@@ -46,11 +46,11 @@ class AI(QGraphicsView):
         self.setScene(self.scene)
         #Draw the main horizontal line
         pen = QPen(QColor(Qt.white))
-        pen.setWidth(3)
+        pen.setWidth(2)
         self.scene.addLine(0,sceneHeight/2,sceneWidth,sceneHeight/2, pen)
         #self.scene.addLine(sceneWidth/2, sceneHeight/2-5,sceneWidth/2, sceneHeight/2+5, pen)
         #draw the degree hash marks
-        pen.setWidth(2)
+        pen.setWidth(1)
         w = self.scene.width()
         h = self.scene.height()
         for i in range(1, 10):
@@ -70,8 +70,22 @@ class AI(QGraphicsView):
     
     def redraw(self):
         self.resetTransform()
-        self.centerOn(self.scene.width()/2, self.scene.height()/2 +self._pitchAngle * self.pixelsPerDeg)
+        self.centerOn(self.scene.width()/2, self.scene.height()/2 + self._pitchAngle * self.pixelsPerDeg)
         self.rotate(self._rollAngle)
+    
+    # We use the paintEvent to draw on the viewport the parts that aren't moving.
+    def paintEvent(self, event):
+        super(AI, self).paintEvent(event)
+        w = self.width()
+        h = self.height()
+        p = QPainter(self.viewport())
+        
+        p.setPen(QColor(Qt.black))
+        p.setBrush(QColor(Qt.yellow))
+        p.drawRect(w/4,h/2-2,w/6,4)
+        p.drawRect(w-w/4-w/6,h/2-2,w/6,4)
+        p.drawRect(w/2-2, h/2-2, 4, 4)
+        
         
     def setRollAngle(self, angle):
         if angle < -180:
