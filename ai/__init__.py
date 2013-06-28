@@ -85,7 +85,32 @@ class AI(QGraphicsView):
         p.drawRect(w/4,h/2-2,w/6,4)
         p.drawRect(w-w/4-w/6,h/2-2,w/6,4)
         p.drawRect(w/2-2, h/2-2, 4, 4)
-        
+
+	# Add non-moving Bank Angle Markers
+	marks = QPen()
+	marks.setBrush(QColor(Qt.black))
+	marks.setWidth(2)
+	p.translate(w/2 , h/2)
+        p.setPen(marks)
+	smallMarks = [10, 20, 45]
+	largeMarks = [30, 60, 90]
+	for angle in smallMarks:
+		p.rotate(angle)
+        	p.drawLine(0, -(h/2), 0 , -(h/2-10))
+		p.rotate(-2*angle)
+		p.drawLine(0, -(h/2), 0 , -(h/2-10))
+		p.rotate(angle)
+	for angle in largeMarks:
+		p.rotate(angle)
+		p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
+                p.rotate(-2*angle)
+		p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
+		p.rotate(angle)
+
+	triangle = QPolygon([QPoint(0+5, -(h/2)), QPoint(0-5, -(h/2)), 
+QPoint( 0,
+-(h/2-10))])
+	p.drawPolygon(triangle)        
         
     def setRollAngle(self, angle):
         if angle < -180:
