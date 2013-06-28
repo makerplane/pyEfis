@@ -26,6 +26,8 @@ class AI(QGraphicsView):
         self.setStyleSheet("border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
         self._rollAngle = 0
         self._pitchAngle = 0
     
@@ -78,6 +80,7 @@ class AI(QGraphicsView):
         w = self.width()
         h = self.height()
         p = QPainter(self.viewport())
+        p.setRenderHint(QPainter.Antialiasing)
         
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.yellow))
@@ -85,31 +88,41 @@ class AI(QGraphicsView):
         p.drawRect(w-w/4-w/6,h/2-2,w/6,4)
         p.drawRect(w/2-2, h/2-2, 4, 4)
 
-	# Add non-moving Bank Angle Markers
-	marks = QPen()
-	marks.setBrush(QColor(Qt.black))
-	marks.setWidth(2)
-	p.translate(w/2 , h/2)
+        # Add non-moving Bank Angle Markers
+        marks = QPen()
+        marks.setBrush(QColor(Qt.black))
+        marks.setWidth(2)
+        p.translate(w/2 , h/2)
         p.setPen(marks)
-	smallMarks = [10, 20, 45]
-	largeMarks = [30, 60, 90]
-	for angle in smallMarks:
-		p.rotate(angle)
-        	p.drawLine(0, -(h/2), 0 , -(h/2-10))
-		p.rotate(-2*angle)
-		p.drawLine(0, -(h/2), 0 , -(h/2-10))
-		p.rotate(angle)
-	for angle in largeMarks:
-		p.rotate(angle)
-		p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
-                p.rotate(-2*angle)
-		p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
-		p.rotate(angle)
-
-	triangle = QPolygon([QPoint(0+5, -(h/2)), QPoint(0-5, -(h/2)), 
-QPoint( 0,
--(h/2-10))])
-	p.drawPolygon(triangle)        
+        p.setBrush(QColor(Qt.black))
+        smallMarks = [10, 20, 45]
+        largeMarks = [30, 60, 90]
+        for angle in smallMarks:
+            p.rotate(angle)
+            p.drawLine(0, -(h/2), 0 , -(h/2-10))
+            p.rotate(-2*angle)
+            p.drawLine(0, -(h/2), 0 , -(h/2-10))
+            p.rotate(angle)
+        for angle in largeMarks:
+            p.rotate(angle)
+            p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
+            p.rotate(-2*angle)
+            p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
+            p.rotate(angle)
+    
+        triangle = QPolygon([QPoint(0+5, -(h/2)), QPoint(0-5, -(h/2)), 
+                            QPoint(0, -(h/2-10))])
+        p.drawPolygon(triangle)
+        
+        pen = QPen(QColor(Qt.white))
+        pen.setWidth(1)
+        p.setPen(pen)
+        p.setBrush(QColor(Qt.white))
+        p.rotate(self._rollAngle)
+        triangle = QPolygon([QPoint(0+5, -(h/2)+20), QPoint(0-5, -(h/2)+20), 
+                            QPoint(0, -(h/2-10))])
+        p.drawPolygon(triangle)
+        
     
     # We don't want this responding to keystrokes
     def keyPressEvent(self, event):
