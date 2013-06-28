@@ -48,7 +48,6 @@ class AI(QGraphicsView):
         pen = QPen(QColor(Qt.white))
         pen.setWidth(2)
         self.scene.addLine(0,sceneHeight/2,sceneWidth,sceneHeight/2, pen)
-        #self.scene.addLine(sceneWidth/2, sceneHeight/2-5,sceneWidth/2, sceneHeight/2+5, pen)
         #draw the degree hash marks
         pen.setWidth(1)
         w = self.scene.width()
@@ -85,7 +84,10 @@ class AI(QGraphicsView):
         p.drawRect(w/4,h/2-2,w/6,4)
         p.drawRect(w-w/4-w/6,h/2-2,w/6,4)
         p.drawRect(w/2-2, h/2-2, 4, 4)
-        
+    
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass 
         
     def setRollAngle(self, angle):
         if angle < -180:
