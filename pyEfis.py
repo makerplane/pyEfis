@@ -20,7 +20,7 @@ import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import PyQt4.Qt
-import guages
+import gauges
 import ai
     
 def main():
@@ -49,7 +49,7 @@ def main():
     pitch.resize(20,200)
     pitch.move(20,100)
     
-    vb = guages.VerticalBar(w)
+    vb = gauges.VerticalBar(w)
     vb.resize(10,150)
     vb.move(480,100)
     vb.highWarn = 75
