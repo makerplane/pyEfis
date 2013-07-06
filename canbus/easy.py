@@ -18,7 +18,7 @@
 from exceptions import *
 import serial
 import time
-from serial.tools.list_ports import comports
+#from serial.tools.list_ports import comports
 
 class Adapter():
     """Class that represents an EasySync USB2-F-7x01 USB to CANBus adapter"""

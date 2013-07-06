@@ -199,6 +199,7 @@ class Adapter():
         print "Closing CAN Port"
 
     def sendFrame(self, frame):
+        print "sendFrame() Called"
         if frame.id < 0 or frame.id > 2047:
             raise ValueError("Frame ID out of range")
         else:
@@ -208,6 +209,7 @@ class Adapter():
                     self.__rQueue.put(result)
 
     def recvFrame(self):
+        print "recvFrame() Called"
         for each in self.nodes:
             result = each.getFrame()
             if result:

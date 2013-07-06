@@ -66,17 +66,17 @@ class Adapter():
         
     def connect(self, config):
         try:
-            self.bitrate = config['bitrate']
+            self.bitrate = config.bitrate
         except KeyError:
             self.bitrate = 125
         bitrates = {125:"B125\n", 250:"B250\n", 500:"B500\n", 1000:"B1000\n"}
         try:
-            self.portname = config['port']
+            self.portname = config.device
         except KeyError:
             self.portname = comports[0][0]
-        
+            print "Setting Port to default" + self.portname
         try:
-            self.timeout = config['timeout']
+            self.timeout = config.timeout
         except KeyError:
             self.timeout = 0.25
         
@@ -113,7 +113,7 @@ class Adapter():
         return int(result, 16)
 
     def sendFrame(self, frame):
-        if frame['id'] < 0 or frame['id'] > 2047:
+        if frame.id < 0 or frame.id > 2047:
             raise ValueError("Frame ID out of range")
         xmit = "W"
         xmit = xmit + '%03X' % frame.id
