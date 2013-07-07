@@ -20,7 +20,6 @@
 
 from exceptions import *
 import serial
-#import config
 import threading
 import Queue
 import time

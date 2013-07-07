@@ -132,5 +132,4 @@ class Adapter():
         for n in range((len(result)-5)/2):
             data.append(int(result[5+n*2:7+n*2], 16))
         frame = canbus.Frame(int(result[1:4], 16), data)
-        print frame
         return frame

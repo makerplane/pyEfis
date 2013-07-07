@@ -1,0 +1,2494 @@
+<protocol>
+<name>CANFIX</name>
+<version>0.5</version>
+<group>
+  <name>High Priority Node Alarms</name>
+  <startid>1</startid>
+  <endid>255</endid>
+</group>
+<group>
+  <name>High Priority Pilot Control Inputs</name>
+  <startid>256</startid>
+  <endid>319</endid>
+</group>
+<group>
+  <name>High Priority Measured Positions</name>
+  <startid>320</startid>
+  <endid>383</endid>
+</group>
+<group>
+  <name>High Priority Flight Data</name>
+  <startid>384</startid>
+  <endid>447</endid>
+</group>
+<group>
+  <name>High Priority Navigation Data</name>
+  <startid>448</startid>
+  <endid>511</endid>
+</group>
+<group>
+  <name>High Priority Engine / Aircraft System Data</name>
+  <startid>512</startid>
+  <endid>639</endid>
+</group>
+<group>
+  <name>High Priority Auxiliary Data</name>
+  <startid>640</startid>
+  <endid>767</endid>
+</group>
+<group>
+  <name>Normal Priority Pilot Control Inputs</name>
+  <startid>768</startid>
+  <endid>895</endid>
+</group>
+<group>
+  <name>Normal Priority Measured Positions</name>
+  <startid>896</startid>
+  <endid>1023</endid>
+</group>
+<group>
+  <name>Normal Priority Flight Data</name>
+  <startid>1024</startid>
+  <endid>1151</endid>
+</group>
+<group>
+  <name>Normal Priority Navigation Data</name>
+  <startid>1152</startid>
+  <endid>1279</endid>
+</group>
+<group>
+  <name>Normal Priority Engine / Aircraft System Data</name>
+  <startid>1280</startid>
+  <endid>1407</endid>
+</group>
+<group>
+  <name>Normal Priority Auxiliary Data</name>
+  <startid>1408</startid>
+  <endid>1535</endid>
+</group>
+<group>
+  <name>Future</name>
+  <startid>1536</startid>
+  <endid>1759</endid>
+</group>
+<group>
+  <name>Two-Way Connection Channels</name>
+  <startid>1760</startid>
+  <endid>1791</endid>
+</group>
+<group>
+  <name>Node Specific Messages</name>
+  <startid>1792</startid>
+  <endid>2047</endid>
+</group>
+<parameter>
+  <id>256</id>
+  <count>2</count>
+  <name>Flap Control Switches</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <remarks>b0 = Up</remarks>
+  <remarks>b1 = Down</remarks>
+  <remarks>b2 - b7 Can be used for predefined notches</remarks>
+</parameter>
+<parameter>
+  <id>258</id>
+  <count>2</count>
+  <name>Trim Switches</name>
+  <type>WORD</type>
+  <format>Discrete Bits</format>
+  <remarks>b0 = Pitch Up</remarks>
+  <remarks>b1 = Pitch Down</remarks>
+  <remarks>b2 = Pitch Center</remarks>
+  <remarks>b3 = Roll Left</remarks>
+  <remarks>b4 = Roll Right</remarks>
+  <remarks>b5 = Roll Center</remarks>
+  <remarks>b6 = Yaw Left</remarks>
+  <remarks>b7 = Yaw Right</remarks>
+  <remarks>b8 = Yaw Center</remarks>
+  <remarks>b9 = Collective Up</remarks>
+  <remarks>b10 = Collective Dn</remarks>
+  <remarks>b11 = AT Pedals Left</remarks>
+  <remarks>b12 = AT Pedals Right</remarks>
+  <remarks>b13 = AT Pedals Center</remarks>
+</parameter>
+<parameter>
+  <id>260</id>
+  <count>2</count>
+  <name>Electrical Bus Control Switches</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>262</id>
+  <count>2</count>
+  <name>Lighting Control Switches</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>264</id>
+  <count>2</count>
+  <name>Fuel Pump System Switches</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>266</id>
+  <count>2</count>
+  <name>Fuel Valve System Switches</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>268</id>
+  <count>2</count>
+  <name>AutoPilot Commands</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <remarks>b0 = Engage</remarks>
+  <remarks>b1 = Disconnect</remarks>
+  <remarks>b2 = VS Mode</remarks>
+  <remarks>b3 = Alt Hold Mode</remarks>
+  <remarks>b4 = Alt Select Mode</remarks>
+  <remarks>b5 = Heading Increment</remarks>
+  <remarks>b6 = Heading Decrement</remarks>
+</parameter>
+<parameter>
+  <id>270</id>
+  <count>2</count>
+  <name>VHF Control Commands</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <index>Radio</index>
+  <remarks>b0 = PTT</remarks>
+  <remarks>b1 = Flip</remarks>
+  <remarks>b2 = Next Saved Freq</remarks>
+  <remarks>b3 = Last Saved Freq</remarks>
+</parameter>
+<parameter>
+  <id>272</id>
+  <count>2</count>
+  <name>VOR/LOC Control Commands</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <index>Radio</index>
+  <remarks>b1 = Flip</remarks>
+  <remarks>b2 = Next Saved Freq</remarks>
+  <remarks>b3 = Last Saved Freq</remarks>
+</parameter>
+<parameter>
+  <id>274</id>
+  <count>2</count>
+  <name>Transponder Commands</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <remarks>b0 = IDENT</remarks>
+  <remarks>b1 = ALT</remarks>
+  <remarks>b2 = STBY</remarks>
+  <remarks>b2 = ALT</remarks>
+  <remarks>b3 = VFR</remarks>
+  <remarks>b5 = OFF</remarks>
+  <remarks>b6 = Squat</remarks>
+</parameter>
+<parameter>
+  <id>276</id>
+  <count>2</count>
+  <name>Starter / Magneto Commands</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>278</id>
+  <count>2</count>
+  <name>Landing Gear Control Position</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <remarks>0=Down</remarks>
+  <remarks>1=Up</remarks>
+  <remarks>b0=Nose</remarks>
+  <remarks>b1=Left</remarks>
+  <remarks>b2=Right</remarks>
+</parameter>
+<parameter>
+  <id>280</id>
+  <count>2</count>
+  <name>Keypad Input</name>
+  <type>CHAR[2]</type>
+  <format>Key, Function Key</format>
+</parameter>
+<parameter>
+  <id>282</id>
+  <count>2</count>
+  <name>Encoder Input</name>
+  <type>INT</type>
+  <format>Steps Moved</format>
+  <remarks>Less than 0 = CCW, Greater than 0 = CW</remarks>
+</parameter>
+<parameter>
+  <id>284</id>
+  <count>2</count>
+  <name>Generic Switches</name>
+  <type>BYTE[5]</type>
+  <format>Discrete Bits</format>
+  <index>Unit</index>
+  <remarks>User Defined For Multiplexing Switches</remarks>
+</parameter>
+<parameter>
+  <id>286</id>
+  <count>1</count>
+  <name>Pitch Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Greater Than 0 = Nose Up</remarks>
+</parameter>
+<parameter>
+  <id>287</id>
+  <count>1</count>
+  <name>Roll Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Greater Than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>288</id>
+  <count>1</count>
+  <name>Yaw Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Greater Than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>289</id>
+  <count>1</count>
+  <name>Collective Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Greater Than 0 = Up</remarks>
+</parameter>
+<parameter>
+  <id>290</id>
+  <count>1</count>
+  <name>Anti-Torque Pedals Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Greater Than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>291</id>
+  <count>1</count>
+  <name>Flap Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Greater Than 0 = Down</remarks>
+</parameter>
+<parameter>
+  <id>292</id>
+  <count>1</count>
+  <name>Left Brake Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>293</id>
+  <count>1</count>
+  <name>Right Brake Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>294</id>
+  <count>2</count>
+  <name>Engine Throttle Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>296</id>
+  <count>2</count>
+  <name>Engine Prop Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>298</id>
+  <count>2</count>
+  <name>Engine Mixture Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>300</id>
+  <count>4</count>
+  <name>Generic Analog Control</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <index>Unit</index>
+  <remarks>User Defined</remarks>
+</parameter>
+<parameter>
+  <id>320</id>
+  <count>1</count>
+  <name>Elevator Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Nose Up</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>321</id>
+  <count>1</count>
+  <name>Aileron Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Right</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>322</id>
+  <count>1</count>
+  <name>Rudder Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Right</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>323</id>
+  <count>1</count>
+  <name>Collective Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Up</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>324</id>
+  <count>1</count>
+  <name>Tail Rotor Angle</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Right</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>325</id>
+  <count>1</count>
+  <name>Flap Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Down</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>326</id>
+  <count>1</count>
+  <name>Landing Gear Position Switches</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+  <remarks>b0=Nose Up</remarks>
+  <remarks>b1=Nose Down</remarks>
+  <remarks>b2=Left Up</remarks>
+  <remarks>b3=Left Down</remarks>
+  <remarks>b4=Right Up</remarks>
+  <remarks>b5=Right Down</remarks>
+</parameter>
+<parameter>
+  <id>384</id>
+  <count>1</count>
+  <name>Pitch Angle</name>
+  <type>INT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Nose Up</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>385</id>
+  <count>1</count>
+  <name>Roll Angle</name>
+  <type>INT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Greater Than 0 = Right</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>386</id>
+  <count>1</count>
+  <name>Angle of Attack</name>
+  <type>INT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='7'>0g</aux>
+  <aux id='8'>Warn</aux>
+  <aux id='9'>Stall</aux>
+</parameter>
+<parameter>
+  <id>387</id>
+  <count>1</count>
+  <name>Indicated Airspeed</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>999.9</max>
+  <multiplier>0.1</multiplier>
+  <units>knots</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='3'>V1</aux>
+  <aux id='4'>V2</aux>
+  <aux id='5'>Vne</aux>
+  <aux id='6'>Vfe</aux>
+  <aux id='7'>Vmc</aux>
+  <aux id='8'>Va</aux>
+  <aux id='9'>Vno</aux>
+  <aux id='10'>Vs</aux>
+  <aux id='11'>Vs0</aux>
+  <aux id='14'>Vx</aux>
+  <aux id='15'>Vy</aux>
+</parameter>
+<parameter>
+  <id>388</id>
+  <count>1</count>
+  <name>Indicated Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>389</id>
+  <count>1</count>
+  <name>Heading</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+  <remarks>Magnetic Heading</remarks>
+</parameter>
+<parameter>
+  <id>390</id>
+  <count>1</count>
+  <name>Vertical Speed</name>
+  <type>INT</type>
+  <min>-30,000</min>
+  <max>30,000</max>
+  <multiplier>1</multiplier>
+  <units>ft/min</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>391</id>
+  <count>1</count>
+  <name>TE Variometer Vertical Speed</name>
+  <type>INT</type>
+  <min>-300</min>
+  <max>300</max>
+  <multiplier>0.01</multiplier>
+  <units>knots</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>392</id>
+  <count>1</count>
+  <name>Radar Altitude</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>393</id>
+  <count>1</count>
+  <name>Yaw Angle</name>
+  <type>INT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>394</id>
+  <count>1</count>
+  <name>Normal Acceleration</name>
+  <type>INT</type>
+  <min>-30</min>
+  <max>30</max>
+  <multiplier>0.001</multiplier>
+  <units>g</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>395</id>
+  <count>1</count>
+  <name>Lateral Acceleration</name>
+  <type>INT</type>
+  <min>-30</min>
+  <max>30</max>
+  <multiplier>0.001</multiplier>
+  <units>g</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>396</id>
+  <count>1</count>
+  <name>Longitudinal Acceleration</name>
+  <type>INT</type>
+  <min>-30</min>
+  <max>30</max>
+  <multiplier>0.001</multiplier>
+  <units>g</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>397</id>
+  <count>1</count>
+  <name>True Airspeed</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>2000</max>
+  <multiplier>0.1</multiplier>
+  <units>knots</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>398</id>
+  <count>1</count>
+  <name>Calibrated Airspeed</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>2000</max>
+  <multiplier>0.1</multiplier>
+  <units>knots</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>399</id>
+  <count>1</count>
+  <name>Mach Number</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>Mach</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>400</id>
+  <count>1</count>
+  <name>Altimeter Setting Set</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>35</max>
+  <multiplier>0.001</multiplier>
+  <units>inHg</units>
+</parameter>
+<parameter>
+  <id>401</id>
+  <count>1</count>
+  <name>Altimeter Setting Report</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>35</max>
+  <multiplier>0.001</multiplier>
+  <units>inHg</units>
+</parameter>
+<parameter>
+  <id>402</id>
+  <count>1</count>
+  <name>Pressure Altitude</name>
+  <type>DINT</type>
+  <min>-1,000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>448</id>
+  <count>1</count>
+  <name>VOR/LOC Deviation</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>449</id>
+  <count>1</count>
+  <name>Glideslope Deviation</name>
+  <type>INT</type>
+  <min>-45</min>
+  <max>45</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>450</id>
+  <count>1</count>
+  <name>OBI Flags</name>
+  <type>WORD</type>
+  <remarks>b0 = To/From (To = 1)</remarks>
+  <remarks>b1:b2 = Input (00=NAV1, 01=NAV2, 10=GPS1, 11=GPS2)</remarks>
+  <remarks>b3 = GS</remarks>
+  <remarks>b4 = LOC/NAV</remarks>
+</parameter>
+<parameter>
+  <id>451</id>
+  <count>1</count>
+  <name>Aircraft Position Latitude</name>
+  <type>FLOAT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>452</id>
+  <count>1</count>
+  <name>Aircraft Position Longitude</name>
+  <type>FLOAT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>453</id>
+  <count>1</count>
+  <name>Groundspeed</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>2000</max>
+  <multiplier>0.1</multiplier>
+  <units>knots</units>
+  <aux id='3'>In Flight Threshold</aux>
+</parameter>
+<parameter>
+  <id>454</id>
+  <count>1</count>
+  <name>True Ground Track</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>455</id>
+  <count>1</count>
+  <name>Magnetic Ground Track</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>456</id>
+  <count>1</count>
+  <name>Cross Track Error</name>
+  <type>INT</type>
+  <multiplier>0.01</multiplier>
+  <units>nm</units>
+</parameter>
+<parameter>
+  <id>457</id>
+  <count>1</count>
+  <name>Selected Course</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>458</id>
+  <count>1</count>
+  <name>Selected Glidepath Angle</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>90</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>459</id>
+  <count>1</count>
+  <name>Selected Vertical Speed</name>
+  <type>INT</type>
+  <min>-30,000</min>
+  <max>30,000</max>
+  <multiplier>1</multiplier>
+  <units>ft/min</units>
+</parameter>
+<parameter>
+  <id>460</id>
+  <count>1</count>
+  <name>Selected Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>461</id>
+  <count>1</count>
+  <name>RAIM Status</name>
+  <type>USHORT</type>
+  <remarks>0 if Good</remarks>
+  <remarks>Otherwise the ID of the most likely failed satellite</remarks>
+</parameter>
+<parameter>
+  <id>462</id>
+  <count>1</count>
+  <name>RAIM Horizontal Error</name>
+  <type>UINT</type>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>463</id>
+  <count>1</count>
+  <name>RAIM Vertical Error</name>
+  <type>UINT</type>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>464</id>
+  <count>1</count>
+  <name>ADS-B ES Airborne Position Latitude</name>
+  <type>FLOAT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>465</id>
+  <count>1</count>
+  <name>ADS-B ES Airborne Position Longitude</name>
+  <type>FLOAT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>466</id>
+  <count>1</count>
+  <name>ADS-B ES Airborne Position Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>467</id>
+  <count>1</count>
+  <name>ADS-B ES Surface Position Latitude</name>
+  <type>FLOAT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>468</id>
+  <count>1</count>
+  <name>ADS-B ES Surface Position Longitude</name>
+  <type>FLOAT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>469</id>
+  <count>1</count>
+  <name>ADS-B ES Surface Position Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>470</id>
+  <count>1</count>
+  <name>ADS-B ES Status</name>
+  <type></type>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>471</id>
+  <count>1</count>
+  <name>ADS-B ES Identification</name>
+  <type></type>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>472</id>
+  <count>1</count>
+  <name>ADS-B ES Type</name>
+  <type></type>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>473</id>
+  <count>1</count>
+  <name>ADS-B ES Airborne Velocity</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>2000</max>
+  <multiplier>0.1</multiplier>
+  <units>knots</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>474</id>
+  <count>1</count>
+  <name>ADS-B ES Airborne Bearing</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>475</id>
+  <count>1</count>
+  <name>ADS-B ES Airborne Rate of Climb</name>
+  <type>INT</type>
+  <min>-30,000</min>
+  <max>30,000</max>
+  <multiplier>1</multiplier>
+  <units>ft/min</units>
+  <index>Aircraft</index>
+</parameter>
+<parameter>
+  <id>476</id>
+  <count>1</count>
+  <name>ADS-B ES Emergency Priority Status</name>
+  <type></type>
+  <index>Aircraft</index>
+  <remarks>Event Driven Information</remarks>
+</parameter>
+<parameter>
+  <id>477</id>
+  <count>1</count>
+  <name>ADS-B ES Current Trajectory Change Point</name>
+  <type></type>
+  <index>Aircraft</index>
+  <remarks>Event Driven Information</remarks>
+</parameter>
+<parameter>
+  <id>478</id>
+  <count>1</count>
+  <name>ADS-B ES Next Trajectory Change Point</name>
+  <type></type>
+  <index>Aircraft</index>
+  <remarks>Event Driven Information</remarks>
+</parameter>
+<parameter>
+  <id>479</id>
+  <count>1</count>
+  <name>ADS-B ES Operation Coord. Message</name>
+  <type></type>
+  <index>Aircraft</index>
+  <remarks>Event Driven Information</remarks>
+</parameter>
+<parameter>
+  <id>480</id>
+  <count>1</count>
+  <name>ADS-B ES Operational Status</name>
+  <type></type>
+  <index>Aircraft</index>
+  <remarks>Event Driven Information</remarks>
+</parameter>
+<parameter>
+  <id>512</id>
+  <count>2</count>
+  <name>N1 or Engine RPM</name>
+  <type>UINT</type>
+  <remarks>N1 for Turbines</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>514</id>
+  <count>2</count>
+  <name>N2, Prop RPM or Rotor RPM</name>
+  <type>UINT</type>
+  <remarks>N2 for Turbines</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>516</id>
+  <count>2</count>
+  <name>Torque</name>
+  <type>INT</type>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>518</id>
+  <count>2</count>
+  <name>Turbine Inlet Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>520</id>
+  <count>2</count>
+  <name>Inter-turbine Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>522</id>
+  <count>2</count>
+  <name>Turbine Outlet Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>524</id>
+  <count>2</count>
+  <name>Fuel Pressure Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>526</id>
+  <count>2</count>
+  <name>Oil Pressure Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>528</id>
+  <count>2</count>
+  <name>Oil Temperature Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>530</id>
+  <count>2</count>
+  <name>Coolant Temperature Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>532</id>
+  <count>2</count>
+  <name>Fuel Quantity Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>534</id>
+  <count>2</count>
+  <name>Oil Quantity Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>536</id>
+  <count>2</count>
+  <name>Coolant Quantity Switch</name>
+  <type>SHORT</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>538</id>
+  <count>2</count>
+  <name>Fuel Flow</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>gal/hr</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>540</id>
+  <count>2</count>
+  <name>Fuel Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>542</id>
+  <count>2</count>
+  <name>Manifold Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>inHg</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+</parameter>
+<parameter>
+  <id>544</id>
+  <count>2</count>
+  <name>Oil Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>546</id>
+  <count>2</count>
+  <name>Oil Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>548</id>
+  <count>2</count>
+  <name>Coolant Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>550</id>
+  <count>2</count>
+  <name>Fuel Quantity</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>gal</units>
+  <index>Aux Tank</index>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>552</id>
+  <count>2</count>
+  <name>Fuel Pump Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>554</id>
+  <count>2</count>
+  <name>Oil Quantity</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>gal</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>556</id>
+  <count>2</count>
+  <name>Coolant Quantity</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>gal</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>558</id>
+  <count>2</count>
+  <name>Electric Propulsion Motor Current</name>
+  <type>UINT</type>
+  <multiplier>1</multiplier>
+  <units>A</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>560</id>
+  <count>2</count>
+  <name>Main Propulsion Bus Voltage</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>V</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>562</id>
+  <count>2</count>
+  <name>Main Battery Current</name>
+  <type>INT</type>
+  <multiplier>1</multiplier>
+  <units>A</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>564</id>
+  <count>2</count>
+  <name>Main Battery Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>566</id>
+  <count>2</count>
+  <name>Main Battery Charge</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.10</multiplier>
+  <units>%</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+</parameter>
+<parameter>
+  <id>568</id>
+  <count>2</count>
+  <name>Hybrid System Status</name>
+  <type>WORD</type>
+</parameter>
+<parameter>
+  <id>640</id>
+  <count>1</count>
+  <name>Cabin Pressure</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>35</max>
+  <multiplier>0.001</multiplier>
+  <units>inHg</units>
+</parameter>
+<parameter>
+  <id>641</id>
+  <count>1</count>
+  <name>Cabin Altitude</name>
+  <type>INT</type>
+  <min>-1,000</min>
+  <max>30,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>768</id>
+  <count>1</count>
+  <name>Speedbrake Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>769</id>
+  <count>1</count>
+  <name>Cowl Flaps Control Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>770</id>
+  <count>1</count>
+  <name>Pitch Trim Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>771</id>
+  <count>1</count>
+  <name>Roll Trim Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>772</id>
+  <count>1</count>
+  <name>Yaw Trim Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>773</id>
+  <count>1</count>
+  <name>Collective Trim Control Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>774</id>
+  <count>1</count>
+  <name>Anti-Torque Pedals Trim Position</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>896</id>
+  <count>1</count>
+  <name>Speedbrake Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Less than 0 = Down</remarks>
+  <remarks>Greater than 0 = Up</remarks>
+</parameter>
+<parameter>
+  <id>897</id>
+  <count>1</count>
+  <name>Cowl Flaps Position</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>100% = Open</remarks>
+</parameter>
+<parameter>
+  <id>898</id>
+  <count>1</count>
+  <name>Pitch Trim Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Less than 0 = Down</remarks>
+  <remarks>Greater than 0 = Up</remarks>
+</parameter>
+<parameter>
+  <id>899</id>
+  <count>1</count>
+  <name>Roll Trim Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>900</id>
+  <count>1</count>
+  <name>Yaw Trim Position</name>
+  <type>INT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>901</id>
+  <count>1</count>
+  <name>Pitch Trim Motor Speed</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Less than 0 = Down</remarks>
+  <remarks>Greater than 0 = Up</remarks>
+</parameter>
+<parameter>
+  <id>902</id>
+  <count>1</count>
+  <name>Roll Trim Motor Speed</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>903</id>
+  <count>1</count>
+  <name>Yaw Trim Motor Speed</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>904</id>
+  <count>1</count>
+  <name>Collective Trim Motor Speed</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Less than 0 = Down</remarks>
+  <remarks>Greater than 0 = Up</remarks>
+</parameter>
+<parameter>
+  <id>905</id>
+  <count>1</count>
+  <name>Anti-Torque Pedals Trim Motor Speed</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>906</id>
+  <count>1</count>
+  <name>Light Status</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>907</id>
+  <count>1</count>
+  <name>Fuel Pump Status</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>908</id>
+  <count>1</count>
+  <name>Fuel Valve Status</name>
+  <type>BYTE</type>
+  <format>Discrete Bits</format>
+</parameter>
+<parameter>
+  <id>909</id>
+  <count>4</count>
+  <name>Generic Analog Measurement</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <index>Unit</index>
+  <remarks>User Defined</remarks>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1024</id>
+  <count>1</count>
+  <name>Pitch Rate</name>
+  <type>INT</type>
+  <min>-3000</min>
+  <max>3000</max>
+  <multiplier>0.1</multiplier>
+  <units>deg/sec</units>
+  <remarks>Less than 0 = Down</remarks>
+  <remarks>Greater than 0 = Up</remarks>
+</parameter>
+<parameter>
+  <id>1025</id>
+  <count>1</count>
+  <name>Roll Rate</name>
+  <type>INT</type>
+  <min>-3000</min>
+  <max>3000</max>
+  <multiplier>0.1</multiplier>
+  <units>deg/sec</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>1026</id>
+  <count>1</count>
+  <name>Yaw Rate</name>
+  <type>INT</type>
+  <min>-3000</min>
+  <max>3000</max>
+  <multiplier>0.1</multiplier>
+  <units>deg/sec</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>1027</id>
+  <count>1</count>
+  <name>Turn Rate</name>
+  <type>INT</type>
+  <min>-3000</min>
+  <max>3000</max>
+  <multiplier>0.1</multiplier>
+  <units>deg/sec</units>
+  <remarks>Less than 0 = Left</remarks>
+  <remarks>Greater than 0 = Right</remarks>
+</parameter>
+<parameter>
+  <id>1028</id>
+  <count>1</count>
+  <name>Static Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>inHg</units>
+</parameter>
+<parameter>
+  <id>1029</id>
+  <count>1</count>
+  <name>Pitot Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>inHg</units>
+</parameter>
+<parameter>
+  <id>1030</id>
+  <count>1</count>
+  <name>Total Air Temperature</name>
+  <type>INT</type>
+  <min>-300</min>
+  <max>300</max>
+  <multiplier>0.01</multiplier>
+  <units>degC</units>
+</parameter>
+<parameter>
+  <id>1031</id>
+  <count>1</count>
+  <name>Static Air Temperature</name>
+  <type>INT</type>
+  <min>-300</min>
+  <max>300</max>
+  <multiplier>0.01</multiplier>
+  <units>degC</units>
+</parameter>
+<parameter>
+  <id>1032</id>
+  <count>1</count>
+  <name>Density Altitude</name>
+  <type>DINT</type>
+  <min>-1,000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>1033</id>
+  <count>1</count>
+  <name>True Altitude</name>
+  <type>DINT</type>
+  <min>-1,000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>1034</id>
+  <count>1</count>
+  <name>Wind Speed</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>2000</max>
+  <multiplier>0.1</multiplier>
+  <units>knots</units>
+</parameter>
+<parameter>
+  <id>1035</id>
+  <count>1</count>
+  <name>Wind Direction</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>360</max>
+  <multiplier>0.01</multiplier>
+  <units>deg</units>
+  <remarks>Magnetic</remarks>
+</parameter>
+<parameter>
+  <id>1152</id>
+  <count>1</count>
+  <name>Next Waypoint Identifier</name>
+  <type>CHAR[4]</type>
+</parameter>
+<parameter>
+  <id>1153</id>
+  <count>1</count>
+  <name>Next Waypoint Latitude</name>
+  <type>FLOAT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1154</id>
+  <count>1</count>
+  <name>Next Waypoint Longitude</name>
+  <type>FLOAT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1155</id>
+  <count>1</count>
+  <name>Next Waypoint Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>1156</id>
+  <count>1</count>
+  <name>Next Waypoint ETA</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+  <multiplier>1</multiplier>
+  <units>UTC</units>
+</parameter>
+<parameter>
+  <id>1157</id>
+  <count>1</count>
+  <name>Next Waypoint ETE</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+</parameter>
+<parameter>
+  <id>1158</id>
+  <count>1</count>
+  <name>Waypoint Identifier</name>
+  <type>CHAR[4]</type>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1159</id>
+  <count>1</count>
+  <name>Waypoint Latitude</name>
+  <type>FLOAT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1160</id>
+  <count>1</count>
+  <name>Waypoint Longitude</name>
+  <type>FLOAT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1161</id>
+  <count>1</count>
+  <name>Waypoint Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1162</id>
+  <count>1</count>
+  <name>Waypoint ETA</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+  <multiplier>1</multiplier>
+  <units>UTC</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1163</id>
+  <count>1</count>
+  <name>Waypoint ETE</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1164</id>
+  <count>1</count>
+  <name>Waypoint, Distance To</name>
+  <type>UINT</type>
+  <multiplier>1</multiplier>
+  <units>nm</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1165</id>
+  <count>1</count>
+  <name>Waypoint Minimum Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1166</id>
+  <count>1</count>
+  <name>Waypoint Minimum Flight Level</name>
+  <type>UINT</type>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1167</id>
+  <count>1</count>
+  <name>Waypoint Minimum Radar Level</name>
+  <type>UINT</type>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1168</id>
+  <count>1</count>
+  <name>Waypoint Maximum Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1169</id>
+  <count>1</count>
+  <name>Waypoint Maximum Flight Level</name>
+  <type>UINT</type>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1170</id>
+  <count>1</count>
+  <name>Waypoint Maximum Radar Level</name>
+  <type>UINT</type>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1171</id>
+  <count>1</count>
+  <name>Waypoint Planned Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1172</id>
+  <count>1</count>
+  <name>Waypoint Reserved</name>
+  <type></type>
+  <index>Waypoint</index>
+</parameter>
+<parameter>
+  <id>1173</id>
+  <count>1</count>
+  <name>Destination Identifier</name>
+  <type>CHAR[4]</type>
+</parameter>
+<parameter>
+  <id>1174</id>
+  <count>1</count>
+  <name>Destination Latitude</name>
+  <type>FLOAT</type>
+  <min>-90</min>
+  <max>90</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1175</id>
+  <count>1</count>
+  <name>Destination Longitude</name>
+  <type>FLOAT</type>
+  <min>-180</min>
+  <max>180</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1176</id>
+  <count>1</count>
+  <name>Destination Altitude</name>
+  <type>DINT</type>
+  <min>-1000</min>
+  <max>60,000</max>
+  <multiplier>1</multiplier>
+  <units>ft</units>
+</parameter>
+<parameter>
+  <id>1177</id>
+  <count>1</count>
+  <name>Destination ETA</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+  <multiplier>1</multiplier>
+  <units>UTC</units>
+</parameter>
+<parameter>
+  <id>1178</id>
+  <count>1</count>
+  <name>Destination ETE</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+</parameter>
+<parameter>
+  <id>1179</id>
+  <count>1</count>
+  <name>Track Error Angle</name>
+  <type></type>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1180</id>
+  <count>36</count>
+  <name>Reserved</name>
+  <type></type>
+</parameter>
+<parameter>
+  <id>1216</id>
+  <count>4</count>
+  <name>VHF Com Frequency Set</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>MHz</units>
+  <index>1 = Memory Locations</index>
+</parameter>
+<parameter>
+  <id>1220</id>
+  <count>4</count>
+  <name>VHF Com Frequency Report</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>MHz</units>
+  <index>1 = Memory Locations</index>
+</parameter>
+<parameter>
+  <id>1224</id>
+  <count>4</count>
+  <name>VOR/ILS Frequency Set</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>MHz</units>
+  <index>1 = Memory Locations</index>
+</parameter>
+<parameter>
+  <id>1228</id>
+  <count>4</count>
+  <name>VOR/ILS Frequency Report</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359</max>
+  <multiplier>1</multiplier>
+  <units>deg</units>
+  <index>1 = Memory Locations</index>
+</parameter>
+<parameter>
+  <id>1232</id>
+  <count>4</count>
+  <name>VOR/ILS Identifier</name>
+  <type>CHAR[4]</type>
+</parameter>
+<parameter>
+  <id>1236</id>
+  <count>4</count>
+  <name>Actual VOR Radial</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1240</id>
+  <count>4</count>
+  <name>Selected VOR Radial</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>359.9</max>
+  <multiplier>0.1</multiplier>
+  <units>deg</units>
+</parameter>
+<parameter>
+  <id>1244</id>
+  <count>1</count>
+  <name>Transponder Code</name>
+  <type>USHORT[4]</type>
+</parameter>
+<parameter>
+  <id>1280</id>
+  <count>2</count>
+  <name>Cylinder Head Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <index>Cylinder</index>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1282</id>
+  <count>2</count>
+  <name>Exhaust Gas Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <index>Cylinder</index>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1284</id>
+  <count>2</count>
+  <name>Cylinder Head Temp. Rate of Change</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC/Min</units>
+  <index>Cylinder</index>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1286</id>
+  <count>2</count>
+  <name>Cylinder Head Temp. Deviation</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1288</id>
+  <count>2</count>
+  <name>Rate of Change</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC/Min</units>
+  <index>Cylinder</index>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1290</id>
+  <count>2</count>
+  <name>Exhaust Gas Temp. Deviation</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1292</id>
+  <count>2</count>
+  <name>Carburetor Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1294</id>
+  <count>4</count>
+  <name>Electrical Bus Voltage</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>V</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1298</id>
+  <count>4</count>
+  <name>Electrical Bus Current</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>A</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1302</id>
+  <count>4</count>
+  <name>Generator / Alternator Voltage</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>V</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1306</id>
+  <count>4</count>
+  <name>Generator / Alternator Current</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>A</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1310</id>
+  <count>2</count>
+  <name>Engine Power</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>1312</id>
+  <count>2</count>
+  <name>Total Engine Time</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>Hours</units>
+</parameter>
+<parameter>
+  <id>1314</id>
+  <count>2</count>
+  <name>Gearbox Speed</name>
+  <type>UINT</type>
+  <multiplier>1</multiplier>
+  <units>RPM</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1316</id>
+  <count>2</count>
+  <name>Gearbox Oil Pressure Switch</name>
+  <type>BYTE</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>1318</id>
+  <count>2</count>
+  <name>Gearbox Oil Temperature Switch</name>
+  <type>BYTE</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>1320</id>
+  <count>2</count>
+  <name>Gearbox Oil Quantity Switch</name>
+  <type>BYTE</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>1322</id>
+  <count>2</count>
+  <name>Hydraulic Pressure Switch</name>
+  <type>BYTE</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>1324</id>
+  <count>2</count>
+  <name>Hydraulic Temperature Switch</name>
+  <type>BYTE</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>1326</id>
+  <count>2</count>
+  <name>Hydraulic Fluid Quantity Switch</name>
+  <type>BYTE</type>
+  <remarks>0 = Normal</remarks>
+  <remarks>-1 = Low</remarks>
+  <remarks>1 = High</remarks>
+</parameter>
+<parameter>
+  <id>1328</id>
+  <count>2</count>
+  <name>Gearbox Oil Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1330</id>
+  <count>2</count>
+  <name>Gearbox Oil Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1332</id>
+  <count>2</count>
+  <name>Gearbox Oil Quantity</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1334</id>
+  <count>2</count>
+  <name>Hydraulic Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1336</id>
+  <count>2</count>
+  <name>Hydraulic Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1338</id>
+  <count>2</count>
+  <name>Hydraulic Fluid Quantity</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.01</multiplier>
+  <units>%</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1340</id>
+  <count>4</count>
+  <name>Tire Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1344</id>
+  <count>4</count>
+  <name>Strut Pressure</name>
+  <type>UINT</type>
+  <multiplier>0.01</multiplier>
+  <units>psi</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1348</id>
+  <count>1</count>
+  <name>Flight Time</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>Hours</units>
+  <index>Flight</index>
+  <remarks>0 Index = last flight, reverse chronological order from there</remarks>
+</parameter>
+<parameter>
+  <id>1408</id>
+  <count>1</count>
+  <name>Time</name>
+  <type>USHORT[3]</type>
+  <format>Hour, Min, Sec</format>
+  <multiplier>1</multiplier>
+  <units>UTC</units>
+</parameter>
+<parameter>
+  <id>1409</id>
+  <count>1</count>
+  <name>Date</name>
+  <type>UINT, USHORT[2]</type>
+  <format>Year, Month, Day</format>
+</parameter>
+<parameter>
+  <id>1410</id>
+  <count>1</count>
+  <name>Time Zone</name>
+  <type>SHORT</type>
+  <min>-12</min>
+  <max>12</max>
+</parameter>
+<parameter>
+  <id>1411</id>
+  <count>1</count>
+  <name>Cabin Temperature</name>
+  <type>UINT</type>
+  <multiplier>0.1</multiplier>
+  <units>degC</units>
+</parameter>
+<parameter>
+  <id>1412</id>
+  <count>1</count>
+  <name>Panel Dimmer Level</name>
+  <type>USHORT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>1</multiplier>
+  <units>%</units>
+</parameter>
+<parameter>
+  <id>1413</id>
+  <count>1</count>
+  <name>Longitudinal Center of Gravity</name>
+  <type>UINT</type>
+  <min>0</min>
+  <max>100</max>
+  <multiplier>0.1</multiplier>
+  <units>% MAC</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1414</id>
+  <count>1</count>
+  <name>Lateral Center of Gravity</name>
+  <type>INT</type>
+  <min>-100</min>
+  <max>100</max>
+  <multiplier>0.1</multiplier>
+  <units>%</units>
+  <aux id='1'>Min</aux>
+  <aux id='2'>Max</aux>
+  <aux id='4'>Low Warn</aux>
+  <aux id='5'>Low Alarm</aux>
+  <aux id='6'>High Warn</aux>
+  <aux id='7'>High Alarm</aux>
+</parameter>
+<parameter>
+  <id>1415</id>
+  <count>1</count>
+  <name>Aircraft Identifier</name>
+  <type>CHAR[5]</type>
+</parameter>
+</protocol>

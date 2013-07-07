@@ -17,7 +17,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import config
+import os
 import xml.etree.ElementTree as ET
 import copy
 import struct
@@ -478,8 +478,8 @@ class ParameterDef():
                 s = s + "    " + each + "\n"
         return s
     
-        
-tree = ET.parse(config.DataPath + "canfix.xml")
+
+tree = ET.parse(os.path.dirname(__file__) + "/canfix.xml")
 root = tree.getroot()            
 if root.tag != "protocol":
     raise ValueError("Root Tag is not protocol'")
