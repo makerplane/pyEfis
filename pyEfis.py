@@ -22,16 +22,20 @@ from PyQt4.QtCore import *
 import PyQt4.Qt
 import gauges
 import ai
+import hsi
     
 def main():
     app = QApplication(sys.argv)
     w = QWidget()
-    w.resize(800, 480)
+    w.resize(800, 640)
     w.move(20,50)
     w.setWindowTitle('PFD')
     a = ai.AI(w)
     a.resize(300,300)
     a.move(100,30)
+    h = hsi.HSI(w)
+    h.resize(300,300)
+    h.move(100,331)
     roll = QSlider(Qt.Horizontal,w)
     roll.setMinimum(-180)
     roll.setMaximum(180)
@@ -63,6 +67,19 @@ def main():
     v.valueChanged.connect(vb.setValue)
     v.resize(20,150)
     v.move(500,100)
+
+    heading = QSpinBox(w)
+    heading.move(20, 400)
+    heading.setRange(1, 360)
+    heading.setValue(1)
+    heading.valueChanged.connect(h.setHeading)
+
+    headingBug = QSpinBox(w)
+    headingBug.move(20, 440)
+    headingBug.setRange(0, 360)
+    headingBug.setValue(1)
+    headingBug.valueChanged.connect(h.setHeadingBug)
+    
     
     w.show()
     sys.exit(app.exec_())
