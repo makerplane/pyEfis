@@ -36,7 +36,7 @@ canServer = '127.0.0.1'
 canPort = 63349
 
 # Screen Geometry
-screenSize = (800,600)
+screenSize = (800,640)
 # Set EFIS to occupy the entire screen without system border / menu
 screenFullSize = False
 

@@ -90,7 +90,6 @@ class AI(QGraphicsView):
 
         # Add non-moving Bank Angle Markers
         marks = QPen()
-        marks.setBrush(QColor(Qt.black))
         marks.setWidth(2)
         p.translate(w/2 , h/2)
         p.setPen(marks)

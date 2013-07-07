@@ -26,6 +26,7 @@ import config
 import fix
 import gauges
 import ai
+import hsi
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -55,6 +56,10 @@ def main(test):
     a = ai.AI(w)
     a.resize(300,300)
     a.move(100,30)
+
+    h = hsi.HSI(w)
+    h.resize(300,300)
+    h.move(100,331)
     
     vb = gauges.VerticalBar(w)
     vb.resize(10,150)
@@ -89,11 +94,22 @@ def main(test):
         v.valueChanged.connect(vb.setValue)
         v.resize(20,150)
         v.move(500,100)
+
+        heading = QSpinBox(w)
+        heading.move(20, 400)
+        heading.setRange(1, 360)
+        heading.setValue(1)
+        heading.valueChanged.connect(h.setHeading)
+
+        headingBug = QSpinBox(w)
+        headingBug.move(20, 440)
+        headingBug.setRange(0, 360)
+        headingBug.setValue(1)
+        headingBug.valueChanged.connect(h.setHeadingBug)
     
         pitch.valueChanged.connect(a.setPitchAngle)
         roll.valueChanged.connect(a.setRollAngle)
 
-    
     if(config.screenFullSize):
         w.showFullScreen()
     w.show()
