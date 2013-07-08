@@ -71,8 +71,8 @@ class AI(QGraphicsView):
     
     def redraw(self):
         self.resetTransform()
-        self.centerOn(self.scene.width()/2, self.scene.height()/2 + self._pitchAngle * self.pixelsPerDeg)
-        self.rotate(self._rollAngle)
+        self.centerOn(self.scene.width()/2, self.scene.height()/2 + self._pitchAngle * self.pixelsPerDeg * -1.0)
+        self.rotate(self._rollAngle * -1.0)
     
     # We use the paintEvent to draw on the viewport the parts that aren't moving.
     def paintEvent(self, event):
@@ -117,7 +117,7 @@ class AI(QGraphicsView):
         pen.setWidth(1)
         p.setPen(pen)
         p.setBrush(QColor(Qt.white))
-        p.rotate(self._rollAngle)
+        p.rotate(self._rollAngle * -1.0)
         triangle = QPolygon([QPoint(0+5, -(h/2)+20), QPoint(0-5, -(h/2)+20), 
                             QPoint(0, -(h/2-10))])
         p.drawPolygon(triangle)
