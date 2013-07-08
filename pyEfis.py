@@ -33,12 +33,15 @@ import hsi
 class FlightData(QObject):
     rollChanged = pyqtSignal(float, name = "rollChanged")
     pitchChanged = pyqtSignal(float, name = "pitchChanged")
+    headingChanged = pyqtSignal(float, name = "headingChanged")
     
     def getParameter(self, param):
         if param.name == "Roll Angle":
             self.rollChanged.emit(param.value)
         elif param.name == "Pitch Angle":
             self.pitchChanged.emit(param.value)
+        elif param.name == "Heading":
+            self.headingChanged.emit(param.value)
 
 
 def main(test):
@@ -72,6 +75,7 @@ def main(test):
     if not test:
         flightData.pitchChanged.connect(a.setPitchAngle)
         flightData.rollChanged.connect(a.setRollAngle)
+        flightData.headingChanged.connect(h.setHeading)
     else:
         roll = QSlider(Qt.Horizontal,w)
         roll.setMinimum(-180)
