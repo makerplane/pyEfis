@@ -56,20 +56,31 @@ def main(test):
     w.resize(config.screenSize[0],config.screenSize[1])
     w.move(0,0)
     w.setWindowTitle('PFD')
+    p = w.palette()
+    if config.screenColor:
+        p.setColor(w.backgroundRole(), QColor(config.screenColor))
+        w.setPalette(p)
+        w.setAutoFillBackground(True)
+    instWidth = config.screenSize[1]/2
+    
     a = ai.AI(w)
-    a.resize(300,300)
-    a.move(100,30)
+    a.resize(instWidth,instWidth)
+    a.move(w.width()/2-instWidth/2,0)
 
     h = hsi.HSI(w)
-    h.resize(300,300)
-    h.move(100,331)
+    h.resize(instWidth,instWidth)
+    h.move(w.width()/2-instWidth/2,instWidth)
     
     vb = gauges.VerticalBar(w)
     vb.resize(10,150)
-    vb.move(480,100)
+    vb.move(w.width()/2+instWidth/2+10,50)
     vb.highWarn = 75
     vb.highAlarm = 85
     vb.value = 0
+    
+    qg = gauges.QuarterGauge(w)
+    qg.resize(200, 100)
+    qg.move(w.width()/2+instWidth/2+10,200)
     
 
     if not test:
@@ -82,7 +93,7 @@ def main(test):
         roll.setMaximum(180)
         roll.setValue(0)
         roll.resize(200,20)
-        roll.move(100,0)
+        roll.move(10,0)
         
         pitch = QSlider(Qt.Vertical,w)
         pitch.setMinimum(-90)
@@ -97,7 +108,7 @@ def main(test):
         v.setValue(0)
         v.valueChanged.connect(vb.setValue)
         v.resize(20,150)
-        v.move(500,100)
+        v.move(w.width()/2+instWidth/2+50,50)
 
         heading = QSpinBox(w)
         heading.move(20, 400)
