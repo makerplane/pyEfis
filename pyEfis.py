@@ -73,14 +73,30 @@ def main(test):
     
     vb = gauges.VerticalBar(w)
     vb.resize(10,150)
-    vb.move(w.width()/2+instWidth/2+10,50)
+    vb.move(w.width()/2+instWidth/2+10,350)
     vb.highWarn = 75
     vb.highAlarm = 85
     vb.value = 0
     
-    qg = gauges.QuarterGauge(w)
-    qg.resize(200, 100)
-    qg.move(w.width()/2+instWidth/2+10,200)
+    map = gauges.RoundGauge(w)
+    map.name = "MAP"
+    map.decimalPlaces = 1
+    map.lowRange = 0.0
+    map.highRange = 30.0
+    map.highWarn = 28.0
+    map.highAlarm = 29.0
+    map.resize(200, 100)
+    map.move(w.width()/2+instWidth/2+10,0)
+    
+    rpm = gauges.RoundGauge(w)
+    rpm.name = "RPM"
+    rpm.decimalPlaces = 0
+    rpm.lowRange = 0.0
+    rpm.highRange = 2800.0
+    rpm.highWarn = 2600.0
+    rpm.highAlarm = 2760.0
+    rpm.resize(200, 100)
+    rpm.move(w.width()/2+instWidth/2+10+200,0)
     
 
     if not test:
@@ -108,8 +124,22 @@ def main(test):
         v.setValue(0)
         v.valueChanged.connect(vb.setValue)
         v.resize(20,150)
-        v.move(w.width()/2+instWidth/2+50,50)
-
+        v.move(w.width()/2+instWidth/2+50,350)
+        
+        smap = QSlider(Qt.Horizontal,w)
+        smap.setMinimum(0)
+        smap.setMaximum(30)
+        smap.setValue(0)
+        smap.resize(200,20)
+        smap.move(w.width()/2+instWidth/2+10,100)
+        
+        srpm = QSlider(Qt.Horizontal,w)
+        srpm.setMinimum(0)
+        srpm.setMaximum(3000)
+        srpm.setValue(0)
+        srpm.resize(200,20)
+        srpm.move(w.width()/2+instWidth/2+210,100)
+        
         heading = QSpinBox(w)
         heading.move(20, 400)
         heading.setRange(1, 360)
@@ -124,6 +154,8 @@ def main(test):
     
         pitch.valueChanged.connect(a.setPitchAngle)
         roll.valueChanged.connect(a.setRollAngle)
+        smap.valueChanged.connect(map.setValue)
+        srpm.valueChanged.connect(rpm.setValue)
 
     if(config.screenFullSize):
         w.showFullScreen()
