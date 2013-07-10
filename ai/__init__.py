@@ -30,6 +30,7 @@ class AI(QGraphicsView):
         self.setFocusPolicy(Qt.NoFocus)
         self._rollAngle = 0
         self._pitchAngle = 0
+        self.fontSize = 30
     
     def resizeEvent(self, event):
         #Setup the scene that we use for the background of the AI
@@ -51,23 +52,59 @@ class AI(QGraphicsView):
         pen.setWidth(2)
         self.scene.addLine(0,sceneHeight/2,sceneWidth,sceneHeight/2, pen)
         #draw the degree hash marks
-        pen.setWidth(1)
+        pen.setWidth(2)
         w = self.scene.width()
         h = self.scene.height()
+        f = QFont()
+        f.setPixelSize(self.fontSize)
+        
+        # This loop is for drawing the tick marks
         for i in range(1, 10):
             left =  w / 2 - self.width() / 8
             right = w / 2 + self.width() / 8
+            inset = self.width() / 16
             
+            # Draw the ticks above the line
             y = h / 2 - (self.pixelsPerDeg * 10) * i
             self.scene.addLine(left, y, right, y, pen)
+            yy = y+self.pixelsPerDeg*5
+            self.scene.addLine(left+inset, yy, right-inset,yy, pen)
+            # Draw the text for each of these
+            t = self.scene.addText(str(i*10))
+            t.setFont(f)
+            self.scene.setFont(f)
+            t.setDefaultTextColor(QColor(Qt.white))
+            t.setX(right+5)
+            t.setY(y - t.boundingRect().height()/2)
+            
+            t = self.scene.addText(str(i*10))
+            t.setFont(f)
+            self.scene.setFont(f)
+            t.setDefaultTextColor(QColor(Qt.white))
+            t.setX(left - (t.boundingRect().width()+5))
+            t.setY(y - t.boundingRect().height()/2)
+            
+            # Draw the tick marks below the line
             y = h / 2 + (self.pixelsPerDeg * 10) * i
             self.scene.addLine(left, y, right, y, pen)
-            
+            yy = y-self.pixelsPerDeg*5
+            self.scene.addLine(left+inset, yy, right-inset,yy, pen)
+            # Draw the text for these
             y = h / 2 + (self.pixelsPerDeg * 10) * i
-            #pygame.draw.line(self.backGround, efis.WHITE, (left, y), (right ,y))
-            #textSurf = font.render(str(i*-10), True, efis.WHITE)
-            #self.backGround.blit(textSurf, (left-textSurf.get_width()-5, y - textSurf.get_height()/2))
-            #self.backGround.blit(textSurf, (right+5, y - textSurf.get_height()/2))
+            t = self.scene.addText(str(i*-10))
+            t.setFont(f)
+            self.scene.setFont(f)
+            t.setDefaultTextColor(QColor(Qt.white))
+            t.setX(right+5)
+            t.setY(y - t.boundingRect().height()/2)
+            
+            t = self.scene.addText(str(i*-10))
+            t.setFont(f)
+            self.scene.setFont(f)
+            t.setDefaultTextColor(QColor(Qt.white))
+            t.setX(left - (t.boundingRect().width()+5))
+            t.setY(y - t.boundingRect().height()/2)
+            
     
     def redraw(self):
         self.resetTransform()
