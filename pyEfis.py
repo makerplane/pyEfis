@@ -27,6 +27,8 @@ import fix
 import gauges
 import ai
 import hsi
+import airspeed
+import altimeter
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -62,18 +64,25 @@ def main(test):
         w.setPalette(p)
         w.setAutoFillBackground(True)
     instWidth = config.screenSize[1]/2
-    
     a = ai.AI(w)
     a.resize(instWidth,instWidth)
-    a.move(w.width()/2-instWidth/2,0)
+    a.move((w.width()-200)/3*1,0)
 
     h = hsi.HSI(w)
     h.resize(instWidth,instWidth)
-    h.move(w.width()/2-instWidth/2,instWidth)
-    
+    h.move((w.width()-200)/3*1,instWidth)
+
+    air = airspeed.Airspeed(w)
+    air.resize(instWidth,instWidth)
+    air.move((w.width()-200)/3*0,0)
+
+    alt = altimeter.Altimeter(w)
+    alt.resize(instWidth,instWidth)
+    alt.move((w.width()-200)/3*2,0)
+
     vb = gauges.VerticalBar(w)
     vb.resize(10,150)
-    vb.move(w.width()/2+instWidth/2+10,350)
+    vb.move(w.width()-180,350)
     vb.highWarn = 75
     vb.highAlarm = 85
     vb.value = 0
@@ -86,7 +95,7 @@ def main(test):
     map.highWarn = 28.0
     map.highAlarm = 29.0
     map.resize(200, 100)
-    map.move(w.width()/2+instWidth/2+10,0)
+    map.move(w.width()-200,100)
     
     rpm = gauges.RoundGauge(w)
     rpm.name = "RPM"
@@ -96,7 +105,7 @@ def main(test):
     rpm.highWarn = 2600.0
     rpm.highAlarm = 2760.0
     rpm.resize(200, 100)
-    rpm.move(w.width()/2+instWidth/2+10+200,0)
+    rpm.move(w.width()-200,0)
     
 
     if not test:
@@ -109,14 +118,14 @@ def main(test):
         roll.setMaximum(180)
         roll.setValue(0)
         roll.resize(200,20)
-        roll.move(10,0)
+        roll.move(440,0)
         
         pitch = QSlider(Qt.Vertical,w)
         pitch.setMinimum(-90)
         pitch.setMaximum(90)
         pitch.setValue(0)
         pitch.resize(20,200)
-        pitch.move(20,100)
+        pitch.move(360,80)
         
         v = QSlider(Qt.Vertical,w)
         v.setMinimum(0)
@@ -124,30 +133,30 @@ def main(test):
         v.setValue(0)
         v.valueChanged.connect(vb.setValue)
         v.resize(20,150)
-        v.move(w.width()/2+instWidth/2+50,350)
+        v.move(w.width()-200,350)
         
         smap = QSlider(Qt.Horizontal,w)
         smap.setMinimum(0)
         smap.setMaximum(30)
         smap.setValue(0)
         smap.resize(200,20)
-        smap.move(w.width()/2+instWidth/2+10,100)
+        smap.move(w.width()-200,200)
         
         srpm = QSlider(Qt.Horizontal,w)
         srpm.setMinimum(0)
         srpm.setMaximum(3000)
         srpm.setValue(0)
         srpm.resize(200,20)
-        srpm.move(w.width()/2+instWidth/2+210,100)
+        srpm.move(w.width()-200,100)
         
         heading = QSpinBox(w)
-        heading.move(20, 400)
+        heading.move(370, 680)
         heading.setRange(1, 360)
         heading.setValue(1)
         heading.valueChanged.connect(h.setHeading)
 
         headingBug = QSpinBox(w)
-        headingBug.move(20, 440)
+        headingBug.move(650, 680)
         headingBug.setRange(0, 360)
         headingBug.setValue(1)
         headingBug.valueChanged.connect(h.setHeadingBug)
