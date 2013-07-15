@@ -100,7 +100,6 @@ class Airspeed(QGraphicsView):
                 dial.drawLine(0 , -(h/2-25), 0, -(h/2-40))
                 x = fontMetrics.width(str(a_s))/2
                 y = f.pixelSize()
-                print y
                 dial.drawText(-x, -(h/2-40-y),
                            str(a_s))
                 a_s += 10
