@@ -34,61 +34,108 @@ class Airspeed(QGraphicsView):
         super(Airspeed, self).paintEvent(event)
         w = self.width()
         h = self.height()
-        c = QPainter(self.viewport())
-        c.setRenderHint(QPainter.Antialiasing)
+        dial = QPainter(self.viewport())
+        dial.setRenderHint(QPainter.Antialiasing)
 
         #Draw the Black Background
-        c.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, Qt.black)
 
         # Setup Pens
+        f = QFont()
+        f.setPixelSize(20)
+        fontMetrics = QFontMetricsF(f)
+
         dialPen = QPen(QColor(Qt.white))
-        dialBrush = QBrush(QColor(Qt.white))
         dialPen.setWidth(2)
+
+        needleBrush = QBrush(QColor(Qt.white))
 
         vnePen = QPen(QColor(Qt.red))
         vneBrush = QBrush(QColor(Qt.red))
-        vnePen.setWidth(2)
+        vnePen.setWidth(6)
 
-        vsoPen = QPen(QColor(Qt.yellow))
-        vsoPen.setWidth(3)
+        vsoPen = QPen(QColor(Qt.white))
+        vsoPen.setWidth(4)
 
-        # Compass Setup
-        c.setPen(dialPen)
-        c.drawPoint(w/2, h/2)
+        vnoPen = QPen(QColor(Qt.green))
+        vnoPen.setWidth(4)
+
+        yellowPen = QPen(QColor(Qt.yellow))
+        yellowPen.setWidth(4)
 
         # Dial Setup
-        #c.drawEllipse(
-        #              25,
-        #              25,
-        #              w-50,
-        #              h-50)
-        c.drawArc(QRect(25,25,w-50,h-50), 30*16,30*16 )
-        c.save()
+        # V Speeds 
+        Vs = 45
+        Vs0 = 40
+        Vno = 125
+        Vne = 140 
+        Va = 120
+        Vfe = 70
 
-        #Vne 120
-        # min 0
-        c.translate(w/2 , h/2)
-        c.rotate(-(self._airspeed))
+        # VSpeed to angle for drawArc
+        Vs0_angle = (-(((Vs0-30)*2.5)+26)+90)*16
+        Vs_angle = (-(((Vs-30)*2.5)+26)+90)*16
+        Vfe_angle = (-(((Vfe-30)*2.5)+25)+90)*16
+        Vno_angle = (-(((Vno-30)*2.5)+25)+90)*16
+        Vne_angle = (-(((Vne-30)*2.5)+25)+90)*16
+
+        # Vspeeds Arcs
+        dial.setPen(vnoPen)
+        dial.drawArc(QRectF(25,25,w-50,h-50), Vs_angle,
+                  -(Vs_angle-Vno_angle))
+        dial.setPen(vsoPen)
+        dial.drawArc(QRectF(28,28,w-56,h-56), Vs0_angle, 
+                  -(Vs0_angle-Vfe_angle))
+        dial.setPen(yellowPen)
+        dial.drawArc(QRectF(25,25,w-50,h-50), Vno_angle,
+                  -(Vno_angle-Vne_angle))
+        dial.save()
+        dial.setPen(dialPen)
+        dial.setFont(f)
+        dial.translate(w/2 , h/2)
         count = 0
-        
+        a_s = 0
         while count < 360:
-            if count % 30 == 0: 
-                c.drawLine(0 , -(h/2-25), 0, -(h/2-40))
-                
-                c.drawText(-10, -(h/2-52),
-                           str(count/3))
-            elif count % 15 == 0:
-                c.drawLine(0 , -(h/2-25), 0, -(h/2-35))
+            if count % 25 == 0 and a_s <= 140:
+                dial.drawLine(0 , -(h/2-25), 0, -(h/2-40))
+                x = fontMetrics.width(str(a_s))/2
+                y = f.pixelSize()
+                dial.drawText(-x, -(h/2-40-y),
+                           str(a_s))
+                a_s += 10
+                if count == 0:
+                    a_s = 30
+                    count = count + 19
+                    dial.rotate(19)
+            elif count % 12.5 == 0 and a_s <= 140:
+                dial.drawLine(0 , -(h/2-25), 0, -(h/2-35))
+            if count == (-Vne_angle/16)+90:
+                dial.setPen(vnePen)
+                dial.drawLine(0 , -(h/2-25), 0, -(h/2-40))
+                dial.setPen(dialPen)
+            dial.rotate(0.5)
+            count += 0.5
 
-            c.rotate(1)
-            count += 1
-        c.restore()
+        dial.setBrush(needleBrush)
+        #Needle Movement
+        needle = QPolygon([QPoint(5, 0), QPoint(0,+5), QPoint(-5, 0),
+                            QPoint(0, -(h/2-40))])
+        
+        if self.airspeed <= 30: #Airspeeds Below 30 Knots
+            needle_angle = self._airspeed *0.83
+        else: #Airspeeds above 30 Knots
+            needle_angle = (self._airspeed-30) * 2.5 +25
+
+        dial.rotate(needle_angle)
+        dial.drawPolygon(needle)
+
+        dial.restore()
 
     def getAirspeed(self):
         return self._airspeed 
 
     def setAirspeed(self, airspeed):
-        if heading != self._airspeed:
+        if airspeed != self._airspeed:
             self._airspeed = airspeed
             self.update()
 
