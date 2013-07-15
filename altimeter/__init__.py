@@ -28,73 +28,85 @@ class Altimeter(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._airspeed = 0
+        self._altimeter = 0
 
     def paintEvent(self, event):
-        super(Altimeter, self).paintEvent(event)
+        #super(Altimeter, self).paintEvent(event)
         w = self.width()
         h = self.height()
-        c = QPainter(self.viewport())
-        c.setRenderHint(QPainter.Antialiasing)
+        dial = QPainter(self.viewport())
+        dial.setRenderHint(QPainter.Antialiasing)
 
         #Draw the Black Background
-        c.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, Qt.black)
 
         # Setup Pens
+        f = QFont()
+        f.setPixelSize(30)
+        fontMetrics = QFontMetricsF(f)
+
         dialPen = QPen(QColor(Qt.white))
         dialBrush = QBrush(QColor(Qt.white))
         dialPen.setWidth(2)
-
-        vnePen = QPen(QColor(Qt.red))
-        vneBrush = QBrush(QColor(Qt.red))
-        vnePen.setWidth(2)
-
-        vsoPen = QPen(QColor(Qt.yellow))
-        vsoPen.setWidth(3)
-
-        # Compass Setup
-        c.setPen(dialPen)
-        c.drawPoint(w/2, h/2)
+        
 
         # Dial Setup
-        c.drawEllipse(
+        #dial.save()
+        dial.setPen(dialPen)
+        dial.setFont(f)
+        dial.drawEllipse(
                       25,
                       25,
                       w-50,
                       h-50)
 
-        c.save()
-
-        c.translate(w/2 , h/2)
+        dial.translate(w/2 , h/2)
         count = 0
         altimeter_numbers = 0
         while count < 360:
             if count % 36 == 0: 
-                c.drawLine(0 , -(h/2-25), 0, -(h/2-40))
+                dial.drawLine(0 , -(h/2-25), 0, -(h/2-40))
                 
-                c.drawText(-5, -(h/2-52),
+                dial.drawText(-9.5, -(h/2-67),
                            str(altimeter_numbers))
 		altimeter_numbers += 1
             else:
-                c.drawLine(0 , -(h/2-25), 0, -(h/2-35))
+                dial.drawLine(0 , -(h/2-25), 0, -(h/2-35))
 
-            c.rotate(36)
+            dial.rotate(36)
             count += 36
-        #c.restore()
         count = 0
         while count < 360:
-            c.drawLine(0 , -(h/2-25), 0, -(h/2-35))
+            dial.drawLine(0 , -(h/2-25), 0, -(h/2-35))
 
-            c.rotate(3.6)
+            dial.rotate(3.6)
             count += 3.6
-        c.restore()
 
-    def getAirspeed(self):
-        return self._airspeed 
+        dial.setBrush(dialBrush)
+        #Needle Movement
+        sm_dial = QPolygon([QPoint(5, 0), QPoint(0,+5), QPoint(-5, 0),
+                            QPoint(0, -(h/2-40))])
+        lg_dial = QPolygon([QPoint(10, -(h/2-120)), QPoint(5, 0),
+                            QPoint(0,+5), QPoint(-5, 0),
+                            QPoint(-10, -(h/2-120)),
+                            QPoint(0, -(h/2-100))])
 
-    def setAirspeed(self, airspeed):
-        if heading != self._airspeed:
-            self._airspeed = airspeed
+        sm_dial_angle = self._altimeter * .36
+        lg_dial_angle = self._altimeter/10 * .36
+
+        dial.rotate(sm_dial_angle)
+        dial.drawPolygon(sm_dial)
+        dial.rotate(-sm_dial_angle)
+        dial.rotate(lg_dial_angle)
+        dial.drawPolygon(lg_dial)
+
+    def getAltimeter(self):
+        return self._altimeter 
+
+    def setAltimeter(self, altimeter):
+        if altimeter != self._altimeter:
+            self._altimeter = altimeter
+            print altimeter
             self.update()
 
-    airspeed = property(getAirspeed, setAirspeed)
+    altimeter = property(getAltimeter, setAltimeter)

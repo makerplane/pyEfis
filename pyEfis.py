@@ -160,7 +160,21 @@ def main(test):
         headingBug.setRange(0, 360)
         headingBug.setValue(1)
         headingBug.valueChanged.connect(h.setHeadingBug)
-    
+
+        alt_gauge = QSpinBox(w)
+        alt_gauge.setMinimum(0)
+        alt_gauge.setMaximum(10000)
+        alt_gauge.setValue(0)
+        alt_gauge.move(720,10)
+        alt_gauge.valueChanged.connect(alt.setAltimeter)
+
+        as_gauge = QSpinBox(w)
+        as_gauge.setMinimum(0)
+        as_gauge.setMaximum(140)
+        as_gauge.setValue(0)
+        as_gauge.move(10,360)
+        as_gauge.valueChanged.connect(air.setAirspeed)
+
         pitch.valueChanged.connect(a.setPitchAngle)
         roll.valueChanged.connect(a.setRollAngle)
         smap.valueChanged.connect(map.setValue)
