@@ -70,7 +70,7 @@ def main(test):
 
     h = hsi.HSI(w)
     h.resize(instWidth,instWidth)
-    h.move((w.width()-200)/3*1,instWidth)
+    h.move((w.width()-200)/3,instWidth)
 
     air = airspeed.Airspeed(w)
     air.resize(instWidth,instWidth)

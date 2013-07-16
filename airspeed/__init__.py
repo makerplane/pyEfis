@@ -20,21 +20,17 @@ from PyQt4.QtCore import *
 import PyQt4.Qt
 import math
 
-class Airspeed(QGraphicsView):
+class Airspeed(QWidget):
     def __init__(self, parent=None):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._airspeed = 0
 
     def paintEvent(self, event):
-        super(Airspeed, self).paintEvent(event)
         w = self.width()
         h = self.height()
-        dial = QPainter(self.viewport())
+        dial = QPainter(self)
         dial.setRenderHint(QPainter.Antialiasing)
 
         #Draw the Black Background
