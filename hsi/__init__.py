@@ -20,28 +20,32 @@ from PyQt4.QtCore import *
 import PyQt4.Qt
 import math
 
-class HSI(QGraphicsView):
+class HSI(QWidget):
     def __init__(self, parent=None):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
+        self.fontSize = 25
         self._heading = 1
         self._headingSelect = 1
         self._courseSelect = 1
         self._courseDevation = 1
+        self.cardinal = ["N", "E", "S", "W"]
 
+    def resizeEvent(self, event):
+        self.cx = self.width() / 2
+        self.cy = self.height() / 2 + self.fontSize / 2 + 7
+        self.r = self.height() / 2 - 21
+        
     def paintEvent(self, event):
-        super(HSI, self).paintEvent(event)
-        w = self.width()
-        h = self.height()
-        c = QPainter(self.viewport())
+        c = QPainter(self)
         c.setRenderHint(QPainter.Antialiasing)
-
+        f = QFont()
+        f.setPixelSize(self.fontSize)
+        c.setFont(f)
+        
         #Draw the Black Background
-        c.fillRect(0, 0, w, h, Qt.black)
+        c.fillRect(0, 0, self.width(), self.height(), Qt.black)
 
         # Setup Pens
         compassPen = QPen(QColor(Qt.white))
@@ -57,68 +61,58 @@ class HSI(QGraphicsView):
 
         # Compass Setup
         c.setPen(compassPen)
-        c.drawPoint(w/2, h/2)
-        c.drawText(self.rect(), 
-                   Qt.AlignHCenter|Qt.AlignTop,
-                    str(self._heading))
-        c.drawRect(w/2-16, 0+4, 31, 14)
+        c.drawPoint(self.cx, self.cy)
+        tr = QRect(self.cx-self.fontSize*1.5, 3, 
+                   self.fontSize * 3, self.fontSize + 5)
+        c.drawText(tr, Qt.AlignHCenter|Qt.AlignVCenter,
+                   str(int(self._heading)))
+        c.drawRect(tr)
 
         # Compass Setup
-        c.drawEllipse(
-                      25,
-                      25,
-                      w-50,
-                      h-50)
+        center = QPointF(self.cx, self.cy)
+        c.drawEllipse(center, self.r,self.r)
 
         c.save()
-        c.translate(w/2 , h/2)
+        c.translate(self.cx, self.cy)
         c.rotate(-(self._heading))
-        count = 0
-        cardnal = ["N", "E", "S", "W"]
-        while count < 360:
+        
+        longLine = QLine(0 , -self.r, 0, -(self.r-self.fontSize))
+        shortLine = QLine(0 , -self.r, 0, -(self.r-self.fontSize/2))
+        textRect = QRect(-40, -self.r+self.fontSize, 80, self.fontSize+10)
+        for count in range(0, 360, 5):
             if count % 10 == 0: 
-                c.drawLine(0 , -(h/2-25), 0, -(h/2-40))
+                c.drawLine(longLine)
                 if count % 90 == 0:
-                    c.drawText(-5,
-                               -(h/2-52),
-                               cardnal[int(count/90)])
+                    c.drawText(textRect, Qt.AlignHCenter|Qt.AlignVCenter, 
+                               self.cardinal[int(count/90)])
                 elif count % 30 == 0:
-                    subCardnal = str(int(count/10))
-                    if int(count/10) < 10:
-                        c.drawText(-5,
-                                   -(h/2-52),
-                                   subCardnal)
-                    else:
-                       c.drawText(-9,
-                                  -(h/2-52),
-                                  subCardnal)
+                    c.drawText(textRect, Qt.AlignHCenter|Qt.AlignVCenter, 
+                               str(int(count/10)))
             else:
-                c.drawLine(0 , -(h/2-25), 0, -(h/2-35))
-
-            #Draw Heading Bug
-            if (count+0 <= self._headingSelect + 10 and 
-                count+5 > self._headingSelect + 10):
-                c.setPen(headingPen)
-                c.setBrush(headingBrush)
-                delta = self._headingSelect- count
-                c.rotate(delta)
-                triangle = QPolygon([QPoint(0+5, -(h/2-25)),
-                                     QPoint(0-5, -(h/2-25)),
-                                     QPoint(0, -(h/2-35))])
-                c.drawPolygon(triangle)
-                c.setPen(compassPen)
-                c.rotate(-delta)
-
+                c.drawLine(shortLine)
             c.rotate(5)
-            count += 5
+
+        #Draw Heading Bug
+        c.setPen(headingPen)
+        c.setBrush(headingBrush)
+        delta = self._headingSelect
+        c.rotate(delta)
+        inc = int(self.fontSize / 2 *0.8)
+        triangle = QPolygon([QPoint(inc, -self.r+1),
+                             QPoint(-inc, -self.r+1),
+                             QPoint(0, -(self.r-inc*2))])
+        c.drawPolygon(triangle)
+        c.rotate(-delta)
+
         c.restore()
 
         #Non-moving items
-        c.drawLine(w/2 , 0+20, w/2, 0+50)
         c.setPen(planePen)
-        c.drawLine(w/2 , h/2+30, w/2, h/2-30)
-        c.drawLine(w/2-40 , h/2-15, w/2+40, h/2-15) 
-        c.drawLine(w/2-20 , h/2+20, w/2+20, h/2+20)
+        c.drawLine(self.cx , self.cy-self.r-5, self.cx, self.cy-self.r+self.fontSize+5)
+        c.drawLine(self.cx , self.cy+40, self.cx, self.cy-20)
+        c.drawLine(self.cx-40 , self.cy, self.cx+40, self.cy) 
+        c.drawLine(self.cx-20 , self.cy+30, self.cx+20, self.cy+30)
+
 
     def getHeading(self):
         return self._heading 
@@ -134,6 +128,7 @@ class HSI(QGraphicsView):
         return self._headingSelect
 
     def setHeadingBug(self, headingBug):
+        print "setHeadingBug() Called"
         if headingBug != self._headingSelect:
             self._headingSelect = headingBug
             self.update()
