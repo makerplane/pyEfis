@@ -102,7 +102,6 @@ class Altimeter(QWidget):
     def setAltimeter(self, altimeter):
         if altimeter != self._altimeter:
             self._altimeter = altimeter
-            print altimeter
             self.update()
 
     altimeter = property(getAltimeter, setAltimeter)

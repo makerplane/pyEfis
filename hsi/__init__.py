@@ -128,7 +128,6 @@ class HSI(QWidget):
         return self._headingSelect
 
     def setHeadingBug(self, headingBug):
-        print "setHeadingBug() Called"
         if headingBug != self._headingSelect:
             self._headingSelect = headingBug
             self.update()
