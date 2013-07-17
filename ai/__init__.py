@@ -19,6 +19,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import PyQt4.Qt
 import math
+import efis
 
 class AI(QGraphicsView):
     def __init__(self, parent=None):
@@ -165,14 +166,8 @@ class AI(QGraphicsView):
         pass 
         
     def setRollAngle(self, angle):
-        if angle < -180:
-            newAngle = -180
-        elif angle > 180:
-            newAngle = 180
-        else:
-            newAngle = angle
-        if newAngle != self._rollAngle:
-            self._rollAngle = newAngle
+        if angle != self._rollAngle:
+            self._rollAngle = efis.bounds(-180, 180, angle)
             self.redraw()
     
     def getRollAngle(self):
@@ -181,14 +176,8 @@ class AI(QGraphicsView):
     rollAngle = property(getRollAngle, setRollAngle)
     
     def setPitchAngle(self, angle):
-        if angle < -90:
-            newAngle = -90
-        elif angle > 90:
-            newAngle = 90
-        else:
-            newAngle = angle
-        if newAngle != self._pitchAngle:
-            self._pitchAngle = newAngle
+        if angle != self._pitchAngle:
+            self._pitchAngle = efis.bounds(-90, 90, angle)
             self.redraw()
     
     def getPitchAngle(self):

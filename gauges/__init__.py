@@ -19,6 +19,7 @@ import math
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import PyQt4.Qt
+import efis
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRect(x-r, y-r, r*2, r*2)
@@ -48,12 +49,9 @@ class AbstractGauge(QWidget):
         return ((value - l) / (m - l)) * h
 
     def setValue(self, value):
-        if value > self.highRange:
-            value = self.highRange
-        elif value < self.lowRange:
-            value = self.lowRange
-        self._value = value
-        self.update()
+        if value != self._value:
+            self._value = efis.bounds(self.lowRange, self.highRange, value)
+            self.update()
     
     def getValue(self):
         return self._value
