@@ -92,12 +92,12 @@ def main(test):
     turn.latAcc = -0.1
 
 
-    vb = gauges.VerticalBar(w)
-    vb.resize(10,150)
-    vb.move(w.width()-180,350)
-    vb.highWarn = 75
-    vb.highAlarm = 85
-    vb.value = 0
+    #vb = gauges.VerticalBar(w)
+    #vb.resize(10,150)
+    #vb.move(w.width()-180,350)
+    #vb.highWarn = 75
+    #vb.highAlarm = 85
+    #vb.value = 0
     
     map = gauges.RoundGauge(w)
     map.name = "MAP"
@@ -119,6 +119,34 @@ def main(test):
     rpm.resize(200, 100)
     rpm.move(w.width()-200,0)
     
+    op = gauges.HorizontalBar(w)
+    op.name = "Oil Press"
+    op.units = "psi"
+    op.decimalPlaces = 1
+    op.lowRange = 0.0
+    op.highRange = 100.0
+    op.highWarn = 90.0
+    op.highAlarm = 95.0
+    op.lowWarn = 45.0
+    op.lowAlarm = 10.0
+    op.resize(190, 75)
+    op.move(w.width()-200,220)
+    op.value = 45.2
+    
+    ot = gauges.HorizontalBar(w)
+    ot.name = "Oil Temp"
+    ot.units = "degF"
+    ot.decimalPlaces = 1
+    ot.lowRange = 160.0
+    ot.highRange = 250.0
+    ot.highWarn = 210.0
+    ot.highAlarm = 230.0
+    ot.lowWarn = None
+    ot.lowAlarm = None
+    ot.resize(190, 75)
+    ot.move(w.width()-200,300)
+    ot.value = 215.2
+    
 
     if not test:
         flightData.pitchChanged.connect(a.setPitchAngle)
@@ -139,13 +167,13 @@ def main(test):
         pitch.resize(20,200)
         pitch.move(360,80)
         
-        v = QSlider(Qt.Vertical,w)
-        v.setMinimum(0)
-        v.setMaximum(100)
-        v.setValue(0)
-        v.valueChanged.connect(vb.setValue)
-        v.resize(20,150)
-        v.move(w.width()-200,350)
+        #v = QSlider(Qt.Vertical,w)
+        #v.setMinimum(0)
+        #v.setMaximum(100)
+        #v.setValue(0)
+        #v.valueChanged.connect(vb.setValue)
+        #v.resize(20,150)
+        #v.move(w.width()-200,350)
         
         smap = QSlider(Qt.Horizontal,w)
         smap.setMinimum(0)
