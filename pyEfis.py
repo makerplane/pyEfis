@@ -91,7 +91,6 @@ def main(test):
     turn.move(0, instWidth)
     turn.latAcc = -0.1
 
-
     #vb = gauges.VerticalBar(w)
     #vb.resize(10,150)
     #vb.move(w.width()-180,350)
@@ -147,7 +146,54 @@ def main(test):
     ot.move(w.width()-200,300)
     ot.value = 215.2
     
-
+    fuel = gauges.HorizontalBar(w)
+    fuel.name = "Fuel Qty"
+    fuel.units = "gal"
+    fuel.decimalPlaces = 1
+    fuel.lowRange = 0.0
+    fuel.highRange = 20.0
+    fuel.lowWarn = 2.0
+    fuel.resize(190, 75)
+    fuel.move(w.width()-200,380)
+    fuel.value = 15.2
+    
+    ff = gauges.HorizontalBar(w)
+    ff.name = "Fuel Flow"
+    ff.units = "gph"
+    ff.decimalPlaces = 1
+    ff.lowRange = 0.0
+    ff.highRange = 20.0
+    ff.highWarn = None
+    ff.highAlarm = None
+    ff.lowWarn = None
+    ff.lowAlarm = None
+    ff.resize(190, 75)
+    ff.move(w.width()-200,460)
+    ff.value = 5.2
+    
+    cht = gauges.HorizontalBar(w)
+    cht.name = "Max CHT"
+    cht.units = "degF"
+    cht.decimalPlaces = 0
+    cht.lowRange = 0.0
+    cht.highRange = 500.0
+    cht.highWarn = 380
+    cht.highAlarm = 400
+    cht.resize(190, 75)
+    cht.move(w.width()-200,540)
+    cht.value = 350
+    
+    egt = gauges.HorizontalBar(w)
+    egt.name = "Avg EGT"
+    egt.units = "degF"
+    egt.decimalPlaces = 0
+    egt.lowRange = 800.0
+    egt.highRange = 1500.0
+    egt.resize(190, 75)
+    egt.move(w.width()-200,620)
+    egt.value = 1350
+    
+    
     if not test:
         flightData.pitchChanged.connect(a.setPitchAngle)
         flightData.rollChanged.connect(a.setRollAngle)
