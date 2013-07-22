@@ -55,6 +55,7 @@ class VSI(QWidget):
         p.translate(self.center)
         p.rotate(-90)
         p.drawLine(longLine)
+        p.drawText(textRect,Qt.AlignHCenter|Qt.AlignVCenter, '0')
         for each in range(1, tickCount+1):
             p.rotate(tickAngle)
             if each % 10 == 0:
@@ -63,7 +64,6 @@ class VSI(QWidget):
             else:
                 p.drawLine(shortLine)
         p.restore()
-        #p.end()
         p.save()
         p.translate(self.center)
         p.rotate(-90)
