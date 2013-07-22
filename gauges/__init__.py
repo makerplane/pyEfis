@@ -71,7 +71,7 @@ class HorizontalBar(AbstractGauge):
         self.smallFont.setPixelSize(self.height()/5)
         self.barHeight = self.height()/6
         self.barTop = self.height()/5 + 4
-        self.nameTextRect = QRectF(1,1,self.width(),self.height()/5)
+        self.nameTextRect = QRectF(1,1,self.width(),self.height()/5+10)
         self.valueTextRect = QRectF(1,self.barTop + self.barHeight+4, 
                                     self.width(), self.height()/2)
     
