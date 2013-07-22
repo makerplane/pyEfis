@@ -30,6 +30,7 @@ import hsi
 import airspeed
 import altimeter
 import vsi
+import tc
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -84,6 +85,12 @@ def main(test):
     vs = vsi.VSI(w)
     vs.resize(instWidth, instWidth)
     vs.move((w.width()-200)/3*2, instWidth)
+
+    turn = tc.TurnCoordinator(w)
+    turn.resize(instWidth, instWidth)
+    turn.move(0, instWidth)
+    turn.latAcc = -0.1
+
 
     vb = gauges.VerticalBar(w)
     vb.resize(10,150)
@@ -169,6 +176,7 @@ def main(test):
         alt_gauge = QSpinBox(w)
         alt_gauge.setMinimum(0)
         alt_gauge.setMaximum(10000)
+        alt_gauge.setSingleStep(10)
         alt_gauge.setValue(0)
         alt_gauge.move(720,10)
         alt_gauge.valueChanged.connect(alt.setAltimeter)
@@ -186,12 +194,21 @@ def main(test):
         svsi.setValue(0)
         svsi.resize(20,200)
         svsi.move(740,instWidth)
+        
+        stc = QSlider(Qt.Horizontal, w)
+        stc.setMinimum(-6) # deg / sec
+        stc.setMaximum(6)
+        stc.setValue(0)
+        stc.resize(200,20)
+        stc.move(80,instWidth + 30)
+
 
         pitch.valueChanged.connect(a.setPitchAngle)
         roll.valueChanged.connect(a.setRollAngle)
         smap.valueChanged.connect(map.setValue)
         srpm.valueChanged.connect(rpm.setValue)
         svsi.valueChanged.connect(vs.setROC)
+        stc.valueChanged.connect(turn.setRate)
 
     if(config.screenFullSize):
         w.showFullScreen()
