@@ -127,37 +127,39 @@ class AI(QGraphicsView):
         p.drawRect(w/2-2, h/2-2, 4, 4)
 
         # Add non-moving Bank Angle Markers
-        marks = QPen()
-        marks.setWidth(2)
+        marks = QPen(Qt.white)
+        marks.setWidth(3)
         p.translate(w/2 , h/2)
         p.setPen(marks)
-        p.setBrush(QColor(Qt.black))
         smallMarks = [10, 20, 45]
         largeMarks = [30, 60, 90]
+        shortLine = QLine(0, -(h/3), 0 , -(h/3-10))
+        longLine = QLine(0, -(h/3+10), 0 , -(h/3-10))
         for angle in smallMarks:
             p.rotate(angle)
-            p.drawLine(0, -(h/2), 0 , -(h/2-10))
+            p.drawLine(shortLine)
             p.rotate(-2*angle)
-            p.drawLine(0, -(h/2), 0 , -(h/2-10))
+            p.drawLine(shortLine)
             p.rotate(angle)
         for angle in largeMarks:
             p.rotate(angle)
-            p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
+            p.drawLine(longLine)
             p.rotate(-2*angle)
-            p.drawLine(0, -(h/2+10), 0 , -(h/2-10))
+            p.drawLine(longLine)
             p.rotate(angle)
     
-        triangle = QPolygon([QPoint(0+5, -(h/2)), QPoint(0-5, -(h/2)), 
-                            QPoint(0, -(h/2-10))])
-        p.drawPolygon(triangle)
         
         pen = QPen(QColor(Qt.white))
         pen.setWidth(1)
         p.setPen(pen)
         p.setBrush(QColor(Qt.white))
+        triangle = QPolygon([QPoint(0+5, -(h/3)), QPoint(0-5, -(h/3)), 
+                            QPoint(0, -(h/3-10))])
+        p.drawPolygon(triangle)
+        
         p.rotate(self._rollAngle * -1.0)
-        triangle = QPolygon([QPoint(0+5, -(h/2)+20), QPoint(0-5, -(h/2)+20), 
-                            QPoint(0, -(h/2-10))])
+        triangle = QPolygon([QPoint(0+7, -(h/3)+25), QPoint(0-7, -(h/3)+25), 
+                             QPoint(0, -(h/3-10))])
         p.drawPolygon(triangle)
         
     
