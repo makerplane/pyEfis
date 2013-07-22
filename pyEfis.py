@@ -29,6 +29,7 @@ import ai
 import hsi
 import airspeed
 import altimeter
+import vsi
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -79,6 +80,10 @@ def main(test):
     alt = altimeter.Altimeter(w)
     alt.resize(instWidth,instWidth)
     alt.move((w.width()-200)/3*2,0)
+
+    vs = vsi.VSI(w)
+    vs.resize(instWidth, instWidth)
+    vs.move((w.width()-200)/3*2, instWidth)
 
     vb = gauges.VerticalBar(w)
     vb.resize(10,150)
@@ -174,11 +179,19 @@ def main(test):
         as_gauge.setValue(0)
         as_gauge.move(10,360)
         as_gauge.valueChanged.connect(air.setAirspeed)
+        
+        svsi = QSlider(Qt.Vertical, w)
+        svsi.setMinimum(-4000)
+        svsi.setMaximum(4000)
+        svsi.setValue(0)
+        svsi.resize(20,200)
+        svsi.move(740,instWidth)
 
         pitch.valueChanged.connect(a.setPitchAngle)
         roll.valueChanged.connect(a.setRollAngle)
         smap.valueChanged.connect(map.setValue)
         srpm.valueChanged.connect(rpm.setValue)
+        svsi.valueChanged.connect(vs.setROC)
 
     if(config.screenFullSize):
         w.showFullScreen()
