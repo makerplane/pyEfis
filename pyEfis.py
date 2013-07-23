@@ -38,6 +38,11 @@ class FlightData(QObject):
     rollChanged = pyqtSignal(float, name = "rollChanged")
     pitchChanged = pyqtSignal(float, name = "pitchChanged")
     headingChanged = pyqtSignal(float, name = "headingChanged")
+    turnRateChanged = pyqtSignal(float, name = "turnRateChanged")
+    rpmChanged = pyqtSignal(float, name = "rpmChanged")
+    mapChanged = pyqtSignal(float, name = "mapChanged")
+    oilPressChanged = pyqtSignal(float, name = "oilPressChanged")
+    oilTempChanged = pyqtSignal(float, name = "oilTempChanged")
     
     def getParameter(self, param):
         if param.name == "Roll Angle":
@@ -46,6 +51,18 @@ class FlightData(QObject):
             self.pitchChanged.emit(param.value)
         elif param.name == "Heading":
             self.headingChanged.emit(param.value)
+        elif param.name == "Turn Rate":
+            self.turnRateChanged.emit(param.value)
+        elif param.name == "N1 or Engine RPM #1":
+            self.rpmChanged.emit(param.value)
+        elif param.name == "Manifold Pressure #1":
+            self.mapChanged.emit(param.value)
+        elif param.name == "Oil Pressure #1":
+            self.oilPressChanged.emit(param.value)
+        elif param.name == "Oil Temperature #1":
+            self.oilTempChanged.emit(param.value)
+        else:
+            print param.name
 
 
 def main(test):
@@ -198,6 +215,11 @@ def main(test):
         flightData.pitchChanged.connect(a.setPitchAngle)
         flightData.rollChanged.connect(a.setRollAngle)
         flightData.headingChanged.connect(h.setHeading)
+        flightData.turnRateChanged.connect(turn.setTurnRate)
+        flightData.rpmChanged.connect(rpm.setValue)
+        flightData.mapChanged.connect(map.setValue)
+        flightData.oilPressChanged.connect(op.setValue)
+        flightData.oilTempChanged.connect(ot.setValue)
     else:
         roll = QSlider(Qt.Horizontal,w)
         roll.setMinimum(-180)
