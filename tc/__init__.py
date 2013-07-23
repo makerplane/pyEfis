@@ -122,15 +122,15 @@ class TurnCoordinator(QWidget):
         p.drawLine(-length/2, -length/2, length/2, -length/2)
         p.drawLine(0,0,0,-length)
  
-    def getRate(self):
+    def getTurnRate(self):
         return self._rate 
 
-    def setRate(self, rate):
+    def setTurnRate(self, rate):
         if rate != self._rate:
             self._rate = rate
             self.update()
 
-    turnRate = property(getRate, setRate)
+    turnRate = property(getTurnRate, setTurnRate)
     
     def getLatAcc(self):
         return self._latAcc
