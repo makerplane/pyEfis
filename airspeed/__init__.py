@@ -136,3 +136,99 @@ class Airspeed(QWidget):
             self.update()
 
     airspeed = property(getAirspeed, setAirspeed)
+
+class Airspeed_Tape(QGraphicsView):
+    def __init__(self, parent=None):
+        super(Airspeed_Tape, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._airspeed = 0
+
+    def resizeEvent(self, event):
+
+        # V Speeds 
+        Vs = 45
+        Vs0 = 40
+        Vno = 125
+        Vne = 140 
+        Va = 120
+        Vfe = 70
+
+        w = self.width()
+        h = self.height()
+        self.pph = 10
+        f = QFont()
+        f.setPixelSize(20)
+        fontMetrics = QFontMetricsF(f)
+        speed_pixel = 1500 + h
+
+        dialPen = QPen(QColor(Qt.white))
+        dialPen.setWidth(2)
+
+        vnePen = QPen(QColor(Qt.red))
+        vneBrush = QBrush(QColor(Qt.red))
+        vnePen.setWidth(8)
+
+        vsoPen = QPen(QColor(Qt.white))
+        vsoPen.setWidth(8)
+
+        vnoPen = QPen(QColor(Qt.green))
+        vnoPen.setWidth(8)
+
+        yellowPen = QPen(QColor(Qt.yellow))
+        yellowPen.setWidth(8)
+
+        self.scene = QGraphicsScene(0,0,w, speed_pixel)
+        self.scene.addRect(0, 0, w, speed_pixel, 
+                           QPen(QColor(Qt.black)),QBrush(QColor(Qt.black)))
+
+        for i in range(150, -1, -5):
+            if i % 10 == 0:
+                self.scene.addLine(0, (-i*10)+ 1500+h/2, w/2, (-i*10)+ 1500+h/2,
+                                   dialPen)
+                t = self.scene.addText(str(i))
+                t.setFont(f)
+                self.scene.setFont(f)
+                t.setDefaultTextColor(QColor(Qt.white))
+                t.setX(w-t.boundingRect().width())
+                t.setY(((-i*10)+1500+h/2) - t.boundingRect().height()/2)
+            else:
+                self.scene.addLine(0, (-i*10)+1500+h/2, w/2-20, 
+                                  (-i*10)+1500+h/2, dialPen)
+
+        #Add Markings
+        self.scene.addLine(4, Vs0 * -self.pph +1500+ self.height()/2 -4,
+                           4, Vfe* -self.pph +1500+ self.height()/2 +4,
+                           vsoPen)
+        self.scene.addLine(4, Vfe* -self.pph +1500+ self.height()/2 -4,
+                           4, Vno* -self.pph +1500+ self.height()/2 +4,
+                           vnoPen)
+        self.scene.addLine(4, Vne* -self.pph +1500+ self.height()/2 -4,
+                           4, Vno* -self.pph +1500+ self.height()/2 +4,
+                           yellowPen) 
+        self.scene.addLine(4, Vne* -self.pph +1500+ self.height()/2 -4,
+                           4, 150* -self.pph +1500+ self.height()/2 +4,
+                           vnePen)
+
+
+        self.setScene(self.scene)
+
+    def redraw(self):
+        self.resetTransform()
+        self.centerOn(self.scene.width()/2,
+                      -self._airspeed * self.pph + 1500+self.height()/2)
+
+
+    def getAirspeed(self):
+        return self._airspeed 
+
+    def setAirspeed(self, airspeed):
+        print airspeed
+        if airspeed != self._airspeed:
+            self._airspeed = airspeed
+            self.redraw()
+
+    airspeed = property(getAirspeed, setAirspeed)
