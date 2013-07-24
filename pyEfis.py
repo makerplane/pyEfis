@@ -304,7 +304,7 @@ def main(test):
         smap.valueChanged.connect(map.setValue)
         srpm.valueChanged.connect(rpm.setValue)
         svsi.valueChanged.connect(vs.setROC)
-        stc.valueChanged.connect(turn.setRate)
+        stc.valueChanged.connect(turn.setTurnRate)
 
     if(config.screenFullSize):
         w.showFullScreen()
