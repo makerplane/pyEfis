@@ -135,3 +135,83 @@ class HSI(QWidget):
 	
 
     headingBug = property(getHeadingBug, setHeadingBug)
+
+class DG_Tape(QGraphicsView):
+    def __init__(self, parent=None):
+        super(DG_Tape, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._heading = 1
+        self._headingSelect = 1
+        self._courseSelect = 1
+        self._courseDevation = 1
+        self.cardinal = ["N", "E", "S", "W"]
+
+    def resizeEvent(self, event):
+        w = self.width()
+        h = self.height()
+
+        self.dpp = 10
+        compassPen = QPen(QColor(Qt.white))
+        compassPen.setWidth(2)
+
+        headingPen = QPen(QColor(Qt.red))
+        headingPen.setWidth(8)
+
+        f = QFont()
+        f.setPixelSize(20)
+        fontMetrics = QFontMetricsF(f)
+
+        self.scene = QGraphicsScene(0,0,5000, h)
+        self.scene.addRect(0, 0, 5000, h, 
+                           QPen(QColor(Qt.black)),QBrush(QColor(Qt.black)))
+
+        self.setScene(self.scene)
+
+        for i in range(-50, 410, 5):
+            if i % 10 == 0:
+                self.scene.addLine((i*10)+w/2, 0, (i*10)+w/2, h/2,
+                                   compassPen)
+                if i > 360:
+                    t = self.scene.addText(str(i-360))
+                    t.setFont(f)
+                    self.scene.setFont(f)
+                    t.setDefaultTextColor(QColor(Qt.white))
+                    t.setX(((i*10)+w/2) - t.boundingRect().width()/2)
+                    t.setY(h-t.boundingRect().height())
+                elif i < 1:
+                    t = self.scene.addText(str(i+360))
+                    t.setFont(f)
+                    self.scene.setFont(f)
+                    t.setDefaultTextColor(QColor(Qt.white))
+                    t.setX(((i*10)+w/2) - t.boundingRect().width()/2)
+                    t.setY(h-t.boundingRect().height())
+                else:
+                    t = self.scene.addText(str(i))
+                    t.setFont(f)
+                    self.scene.setFont(f)
+                    t.setDefaultTextColor(QColor(Qt.white))
+                    t.setX(((i*10)+w/2) - t.boundingRect().width()/2)
+                    t.setY(h-t.boundingRect().height())
+            else:
+                self.scene.addLine((i*10)+w/2, 0, (i*10)+w/2, h/2-20,
+                                  compassPen)
+
+    def redraw(self):
+        self.resetTransform()
+        self.centerOn(self._heading * self.dpp + self.width()/2,
+                      self.scene.height()/2)
+
+    def getHeading(self):
+        return self._heading 
+
+    def setHeading(self, heading):
+        if heading != self._heading:
+            self._heading = heading
+            self.redraw()
+
+    heading = property(getHeading, setHeading)
+
