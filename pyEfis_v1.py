@@ -216,7 +216,7 @@ class main (QMainWindow):
         
             heading = QSpinBox(w)
             heading.move(0, instHeight+100)
-            heading.setRange(1, 360)
+            heading.setRange(0, 360)
             heading.setValue(1)
             heading.valueChanged.connect(head_tape.setHeading)
 
@@ -230,6 +230,7 @@ class main (QMainWindow):
             alt_gauge.setMinimum(0)
             alt_gauge.setMaximum(10000)
             alt_gauge.setValue(0)
+            alt_gauge.setSingleStep(10)
             alt_gauge.move(1100,100)
             alt_gauge.valueChanged.connect(alt_tape.setAltimeter)
 
