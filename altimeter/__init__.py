@@ -105,3 +105,60 @@ class Altimeter(QWidget):
             self.update()
 
     altimeter = property(getAltimeter, setAltimeter)
+
+class Altimeter_Tape(QGraphicsView):
+    def __init__(self, parent=None):
+        super(Altimeter_Tape, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._altimeter = 0
+
+    def resizeEvent(self, event):
+        w = self.width()
+        h = self.height()
+        self.pph = 0.5
+        f = QFont()
+        f.setPixelSize(20)
+        fontMetrics = QFontMetricsF(f)
+        height_pixel = 5000 + h
+
+        dialPen = QPen(QColor(Qt.white))
+        dialPen.setWidth(2)
+
+        self.scene = QGraphicsScene(0,0,w, height_pixel)
+        self.scene.addRect(0, 0, w, height_pixel, 
+                           QPen(QColor(Qt.black)),QBrush(QColor(Qt.black)))
+
+        for i in range(100, -1, -1):
+            if i % 2 == 0:
+                self.scene.addLine(w/2 + 15, (-i*50)+ 5000+h/2, w, (-i*50)+ 5000+h/2,
+                                   dialPen)
+                t = self.scene.addText(str(i*100))
+                t.setFont(f)
+                self.scene.setFont(f)
+                t.setDefaultTextColor(QColor(Qt.white))
+                t.setX(0)
+                t.setY(((-i*50)+5000+h/2) - t.boundingRect().height()/2)
+            else:
+                self.scene.addLine(w/2+ 30, (-i*50)+5000+h/2, w, (-i*50)+5000+h/2, dialPen)
+        self.setScene(self.scene)
+
+    def redraw(self):
+        self.resetTransform()
+        self.centerOn(self.scene.width()/2,
+                      -self._altimeter * self.pph + 5000+self.height()/2)
+
+
+    def getAltimeter(self):
+        return self._altimeter 
+
+    def setAltimeter(self, altimeter):
+        print altimeter
+        if altimeter != self._altimeter:
+            self._altimeter = altimeter
+            self.redraw()
+
+    altimeter = property(getAltimeter, setAltimeter)

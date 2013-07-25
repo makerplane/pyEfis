@@ -41,6 +41,8 @@ class TurnCoordinator(QWidget):
         p.setPen(pen)
         self.center = QPointF(p.device().width()/2, p.device().height()/2)
         self.r = min(self.width(), self.height())/2 - 25
+        
+        p.fillRect(0, 0, self.width(), self.height(), Qt.black)
         p.drawEllipse(self.center, self.r, self.r)
         
         # this draws the tick boxes

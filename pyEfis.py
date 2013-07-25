@@ -70,16 +70,145 @@ class FlightData(QObject):
         else:
             print param.name, "=", param.value
 
+class MainWindow(QWidget):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
+        self.a = ai.AI(self)
+        self.h = hsi.HSI(self)
+        self.air = airspeed.Airspeed(self)
+        self.alt = altimeter.Altimeter(self)
+        self.vs = vsi.VSI(self)
+        self.turn = tc.TurnCoordinator(self)
+        self.map = gauges.RoundGauge(self)
+        self.rpm = gauges.RoundGauge(self)
+        self.op = gauges.HorizontalBar(self)
+        self.ot = gauges.HorizontalBar(self)
+        self.fuel = gauges.HorizontalBar(self)
+        self.ff = gauges.HorizontalBar(self)
+        self.cht = gauges.HorizontalBar(self)
+        self.egt = gauges.HorizontalBar(self)
+        
+    def resizeEvent(self, e):
+        instWidth = self.height()/2
+        print self.width(), self.height()
+        
+        self.a.resize(instWidth,instWidth)
+        self.a.move((self.width()-200)/3*1,0)
+        
+        self.h.resize(instWidth,instWidth)
+        self.h.move((self.width()-200)/3,instWidth)
+        
+        self.air.resize(instWidth,instWidth)
+        self.air.move((self.width()-200)/3*0,0)
+        
+        self.alt.resize(instWidth,instWidth)
+        self.alt.move((self.width()-200)/3*2,0)
+        
+        self.vs.resize(instWidth, instWidth)
+        self.vs.move((self.width()-200)/3*2, instWidth)
+        
+        self.turn.resize(instWidth, instWidth)
+        self.turn.move(0, instWidth)
+        self.turn.latAcc = 0.0
+        
+        self.map.name = "MAP"
+        self.map.decimalPlaces = 1
+        self.map.lowRange = 0.0
+        self.map.highRange = 30.0
+        self.map.highWarn = 28.0
+        self.map.highAlarm = 29.0
+        self.map.resize(200, 100)
+        self.map.move(self.width()-200,100)
+        
+        self.rpm.name = "RPM"
+        self.rpm.decimalPlaces = 0
+        self.rpm.lowRange = 0.0
+        self.rpm.highRange = 2800.0
+        self.rpm.highWarn = 2600.0
+        self.rpm.highAlarm = 2760.0
+        self.rpm.resize(200, 100)
+        self.rpm.move(self.width()-200,0)
+        
+        self.op.name = "Oil Press"
+        self.op.units = "psi"
+        self.op.decimalPlaces = 1
+        self.op.lowRange = 0.0
+        self.op.highRange = 100.0
+        self.op.highWarn = 90.0
+        self.op.highAlarm = 95.0
+        self.op.lowWarn = 45.0
+        self.op.lowAlarm = 10.0
+        self.op.resize(190, 75)
+        self.op.move(self.width()-200,220)
+        self.op.value = 45.2
+        
+        self.ot.name = "Oil Temp"
+        self.ot.units = "degF"
+        self.ot.decimalPlaces = 1
+        self.ot.lowRange = 160.0
+        self.ot.highRange = 250.0
+        self.ot.highWarn = 210.0
+        self.ot.highAlarm = 230.0
+        self.ot.lowWarn = None
+        self.ot.lowAlarm = None
+        self.ot.resize(190, 75)
+        self.ot.move(self.width()-200,300)
+        self.ot.value = 215.2
+        
+        self.fuel.name = "Fuel Qty"
+        self.fuel.units = "gal"
+        self.fuel.decimalPlaces = 1
+        self.fuel.lowRange = 0.0
+        self.fuel.highRange = 20.0
+        self.fuel.lowWarn = 2.0
+        self.fuel.resize(190, 75)
+        self.fuel.move(self.width()-200,380)
+        self.fuel.value = 15.2
+        
+        self.ff.name = "Fuel Flow"
+        self.ff.units = "gph"
+        self.ff.decimalPlaces = 1
+        self.ff.lowRange = 0.0
+        self.ff.highRange = 20.0
+        self.ff.highWarn = None
+        self.ff.highAlarm = None
+        self.ff.lowWarn = None
+        self.ff.lowAlarm = None
+        self.ff.resize(190, 75)
+        self.ff.move(self.width()-200,460)
+        self.ff.value = 5.2
+        
+        self.cht.name = "Max CHT"
+        self.cht.units = "degF"
+        self.cht.decimalPlaces = 0
+        self.cht.lowRange = 0.0
+        self.cht.highRange = 500.0
+        self.cht.highWarn = 380
+        self.cht.highAlarm = 400
+        self.cht.resize(190, 75)
+        self.cht.move(self.width()-200,540)
+        self.cht.value = 350
+        
+        self.egt.name = "Avg EGT"
+        self.egt.units = "degF"
+        self.egt.decimalPlaces = 0
+        self.egt.lowRange = 800.0
+        self.egt.highRange = 1500.0
+        self.egt.resize(190, 75)
+        self.egt.move(self.width()-200,620)
+        self.egt.value = 1350
+        
+    def nextScreen(b):
+        print "Button Pushed"
 
 def main(test):
     if not test:
         flightData = FlightData()
-
         cfix = fix.Fix(config.canAdapter, config.canDevice)
         cfix.setParameterCallback(flightData.getParameter)
     
     app = QApplication(sys.argv)
-    w = QWidget()
+    w = MainWindow()
     w.resize(config.screenSize[0],config.screenSize[1])
     w.move(0,0)
     w.setWindowTitle('PFD')
@@ -88,147 +217,25 @@ def main(test):
         p.setColor(w.backgroundRole(), QColor(config.screenColor))
         w.setPalette(p)
         w.setAutoFillBackground(True)
-    instWidth = config.screenSize[1]/2
-    a = ai.AI(w)
-    a.resize(instWidth,instWidth)
-    a.move((w.width()-200)/3*1,0)
-
-    h = hsi.HSI(w)
-    h.resize(instWidth,instWidth)
-    h.move((w.width()-200)/3,instWidth)
-
-    air = airspeed.Airspeed(w)
-    air.resize(instWidth,instWidth)
-    air.move((w.width()-200)/3*0,0)
-
-    alt = altimeter.Altimeter(w)
-    alt.resize(instWidth,instWidth)
-    alt.move((w.width()-200)/3*2,0)
-
-    vs = vsi.VSI(w)
-    vs.resize(instWidth, instWidth)
-    vs.move((w.width()-200)/3*2, instWidth)
-
-    turn = tc.TurnCoordinator(w)
-    turn.resize(instWidth, instWidth)
-    turn.move(0, instWidth)
-    turn.latAcc = -0.1
-
-    #vb = gauges.VerticalBar(w)
-    #vb.resize(10,150)
-    #vb.move(w.width()-180,350)
-    #vb.highWarn = 75
-    #vb.highAlarm = 85
-    #vb.value = 0
-    
-    map = gauges.RoundGauge(w)
-    map.name = "MAP"
-    map.decimalPlaces = 1
-    map.lowRange = 0.0
-    map.highRange = 30.0
-    map.highWarn = 28.0
-    map.highAlarm = 29.0
-    map.resize(200, 100)
-    map.move(w.width()-200,100)
-    
-    rpm = gauges.RoundGauge(w)
-    rpm.name = "RPM"
-    rpm.decimalPlaces = 0
-    rpm.lowRange = 0.0
-    rpm.highRange = 2800.0
-    rpm.highWarn = 2600.0
-    rpm.highAlarm = 2760.0
-    rpm.resize(200, 100)
-    rpm.move(w.width()-200,0)
-    
-    op = gauges.HorizontalBar(w)
-    op.name = "Oil Press"
-    op.units = "psi"
-    op.decimalPlaces = 1
-    op.lowRange = 0.0
-    op.highRange = 100.0
-    op.highWarn = 90.0
-    op.highAlarm = 95.0
-    op.lowWarn = 45.0
-    op.lowAlarm = 10.0
-    op.resize(190, 75)
-    op.move(w.width()-200,220)
-    op.value = 45.2
-    
-    ot = gauges.HorizontalBar(w)
-    ot.name = "Oil Temp"
-    ot.units = "degF"
-    ot.decimalPlaces = 1
-    ot.lowRange = 160.0
-    ot.highRange = 250.0
-    ot.highWarn = 210.0
-    ot.highAlarm = 230.0
-    ot.lowWarn = None
-    ot.lowAlarm = None
-    ot.resize(190, 75)
-    ot.move(w.width()-200,300)
-    ot.value = 215.2
-    
-    fuel = gauges.HorizontalBar(w)
-    fuel.name = "Fuel Qty"
-    fuel.units = "gal"
-    fuel.decimalPlaces = 1
-    fuel.lowRange = 0.0
-    fuel.highRange = 20.0
-    fuel.lowWarn = 2.0
-    fuel.resize(190, 75)
-    fuel.move(w.width()-200,380)
-    fuel.value = 15.2
-    
-    ff = gauges.HorizontalBar(w)
-    ff.name = "Fuel Flow"
-    ff.units = "gph"
-    ff.decimalPlaces = 1
-    ff.lowRange = 0.0
-    ff.highRange = 12.0
-    ff.highWarn = None
-    ff.highAlarm = None
-    ff.lowWarn = None
-    ff.lowAlarm = None
-    ff.resize(190, 75)
-    ff.move(w.width()-200,460)
-    ff.value = 5.2
-    
-    cht = gauges.HorizontalBar(w)
-    cht.name = "Max CHT"
-    cht.units = "degF"
-    cht.decimalPlaces = 0
-    cht.lowRange = 0.0
-    cht.highRange = 500.0
-    cht.highWarn = 380
-    cht.highAlarm = 400
-    cht.resize(190, 75)
-    cht.move(w.width()-200,540)
-    cht.value = 350
-    
-    egt = gauges.HorizontalBar(w)
-    egt.name = "Avg EGT"
-    egt.units = "degF"
-    egt.decimalPlaces = 0
-    egt.lowRange = 800.0
-    egt.highRange = 1500.0
-    egt.resize(190, 75)
-    egt.move(w.width()-200,620)
-    egt.value = 1350
-    
     
     if not test:
-        flightData.pitchChanged.connect(a.setPitchAngle)
-        flightData.rollChanged.connect(a.setRollAngle)
-        flightData.headingChanged.connect(h.setHeading)
-        flightData.turnRateChanged.connect(turn.setTurnRate)
-        flightData.rpmChanged.connect(rpm.setValue)
-        flightData.mapChanged.connect(map.setValue)
-        flightData.oilPressChanged.connect(op.setValue)
-        flightData.oilTempChanged.connect(ot.setValue)
-        flightData.fuelFlowChanged.connect(ff.setValue)
-        flightData.fuelQtyChanged.connect(fuel.setValue)
+        flightData.pitchChanged.connect(w.a.setPitchAngle)
+        flightData.rollChanged.connect(w.a.setRollAngle)
+        flightData.headingChanged.connect(w.h.setHeading)
+        flightData.turnRateChanged.connect(w.turn.setTurnRate)
+        flightData.rpmChanged.connect(w.rpm.setValue)
+        flightData.mapChanged.connect(w.map.setValue)
+        flightData.oilPressChanged.connect(w.op.setValue)
+        flightData.oilTempChanged.connect(w.ot.setValue)
+        flightData.fuelFlowChanged.connect(w.ff.setValue)
+        flightData.fuelQtyChanged.connect(w.fuel.setValue)
+
     else:
+        toggle = QPushButton(w)
+        toggle.setText("Screen")
+        toggle.move(0,0)
+        toggle.clicked.connect(w.nextScreen)
+        
         roll = QSlider(Qt.Horizontal,w)
         roll.setMinimum(-180)
         roll.setMaximum(180)
@@ -242,14 +249,6 @@ def main(test):
         pitch.setValue(0)
         pitch.resize(20,200)
         pitch.move(360,80)
-        
-        #v = QSlider(Qt.Vertical,w)
-        #v.setMinimum(0)
-        #v.setMaximum(100)
-        #v.setValue(0)
-        #v.valueChanged.connect(vb.setValue)
-        #v.resize(20,150)
-        #v.move(w.width()-200,350)
         
         smap = QSlider(Qt.Horizontal,w)
         smap.setMinimum(0)
@@ -269,13 +268,13 @@ def main(test):
         heading.move(370, 680)
         heading.setRange(1, 360)
         heading.setValue(1)
-        heading.valueChanged.connect(h.setHeading)
+        heading.valueChanged.connect(w.h.setHeading)
 
         headingBug = QSpinBox(w)
         headingBug.move(650, 680)
         headingBug.setRange(0, 360)
         headingBug.setValue(1)
-        headingBug.valueChanged.connect(h.setHeadingBug)
+        headingBug.valueChanged.connect(w.h.setHeadingBug)
 
         alt_gauge = QSpinBox(w)
         alt_gauge.setMinimum(0)
@@ -283,36 +282,35 @@ def main(test):
         alt_gauge.setSingleStep(10)
         alt_gauge.setValue(0)
         alt_gauge.move(720,10)
-        alt_gauge.valueChanged.connect(alt.setAltimeter)
+        alt_gauge.valueChanged.connect(w.alt.setAltimeter)
 
         as_gauge = QSpinBox(w)
         as_gauge.setMinimum(0)
         as_gauge.setMaximum(140)
         as_gauge.setValue(0)
         as_gauge.move(10,360)
-        as_gauge.valueChanged.connect(air.setAirspeed)
+        as_gauge.valueChanged.connect(w.air.setAirspeed)
         
         svsi = QSlider(Qt.Vertical, w)
         svsi.setMinimum(-4000)
         svsi.setMaximum(4000)
         svsi.setValue(0)
         svsi.resize(20,200)
-        svsi.move(740,instWidth)
+        svsi.move(740,360)
         
         stc = QSlider(Qt.Horizontal, w)
         stc.setMinimum(-6) # deg / sec
         stc.setMaximum(6)
         stc.setValue(0)
         stc.resize(200,20)
-        stc.move(80,instWidth + 30)
+        stc.move(80,360 + 30)
 
-
-        pitch.valueChanged.connect(a.setPitchAngle)
-        roll.valueChanged.connect(a.setRollAngle)
-        smap.valueChanged.connect(map.setValue)
-        srpm.valueChanged.connect(rpm.setValue)
-        svsi.valueChanged.connect(vs.setROC)
-        stc.valueChanged.connect(turn.setRate)
+        pitch.valueChanged.connect(w.a.setPitchAngle)
+        roll.valueChanged.connect(w.a.setRollAngle)
+        smap.valueChanged.connect(w.map.setValue)
+        srpm.valueChanged.connect(w.rpm.setValue)
+        svsi.valueChanged.connect(w.vs.setROC)
+        stc.valueChanged.connect(w.turn.setTurnRate)
 
     if(config.screenFullSize):
         w.showFullScreen()
