@@ -43,6 +43,8 @@ class FlightData(QObject):
     mapChanged = pyqtSignal(float, name = "mapChanged")
     oilPressChanged = pyqtSignal(float, name = "oilPressChanged")
     oilTempChanged = pyqtSignal(float, name = "oilTempChanged")
+    fuelFlowChanged = pyqtSignal(float, name = "fuelFlowChanged")
+    fuelQtyChanged = pyqtSignal(float, name = "fuelQtyChanged")
     
     def getParameter(self, param):
         if param.name == "Roll Angle":
@@ -61,8 +63,12 @@ class FlightData(QObject):
             self.oilPressChanged.emit(param.value)
         elif param.name == "Oil Temperature #1":
             self.oilTempChanged.emit(param.value)
+        elif param.name == "Fuel Flow #1":
+            self.fuelFlowChanged.emit(param.value)
+        elif param.name == "Fuel Quantity #1":
+            self.fuelQtyChanged.emit(param.value)
         else:
-            print param.name
+            print param.name, "=", param.value
 
 
 def main(test):
@@ -179,7 +185,7 @@ def main(test):
     ff.units = "gph"
     ff.decimalPlaces = 1
     ff.lowRange = 0.0
-    ff.highRange = 20.0
+    ff.highRange = 12.0
     ff.highWarn = None
     ff.highAlarm = None
     ff.lowWarn = None
@@ -220,6 +226,8 @@ def main(test):
         flightData.mapChanged.connect(map.setValue)
         flightData.oilPressChanged.connect(op.setValue)
         flightData.oilTempChanged.connect(ot.setValue)
+        flightData.fuelFlowChanged.connect(ff.setValue)
+        flightData.fuelQtyChanged.connect(fuel.setValue)
     else:
         roll = QSlider(Qt.Horizontal,w)
         roll.setMinimum(-180)
