@@ -18,11 +18,13 @@
 
 import sys
 import argparse
+import ConfigParser
+import string
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import PyQt4.Qt
 
-import config
+#import config
 import fix
 import gauges
 import ai
@@ -49,27 +51,34 @@ class FlightData(QObject):
 class main (QMainWindow):
     def __init__(self, test, parent = None):
         super(main,  self).__init__(parent)
+        config = ConfigParser.RawConfigParser()
+        config.read('config')
+        self.width = int(config.get("Screen", "screenSize.Width"))
+        self.height = int(config.get("Screen", "screenSize.Height"))
+        self.screenColor = config.get("Screen", "screenColor")
+        self.canAdapter = config.get("CAN-FIX", "canAdapter")
+        self.canDevice = config.get("CAN-FIX", "canDevice")
         self.setupUi(self, test)
 
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
-        MainWindow.resize(config.screenSize[0],config.screenSize[1])
+        MainWindow.resize(self.width, self.height)
 
         if not test:
             flightData = FlightData()
-            cfix = fix.Fix(config.canAdapter, config.canDevice)
+            cfix = fix.Fix(self.canAdapter, self.canDevice)
             cfix.setParameterCallback(flightData.getParameter)
     
         w = QWidget(MainWindow)
-        w.setGeometry(0,0, config.screenSize[0],config.screenSize[1])
+        w.setGeometry(0,0, self.width, self.height)
 
         p = w.palette()
-        if config.screenColor:
-            p.setColor(w.backgroundRole(), QColor(config.screenColor))
+        if self.screenColor:
+            p.setColor(w.backgroundRole(), QColor(self.screenColor))
             w.setPalette(p)
             w.setAutoFillBackground(True)
-        instWidth = config.screenSize[0]-410
-        instHeight = config.screenSize[1]-200
+        instWidth = self.width-410
+        instHeight = self.height-200
         a = ai.AI(w)
         a.resize(instWidth,instHeight)
         a.move(100,100)
