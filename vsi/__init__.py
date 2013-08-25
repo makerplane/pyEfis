@@ -108,9 +108,9 @@ class VSI(QWidget):
                             QPoint(0, -(h/2-60))])
         
         #dial_angle = self._roc * -0.0338 # 135deg / 4000 fpm
-        dial_angle = self._roc * -(self.maxAngle/self.maxRange)
+        dial_angle = self._roc * (self.maxAngle/self.maxRange)
         dial.translate(self.center)
-        dial.rotate(dial_angle -90)
+        dial.rotate(dial_angle-90)
         dial.drawPolygon(needle)
         
     def getROC(self):
@@ -119,6 +119,7 @@ class VSI(QWidget):
     def setROC(self, roc):
         if roc != self._roc:
             self._roc = roc
+            print roc
             self.update()
 
     roc = property(getROC, setROC)

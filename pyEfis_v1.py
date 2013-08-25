@@ -51,6 +51,7 @@ class FlightData(QObject):
 class main (QMainWindow):
     def __init__(self, test, parent = None):
         super(main,  self).__init__(parent)
+<<<<<<< HEAD
         config = ConfigParser.RawConfigParser()
         config.read('config')
         self.width = int(config.get("Screen", "screenSize.Width"))
@@ -58,16 +59,25 @@ class main (QMainWindow):
         self.screenColor = config.get("Screen", "screenColor")
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
+=======
+        if not test:
+            self.flightData = FlightData()
+            self.cfix = fix.Fix(config.canAdapter, config.canDevice)
+            self.cfix.setParameterCallback(self.flightData.getParameter)
+>>>>>>> upstream/master
         self.setupUi(self, test)
-
+        
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
         MainWindow.resize(self.width, self.height)
 
+<<<<<<< HEAD
         if not test:
             flightData = FlightData()
             cfix = fix.Fix(self.canAdapter, self.canDevice)
             cfix.setParameterCallback(flightData.getParameter)
+=======
+>>>>>>> upstream/master
     
         w = QWidget(MainWindow)
         w.setGeometry(0,0, self.width, self.height)
@@ -190,9 +200,9 @@ class main (QMainWindow):
         egt.value = 1350
     
         if not test:
-            flightData.pitchChanged.connect(a.setPitchAngle)
-            flightData.rollChanged.connect(a.setRollAngle)
-            flightData.headingChanged.connect(head_tape.setHeading)
+            self.flightData.pitchChanged.connect(a.setPitchAngle)
+            self.flightData.rollChanged.connect(a.setRollAngle)
+            self.flightData.headingChanged.connect(head_tape.setHeading)
         else:
             roll = QSlider(Qt.Horizontal,w)
             roll.setMinimum(-180)
@@ -256,12 +266,6 @@ class main (QMainWindow):
             srpm.valueChanged.connect(rpm.setValue)
 
 
-#        if not test:
-#           cfix.start()
-#        result = app.exec_()
-#        if not test:
-#            cfix.quit()
-#        sys.exit(result)
 
 #parser = argparse.ArgumentParser(description='pyEfis')
 #parser.add_argument('--test', '-t', action='store_true', help='Run in test mode')
@@ -279,4 +283,9 @@ if __name__ == "__main__":
     form = main(args.test)
     form.show()
     
-sys.exit(app.exec_())
+    if not args.test:
+        form.cfix.start()
+    result = app.exec_()
+    if not args.test:
+        form.cfix.quit()
+    sys.exit(result)

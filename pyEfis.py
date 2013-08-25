@@ -45,6 +45,9 @@ class FlightData(QObject):
     oilTempChanged = pyqtSignal(float, name = "oilTempChanged")
     fuelFlowChanged = pyqtSignal(float, name = "fuelFlowChanged")
     fuelQtyChanged = pyqtSignal(float, name = "fuelQtyChanged")
+    airspeedChanged = pyqtSignal(float, name = "airspeedChanged")
+    altitudeChanged = pyqtSignal(float, name = "altitudeChanged")
+    vsChanged = pyqtSignal(float, name = "vsChanged")
     
     def getParameter(self, param):
         if param.name == "Roll Angle":
@@ -67,6 +70,12 @@ class FlightData(QObject):
             self.fuelFlowChanged.emit(param.value)
         elif param.name == "Fuel Quantity #1":
             self.fuelQtyChanged.emit(param.value)
+        elif param.name == "Calibrated Airspeed":
+            self.airspeedChanged.emit(param.value)
+        elif param.name == "Indicated Altitude":
+            self.altitudeChanged.emit(param.value)
+        elif param.name == "Vertical Speed":
+            self.vsChanged.emit(param.value)
         else:
             print param.name, "=", param.value
 
@@ -229,6 +238,9 @@ def main(test):
         flightData.oilTempChanged.connect(w.ot.setValue)
         flightData.fuelFlowChanged.connect(w.ff.setValue)
         flightData.fuelQtyChanged.connect(w.fuel.setValue)
+        flightData.airspeedChanged.connect(w.air.setAirspeed)
+        flightData.altitudeChanged.connect(w.alt.setAltimeter)
+        flightData.vsChanged.connect(w.vs.setROC)
 
     else:
         toggle = QPushButton(w)
