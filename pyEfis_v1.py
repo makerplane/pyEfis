@@ -51,7 +51,7 @@ class FlightData(QObject):
 class main (QMainWindow):
     def __init__(self, test, parent = None):
         super(main,  self).__init__(parent)
-<<<<<<< HEAD
+
         config = ConfigParser.RawConfigParser()
         config.read('config')
         self.width = int(config.get("Screen", "screenSize.Width"))
@@ -59,26 +59,16 @@ class main (QMainWindow):
         self.screenColor = config.get("Screen", "screenColor")
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
-=======
+
         if not test:
             self.flightData = FlightData()
             self.cfix = fix.Fix(config.canAdapter, config.canDevice)
             self.cfix.setParameterCallback(self.flightData.getParameter)
->>>>>>> upstream/master
         self.setupUi(self, test)
         
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
-        MainWindow.resize(self.width, self.height)
-
-<<<<<<< HEAD
-        if not test:
-            flightData = FlightData()
-            cfix = fix.Fix(self.canAdapter, self.canDevice)
-            cfix.setParameterCallback(flightData.getParameter)
-=======
->>>>>>> upstream/master
-    
+        MainWindow.resize(self.width, self.height)  
         w = QWidget(MainWindow)
         w.setGeometry(0,0, self.width, self.height)
 
