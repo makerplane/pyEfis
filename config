@@ -1,0 +1,28 @@
+[Screen]
+# Screen Geometry
+screenSize.Width = 1400
+screenSize.Height = 900
+# Set EFIS to occupy the entire screen without system border / menu
+screenFullSize = False
+# Screen background color RGB
+screenColor = (0,0,0) #Black
+
+[CAN-FIX]
+# Uncomment the adapter that you would like to use
+canAdapter = 'canfixusb'
+#canAdapter = 'simulate'
+#canAdapter = 'easy'
+#canAdapter = 'network'
+
+# CAN Bitrate to use in kbps
+canBitrate = 125
+
+# The Serial/USB device that the above adapter would use
+canDevice = '/dev/ttyUSB1'
+
+# IP information for network adapter
+canServer = '127.0.0.1'
+canPort = 63349
+
+[hardcopy]
+pages: 350
