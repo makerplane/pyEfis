@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+
+ <generic>
+
+  <output>
+   <line_separator>newline</line_separator>
+   <var_separator>,</var_separator>
+
+   <chunk>
+    <name>indicated speed (kt)</name>
+    <type>int</type>
+    <node>/velocities/airspeed-kt</node>
+   </chunk>
+ 
+   <chunk>
+    <name>pitch att (deg)</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/orientation/pitch-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>Roll att (deg)</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/orientation/roll-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>magnetic heading (deg)</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/orientation/heading-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>Altitude</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/position/altitude-agl-ft</node>
+   </chunk>
+
+   <chunk>
+    <name>clock</name>
+    <type>string</type>
+    <format>%s</format>
+    <node>/instrumentation/clock/indicated-string</node>
+   </chunk>
+
+   <chunk>
+    <name>Voltage</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/systems/electrical/volts</node>
+   </chunk>
+
+   <chunk>
+    <name>CHT-Deg F</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/engines/engine[0]/cht-degf</node>
+   </chunk>
+   
+   <chunk>
+    <name>Oil Temp F</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/engines/engine[0]/oil-temperature-degf</node>
+   </chunk>
+
+   <chunk>
+    <name>Oil Pressure</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/engines/engine[0]/oil-pressure-psi</node>
+   </chunk>
+
+   <chunk>
+    <name>Fuel Tank 0</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/consumables/fuel/tank[0]/level-gal_us</node>
+   </chunk>
+
+   <chunk>
+    <name>Fuel Tank 1</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/consumables/fuel/tank[1]/level-gal_us</node>
+   </chunk>
+
+  </output>
+
+ </generic>
+
+</PropertyList>
