@@ -16,21 +16,20 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
+import sys, time, Queue
 import argparse
-import ConfigParser
+import ConfigParser # configparser for Python 3
 import string
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-import PyQt4.Qt
 
-#import config
 import fix
 import gauges
 import ai
 import hsi
 import airspeed
 import altimeter
+import fgfs
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -46,7 +45,7 @@ class FlightData(QObject):
             self.pitchChanged.emit(param.value)
         elif param.name == "Heading":
             self.headingChanged.emit(param.value)
-
+            
 
 class main (QMainWindow):
     def __init__(self, test, parent = None):
@@ -59,19 +58,21 @@ class main (QMainWindow):
         self.screenColor = config.get("Screen", "screenColor")
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
-
-        if not test:
-            self.flightData = FlightData()
-            self.cfix = fix.Fix(config.canAdapter, config.canDevice)
-            self.cfix.setParameterCallback(self.flightData.getParameter)
+        self.queue = Queue.Queue()       
         self.setupUi(self, test)
         
+
+        if test == 'normal':
+            self.flightData = FlightData()
+            self.cfix = fix.Fix(self.canAdapter, self.canDevice)
+            self.cfix.setParameterCallback(self.flightData.getParameter)
+     
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
         MainWindow.resize(self.width, self.height)  
         w = QWidget(MainWindow)
         w.setGeometry(0,0, self.width, self.height)
-
+        
         p = w.palette()
         if self.screenColor:
             p.setColor(w.backgroundRole(), QColor(self.screenColor))
@@ -79,21 +80,21 @@ class main (QMainWindow):
             w.setAutoFillBackground(True)
         instWidth = self.width-410
         instHeight = self.height-200
-        a = ai.AI(w)
-        a.resize(instWidth,instHeight)
-        a.move(100,100)
+        self.a = ai.AI(w)
+        self.a.resize(instWidth,instHeight)
+        self.a.move(100,100)
 
-        alt_tape = altimeter.Altimeter_Tape(w)
-        alt_tape.resize(100,instHeight)
-        alt_tape.move(instWidth+100, 100)
+        self.alt_tape = altimeter.Altimeter_Tape(w)
+        self.alt_tape.resize(100,instHeight)
+        self.alt_tape.move(instWidth+100, 100)
 
-        as_tape = airspeed.Airspeed_Tape(w)
-        as_tape.resize(100,instHeight)
-        as_tape.move(0, 100)
+        self.as_tape = airspeed.Airspeed_Tape(w)
+        self.as_tape.resize(100,instHeight)
+        self.as_tape.move(0, 100)
 
-        head_tape = hsi.DG_Tape(w)
-        head_tape.resize(instWidth,100)
-        head_tape.move(100, instHeight+100)
+        self.head_tape = hsi.DG_Tape(w)
+        self.head_tape.resize(instWidth,100)
+        self.head_tape.move(100, instHeight+100)
     
         map = gauges.RoundGauge(w)
         map.name = "MAP"
@@ -105,67 +106,68 @@ class main (QMainWindow):
         map.resize(200, 100)
         map.move(w.width()-200,100)
     
-        rpm = gauges.RoundGauge(w)
-        rpm.name = "RPM"
-        rpm.decimalPlaces = 0
-        rpm.lowRange = 0.0
-        rpm.highRange = 2800.0
-        rpm.highWarn = 2600.0
-        rpm.highAlarm = 2760.0
-        rpm.resize(200, 100)
-        rpm.move(w.width()-200,0)
-        op = gauges.HorizontalBar(w)
-        op.name = "Oil Press"
-        op.units = "psi"
-        op.decimalPlaces = 1
-        op.lowRange = 0.0
-        op.highRange = 100.0
-        op.highWarn = 90.0
-        op.highAlarm = 95.0
-        op.lowWarn = 45.0
-        op.lowAlarm = 10.0
-        op.resize(190, 75)
-        op.move(w.width()-200,220)
-        op.value = 45.2
+        self.rpm = gauges.RoundGauge(w)
+        self.rpm.name = "RPM"
+        self.rpm.decimalPlaces = 0
+        self.rpm.lowRange = 0.0
+        self.rpm.highRange = 2800.0
+        self.rpm.highWarn = 2600.0
+        self.rpm.highAlarm = 2760.0
+        self.rpm.resize(200, 100)
+        self.rpm.move(w.width()-200,0)
+
+        self.op = gauges.HorizontalBar(w)
+        self.op.name = "Oil Press"
+        self.op.units = "psi"
+        self.op.decimalPlaces = 1
+        self.op.lowRange = 0.0
+        self.op.highRange = 100.0
+        self.op.highWarn = 90.0
+        self.op.highAlarm = 95.0
+        self.op.lowWarn = 45.0
+        self.op.lowAlarm = 10.0
+        self.op.resize(190, 75)
+        self.op.move(w.width()-200,220)
+        self.op.value = 45.2
     
-        ot = gauges.HorizontalBar(w)
-        ot.name = "Oil Temp"
-        ot.units = "degF"
-        ot.decimalPlaces = 1
-        ot.lowRange = 160.0
-        ot.highRange = 250.0
-        ot.highWarn = 210.0
-        ot.highAlarm = 230.0
-        ot.lowWarn = None
-        ot.lowAlarm = None
-        ot.resize(190, 75)
-        ot.move(w.width()-200,300)
-        ot.value = 215.2
+        self.ot = gauges.HorizontalBar(w)
+        self.ot.name = "Oil Temp"
+        self.ot.units = "degF"
+        self.ot.decimalPlaces = 1
+        self.ot.lowRange = 160.0
+        self.ot.highRange = 250.0
+        self.ot.highWarn = 210.0
+        self.ot.highAlarm = 230.0
+        self.ot.lowWarn = None
+        self.ot.lowAlarm = None
+        self.ot.resize(190, 75)
+        self.ot.move(w.width()-200,300)
+        self.ot.value = 215.2
     
-        fuel = gauges.HorizontalBar(w)
-        fuel.name = "Fuel Qty"
-        fuel.units = "gal"
-        fuel.decimalPlaces = 1
-        fuel.lowRange = 0.0
-        fuel.highRange = 20.0
-        fuel.lowWarn = 2.0
-        fuel.resize(190, 75)
-        fuel.move(w.width()-200,380)
-        fuel.value = 15.2
+        self.fuel = gauges.HorizontalBar(w)
+        self.fuel.name = "Fuel Qty"
+        self.fuel.units = "gal"
+        self.fuel.decimalPlaces = 1
+        self.fuel.lowRange = 0.0
+        self.fuel.highRange = 50.0
+        self.fuel.lowWarn = 2.0
+        self.fuel.resize(190, 75)
+        self.fuel.move(w.width()-200,380)
+        self.fuel.value = 15.2
         
-        ff = gauges.HorizontalBar(w)
-        ff.name = "Fuel Flow"
-        ff.units = "gph"
-        ff.decimalPlaces = 1
-        ff.lowRange = 0.0
-        ff.highRange = 20.0
-        ff.highWarn = None
-        ff.highAlarm = None
-        ff.lowWarn = None
-        ff.lowAlarm = None
-        ff.resize(190, 75)
-        ff.move(w.width()-200,460)
-        ff.value = 5.2
+        self.ff = gauges.HorizontalBar(w)
+        self.ff.name = "Fuel Flow"
+        self.ff.units = "gph"
+        self.ff.decimalPlaces = 1
+        self.ff.lowRange = 0.0
+        self.ff.highRange = 20.0
+        self.ff.highWarn = None
+        self.ff.highAlarm = None
+        self.ff.lowWarn = None
+        self.ff.lowAlarm = None
+        self.ff.resize(190, 75)
+        self.ff.move(w.width()-200,460)
+        self.ff.value = 5.2
         
         cht = gauges.HorizontalBar(w)
         cht.name = "Max CHT"
@@ -179,21 +181,33 @@ class main (QMainWindow):
         cht.move(w.width()-200,540)
         cht.value = 350
         
-        egt = gauges.HorizontalBar(w)
-        egt.name = "Avg EGT"
-        egt.units = "degF"
-        egt.decimalPlaces = 0
-        egt.lowRange = 800.0
-        egt.highRange = 1500.0
-        egt.resize(190, 75)
-        egt.move(w.width()-200,620)
-        egt.value = 1350
-    
-        if not test:
+        self.egt = gauges.HorizontalBar(w)
+        self.egt.name = "Avg EGT"
+        self.egt.units = "degF"
+        self.egt.decimalPlaces = 0
+        self.egt.lowRange = 0.0
+        self.egt.highRange = 1500.0
+        self.egt.resize(190, 75)
+        self.egt.move(w.width()-200,620)
+        self.egt.value = 1350
+
+        if test == 'normal':
             self.flightData.pitchChanged.connect(a.setPitchAngle)
             self.flightData.rollChanged.connect(a.setRollAngle)
             self.flightData.headingChanged.connect(head_tape.setHeading)
-        else:
+
+        elif test == 'fgfs':
+            self.timer = QTimer() 
+            #Timer Signal to run guiUpdate
+            QObject.connect(self.timer,
+                               SIGNAL("timeout()"),self.guiUpdate)
+            # Start the timer 1 msec update
+            self.timer.start(1)
+            
+            self.thread1 = fgfs.UDP_Process(self.queue)
+            self.thread1.start()
+
+        elif test == 'test':
             roll = QSlider(Qt.Horizontal,w)
             roll.setMinimum(-180)
             roll.setMaximum(180)
@@ -227,6 +241,7 @@ class main (QMainWindow):
             heading.move(0, instHeight+100)
             heading.setRange(0, 360)
             heading.setValue(1)
+            heading.hide
             heading.valueChanged.connect(head_tape.setHeading)
 
             #headingBug = QSpinBox(w)
@@ -255,27 +270,47 @@ class main (QMainWindow):
             smap.valueChanged.connect(map.setValue)
             srpm.valueChanged.connect(rpm.setValue)
 
+    def guiUpdate(self):
+        """
+        Pull messages from the Queue and updates the Respected gauges.
+        """
+        try:
+            msg = self.queue.get(0)
+            msg = msg.split(',')
 
+            self.as_tape.setAirspeed(float(msg[0]))
+            self.a.setPitchAngle(float(msg[1]))
+            self.a.setRollAngle(float(msg[2]))
+            self.head_tape.setHeading(float(msg[3]))
+            self.alt_tape.setAltimeter(int(float(msg[4])))
+            self.op.setValue(float(msg[9]))
+            self.ot.setValue(float(msg[8]))
+            self.egt.setValue(float(msg[10]))
+            self.ff.setValue(float(msg[11]))
+            self.rpm.setValue(int(float(msg[7])))
+            self.fuel.setValue(float(msg[12])+float(msg[13]))
+        except Queue.Empty:
+            pass
 
-#parser = argparse.ArgumentParser(description='pyEfis')
-#parser.add_argument('--test', '-t', action='store_true', help='Run in test mode')
-
-#args = parser.parse_args()
-
-#main(args.test)
+    def closeEvent(self, event):
+        self.thread1.stop()
+        self.thread1.join(0)
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
-    parser.add_argument('--test', '-t', action='store_true', help='Run in test mode')
+    parser.add_argument('-m', '--mode', choices=['test', 'normal', 'fgfs'],
+        default='normal', help='Run pyEFIS in specific mode')
 
     args = parser.parse_args()
-    form = main(args.test)
+    form = main(args.mode)
     form.show()
-    
-    if not args.test:
+
+    if args.mode == 'normal':
         form.cfix.start()
+
     result = app.exec_()
-    if not args.test:
+    if args.mode == 'normal':
         form.cfix.quit()
     sys.exit(result)

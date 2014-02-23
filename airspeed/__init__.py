@@ -226,7 +226,6 @@ class Airspeed_Tape(QGraphicsView):
         return self._airspeed 
 
     def setAirspeed(self, airspeed):
-        print airspeed
         if airspeed != self._airspeed:
             self._airspeed = airspeed
             self.redraw()

@@ -156,7 +156,6 @@ class Altimeter_Tape(QGraphicsView):
         return self._altimeter 
 
     def setAltimeter(self, altimeter):
-        print altimeter
         if altimeter != self._altimeter:
             self._altimeter = altimeter
             self.redraw()
