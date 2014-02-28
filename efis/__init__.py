@@ -21,9 +21,12 @@ UP = 'up'
 DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
- 
+
+
 def bounds(min, max, value):
-    if value < min: return min
-    if value > max: return max
-    else: return value
-    
+    if value < min:
+        return min
+    if value > max:
+        return max
+    else:
+        return value
