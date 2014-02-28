@@ -13,12 +13,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- 
-import sys
+
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-import PyQt4.Qt
-import math
+
 
 class Airspeed(QWidget):
     def __init__(self, parent=None):
@@ -47,7 +46,6 @@ class Airspeed(QWidget):
         needleBrush = QBrush(QColor(Qt.white))
 
         vnePen = QPen(QColor(Qt.red))
-        vneBrush = QBrush(QColor(Qt.red))
         vnePen.setWidth(6)
 
         vsoPen = QPen(QColor(Qt.white))
@@ -60,43 +58,43 @@ class Airspeed(QWidget):
         yellowPen.setWidth(4)
 
         # Dial Setup
-        # V Speeds 
+        # V Speeds
         Vs = 45
         Vs0 = 40
         Vno = 125
-        Vne = 140 
-        Va = 120
+        Vne = 140
+        #Va = 120
         Vfe = 70
 
         # VSpeed to angle for drawArc
-        Vs0_angle = (-(((Vs0-30)*2.5)+26)+90)*16
-        Vs_angle = (-(((Vs-30)*2.5)+26)+90)*16
-        Vfe_angle = (-(((Vfe-30)*2.5)+25)+90)*16
-        Vno_angle = (-(((Vno-30)*2.5)+25)+90)*16
-        Vne_angle = (-(((Vne-30)*2.5)+25)+90)*16
+        Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
+        Vs_angle = (-(((Vs - 30) * 2.5) + 26) + 90) * 16
+        Vfe_angle = (-(((Vfe - 30) * 2.5) + 25) + 90) * 16
+        Vno_angle = (-(((Vno - 30) * 2.5) + 25) + 90) * 16
+        Vne_angle = (-(((Vne - 30) * 2.5) + 25) + 90) * 16
 
         # Vspeeds Arcs
         dial.setPen(vnoPen)
-        dial.drawArc(QRectF(25,25,w-50,h-50), Vs_angle,
-                  -(Vs_angle-Vno_angle))
+        dial.drawArc(QRectF(25, 25, w - 50, h - 50), Vs_angle,
+                  -(Vs_angle - Vno_angle))
         dial.setPen(vsoPen)
-        dial.drawArc(QRectF(28,28,w-56,h-56), Vs0_angle, 
-                  -(Vs0_angle-Vfe_angle))
+        dial.drawArc(QRectF(28, 28, w - 56, h - 56), Vs0_angle,
+                  -(Vs0_angle - Vfe_angle))
         dial.setPen(yellowPen)
-        dial.drawArc(QRectF(25,25,w-50,h-50), Vno_angle,
-                  -(Vno_angle-Vne_angle))
+        dial.drawArc(QRectF(25, 25, w - 50, h - 50), Vno_angle,
+                  -(Vno_angle - Vne_angle))
         dial.save()
         dial.setPen(dialPen)
         dial.setFont(f)
-        dial.translate(w/2 , h/2)
+        dial.translate(w / 2, h / 2)
         count = 0
         a_s = 0
         while count < 360:
             if count % 25 == 0 and a_s <= 140:
-                dial.drawLine(0 , -(h/2-25), 0, -(h/2-40))
-                x = fontMetrics.width(str(a_s))/2
+                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
+                x = fontMetrics.width(str(a_s)) / 2
                 y = f.pixelSize()
-                dial.drawText(-x, -(h/2-40-y),
+                dial.drawText(-x, -(h / 2 - 40 - y),
                            str(a_s))
                 a_s += 10
                 if count == 0:
@@ -104,23 +102,23 @@ class Airspeed(QWidget):
                     count = count + 19
                     dial.rotate(19)
             elif count % 12.5 == 0 and a_s <= 140:
-                dial.drawLine(0 , -(h/2-25), 0, -(h/2-35))
-            if count == (-Vne_angle/16)+90:
+                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
+            if count == (-Vne_angle / 16) + 90:
                 dial.setPen(vnePen)
-                dial.drawLine(0 , -(h/2-25), 0, -(h/2-40))
+                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
                 dial.setPen(dialPen)
             dial.rotate(0.5)
             count += 0.5
 
         dial.setBrush(needleBrush)
         #Needle Movement
-        needle = QPolygon([QPoint(5, 0), QPoint(0,+5), QPoint(-5, 0),
-                            QPoint(0, -(h/2-40))])
-        
-        if self.airspeed <= 30: #Airspeeds Below 30 Knots
-            needle_angle = self._airspeed *0.83
-        else: #Airspeeds above 30 Knots
-            needle_angle = (self._airspeed-30) * 2.5 +25
+        needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
+                            QPoint(0, -(h / 2 - 40))])
+
+        if self.airspeed <= 30:  # Airspeeds Below 30 Knots
+            needle_angle = self._airspeed * 0.83
+        else:  # Airspeeds above 30 Knots
+            needle_angle = (self._airspeed - 30) * 2.5 + 25
 
         dial.rotate(needle_angle)
         dial.drawPolygon(needle)
@@ -128,7 +126,7 @@ class Airspeed(QWidget):
         dial.restore()
 
     def getAirspeed(self):
-        return self._airspeed 
+        return self._airspeed
 
     def setAirspeed(self, airspeed):
         if airspeed != self._airspeed:
@@ -136,6 +134,7 @@ class Airspeed(QWidget):
             self.update()
 
     airspeed = property(getAirspeed, setAirspeed)
+
 
 class Airspeed_Tape(QGraphicsView):
     def __init__(self, parent=None):
@@ -149,12 +148,12 @@ class Airspeed_Tape(QGraphicsView):
 
     def resizeEvent(self, event):
 
-        # V Speeds 
-        Vs = 45
+        # V Speeds
+        #Vs = 45
         Vs0 = 40
         Vno = 125
-        Vne = 140 
-        Va = 120
+        Vne = 140
+        #Va = 120
         Vfe = 70
 
         w = self.width()
@@ -162,14 +161,12 @@ class Airspeed_Tape(QGraphicsView):
         self.pph = 10
         f = QFont()
         f.setPixelSize(20)
-        fontMetrics = QFontMetricsF(f)
         speed_pixel = 1500 + h
 
         dialPen = QPen(QColor(Qt.white))
         dialPen.setWidth(2)
 
         vnePen = QPen(QColor(Qt.red))
-        vneBrush = QBrush(QColor(Qt.red))
         vnePen.setWidth(8)
 
         vsoPen = QPen(QColor(Qt.white))
@@ -181,49 +178,48 @@ class Airspeed_Tape(QGraphicsView):
         yellowPen = QPen(QColor(Qt.yellow))
         yellowPen.setWidth(8)
 
-        self.scene = QGraphicsScene(0,0,w, speed_pixel)
-        self.scene.addRect(0, 0, w, speed_pixel, 
-                           QPen(QColor(Qt.black)),QBrush(QColor(Qt.black)))
+        self.scene = QGraphicsScene(0, 0, w, speed_pixel)
+        self.scene.addRect(0, 0, w, speed_pixel,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
 
         for i in range(150, -1, -5):
             if i % 10 == 0:
-                self.scene.addLine(0, (-i*10)+ 1500+h/2, w/2, (-i*10)+ 1500+h/2,
-                                   dialPen)
+                self.scene.addLine(0, (- i * 10) + 1500 + h / 2, w / 2,
+                                   (- i * 10) + 1500 + h / 2, dialPen)
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
-                t.setX(w-t.boundingRect().width())
-                t.setY(((-i*10)+1500+h/2) - t.boundingRect().height()/2)
+                t.setX(w - t.boundingRect().width())
+                t.setY(((- i * 10) + 1500 + h / 2)
+                       - t.boundingRect().height() / 2)
             else:
-                self.scene.addLine(0, (-i*10)+1500+h/2, w/2-20, 
-                                  (-i*10)+1500+h/2, dialPen)
+                self.scene.addLine(0, (- i * 10) + 1500 + h / 2, w / 2 - 20,
+                                  (- i * 10) + 1500 + h / 2, dialPen)
 
         #Add Markings
-        self.scene.addLine(4, Vs0 * -self.pph +1500+ self.height()/2 -4,
-                           4, Vfe* -self.pph +1500+ self.height()/2 +4,
+        self.scene.addLine(4, Vs0 * -self.pph + 1500 + self.height() / 2 - 4,
+                           4, Vfe * -self.pph + 1500 + self.height() / 2 + 4,
                            vsoPen)
-        self.scene.addLine(4, Vfe* -self.pph +1500+ self.height()/2 -4,
-                           4, Vno* -self.pph +1500+ self.height()/2 +4,
+        self.scene.addLine(4, Vfe * -self.pph + 1500 + self.height() / 2 - 4,
+                           4, Vno * -self.pph + 1500 + self.height() / 2 + 4,
                            vnoPen)
-        self.scene.addLine(4, Vne* -self.pph +1500+ self.height()/2 -4,
-                           4, Vno* -self.pph +1500+ self.height()/2 +4,
-                           yellowPen) 
-        self.scene.addLine(4, Vne* -self.pph +1500+ self.height()/2 -4,
-                           4, 150* -self.pph +1500+ self.height()/2 +4,
+        self.scene.addLine(4, Vne * -self.pph + 1500 + self.height() / 2 - 4,
+                           4, Vno * -self.pph + 1500 + self.height() / 2 + 4,
+                           yellowPen)
+        self.scene.addLine(4, Vne * -self.pph + 1500 + self.height() / 2 - 4,
+                           4, 150 * -self.pph + 1500 + self.height() / 2 + 4,
                            vnePen)
-
 
         self.setScene(self.scene)
 
     def redraw(self):
         self.resetTransform()
-        self.centerOn(self.scene.width()/2,
-                      -self._airspeed * self.pph + 1500+self.height()/2)
-
+        self.centerOn(self.scene.width() / 2,
+                      -self._airspeed * self.pph + 1500 + self.height() / 2)
 
     def getAirspeed(self):
-        return self._airspeed 
+        return self._airspeed
 
     def setAirspeed(self, airspeed):
         if airspeed != self._airspeed:
