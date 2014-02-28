@@ -33,7 +33,7 @@
     <name>magnetic heading (deg)</name>
     <type>float</type>
     <format>%.1f</format>
-    <node>/orientation/heading-deg</node>
+    <node>/orientation/heading-magnetic-deg</node>
    </chunk>
 
    <chunk>
