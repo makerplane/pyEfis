@@ -112,6 +112,7 @@ class Altimeter_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
+        self.test = Altimeter_Setting()
 
     def resizeEvent(self, event):
         w = self.width()
@@ -150,6 +151,20 @@ class Altimeter_Tape(QGraphicsView):
         self.centerOn(self.scene.width() / 2,
                       -self._altimeter * self.pph + 5000 + self.height() / 2)
 
+#  Index Line that doesn't move to make it easy to read the altimeter.
+    def paintEvent(self, event):
+        super(Altimeter_Tape, self).paintEvent(event)
+        w = self.width()
+        h = self.height()
+        p = QPainter(self.viewport())
+        p.setRenderHint(QPainter.Antialiasing)
+
+        marks = QPen(Qt.white)
+        marks.setWidth(4)
+        p.translate(w / 2, h / 2)
+        p.setPen(marks)
+        p.drawLine(QLine(0, 0, -w / 2, 0))
+
     def getAltimeter(self):
         return self._altimeter
 
@@ -159,3 +174,55 @@ class Altimeter_Tape(QGraphicsView):
             self.redraw()
 
     altimeter = property(getAltimeter, setAltimeter)
+
+
+class Altimeter_Setting(QGraphicsView):
+    def __init__(self, parent=None):
+        super(Altimeter_Setting, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._altimeter_setting = 29.92
+
+    def resizeEvent(self, event):
+        self.w = self.width()
+        self.h = self.height()
+        self.f = QFont()
+        self.f.setPixelSize(20)
+
+        dialPen = QPen(QColor(Qt.white))
+        dialPen.setWidth(2)
+
+        self.scene = QGraphicsScene(0, 0, self.w, self.h)
+        self.scene.addRect(0, 0, self.w, self.h,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+
+        t = self.scene.addText("%0.2f" % self._altimeter_setting)
+        t.setFont(self.f)
+        self.scene.setFont(self.f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX((self.w - t.boundingRect().width()) / 2)
+        t.setY((self.h - t.boundingRect().height()) / 2)
+        self.setScene(self.scene)
+
+    def redraw(self):
+        self.scene.clear()
+        self.scene.addRect(0, 0, self.w, self.h,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+        t = self.scene.addText("%0.2f" % self._altimeter_setting)
+        t.setFont(self.f)
+        self.scene.setFont(self.f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX((self.w - t.boundingRect().width()) / 2)
+        t.setY((self.h - t.boundingRect().height()) / 2)
+        self.setScene(self.scene)
+
+    def getAltimeter_Setting(self):
+        return self._altimeter_setting
+
+    def setAltimeter_Setting(self, altimeter_setting):
+        if altimeter_setting != self._altimeter_setting:
+            self._altimeter_setting = altimeter_setting
+            self.redraw()
