@@ -1,4 +1,4 @@
-#  CAN-FIX Utilities - An Open Source CAN FIX Utility Package 
+#  CAN-FIX Utilities - An Open Source CAN FIX Utility Package
 #  Copyright (c) 2013 Phil Birkelbach
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ class Adapter():
         self.shortname = "canfixusb"
         self.type = "serial"
         self.ser = None
-        
+
     def __readResponse(self, ch):
         s = ""
 
@@ -48,7 +48,7 @@ class Adapter():
         n = 0 #attempt counter
         if command[-1] != '\n':
             command = command + '\n'
-        
+
         while True:
             self.ser.write(command)
             try:
@@ -62,8 +62,8 @@ class Adapter():
                     raise BusReadError("Unable to send Command " + command)
                 time.sleep(self.timeout)
             n+=1
-        
-        
+
+
     def connect(self, config):
         try:
             self.bitrate = config.bitrate
@@ -79,10 +79,10 @@ class Adapter():
             self.timeout = config.timeout
         except KeyError:
             self.timeout = 0.25
-        
+
         try:
             self.ser = serial.Serial(self.portname, 115200, timeout=self.timeout)
-            
+
             print "Reseting CAN-FIX-it"
             self.__sendCommand("K")
             print "Setting Bit Rate"
@@ -90,14 +90,14 @@ class Adapter():
             self.open()
         except BusReadError:
             raise BussInitError("Unable to Initialize CAN Port")
-    
+
     def disconnect(self):
         self.close()
 
     def open(self):
         print "Opening CAN Port"
         self.__sendCommand("O")
-        
+
     def close(self):
         print "Closing CAN Port"
         self.__sendCommand("C")
@@ -125,7 +125,7 @@ class Adapter():
 
     def recvFrame(self):
         result = self.__readResponse("R")
-        
+
         if result[0] != 'r':
             raise BusReadError("Unknown response from Adapter")
         data= []
