@@ -16,39 +16,29 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
+import sys, Queue
 import argparse
+import ConfigParser  # configparser for Python 3
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-import PyQt4.Qt
 
-import config
 import fix
 import gauges
 import ai
 import hsi
 import airspeed
 import altimeter
-import vsi
-import tc
+import fgfs
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
-class FlightData(QObject):
-    rollChanged = pyqtSignal(float, name = "rollChanged")
-    pitchChanged = pyqtSignal(float, name = "pitchChanged")
-    headingChanged = pyqtSignal(float, name = "headingChanged")
-    turnRateChanged = pyqtSignal(float, name = "turnRateChanged")
-    rpmChanged = pyqtSignal(float, name = "rpmChanged")
-    mapChanged = pyqtSignal(float, name = "mapChanged")
-    oilPressChanged = pyqtSignal(float, name = "oilPressChanged")
-    oilTempChanged = pyqtSignal(float, name = "oilTempChanged")
-    fuelFlowChanged = pyqtSignal(float, name = "fuelFlowChanged")
-    fuelQtyChanged = pyqtSignal(float, name = "fuelQtyChanged")
-    airspeedChanged = pyqtSignal(float, name = "airspeedChanged")
-    altitudeChanged = pyqtSignal(float, name = "altitudeChanged")
-    vsChanged = pyqtSignal(float, name = "vsChanged")
-    
+
+
+class FlightData (QObject):
+    rollChanged = pyqtSignal(float, name="rollChanged")
+    pitchChanged = pyqtSignal(float, name="pitchChanged")
+    headingChanged = pyqtSignal(float, name="headingChanged")
+
     def getParameter(self, param):
         if param.name == "Roll Angle":
             self.rollChanged.emit(param.value)
@@ -56,79 +46,71 @@ class FlightData(QObject):
             self.pitchChanged.emit(param.value)
         elif param.name == "Heading":
             self.headingChanged.emit(param.value)
-        elif param.name == "Turn Rate":
-            self.turnRateChanged.emit(param.value)
-        elif param.name == "N1 or Engine RPM #1":
-            self.rpmChanged.emit(param.value)
-        elif param.name == "Manifold Pressure #1":
-            self.mapChanged.emit(param.value)
-        elif param.name == "Oil Pressure #1":
-            self.oilPressChanged.emit(param.value)
-        elif param.name == "Oil Temperature #1":
-            self.oilTempChanged.emit(param.value)
-        elif param.name == "Fuel Flow #1":
-            self.fuelFlowChanged.emit(param.value)
-        elif param.name == "Fuel Quantity #1":
-            self.fuelQtyChanged.emit(param.value)
-        elif param.name == "Calibrated Airspeed":
-            self.airspeedChanged.emit(param.value)
-        elif param.name == "Indicated Altitude":
-            self.altitudeChanged.emit(param.value)
-        elif param.name == "Vertical Speed":
-            self.vsChanged.emit(param.value)
-        else:
-            print param.name, "=", param.value
 
-class MainWindow(QWidget):
-    def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
-        self.a = ai.AI(self)
-        self.h = hsi.HSI(self)
-        self.air = airspeed.Airspeed(self)
-        self.alt = altimeter.Altimeter(self)
-        self.vs = vsi.VSI(self)
-        self.turn = tc.TurnCoordinator(self)
-        self.map = gauges.RoundGauge(self)
-        self.rpm = gauges.RoundGauge(self)
-        self.op = gauges.HorizontalBar(self)
-        self.ot = gauges.HorizontalBar(self)
-        self.fuel = gauges.HorizontalBar(self)
-        self.ff = gauges.HorizontalBar(self)
-        self.cht = gauges.HorizontalBar(self)
-        self.egt = gauges.HorizontalBar(self)
-        
-    def resizeEvent(self, e):
-        instWidth = self.height()/2
-        print self.width(), self.height()
-        
-        self.a.resize(instWidth,instWidth)
-        self.a.move((self.width()-200)/3*1,0)
-        
-        self.h.resize(instWidth,instWidth)
-        self.h.move((self.width()-200)/3,instWidth)
-        
-        self.air.resize(instWidth,instWidth)
-        self.air.move((self.width()-200)/3*0,0)
-        
-        self.alt.resize(instWidth,instWidth)
-        self.alt.move((self.width()-200)/3*2,0)
-        
-        self.vs.resize(instWidth, instWidth)
-        self.vs.move((self.width()-200)/3*2, instWidth)
-        
-        self.turn.resize(instWidth, instWidth)
-        self.turn.move(0, instWidth)
-        self.turn.latAcc = 0.0
-        
-        self.map.name = "MAP"
-        self.map.decimalPlaces = 1
-        self.map.lowRange = 0.0
-        self.map.highRange = 30.0
-        self.map.highWarn = 28.0
-        self.map.highAlarm = 29.0
-        self.map.resize(200, 100)
-        self.map.move(self.width()-200,100)
-        
+
+class main (QMainWindow):
+    def __init__(self, test, parent=None):
+        super(main, self).__init__(parent)
+
+        config = ConfigParser.RawConfigParser()
+        config.read('config')
+        self.width = int(config.get("Screen", "screenSize.Width"))
+        self.height = int(config.get("Screen", "screenSize.Height"))
+        self.screenColor = config.get("Screen", "screenColor")
+        self.canAdapter = config.get("CAN-FIX", "canAdapter")
+        self.canDevice = config.get("CAN-FIX", "canDevice")
+        self.queue = Queue.Queue()
+        self.setupUi(self, test)
+
+        if test == 'normal':
+            self.flightData = FlightData()
+            self.cfix = fix.Fix(self.canAdapter, self.canDevice)
+            self.cfix.setParameterCallback(self.flightData.getParameter)
+
+    def setupUi(self, MainWindow, test):
+        MainWindow.setObjectName("PFD")
+        MainWindow.resize(self.width, self.height)
+        w = QWidget(MainWindow)
+        w.setGeometry(0, 0, self.width, self.height)
+
+        p = w.palette()
+        if self.screenColor:
+            p.setColor(w.backgroundRole(), QColor(self.screenColor))
+            w.setPalette(p)
+            w.setAutoFillBackground(True)
+        instWidth = self.width - 410
+        instHeight = self.height - 200
+        self.a = ai.AI(w)
+        self.a.resize(instWidth, instHeight)
+        self.a.move(100, 100)
+
+        self.alt_tape = altimeter.Altimeter_Tape(w)
+        self.alt_tape.resize(100, instHeight)
+        self.alt_tape.move(instWidth + 100, 100)
+
+        self.alt_setting = altimeter.Altimeter_Setting(w)
+        self.alt_setting.resize(100, 100)
+        self.alt_setting.move(instWidth + 100, instHeight + 100)
+
+        self.as_tape = airspeed.Airspeed_Tape(w)
+        self.as_tape.resize(100, instHeight)
+        self.as_tape.move(0, 100)
+
+        self.head_tape = hsi.DG_Tape(w)
+        self.head_tape.resize(instWidth, 100)
+        self.head_tape.move(100, instHeight + 100)
+
+        self.map_g = gauges.RoundGauge(w)
+        self.map_g.name = "MAP"
+        self.map_g.decimalPlaces = 1
+        self.map_g.lowRange = 0.0
+        self.map_g.highRange = 30.0
+        self.map_g.highWarn = 28.0
+        self.map_g.highAlarm = 29.0
+        self.map_g.resize(200, 100)
+        self.map_g.move(w.width() - 200, 100)
+
+        self.rpm = gauges.RoundGauge(w)
         self.rpm.name = "RPM"
         self.rpm.decimalPlaces = 0
         self.rpm.lowRange = 0.0
@@ -136,8 +118,9 @@ class MainWindow(QWidget):
         self.rpm.highWarn = 2600.0
         self.rpm.highAlarm = 2760.0
         self.rpm.resize(200, 100)
-        self.rpm.move(self.width()-200,0)
-        
+        self.rpm.move(w.width() - 200, 0)
+
+        self.op = gauges.HorizontalBar(w)
         self.op.name = "Oil Press"
         self.op.units = "psi"
         self.op.decimalPlaces = 1
@@ -148,9 +131,10 @@ class MainWindow(QWidget):
         self.op.lowWarn = 45.0
         self.op.lowAlarm = 10.0
         self.op.resize(190, 75)
-        self.op.move(self.width()-200,220)
+        self.op.move(w.width() - 200, 220)
         self.op.value = 45.2
-        
+
+        self.ot = gauges.HorizontalBar(w)
         self.ot.name = "Oil Temp"
         self.ot.units = "degF"
         self.ot.decimalPlaces = 1
@@ -161,19 +145,21 @@ class MainWindow(QWidget):
         self.ot.lowWarn = None
         self.ot.lowAlarm = None
         self.ot.resize(190, 75)
-        self.ot.move(self.width()-200,300)
+        self.ot.move(w.width() - 200, 300)
         self.ot.value = 215.2
-        
+
+        self.fuel = gauges.HorizontalBar(w)
         self.fuel.name = "Fuel Qty"
         self.fuel.units = "gal"
         self.fuel.decimalPlaces = 1
         self.fuel.lowRange = 0.0
-        self.fuel.highRange = 20.0
+        self.fuel.highRange = 50.0
         self.fuel.lowWarn = 2.0
         self.fuel.resize(190, 75)
-        self.fuel.move(self.width()-200,380)
+        self.fuel.move(w.width() - 200, 380)
         self.fuel.value = 15.2
-        
+
+        self.ff = gauges.HorizontalBar(w)
         self.ff.name = "Fuel Flow"
         self.ff.units = "gph"
         self.ff.decimalPlaces = 1
@@ -184,159 +170,169 @@ class MainWindow(QWidget):
         self.ff.lowWarn = None
         self.ff.lowAlarm = None
         self.ff.resize(190, 75)
-        self.ff.move(self.width()-200,460)
+        self.ff.move(w.width() - 200, 460)
         self.ff.value = 5.2
-        
-        self.cht.name = "Max CHT"
-        self.cht.units = "degF"
-        self.cht.decimalPlaces = 0
-        self.cht.lowRange = 0.0
-        self.cht.highRange = 500.0
-        self.cht.highWarn = 380
-        self.cht.highAlarm = 400
-        self.cht.resize(190, 75)
-        self.cht.move(self.width()-200,540)
-        self.cht.value = 350
-        
+
+        cht = gauges.HorizontalBar(w)
+        cht.name = "Max CHT"
+        cht.units = "degF"
+        cht.decimalPlaces = 0
+        cht.lowRange = 0.0
+        cht.highRange = 500.0
+        cht.highWarn = 380
+        cht.highAlarm = 400
+        cht.resize(190, 75)
+        cht.move(w.width() - 200, 540)
+        cht.value = 350
+
+        self.egt = gauges.HorizontalBar(w)
         self.egt.name = "Avg EGT"
         self.egt.units = "degF"
         self.egt.decimalPlaces = 0
-        self.egt.lowRange = 800.0
+        self.egt.lowRange = 0.0
         self.egt.highRange = 1500.0
         self.egt.resize(190, 75)
-        self.egt.move(self.width()-200,620)
+        self.egt.move(w.width() - 200, 620)
         self.egt.value = 1350
-        
-    def nextScreen(b):
-        print "Button Pushed"
 
-def main(test):
-    if not test:
-        flightData = FlightData()
-        cfix = fix.Fix(config.canAdapter, config.canDevice)
-        cfix.setParameterCallback(flightData.getParameter)
-    
+        if test == 'normal':
+            self.flightData.pitchChanged.connect(a.setPitchAngle)
+            self.flightData.rollChanged.connect(a.setRollAngle)
+            self.flightData.headingChanged.connect(head_tape.setHeading)
+
+        elif test == 'fgfs':
+            self.timer = QTimer()
+            #Timer Signal to run guiUpdate
+            QObject.connect(self.timer,
+                               SIGNAL("timeout()"), self.guiUpdate)
+            # Start the timer 1 msec update
+            self.timer.start(1)
+
+            self.thread1 = fgfs.UDP_Process(self.queue)
+            self.thread1.start()
+
+        elif test == 'test':
+            roll = QSlider(Qt.Horizontal, w)
+            roll.setMinimum(-180)
+            roll.setMaximum(180)
+            roll.setValue(0)
+            roll.resize(200, 20)
+            roll.move(440, 100)
+
+            pitch = QSlider(Qt.Vertical, w)
+            pitch.setMinimum(-90)
+            pitch.setMaximum(90)
+            pitch.setValue(0)
+            pitch.resize(20, 200)
+            pitch.move(360, 180)
+
+            smap = QSlider(Qt.Horizontal, w)
+            smap.setMinimum(0)
+            smap.setMaximum(30)
+            smap.setValue(0)
+            smap.resize(200, 20)
+            smap.move(w.width() - 200, 200)
+
+            srpm = QSlider(Qt.Horizontal, w)
+            srpm.setMinimum(0)
+            srpm.setMaximum(3000)
+            srpm.setValue(0)
+            srpm.resize(200, 20)
+            srpm.move(w.width() - 200, 100)
+
+            heading = QSpinBox(w)
+            heading.move(0, instHeight + 100)
+            heading.setRange(0, 360)
+            heading.setValue(1)
+            heading.hide
+            heading.valueChanged.connect(self.head_tape.setHeading)
+
+            #headingBug = QSpinBox(w)
+            #headingBug.move(650, 680)
+            #headingBug.setRange(0, 360)
+            #headingBug.setValue(1)
+            #headingBug.valueChanged.connect(h.setHeadingBug)
+
+            alt_gauge = QSpinBox(w)
+            alt_gauge.setMinimum(0)
+            alt_gauge.setMaximum(10000)
+            alt_gauge.setValue(0)
+            alt_gauge.setSingleStep(10)
+            alt_gauge.move(instWidth + 100, 100)
+            alt_gauge.valueChanged.connect(self.alt_tape.setAltimeter)
+
+            as_gauge = QSpinBox(w)
+            as_gauge.setMinimum(0)
+            as_gauge.setMaximum(140)
+            as_gauge.setValue(0)
+            as_gauge.move(10, 100)
+            as_gauge.valueChanged.connect(self.as_tape.setAirspeed)
+
+            pitch.valueChanged.connect(self.a.setPitchAngle)
+            roll.valueChanged.connect(self.a.setRollAngle)
+            smap.valueChanged.connect(self.map_g.setValue)
+            srpm.valueChanged.connect(self.rpm.setValue)
+
+    def MSL_Altitude(self, pressure_alt):
+        #  2 high foot from reported on flight gear.
+        MSL_atl = pressure_alt + ((self.alt_setting.getAltimeter_Setting()
+                                   - 29.92126) * 911)
+        return MSL_atl
+
+    def guiUpdate(self):
+        """
+        Pull messages from the Queue and updates the Respected gauges.
+        """
+        try:
+            msg = self.queue.get(0)
+            msg = msg.split(',')
+
+            self.as_tape.setAirspeed(float(msg[0]))
+            self.a.setPitchAngle(float(msg[1]))
+            self.a.setRollAngle(float(msg[2]))
+            self.head_tape.setHeading(float(msg[3]))
+            self.alt_tape.setAltimeter(self.MSL_Altitude(float(msg[4])))
+            self.op.setValue(float(msg[9]))
+            self.ot.setValue(float(msg[8]))
+            self.egt.setValue(float(msg[10]))
+            self.ff.setValue(float(msg[11]))
+            self.rpm.setValue(int(float(msg[7])))
+            self.fuel.setValue(float(msg[12]) + float(msg[13]))
+        except Queue.Empty:
+            pass
+
+    def closeEvent(self, event):
+        try:
+            self.thread1.stop()
+            self.thread1.join(0)
+        except:
+            pass
+
+    def keyReleaseEvent(self, event):
+        #  Increase Altimeter Setting
+        if event.key() == Qt.Key_BracketLeft:
+            self.alt_setting.setAltimeter_Setting(
+                                self.alt_setting.getAltimeter_Setting() + 0.01)
+
+        #  Decrease Altimeter Setting
+        elif event.key() == Qt.Key_BracketRight:
+            self.alt_setting.setAltimeter_Setting(
+                                self.alt_setting.getAltimeter_Setting() - 0.01)
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-    w = MainWindow()
-    w.resize(config.screenSize[0],config.screenSize[1])
-    w.move(0,0)
-    w.setWindowTitle('PFD')
-    p = w.palette()
-    if config.screenColor:
-        p.setColor(w.backgroundRole(), QColor(config.screenColor))
-        w.setPalette(p)
-        w.setAutoFillBackground(True)
-    
-    if not test:
-        flightData.pitchChanged.connect(w.a.setPitchAngle)
-        flightData.rollChanged.connect(w.a.setRollAngle)
-        flightData.headingChanged.connect(w.h.setHeading)
-        flightData.turnRateChanged.connect(w.turn.setTurnRate)
-        flightData.rpmChanged.connect(w.rpm.setValue)
-        flightData.mapChanged.connect(w.map.setValue)
-        flightData.oilPressChanged.connect(w.op.setValue)
-        flightData.oilTempChanged.connect(w.ot.setValue)
-        flightData.fuelFlowChanged.connect(w.ff.setValue)
-        flightData.fuelQtyChanged.connect(w.fuel.setValue)
-        flightData.airspeedChanged.connect(w.air.setAirspeed)
-        flightData.altitudeChanged.connect(w.alt.setAltimeter)
-        flightData.vsChanged.connect(w.vs.setROC)
+    parser = argparse.ArgumentParser(description='pyEfis')
+    parser.add_argument('-m', '--mode', choices=['test', 'normal', 'fgfs'],
+        default='normal', help='Run pyEFIS in specific mode')
 
-    else:
-        toggle = QPushButton(w)
-        toggle.setText("Screen")
-        toggle.move(0,0)
-        toggle.clicked.connect(w.nextScreen)
-        
-        roll = QSlider(Qt.Horizontal,w)
-        roll.setMinimum(-180)
-        roll.setMaximum(180)
-        roll.setValue(0)
-        roll.resize(200,20)
-        roll.move(440,0)
-        
-        pitch = QSlider(Qt.Vertical,w)
-        pitch.setMinimum(-90)
-        pitch.setMaximum(90)
-        pitch.setValue(0)
-        pitch.resize(20,200)
-        pitch.move(360,80)
-        
-        smap = QSlider(Qt.Horizontal,w)
-        smap.setMinimum(0)
-        smap.setMaximum(30)
-        smap.setValue(0)
-        smap.resize(200,20)
-        smap.move(w.width()-200,200)
-        
-        srpm = QSlider(Qt.Horizontal,w)
-        srpm.setMinimum(0)
-        srpm.setMaximum(3000)
-        srpm.setValue(0)
-        srpm.resize(200,20)
-        srpm.move(w.width()-200,100)
-        
-        heading = QSpinBox(w)
-        heading.move(370, 680)
-        heading.setRange(1, 360)
-        heading.setValue(1)
-        heading.valueChanged.connect(w.h.setHeading)
+    args = parser.parse_args()
+    form = main(args.mode)
+    form.show()
 
-        headingBug = QSpinBox(w)
-        headingBug.move(650, 680)
-        headingBug.setRange(0, 360)
-        headingBug.setValue(1)
-        headingBug.valueChanged.connect(w.h.setHeadingBug)
+    if args.mode == 'normal':
+        form.cfix.start()
 
-        alt_gauge = QSpinBox(w)
-        alt_gauge.setMinimum(0)
-        alt_gauge.setMaximum(10000)
-        alt_gauge.setSingleStep(10)
-        alt_gauge.setValue(0)
-        alt_gauge.move(720,10)
-        alt_gauge.valueChanged.connect(w.alt.setAltimeter)
-
-        as_gauge = QSpinBox(w)
-        as_gauge.setMinimum(0)
-        as_gauge.setMaximum(140)
-        as_gauge.setValue(0)
-        as_gauge.move(10,360)
-        as_gauge.valueChanged.connect(w.air.setAirspeed)
-        
-        svsi = QSlider(Qt.Vertical, w)
-        svsi.setMinimum(-4000)
-        svsi.setMaximum(4000)
-        svsi.setValue(0)
-        svsi.resize(20,200)
-        svsi.move(740,360)
-        
-        stc = QSlider(Qt.Horizontal, w)
-        stc.setMinimum(-6) # deg / sec
-        stc.setMaximum(6)
-        stc.setValue(0)
-        stc.resize(200,20)
-        stc.move(80,360 + 30)
-
-        pitch.valueChanged.connect(w.a.setPitchAngle)
-        roll.valueChanged.connect(w.a.setRollAngle)
-        smap.valueChanged.connect(w.map.setValue)
-        srpm.valueChanged.connect(w.rpm.setValue)
-        svsi.valueChanged.connect(w.vs.setROC)
-        stc.valueChanged.connect(w.turn.setTurnRate)
-
-    if(config.screenFullSize):
-        w.showFullScreen()
-    w.show()
-    if not test:
-        cfix.start()
     result = app.exec_()
-    if not test:
-        cfix.quit()
+    if args.mode == 'normal':
+        form.cfix.quit()
     sys.exit(result)
-
-parser = argparse.ArgumentParser(description='pyEfis')
-parser.add_argument('--test', '-t', action='store_true', help='Run in test mode')
-
-args = parser.parse_args()
-
-main(args.test)
