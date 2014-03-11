@@ -218,6 +218,20 @@ class Airspeed_Tape(QGraphicsView):
         self.centerOn(self.scene.width() / 2,
                       -self._airspeed * self.pph + 1500 + self.height() / 2)
 
+#  Index Line that doesn't move to make it easy to read the airspeed.
+    def paintEvent(self, event):
+        super(Airspeed_Tape, self).paintEvent(event)
+        w = self.width()
+        h = self.height()
+        p = QPainter(self.viewport())
+        p.setRenderHint(QPainter.Antialiasing)
+
+        marks = QPen(Qt.white)
+        marks.setWidth(4)
+        p.translate(w / 2, h / 2)
+        p.setPen(marks)
+        p.drawLine(QLine(w / 2, 0, 0, 0))
+
     def getAirspeed(self):
         return self._airspeed
 
