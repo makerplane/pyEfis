@@ -10,11 +10,11 @@
 
    <chunk>
     <name>indicated speed (kt)</name>
-    <type>float</type>
-    <format>%.1f</format>
-    <node>/velocities/airspeed-kt</node>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/airspeed-indicator/indicated-speed-kt</node>
    </chunk>
- 
+
    <chunk>
     <name>pitch att (deg)</name>
     <type>float</type>
@@ -38,9 +38,9 @@
 
    <chunk>
     <name>Altitude</name>
-    <type>float</type>
-    <format>%.1f</format>
-    <node>/position/altitude-agl-ft</node>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/altimeter/pressure-alt-ft</node>
    </chunk>
 
    <chunk>
@@ -63,7 +63,7 @@
     <format>%.4e</format>
     <node>/engines/engine/rpm</node>
    </chunk>
-   
+
    <chunk>
     <name>Oil Temp F</name>
     <type>float</type>
