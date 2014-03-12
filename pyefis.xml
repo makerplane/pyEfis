@@ -65,6 +65,13 @@
    </chunk>
 
    <chunk>
+    <name>MP</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/engines/engine/mp-inhg</node>
+   </chunk>
+
+   <chunk>
     <name>Oil Temp F</name>
     <type>float</type>
     <format>%.4e</format>
