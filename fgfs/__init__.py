@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
-import socket, threading, Queue
+import socket
+import threading
+
 
 
 class UDP_Process(threading.Thread):
@@ -31,8 +33,9 @@ class UDP_Process(threading.Thread):
         self.running = 0
 
 if __name__ == '__main__':
-    queue = Queue.Queue()
-    t = UDP_Process(queue)
+    import queue
+    q = queue.Queue()
+    t = UDP_Process(q)
     t.start()
 
     f = 'pyefis.xml'
@@ -49,13 +52,13 @@ if __name__ == '__main__':
 
     while True:
         try:
-            data_test = queue.get(0)
+            data_test = q.get(0)
             for data in data_test:
                 if len(Name_List) == len(Name_Value):
-                    for q, a, d in zip(Name_List, Name_Value, data_test):
-                        print(q, a, d)
+                    for l, a, d in zip(Name_List, Name_Value, data_test):
+                        print((l, a, d))
                 else:
-                    print('Name value mismatch in :', f)
-        except Queue.Empty:
+                    print(('Name value mismatch in :', f))
+        except queue.Empty:
             pass
     t.join()
