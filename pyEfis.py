@@ -297,7 +297,7 @@ class main (QMainWindow):
             self.egt.setValue(float(msg[11]))
             self.ff.setValue(float(msg[12]))
             self.rpm.setValue(int(float(msg[7])))
-            self.map_g.setValue(int(float(msg[8])))
+            self.map_g.setValue(float(msg[8]))
             self.fuel.setValue(float(msg[13]) + float(msg[14]))
         except Queue.Empty:
             pass
