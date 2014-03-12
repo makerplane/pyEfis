@@ -292,12 +292,13 @@ class main (QMainWindow):
             self.a.setRollAngle(float(msg[2]))
             self.head_tape.setHeading(float(msg[3]))
             self.alt_tape.setAltimeter(self.MSL_Altitude(float(msg[4])))
-            self.op.setValue(float(msg[9]))
-            self.ot.setValue(float(msg[8]))
-            self.egt.setValue(float(msg[10]))
-            self.ff.setValue(float(msg[11]))
+            self.op.setValue(float(msg[10]))
+            self.ot.setValue(float(msg[9]))
+            self.egt.setValue(float(msg[11]))
+            self.ff.setValue(float(msg[12]))
             self.rpm.setValue(int(float(msg[7])))
-            self.fuel.setValue(float(msg[12]) + float(msg[13]))
+            self.map_g.setValue(int(float(msg[8])))
+            self.fuel.setValue(float(msg[13]) + float(msg[14]))
         except Queue.Empty:
             pass
 
