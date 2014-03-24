@@ -16,7 +16,8 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys, Queue
+import sys
+import Queue
 import argparse
 import ConfigParser  # configparser for Python 3
 from PyQt4.QtGui import *
@@ -95,6 +96,10 @@ class main (QMainWindow):
         self.as_tape = airspeed.Airspeed_Tape(w)
         self.as_tape.resize(100, instHeight)
         self.as_tape.move(0, 100)
+
+        self.asd_Box = airspeed.Airspeed_Mode(w)
+        self.asd_Box.resize(100, 100)
+        self.asd_Box.move(0, instHeight + 100)
 
         self.head_tape = hsi.DG_Tape(w)
         self.head_tape.resize(instWidth, 100)
@@ -288,6 +293,14 @@ class main (QMainWindow):
             msg = msg.split(',')
 
             self.as_tape.setAirspeed(float(msg[0]))
+            if self.asd_Box.getMode() == 2:
+                print('here')
+                self.asd_Box.setAS_Data(float(msg[15]), float(msg[4]),
+                                         float(msg[18]))
+            else:
+                self.asd_Box.setAS_Data(float(msg[0]), float(msg[4]),
+                                         float(msg[18]))
+
             self.a.setPitchAngle(float(msg[1]))
             self.a.setRollAngle(float(msg[2]))
             self.head_tape.setHeading(float(msg[3]))
@@ -297,8 +310,10 @@ class main (QMainWindow):
             self.egt.setValue(float(msg[11]))
             self.ff.setValue(float(msg[12]))
             self.rpm.setValue(int(float(msg[7])))
-            self.map_g.setValue(int(float(msg[8])))
+            self.map_g.setValue(float(msg[8]))
             self.fuel.setValue(float(msg[13]) + float(msg[14]))
+            print('Lat: ', msg[16], 'Long: ', msg[17])
+
         except Queue.Empty:
             pass
 
@@ -319,6 +334,10 @@ class main (QMainWindow):
         elif event.key() == Qt.Key_BracketRight:
             self.alt_setting.setAltimeter_Setting(
                                 self.alt_setting.getAltimeter_Setting() - 0.01)
+
+        #  Decrease Altimeter Setting
+        elif event.key() == Qt.Key_M:
+            self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
