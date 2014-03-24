@@ -10,8 +10,8 @@
 
    <chunk>
     <name>indicated speed (kt)</name>
-    <type>double</type>
-    <format>%.4e</format>
+    <type>float</type>
+    <format>%.4f</format>
     <node>/instrumentation/airspeed-indicator/indicated-speed-kt</node>
    </chunk>
 
@@ -66,7 +66,7 @@
 
    <chunk>
     <name>MP</name>
-    <type>double</type>
+    <type>float</type>
     <format>%.4e</format>
     <node>/engines/engine/mp-inhg</node>
    </chunk>
@@ -113,6 +113,33 @@
     <node>/consumables/fuel/tank[1]/level-gal_us</node>
    </chunk>
 
+   <chunk>
+    <name>Ground Speed</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/gps/indicated-ground-speed-kt</node>
+   </chunk>
+
+   <chunk>
+    <name>Latitude</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/gps/indicated-latitude-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>Longitude</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/gps/indicated-longitude-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>OAT</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/environment/temperature-degc</node>
+   </chunk>
   </output>
 
  </generic>
