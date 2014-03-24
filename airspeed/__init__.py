@@ -14,6 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import sys
+sys.path.insert(0, './lib/AeroCalc-0.11/')
+from aerocalc import airspeed
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -241,3 +244,99 @@ class Airspeed_Tape(QGraphicsView):
             self.redraw()
 
     airspeed = property(getAirspeed, setAirspeed)
+
+
+class Airspeed_Mode(QGraphicsView):
+    def __init__(self, parent=None):
+        super(Airspeed_Mode, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._Mode_Indicator = 0
+        self._AS_Data_Box = 0
+        self._airspeed_mode = "IAS"
+
+    def resizeEvent(self, event):
+        self.w = self.width()
+        self.h = self.height()
+        self.f = QFont()
+        self.f.setPixelSize(20)
+
+        dialPen = QPen(QColor(Qt.white))
+        dialPen.setWidth(2)
+
+        self.scene = QGraphicsScene(0, 0, self.w, self.h)
+        self.scene.addRect(0, 0, self.w, self.h,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+
+        t = self.scene.addText(self._airspeed_mode)
+        t.setFont(self.f)
+        self.scene.setFont(self.f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX((self.w - t.boundingRect().width()) / 2)
+        t.setY((self.h - t.boundingRect().height()) / 2 - (
+                                    t.boundingRect().height() / 2))
+        t = self.scene.addText(str(self._AS_Data_Box))
+        t.setFont(self.f)
+        self.scene.setFont(self.f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX((self.w - t.boundingRect().width()) / 2)
+        t.setY(((self.h - t.boundingRect().height()) / 2) + (
+                                    t.boundingRect().height() / 2))
+        self.setScene(self.scene)
+
+    def redraw(self):
+        self.scene.clear()
+        self.scene.addRect(0, 0, self.w, self.h,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+        t = self.scene.addText(self._airspeed_mode)
+        t.setFont(self.f)
+        self.scene.setFont(self.f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX((self.w - t.boundingRect().width()) / 2)
+        t.setY((self.h - t.boundingRect().height()) / 2 - (
+                                    t.boundingRect().height() / 2))
+        t = self.scene.addText(str(self._AS_Data_Box))
+        t.setFont(self.f)
+        self.scene.setFont(self.f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX((self.w - t.boundingRect().width()) / 2)
+        t.setY(((self.h - t.boundingRect().height()) / 2) + (
+                                    t.boundingRect().height() / 2))
+        self.setScene(self.scene)
+
+    def getMode(self):
+        return self._Mode_Indicator
+
+    def setMode(self, Mode):
+        if Mode != self._Mode_Indicator:
+            if Mode == 0:
+                self._Mode_Indicator = 0
+                self._airspeed_mode = "IAS"
+            elif Mode == 1:
+                self._Mode_Indicator = 1
+                self._airspeed_mode = "TAS"
+            elif Mode == 2:
+                self._Mode_Indicator = 2
+                self._airspeed_mode = "GS"
+            elif Mode == 3:
+                self._Mode_Indicator = 0
+                self._airspeed_mode = "IAS"
+            self.redraw()
+
+    def getAS_Data(self):
+        return self._Mode_Indicator
+
+    def setAS_Data(self, AS_Data, PA_Data, OAT):
+        if self._Mode_Indicator == 1:
+            self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
+        elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
+            if self._Mode_Indicator == 0:
+                self._AS_Data_Box = int(AS_Data)
+            elif self._Mode_Indicator == 2:
+                self._AS_Data_Box = int(AS_Data)
+        self.redraw()
+
+    airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)
