@@ -1,0 +1,22 @@
+Change Log for AeroCalc
+
+Changes for v0.11:
+24 March 2008 - added temperature correction to density for 
+                aerocalc.unit_conversion.avgas_conv()
+27 March 2008 - added unit tests for aerocalc.unit_conversion.avgas_conv()
+28 March 2008 - reworked exit from interactive mode in aerocalc.airspeed
+20 Apr 2008 - added unit tests for:
+              aerocalc.unit_conversion.temp_conv(),  
+              aerocalc.unit_conversion.wt_conv(),  
+              aerocalc.unit_conversion.force_conv(),  
+              aerocalc.unit_conversion.len_conv(), and 
+              aerocalc.unit_conversion.power_conv().
+25 Apr 2008 - correct unit validation error in aerocalc.unit_conversion.press_conv()
+              added unit tests for:
+              aerocalc.unit_conversion.speed_conv(),  
+              aerocalc.unit_conversion.area_conv(),  
+              aerocalc.unit_conversion.press_conv(),  
+              aerocalc.unit_conversion.vol_conv(), 
+              aerocalc.unit_conversion.power_conv() and 
+              aerocalc.unit_conversion.density_conv().
+              added ssec module - to be fleshed out later
