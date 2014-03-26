@@ -86,19 +86,19 @@ class main (QMainWindow):
         self.a.move(100, 100)
 
         self.alt_tape = altimeter.Altimeter_Tape(w)
-        self.alt_tape.resize(100, instHeight)
-        self.alt_tape.move(instWidth + 100, 100)
+        self.alt_tape.resize(90, instHeight)
+        self.alt_tape.move(instWidth + 110, 100)
 
         self.alt_setting = altimeter.Altimeter_Setting(w)
-        self.alt_setting.resize(100, 100)
-        self.alt_setting.move(instWidth + 100, instHeight + 100)
+        self.alt_setting.resize(90, 100)
+        self.alt_setting.move(instWidth + 110, instHeight + 100)
 
         self.as_tape = airspeed.Airspeed_Tape(w)
-        self.as_tape.resize(100, instHeight)
+        self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 100)
 
         self.asd_Box = airspeed.Airspeed_Mode(w)
-        self.asd_Box.resize(100, 100)
+        self.asd_Box.resize(90, 100)
         self.asd_Box.move(0, instHeight + 100)
 
         self.head_tape = hsi.DG_Tape(w)
