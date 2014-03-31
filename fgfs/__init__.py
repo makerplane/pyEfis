@@ -3,7 +3,6 @@ import socket
 import threading
 
 
-
 class UDP_Process(threading.Thread):
 
     def __init__(self, conn):
@@ -23,7 +22,7 @@ class UDP_Process(threading.Thread):
         while self.running:
             #Reads the UDP packet splits then sends it to the Queue
             data, addr = self.sock.recvfrom(1024)  # buffer size is 1024 bytes
-            data_test = data.decode()
+            data_test = data
             if (data_test):
                 self.queue.put(data_test)
             else:
