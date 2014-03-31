@@ -10,8 +10,8 @@
 
    <chunk>
     <name>indicated speed (kt)</name>
-    <type>float</type>
-    <format>%.4f</format>
+    <type>double</type>
+    <format>%.4e</format>
     <node>/instrumentation/airspeed-indicator/indicated-speed-kt</node>
    </chunk>
 
@@ -81,7 +81,7 @@
    <chunk>
     <name>Oil Pressure</name>
     <type>float</type>
-    <format>%.4e</format>
+    <format>%.1f</format>
     <node>/engines/engine[0]/oil-pressure-psi</node>
    </chunk>
 
