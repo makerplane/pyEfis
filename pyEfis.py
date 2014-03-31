@@ -22,6 +22,7 @@ import argparse
 import ConfigParser  # configparser for Python 3
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from decimal import *
 
 import fix
 import gauges
@@ -30,6 +31,7 @@ import hsi
 import airspeed
 import altimeter
 import fgfs
+import vsi
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -89,6 +91,10 @@ class main (QMainWindow):
         self.alt_tape.resize(90, instHeight)
         self.alt_tape.move(instWidth + 110, 100)
 
+        self.alt_Trend = vsi.Alt_Trend_Tape(w)
+        self.alt_Trend.resize(10, instHeight)
+        self.alt_Trend.move(instWidth + 100, 100)
+
         self.alt_setting = altimeter.Altimeter_Setting(w)
         self.alt_setting.resize(90, 100)
         self.alt_setting.move(instWidth + 110, instHeight + 100)
@@ -96,6 +102,10 @@ class main (QMainWindow):
         self.as_tape = airspeed.Airspeed_Tape(w)
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 100)
+
+        self.as_Trend = vsi.AS_Trend_Tape(w)
+        self.as_Trend.resize(10, instHeight)
+        self.as_Trend.move(90, 100)
 
         self.asd_Box = airspeed.Airspeed_Mode(w)
         self.asd_Box.resize(90, 100)
@@ -292,27 +302,30 @@ class main (QMainWindow):
             msg = self.queue.get(0)
             msg = msg.split(',')
 
-            self.as_tape.setAirspeed(float(msg[0]))
-            if self.asd_Box.getMode() == 2:
-                print('here')
-                self.asd_Box.setAS_Data(float(msg[15]), float(msg[4]),
-                                         float(msg[18]))
-            else:
-                self.asd_Box.setAS_Data(float(msg[0]), float(msg[4]),
-                                         float(msg[18]))
-
-            self.a.setPitchAngle(float(msg[1]))
-            self.a.setRollAngle(float(msg[2]))
-            self.head_tape.setHeading(float(msg[3]))
-            self.alt_tape.setAltimeter(self.MSL_Altitude(float(msg[4])))
-            self.op.setValue(float(msg[10]))
-            self.ot.setValue(float(msg[9]))
-            self.egt.setValue(float(msg[11]))
-            self.ff.setValue(float(msg[12]))
-            self.rpm.setValue(int(float(msg[7])))
-            self.map_g.setValue(float(msg[8]))
-            self.fuel.setValue(float(msg[13]) + float(msg[14]))
-            print('Lat: ', msg[16], 'Long: ', msg[17])
+            try:
+                self.as_tape.setAirspeed(float(msg[0]))
+                if self.asd_Box.getMode() == 2:
+                    self.asd_Box.setAS_Data(float(msg[15]), float(msg[4]),
+                                             float(msg[18]))
+                else:
+                    self.asd_Box.setAS_Data(float(msg[0]), float(msg[4]),
+                                            float(msg[18]))
+                self.a.setPitchAngle(float(msg[1]))
+                self.a.setRollAngle(float(msg[2]))
+                self.head_tape.setHeading(float(msg[3]))
+                self.alt_tape.setAltimeter(self.MSL_Altitude(float(msg[4])))
+                self.as_Trend.setAS_Trend(float(msg[0]))
+                self.alt_Trend.setAlt_Trend(float(msg[4]))
+                self.op.setValue(float(msg[10]))
+                self.ot.setValue(float(msg[9]))
+                self.egt.setValue(float(msg[11]))
+                self.ff.setValue(float(msg[12]))
+                self.rpm.setValue(int(float(msg[7])))
+                self.map_g.setValue(float(msg[8]))
+                self.fuel.setValue(float(msg[13]) + float(msg[14]))
+                print('Lat: ', msg[16], 'Long: ', msg[17])
+            except:
+                pass
 
         except Queue.Empty:
             pass
