@@ -118,7 +118,137 @@ class VSI(QWidget):
     def setROC(self, roc):
         if roc != self._roc:
             self._roc = roc
-            print roc
             self.update()
 
     roc = property(getROC, setROC)
+
+
+class AS_Trend_Tape(QGraphicsView):
+    def __init__(self, parent=None):
+        super(AS_Trend_Tape, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._airspeed = 0
+        self._airspeed_diff = 0
+        self._airspeed_trend = []
+        self.freq = 10
+
+    def resizeEvent(self, event):
+        w = self.width()
+        h = self.height()
+        self.pph = 10
+        self.zeroPen = QPen(QColor(Qt.white))
+        self.zeroPen.setWidth(4)
+
+        self.scene = QGraphicsScene(0, 0, w, h)
+
+        self.scene.addRect(0, 0, w, h,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+
+        self.scene.addLine(0, h / 2,
+                           w, h / 2,
+                           self.zeroPen)
+
+        self.setScene(self.scene)
+
+    def redraw(self):
+        self.scene.clear()
+        self.scene.addRect(0, 0, self.width(), self.height(),
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+
+        self.scene.addLine(0, self.height() / 2,
+                           self.width(), self.height() / 2,
+                           self.zeroPen)
+
+        self.centerOn(self.scene.width() / 2,
+                      self.height() / 2)
+
+        self._airspeed_diff = (sum(self._airspeed_trend) /
+                               len(self._airspeed_trend)) * 60
+
+        self.scene.addRect(self.width() / 2, self.height() / 2,
+                         self.width() / 2 + 5, self._airspeed_diff * -self.pph,
+                         QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
+
+        self.setScene(self.scene)
+
+    def setAS_Trend(self, airspeed):
+        if airspeed != self._airspeed:
+            if len(self._airspeed_trend) == self.freq:
+                del self._airspeed_trend[0]
+            self._airspeed_trend.append(airspeed - self._airspeed)
+            self._airspeed = airspeed
+            self.redraw()
+        elif airspeed == self._airspeed:
+            if len(self._airspeed_trend) == self.freq:
+                del self._airspeed_trend[0]
+            self._airspeed_trend.append(airspeed - self._airspeed)
+            self._airspeed = airspeed
+            self.redraw()
+
+    altimeter = property(setAS_Trend)
+
+
+class Alt_Trend_Tape(QGraphicsView):
+    def __init__(self, parent=None):
+        super(Alt_Trend_Tape, self).__init__(parent)
+        self.setStyleSheet("border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self._altitude = 0
+        self._altitude_diff = 0
+        self._altitude_trend = []
+        self.freq = 10
+
+    def resizeEvent(self, event):
+        w = self.width()
+        h = self.height()
+        self.pph = 0.5
+        self.zeroPen = QPen(QColor(Qt.white))
+        self.zeroPen.setWidth(4)
+
+        self.scene = QGraphicsScene(0, 0, w, h)
+
+        self.scene.addRect(0, 0, w, h,
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+
+        self.setScene(self.scene)
+
+    def redraw(self):
+        self.scene.clear()
+        self.scene.addRect(0, 0, self.width(), self.height(),
+                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+
+        self.scene.addLine(0, self.height() / 2,
+                           self.width(), self.height() / 2,
+                           self.zeroPen)
+
+        self._altitude_diff = (sum(self._altitude_trend) /
+                               len(self._altitude_trend)) * 60
+
+        self.scene.addRect(0, self.height() / 2,
+                         self.width() / 2, self._altitude_diff * -self.pph,
+                         QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
+
+        self.setScene(self.scene)
+
+    def setAlt_Trend(self, altitude):
+        if altitude != self._altitude:
+            if len(self._altitude_trend) == self.freq:
+                del self._altitude_trend[0]
+            self._altitude_trend.append(altitude - self._altitude)
+            self._altitude = altitude
+            self.redraw()
+        elif altitude == self._altitude:
+            if len(self._altitude_trend) == self.freq:
+                del self._altitude_trend[0]
+            self._altitude_trend.append(altitude - self._altitude)
+            self._altitude = altitude
+            self.redraw()
+
+    altimeter = property(setAlt_Trend)
