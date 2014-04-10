@@ -17,12 +17,15 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
+sys.path.insert(0, './lib/AeroCalc-0.11/')
+
 import Queue
 import argparse
 import ConfigParser  # configparser for Python 3
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from decimal import *
+from aerocalc import std_atm
 
 import fix
 import gauges
@@ -289,9 +292,8 @@ class main (QMainWindow):
             srpm.valueChanged.connect(self.rpm.setValue)
 
     def MSL_Altitude(self, pressure_alt):
-        #  2 high foot from reported on flight gear.
-        MSL_atl = pressure_alt + ((self.alt_setting.getAltimeter_Setting()
-                                   - 29.92126) * 911)
+        MSL_atl = pressure_alt - std_atm.press2alt(
+                                    self.alt_setting.getAltimeter_Setting())
         return MSL_atl
 
     def guiUpdate(self):
