@@ -58,15 +58,24 @@ class main (QMainWindow):
     def __init__(self, test, parent=None):
         super(main, self).__init__(parent)
 
+        resolution = QDesktopWidget().screenGeometry()
         config = ConfigParser.RawConfigParser()
         config.read('config')
-        self.width = int(config.get("Screen", "screenSize.Width"))
-        self.height = int(config.get("Screen", "screenSize.Height"))
+        self.screen = config.getboolean("Screen", "screenFullSize")
+        if self.screen:
+            self.height = resolution.height()
+            self.width = resolution.width()
+        else:
+            self.width = int(config.get("Screen", "screenSize.Width"))
+            self.height = int(config.get("Screen", "screenSize.Height"))
         self.screenColor = config.get("Screen", "screenColor")
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
         self.queue = Queue.Queue()
         self.setupUi(self, test)
+        self.start = 0
+        if self.screen:
+            self.showFullScreen()
 
         if test == 'normal':
             self.flightData = FlightData()
@@ -224,7 +233,7 @@ class main (QMainWindow):
             QObject.connect(self.timer,
                                SIGNAL("timeout()"), self.guiUpdate)
             # Start the timer 1 msec update
-            self.timer.start(1)
+            self.timer.start(6)
 
             self.thread1 = fgfs.UDP_Process(self.queue)
             self.thread1.start()
@@ -302,7 +311,13 @@ class main (QMainWindow):
         """
         try:
             msg = self.queue.get(0)
+            #print(self.queue.qsize())
             msg = msg.split(',')
+            #import time
+
+            #elapse = time.time() - self.start
+            #self.start = time.time()
+            #print (elapse)
 
             try:
                 self.as_tape.setAirspeed(float(msg[0]))
@@ -325,7 +340,7 @@ class main (QMainWindow):
                 self.rpm.setValue(int(float(msg[7])))
                 self.map_g.setValue(float(msg[8]))
                 self.fuel.setValue(float(msg[13]) + float(msg[14]))
-                print('Lat: ', msg[16], 'Long: ', msg[17])
+ #('Lat: ', msg[16], 'Long: ', msg[17])
             except:
                 pass
 
