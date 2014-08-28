@@ -143,7 +143,7 @@ class Connection(object):
         elif self.adapterString.lower() == 'netowrk':
             self.adapter = network.Adapter()
         else:
-            raise IndexError("Undefined CANBus Adapter " + str(self.adapter))
+            raise IndexError("Undefined CANBus Adapter " + self.adapterString)
         config = Config()
         config.bitrate = self.bitrate
         config.device = self.device

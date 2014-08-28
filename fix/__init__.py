@@ -59,6 +59,7 @@ class Fix(threading.Thread):
                 # if the frame represents a CAN-FIX parameter then we make
                 # a generic FIX parameter and send that to the callback
                 cfobj = canfix.parseFrame(frame)
+                print "Fix Thread parseFrame() returned", cfobj
                 if isinstance(cfobj, canfix.Parameter):
                     p = Parameter(cfobj.name, cfobj.value)
                     if self._parameterCallback:

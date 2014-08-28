@@ -44,7 +44,17 @@ class FlightData (QObject):
     rollChanged = pyqtSignal(float, name="rollChanged")
     pitchChanged = pyqtSignal(float, name="pitchChanged")
     headingChanged = pyqtSignal(float, name="headingChanged")
-
+    altitudeChanged = pyqtSignal(float, name="altitudeChanged")
+    airspeedChanged = pyqtSignal(float, name="airspeedChanged")
+    vsiChanged = pyqtSignal(float, name="vsiChanged")
+    RPMChanged = pyqtSignal(float, name="RPMChanged")
+    MAPChanged = pyqtSignal(float, name="MAPChanged")
+    OilPressChanged = pyqtSignal(float, name="OilPressChanged")
+    OilTempChanged = pyqtSignal(float, name="OilTempChanged")
+    FuelFlowChanged = pyqtSignal(float, name="FuelFlowChanged")
+    FuelQtyChanged = pyqtSignal(float, name="FuelQtyChanged")
+    #Changed = pyqtSignal(float, name="Changed")
+    
     def getParameter(self, param):
         if param.name == "Roll Angle":
             self.rollChanged.emit(param.value)
@@ -52,9 +62,27 @@ class FlightData (QObject):
             self.pitchChanged.emit(param.value)
         elif param.name == "Heading":
             self.headingChanged.emit(param.value)
+        elif param.name == "Indicated Altitude":
+            self.altitudeChanged.emit(param.value)
+        elif param.name == "Vertical Speed":
+            self.vsiChanged.emit(param.value)
+        elif param.name == "Calibrated Airspeed":
+            self.airspeedChanged.emit(param.value)
+        elif param.name == "N1 or Engine RPM #1":
+            self.RPMChanged.emit(param.value)
+        elif param.name == "Manifold Pressure #1":
+            self.MAPChanged.emit(param.value)
+        elif param.name == "Oil Pressure #1":
+            self.OilPressChanged.emit(param.value)
+        elif param.name == "Oil Temperature #1":
+            self.OilTempChanged.emit(param.value)
+        elif param.name == "Fuel Flow #1":
+            self.FuelFlowChanged.emit(param.value)
+        elif param.name == "Fuel Quantity #1":
+            self.FuelQtyChanged.emit(param.value)
+           
 
-
-class main (QMainWindow):
+class main(QMainWindow):
     def __init__(self, test, parent=None):
         super(main, self).__init__(parent)
 
@@ -66,12 +94,13 @@ class main (QMainWindow):
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
         self.queue = Queue.Queue()
-        self.setupUi(self, test)
-
+        
         if test == 'normal':
             self.flightData = FlightData()
             self.cfix = fix.Fix(self.canAdapter, self.canDevice)
             self.cfix.setParameterCallback(self.flightData.getParameter)
+        self.setupUi(self, test)
+        
 
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
@@ -214,9 +243,21 @@ class main (QMainWindow):
         self.egt.value = 1350
 
         if test == 'normal':
-            self.flightData.pitchChanged.connect(a.setPitchAngle)
-            self.flightData.rollChanged.connect(a.setRollAngle)
-            self.flightData.headingChanged.connect(head_tape.setHeading)
+            self.flightData.pitchChanged.connect(self.a.setPitchAngle)
+            self.flightData.rollChanged.connect(self.a.setRollAngle)
+            self.flightData.headingChanged.connect(self.head_tape.setHeading)
+            self.flightData.altitudeChanged.connect(self.alt_tape.setAltimeter)
+            self.flightData.altitudeChanged.connect(self.alt_Trend.setAlt_Trend)
+            #self.flightData.vsiChanged.connect(self.alt_Trend.setAlt_Trend)
+            self.flightData.airspeedChanged.connect(self.as_tape.setAirspeed)
+            self.flightData.airspeedChanged.connect(self.as_Trend.setAS_Trend)
+            self.flightData.airspeedChanged.connect(self.asd_Box.setIAS)
+            self.flightData.RPMChanged.connect(self.rpm.setValue)
+            self.flightData.MAPChanged.connect(self.map_g.setValue)
+            self.flightData.OilPressChanged.connect(self.op.setValue)
+            self.flightData.OilTempChanged.connect(self.ot.setValue)
+            self.flightData.FuelFlowChanged.connect(self.ff.setValue)
+            self.flightData.FuelQtyChanged.connect(self.fuel.setValue)
 
         elif test == 'fgfs':
             self.timer = QTimer()
@@ -361,6 +402,7 @@ if __name__ == "__main__":
         default='normal', help='Run pyEFIS in specific mode')
 
     args = parser.parse_args()
+    print("Starting in %s Mode" % (args.mode,))
     form = main(args.mode)
     form.show()
 
