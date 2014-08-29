@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-#  CAN-FIX Utilities - An Open Source CAN FIX Utility Package 
+#  CAN-FIX Protocol Module - An Open Source Module that abstracts communication
+#  with the CAN-FIX Aviation Protocol
 #  Copyright (c) 2012 Phil Birkelbach
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -21,6 +22,8 @@ import os
 import xml.etree.ElementTree as ET
 import copy
 import struct
+import time
+import canbus
 
 class NodeAlarm(object):
     """Represents a Node Alarm"""
@@ -32,6 +35,7 @@ class NodeAlarm(object):
         self.node = frame.id
         self.alarm = frame.data[0] + frame.data[1]*256
         self.data = frame.data[2:]
+        self.data += [0] * (5-len(self.data)) # Pad data with zeros
     
     def getFrame(self):
         frame = canbus.Frame()
@@ -52,12 +56,15 @@ class Parameter(object):
     """Represents a normal parameter update frame"""
     def __init__(self, frame=None):
         if frame != None:
+            if len(frame.data) < 4: return None
             self.setFrame(frame)
         else:
             self.__failure = False
             self.__quality = False
             self.__annunciate = False
+            self.value = 0
             self.index = 0
+            self.node = 0
             self.__meta = None
             self.function = 0
 
@@ -168,20 +175,21 @@ class Parameter(object):
     def setFrame(self, frame):
         self.__frame = frame
         p = parameters[frame.id]
+        self.__identifier = frame.id
         self.__parameterData(frame.id)
         self.node = frame.data[0]
         self.index = frame.data[1]
         self.function = frame.data[2]
         self.data = bytearray(frame.data[3:])
-        if self.function | 0x04:
+        if self.function & 0x04:
             self.__failure = True
         else:
             self.__failure = False
-        if self.function | 0x02:
+        if self.function & 0x02:
             self.quality = True
         else:
             self.quality = False
-        if self.function | 0x01:
+        if self.function & 0x01:
             self.annunciate = True
         else:
             self.annunciate = False
@@ -190,6 +198,8 @@ class Parameter(object):
             self.meta = p.auxdata[self.function>>4]
         except KeyError:
             self.meta = None
+        
+        self.updated = time.time()
         
     def getFrame(self):
         self.data = []
@@ -206,12 +216,33 @@ class Parameter(object):
     
     frame = property(getFrame, setFrame)
     
+    def getFullName(self):
+        if self.indexName:
+            return "%s %s %i" % (self.__name, self.indexName, self.index + 1)
+        else:
+            return self.__name 
+        
+    fullName = property(getFullName)
+    
+    def valueStr(self, units=False):
+        if self.__identifier == 0x580: #Time  
+            return "%02i:%02i:%02i" % (self.value[0], self.value[1], self.value[2])
+        elif self.__identifier == 0x581: #Date
+            return "%i-%i-%i" % (self.value[0], self.value[1], self.value[2])
+        else:
+            if self.units:
+                return str(self.value) + " " + self.units
+            else:
+                return str(self.value)
+        
     def unpack(self):
         if self.type == "UINT, USHORT[2]": #Unusual case of the date
             x = []
             x.append(getValue("UINT", self.data[0:2],1))
             x.append(getValue("USHORT", self.data[2:3], 1))
             x.append(getValue("USHORT", self.data[3:4], 1))
+            for each in x:
+                if each==None: self.__failure=True
         elif '[' in self.type:
             y = self.type.strip(']').split('[')
             if y[0] == 'CHAR':
@@ -221,19 +252,45 @@ class Parameter(object):
                 size = getTypeSize(y[0])
                 for n in range(int(y[1])):
                     x.append(getValue(y[0], self.data[size*n:size*n+size], self.multiplier))
+                for each in x:
+                    if each==None: self.__failure=True
         else:
             x = getValue(self.type, self.data, self.multiplier)
+            if x == None: self.__failure = True
         return x
     
     def pack(self):
         if self.type == "UINT, USHORT[2]": # unusual case of the date
-           pass
+           x=[]
+           x.extend(setValue("UINT", self.value[0]))
+           x.extend(setValue("USHORT", self.value[1]))
+           x.extend(setValue("USHORT", self.value[2]))
+           return x
         elif '[' in self.type:
             y = self.type.strip(']').split('[')
-            if y[0] == 'CHAR':
-                return setValue(self.type, self.value)
+            #if y[0] == 'CHAR':
+            #    return setValue(self.type, self.value)
+            #else:
+            x = []
+            for n in range(int(y[1])):
+                x.extend(setValue(y[0], self.value[n]))
+            return x
         else:
             return setValue(self.type, self.value, self.multiplier)
+    
+    def __cmp__(self, other):
+        if self.__identifier < other.__identifier:
+            return -1
+        elif self.__identifier > other.__identifier:
+            return 1
+        else:
+            if self.index < other.index:
+                return -1
+            elif self.index > other.index:
+                return 1
+            else:
+                return 0
+
     
     def __str__(self):
         s = '[' + str(self.node) + '] ' + self.name
@@ -308,6 +365,9 @@ class NodeSpecific(object):
     def __init__(self, frame=None):
         if frame != None:
             self.setFrame(frame)
+        else:
+            self.controlCode = 0
+            self.data = []
 
     def setFrame(self, frame):
         self.sendNode = frame.id -1792
@@ -316,13 +376,12 @@ class NodeSpecific(object):
         self.data = frame.data[2:]
     
     def getFrame(self):
-        frame = canbus.Frame()
-        frame.id = self.sendNode + 1792
-        frame.data.append(self.destNode)
-        frame.data.append(self.controlCode)
+        f = canbus.Frame(self.sendNode + 1792)
+        f.data.append(self.destNode)
+        f.data.append(self.controlCode)
         for each in self.data:
-            frame.data.append(each)
-        return frame
+            f.data.append(each)
+        return f
     
     frame = property(getFrame, setFrame)
     
@@ -386,8 +445,10 @@ def getValue(datatype, data, multiplier):
         if "CHAR" in datatype:
             return str(data)
         return None
+    except struct.error:
+        return None
         
-def setValue(datatype, value, multiplier):
+def setValue(datatype, value, multiplier=1):
     table = {"SHORT":"<b", "USHORT":"<B", "UINT":"<H",
              "INT":"<h", "DINT":"<l", "UDINT":"<L", "FLOAT":"<f"}
     
@@ -400,13 +461,15 @@ def setValue(datatype, value, multiplier):
         return [ord(y) for y in x] # Convert packed string into ints
     except KeyError:
         if "CHAR" in datatype:
-            return value
+            return [ord(value)]
         return None
         
 def parseFrame(frame):
-    """Determine what type of frame is given and return an object
-       that represents what that frame is"""
-    if frame.id < 256:
+    """Determine what type of CAN-FIX frame this is and return an object
+       that represents that frame type properly.  Returns None on error"""
+    if frame.id ==0: # Undefined
+        return None
+    elif frame.id < 256:
         return NodeAlarm(frame)
     elif frame.id < 1760:
         return Parameter(frame)
@@ -478,8 +541,8 @@ class ParameterDef():
                 s = s + "    " + each + "\n"
         return s
     
-
-tree = ET.parse(os.path.dirname(__file__) + "/canfix.xml")
+        
+tree = ET.parse(os.path.dirname(__file__)+"/canfix.xml")
 root = tree.getroot()            
 if root.tag != "protocol":
     raise ValueError("Root Tag is not protocol'")
@@ -545,72 +608,12 @@ def getGroup(id):
         if id >= each['startid'] and id <= each['endid']:
             return each
             
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description='CAN-FIX Configuration Utility Protocol Module')
-    parser.add_argument('--print-info', '-p', action='store_true', help='Print Protocol Information')
-    parser.add_argument('--test', '-t', action='store_true', help='Run Test')
-    args = parser.parse_args()
+#if __name__ == "__main__":
+    #print "CANFIX Protocol Version " + version
+    #print "Groups:"
+    #for each in groups:
+        #print "  %s %d-%d" % (each["name"], each["startid"], each["endid"])
     
-    if args.print_info == True:
-        print "CANFIX Protocol Version " + version
-        print "Groups:"
-        for each in groups:
-            print "  %s %d-%d" % (each["name"], each["startid"], each["endid"])
-        
-        print "Parameters:"
-        for each in parameters:
-            print parameters[each]
-
-    if args.test:
-        import canbus
-        frames = []
-        frames.append(canbus.Frame(0x023, [0x01, 0x02, 1,2,3,4,5]))
-        frames.append(canbus.Frame(0x183, [2, 0, 0, 44, 5]))
-        frames.append(canbus.Frame(0x183, [2, 0, 0x10, 0, 0]))
-        frames.append(canbus.Frame(0x183, [2, 0, 0x20, 0xD0, 0x7]))
-        frames.append(canbus.Frame(0x183, [2, 0, 0x30, 44, 2]))
-        frames.append(canbus.Frame(0x184, [2, 0, 0, 0xd0, 0x7, 0, 0]))
-        frames.append(canbus.Frame(0x184, [2, 0, 0, 0xff, 0xff, 255, 255]))
-        frames.append(canbus.Frame(0x102, [3, 0, 0, 0x55, 0xAA]))
-        frames.append(canbus.Frame(0x10E, [3, 1, 0, 0x02]))
-        frames.append(canbus.Frame(0x587, [1, 0, 0, ord('7'), ord('2'), ord('7'), ord('W'), ord('B')]))
-        frames.append(canbus.Frame(0x4DC, [4, 0, 0, 1, 2, 0, 0]))
-        frames.append(canbus.Frame(0x581, [5, 0, 0, 0xdd, 0x07, 4, 26]))
-        frames.append(canbus.Frame(1795, [5, 3, 1, 2, 3]))
-        frames.append(canbus.Frame(1773, [1, 2, 3, 4, 5]))
-        for f in frames:
-            p = parseFrame(f)
-            print '-'
-            print str(f)
-            print str(p)
-        
-        na = NodeAlarm()
-        na.node = 4
-        na.alarm = 0x2345
-        na.data = [1, 2, 3, 4]
-        print na
-        print na.frame
-       
-        p = Parameter()
-        #p.identifier = 0x1
-        #print p.name
-        
-        p.name = "indicated Airspeed"
-        p.value = 132.4
-        p.node = 12
-        #p.annunciate = True
-        p.index = 0
-        #p.meta = "Max"
-        p.meta = 4
-        
-        print p
-        print p.getFrame()
-        
-        tw = TwoWayMsg()
-        tw.channel = 0
-        tw.data = [9, 10, 11, 12, 13, 14, 15, 16]
-        print tw
-        print tw.frame
-        
-        
+    #print "Parameters:"
+    #for each in parameters:
+        #print parameters[each]

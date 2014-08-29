@@ -338,5 +338,8 @@ class Airspeed_Mode(QGraphicsView):
             elif self._Mode_Indicator == 2:
                 self._AS_Data_Box = int(AS_Data)
         self.redraw()
+        
+    def setIAS(self, IAS):
+        self.setAS_Data(IAS, 0, 0)
 
     airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)

@@ -11,19 +11,19 @@ screenColor = (0,0,0) #Black
 
 [CAN-FIX]
 # Uncomment the adapter that you would like to use
-#canAdapter = 'canfixusb'
-canAdapter = 'simulate'
-#canAdapter = 'easy'
-#canAdapter = 'network'
+canAdapter = canfixusb
+#canAdapter = simulate
+#canAdapter = easy
+#canAdapter = network
 
 # CAN Bitrate to use in kbps
 canBitrate = 125
 
 # The Serial/USB device that the above adapter would use
-canDevice = '/dev/ttyUSB1'
+canDevice = /dev/ttyUSB2
 
 # IP information for network adapter
-canServer = '127.0.0.1'
+canServer = 127.0.0.1
 canPort = 63349
 
 [hardcopy]

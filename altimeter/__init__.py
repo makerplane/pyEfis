@@ -150,6 +150,7 @@ class Altimeter_Tape(QGraphicsView):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                       -self._altimeter * self.pph + 5000 + self.height() / 2)
+    
 
 #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
