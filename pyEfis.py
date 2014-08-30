@@ -280,68 +280,6 @@ class main(QMainWindow):
             self.thread1 = fgfs.UDP_Process(self.queue)
             self.thread1.start()
 
-        elif test == 'test':
-            roll = QSlider(Qt.Horizontal, w)
-            roll.setMinimum(-180)
-            roll.setMaximum(180)
-            roll.setValue(0)
-            roll.resize(200, 20)
-            roll.move(440, 100)
-
-            pitch = QSlider(Qt.Vertical, w)
-            pitch.setMinimum(-90)
-            pitch.setMaximum(90)
-            pitch.setValue(0)
-            pitch.resize(20, 200)
-            pitch.move(360, 180)
-
-            smap = QSlider(Qt.Horizontal, w)
-            smap.setMinimum(0)
-            smap.setMaximum(30)
-            smap.setValue(0)
-            smap.resize(200, 20)
-            smap.move(w.width() - 200, 200)
-
-            srpm = QSlider(Qt.Horizontal, w)
-            srpm.setMinimum(0)
-            srpm.setMaximum(3000)
-            srpm.setValue(0)
-            srpm.resize(200, 20)
-            srpm.move(w.width() - 200, 100)
-
-            heading = QSpinBox(w)
-            heading.move(0, instHeight + 100)
-            heading.setRange(0, 360)
-            heading.setValue(1)
-            heading.hide
-            heading.valueChanged.connect(self.head_tape.setHeading)
-
-            #headingBug = QSpinBox(w)
-            #headingBug.move(650, 680)
-            #headingBug.setRange(0, 360)
-            #headingBug.setValue(1)
-            #headingBug.valueChanged.connect(h.setHeadingBug)
-
-            alt_gauge = QSpinBox(w)
-            alt_gauge.setMinimum(0)
-            alt_gauge.setMaximum(10000)
-            alt_gauge.setValue(0)
-            alt_gauge.setSingleStep(10)
-            alt_gauge.move(instWidth + 100, 100)
-            alt_gauge.valueChanged.connect(self.alt_tape.setAltimeter)
-
-            as_gauge = QSpinBox(w)
-            as_gauge.setMinimum(0)
-            as_gauge.setMaximum(140)
-            as_gauge.setValue(0)
-            as_gauge.move(10, 100)
-            as_gauge.valueChanged.connect(self.as_tape.setAirspeed)
-
-            pitch.valueChanged.connect(self.a.setPitchAngle)
-            roll.valueChanged.connect(self.a.setRollAngle)
-            smap.valueChanged.connect(self.map_g.setValue)
-            srpm.valueChanged.connect(self.rpm.setValue)
-
     def MSL_Altitude(self, pressure_alt):
         MSL_atl = pressure_alt - std_atm.press2alt(
                                     self.alt_setting.getAltimeter_Setting())
@@ -353,13 +291,8 @@ class main(QMainWindow):
         """
         try:
             msg = self.queue.get(0)
-            #print(self.queue.qsize())
-            msg = msg.split(',')
-            #import time
 
-            #elapse = time.time() - self.start
-            #self.start = time.time()
-            #print (elapse)
+            msg = msg.split(',')
 
             try:
                 self.as_tape.setAirspeed(float(msg[0]))
@@ -414,7 +347,7 @@ class main(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
-    parser.add_argument('-m', '--mode', choices=['test', 'normal', 'fgfs'],
+    parser.add_argument('-m', '--mode', choices=['normal', 'fgfs'],
         default='normal', help='Run pyEFIS in specific mode')
 
     args = parser.parse_args()
