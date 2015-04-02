@@ -17,3 +17,15 @@ for CANBus.
 
 This program is quite immature at this stage and should not be used
 in an aircraft of any kind.
+
+
+You connect FlightGear to pyEFIS you need to copy pyefis.xml to Protocol in the FGRoot directort.
+
+Launch FlightGear with this command addtional
+--generic=socket,out,10,IP of PC with pyEFIS,34200,udp,pyefis
+
+Controls
+
+'[' and ']' Keys changes the Altimeter Setting
+
+'m' Changes Airspeed mode from IAS , TAS, and GS

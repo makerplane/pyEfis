@@ -1,0 +1,21 @@
+Metadata-Version: 1.0
+Name: AeroCalc
+Version: 0.11
+Summary: Aeronautical Engineering Calculations
+Home-page: http://www.kilohotel.com/python/aerocalc
+Author: Kevin Horton
+Author-email: kevin01@kilohotel.com
+License: BSD
+Description: 
+        AeroCalc is a pure python package that performs various aeronautical
+        engineering calculations.  Currently it provides airspeed conversions,
+        standard atmosphere calculations, static source error correction calculations
+        and unit conversions.
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering :: Atmospheric Science
