@@ -62,12 +62,12 @@ class Airspeed(QWidget):
 
         # Dial Setup
         # V Speeds
-        Vs = 45
-        Vs0 = 40
-        Vno = 125
-        Vne = 140
-        #Va = 120
-        Vfe = 70
+        Vs = 40
+        Vs0 = 38
+        Vno = 80
+        Vne = 122
+        #Va = 60
+        Vfe = 60
 
         # VSpeed to angle for drawArc
         Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
@@ -152,12 +152,12 @@ class Airspeed_Tape(QGraphicsView):
     def resizeEvent(self, event):
 
         # V Speeds
-        #Vs = 45
-        Vs0 = 40
-        Vno = 125
-        Vne = 140
-        #Va = 120
-        Vfe = 70
+        #Vs = 40
+        Vs0 = 38
+        Vno = 80
+        Vne = 122
+        #Va = 65
+        Vfe = 60
 
         w = self.width()
         h = self.height()
@@ -170,16 +170,16 @@ class Airspeed_Tape(QGraphicsView):
         dialPen.setWidth(2)
 
         vnePen = QPen(QColor(Qt.red))
-        vnePen.setWidth(8)
+        vnePen.setWidth(40)
 
         vsoPen = QPen(QColor(Qt.white))
-        vsoPen.setWidth(8)
+        vsoPen.setWidth(40)
 
         vnoPen = QPen(QColor(Qt.green))
-        vnoPen.setWidth(8)
+        vnoPen.setWidth(40)
 
         yellowPen = QPen(QColor(Qt.yellow))
-        yellowPen.setWidth(8)
+        yellowPen.setWidth(40)
 
         self.scene = QGraphicsScene(0, 0, w, speed_pixel)
         self.scene.addRect(0, 0, w, speed_pixel,
