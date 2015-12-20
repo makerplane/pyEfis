@@ -30,7 +30,7 @@ class AI(QGraphicsView):
         self.setFocusPolicy(Qt.NoFocus)
         self._rollAngle = 0
         self._pitchAngle = 0
-        self.fontSize = 30
+        self.fontSize = 20
 
     def resizeEvent(self, event):
         #Setup the scene that we use for the background of the AI
