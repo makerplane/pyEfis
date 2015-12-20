@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+
+ <generic>
+
+  <output>
+   <line_separator>newline</line_separator>
+   <var_separator>,</var_separator>
+
+   <chunk>
+    <name>indicated speed (kt)</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/airspeed-indicator/indicated-speed-kt</node>
+   </chunk>
+
+   <chunk>
+    <name>pitch att (deg)</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/orientation/pitch-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>Roll att (deg)</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/orientation/roll-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>magnetic heading (deg)</name>
+    <type>float</type>
+    <format>%.1f</format>
+    <node>/orientation/heading-magnetic-deg</node>
+   </chunk>
+
+   <chunk>
+    <name>Altitude</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/instrumentation/altimeter/pressure-alt-ft</node>
+   </chunk>
+
+   <chunk>
+    <name>Voltage</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/systems/electrical/volts</node>
+   </chunk>
+
+   <chunk>
+    <name>co</name>
+    <type>float</type>
+    <format>%.4e</format>
+    <node>/systems/electrical/co_sensor</node>
+   </chunk>
+
+   <chunk>
+    <name>OAT</name>
+    <type>double</type>
+    <format>%.4e</format>
+    <node>/environment/temperature-degc</node>
+   </chunk>
+  </output>
+
+ </generic>
+
+</PropertyList>
