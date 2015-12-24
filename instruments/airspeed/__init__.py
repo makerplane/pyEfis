@@ -147,7 +147,7 @@ class Airspeed(QWidget):
 class Airspeed_Tape(QGraphicsView):
     def __init__(self, parent=None):
         super(Airspeed_Tape, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -188,7 +188,7 @@ class Airspeed_Tape(QGraphicsView):
 
         self.scene = QGraphicsScene(0, 0, w, speed_pixel)
         self.scene.addRect(0, 0, w, speed_pixel,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+                           QPen(QColor(32, 32, 32, 10)), QBrush(QColor(32, 32, 32, 10)))
 
         for i in range(150, -1, -5):
             if i % 10 == 0:
@@ -236,9 +236,9 @@ class Airspeed_Tape(QGraphicsView):
 
         marks = QPen(Qt.white)
         marks.setWidth(4)
-        p.translate(w / 2, h / 2)
+        p.translate(0, h / 2)
         p.setPen(marks)
-        p.drawLine(QLine(w / 2, 0, 0, 0))
+        p.drawLine(QLine(w / 3, 0, 0, 0))
 
     def getAirspeed(self):
         return self._airspeed
