@@ -111,7 +111,7 @@ class Altimeter(QWidget):
 class Altimeter_Tape(QGraphicsView):
     def __init__(self, parent=None):
         super(Altimeter_Tape, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -132,7 +132,7 @@ class Altimeter_Tape(QGraphicsView):
 
         self.scene = QGraphicsScene(0, 0, w, height_pixel)
         self.scene.addRect(0, 0, w, height_pixel,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+                           QPen(QColor(32, 32, 32, 10)), QBrush(QColor(32, 32, 32, 10)))
 
         for i in range(100, -1, -1):
             if i % 2 == 0:
@@ -167,9 +167,9 @@ class Altimeter_Tape(QGraphicsView):
 
         marks = QPen(Qt.white)
         marks.setWidth(4)
-        p.translate(w / 2, h / 2)
+        p.translate(w , h / 2)
         p.setPen(marks)
-        p.drawLine(QLine(0, 0, -w / 2, 0))
+        p.drawLine(QLine(0, 0, -w / 5, 0))
 
     def getAltimeter(self):
         return self._altimeter
