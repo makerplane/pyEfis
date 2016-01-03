@@ -147,3 +147,87 @@ class TurnCoordinator(QWidget):
             self.update()
 
     latAcc = property(getLatAcc, setLatAcc)
+
+class TurnCoordinator_Tape(QWidget):
+    def __init__(self, parent=None):
+        super(TurnCoordinator_Tape, self).__init__(parent)
+        self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
+        self.setFocusPolicy(Qt.NoFocus)
+        self._rate = 0.0
+        self._latAcc = 0.0
+
+    def resizeEvent(self, event):
+        self.tick_thickness = self.height() / 2
+        self.tick_length = self.width() / 2
+        self.background = QPixmap(self.width(), self.height())
+
+        p = QPainter(self.background)
+        p.setRenderHint(QPainter.Antialiasing)
+        pen = QPen(QColor(Qt.white))
+        pen.setWidth(2)
+        brush = QBrush(QColor(Qt.white))
+        p.setPen(pen)
+        self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
+        self.r = min(self.width(), self.height()) / 2 - 25
+
+        # this draws the tick boxes
+        thickness = self.tick_thickness
+        length = self.tick_length
+        rect = QRect(-(self.r), 0 - thickness / 2,
+                     length, thickness)
+        p.setBrush(brush)
+        p.save()
+        p.translate(self.center)
+        p.restore()
+
+        # TC Box
+        self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
+        self.boxTop = self.center.y() + (self.r -
+                      length) * math.sin(math.radians(30)) + thickness
+        rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
+                     QPoint(self.center.x() + self.boxHalfWidth,
+                            self.boxTop + length))
+        p.drawRect(rect)
+        #Draw the little airplane center
+        p.drawEllipse(self.center, thickness, thickness)
+        # vertical black lines on TC
+        pen.setColor(QColor(Qt.black))
+        pen.setWidth(4)
+        p.setPen(pen)
+        p.drawLine(self.center.x() - 30, self.boxTop,
+                   self.center.x() - 30, self.boxTop + length + 2)
+        p.drawLine(self.center.x() + 30, self.boxTop,
+                   self.center.x() + 30, self.boxTop + length + 2)
+
+    def paintEvent(self, event):
+
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+
+        # Just to make it a bit easier
+        thickness = self.tick_thickness
+        length = self.tick_length
+
+        # Insert Background
+        p.drawPixmap(0, 0, self.background)
+
+        # Draw TC Ball
+        pen = QPen(QColor(Qt.black))
+        brush = QBrush(QColor(Qt.black))
+        pen.setWidth(2)
+        p.setPen(pen)
+        p.setBrush(brush)
+        center = QPointF(self.center.x() + self.boxHalfWidth * 4 * self._latAcc,
+                         self.boxTop + length / 2)
+        p.drawEllipse(center,thickness , thickness)
+
+
+    def getLatAcc(self):
+        return self._latAcc
+
+    def setLatAcc(self, acc):
+        if acc != self._latAcc:
+            self._latAcc = acc
+            self.update()
+
+    latAcc = property(getLatAcc, setLatAcc)
