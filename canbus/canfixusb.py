@@ -15,14 +15,16 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from exceptions import *
+from .exceptions import *
 import serial
 import time
 import canbus
 #from serial.tools.list_ports import comports
 
+
 class Adapter():
-    """Class that represents an the Open Source CAN-FIX-it USB to CANBus adapter"""
+    """Class that represents an the Open Source
+       CAN-FIX-it USB to CANBus adapter"""
     def __init__(self):
         self.name = "CAN-FIX-it USB Adapter"
         self.shortname = "canfixusb"
@@ -39,13 +41,13 @@ class Adapter():
             else:
                 s = s + x
                 if x == '\n':
-                    if s[0] == ch.lower(): # Good Response
+                    if s[0] == ch.lower():  # Good Response
                         return s
-                    if s[0] == "*": # Error
+                    if s[0] == "*":  # Error
                         raise BusReadError("Error " + s[1] + " Returned")
 
-    def __sendCommand(self, command, attempts = 3):
-        n = 0 #attempt counter
+    def __sendCommand(self, command, attempts=3):
+        n = 0  # attempt counter
         if command[-1] != '\n':
             command = command + '\n'
 
@@ -61,31 +63,32 @@ class Adapter():
                 if n == attempts:
                     raise BusReadError("Unable to send Command " + command)
                 time.sleep(self.timeout)
-            n+=1
-
+            n += 1
 
     def connect(self, config):
         try:
             self.bitrate = config.bitrate
         except KeyError:
             self.bitrate = 125
-        bitrates = {125:"B125\n", 250:"B250\n", 500:"B500\n", 1000:"B1000\n"}
+        bitrates = {125: "B125\n", 250: "B250\n",
+                    500: "B500\n", 1000: "B1000\n"}
         try:
             self.portname = config.device
         except KeyError:
             self.portname = comports[0][0]
-            print "Setting Port to default" + self.portname
+            print("Setting Port to default" + self.portname)
         try:
             self.timeout = config.timeout
         except KeyError:
             self.timeout = 0.25
 
         try:
-            self.ser = serial.Serial(self.portname, 115200, timeout=self.timeout)
+            self.ser = serial.Serial(self.portname, 115200,
+                                     timeout=self.timeout)
 
-            print "Reseting CAN-FIX-it"
+            print("Reseting CAN-FIX-it")
             self.__sendCommand("K")
-            print "Setting Bit Rate"
+            print("Setting Bit Rate")
             self.__sendCommand(bitrates[self.bitrate])
             self.open()
         except BusReadError:
@@ -95,11 +98,11 @@ class Adapter():
         self.close()
 
     def open(self):
-        print "Opening CAN Port"
+        print("Opening CAN Port")
         self.__sendCommand("O")
-        
+
     def close(self):
-        print "Closing CAN Port"
+        print("Closing CAN Port")
         self.__sendCommand("C")
 
     def error(self):
@@ -128,9 +131,9 @@ class Adapter():
 
         if result[0] != 'r':
             raise BusReadError("Unknown response from Adapter")
-        data= []
-        for n in range((len(result)-5)/2):
-            data.append(int(result[5+n*2:7+n*2], 16))
+        data = []
+        for n in range((len(result) - 5) / 2):
+            data.append(int(result[5 + n * 2:7 + n * 2], 16))
         frame = canbus.Frame(int(result[1:4], 16), data)
         #print frame
         return frame
