@@ -18,23 +18,22 @@
 # CANBus communication adapters.
 
 
-from exceptions import *
+from .exceptions import *
 import serial
 import threading
-import Queue
-import time
 
 # Import and add each Adapter class from the files.  There may be a way
 # to do this in a loop but for now this will work.
-import simulate
-import canfixusb
-import easy
-import network
+from . import simulate
+from . import canfixusb
+from . import easy
+from . import network
+
 
 def getSerialPortList():
     # Scan for available ports.
     available = []
-    
+
     for i in config.portlist:
         try:
             s = serial.Serial(i)
@@ -50,12 +49,15 @@ class Frame(object):
     def __init__(self, id=0, data=[]):
         self.id = id
         self.data = data
+
     def __str__(self):
         s = hex(self.id)[2:] + ':'
         for each in self.data:
-            if each < 16: s = s + '0'
-            s = s + hex(each)[2:]  + ' '
+            if each < 16:
+                s = s + '0'
+            s = s + hex(each)[2:] + ' '
         return s.upper()
+
 
 class SendThread(threading.Thread):
     def __init__(self, adapter, queue):
@@ -63,11 +65,11 @@ class SendThread(threading.Thread):
         self.adapter = adapter
         self.sendQueue = queue
         self.getout = False
-    
+
     def run(self):
         while(True):
             try:
-                frame = self.sendQueue.get(timeout = 0.5)
+                frame = self.sendQueue.get(timeout=0.5)
                 self.adapter.sendFrame(frame)
             except Queue.Empty:
                 pass
@@ -78,8 +80,8 @@ class SendThread(threading.Thread):
                 if(self.getout):
                     break
                 #print "Send Thread", adapterIndex
-        print "End of the Send Thread"
-    
+        print("End of the Send Thread")
+
     def quit(self):
         self.getout = True
 
@@ -90,7 +92,7 @@ class RecvThread(threading.Thread):
         self.adapter = adapter
         self.recvQueue = queue
         self.getout = False
-    
+
     def run(self):
         while(True):
             try:
@@ -99,40 +101,39 @@ class RecvThread(threading.Thread):
             except DeviceTimeout:
                 pass
             except BusError:
-                print "BussError"
+                print("BussError")
                 # TODO: Should probably handle some of these.
                 pass
             finally:
                 if(self.getout):
                     break
                 #print "Receive Thread", adapterIndex
-        print "End of the Receive thread"
-        
+        print("End of the Receive thread")
+
     def quit(self):
         self.getout = True
+
 
 class Config(object):
     def __init__(self):
         self.device = None
         self.bitrate = None
         self.ipaddress = '127.0.0.1'
-        self.port = 63349 #NEFIX on keypad
+        self.port = 63349  # NEFIX on keypad
         self.timeout = 0.25
-    
 
 
 class Connection(object):
-    def __init__(self, adapter = None):
+    def __init__(self, adapter=None):
         self.adapterString = adapter
         self.device = None
         self.bitrate = 125
         self.ipaddress = '127.0.0.1'
-        self.port = 63349 #NEFIX on keypad
+        self.port = 63349  # NEFIX on keypad
         self.timeout = 0.25
         self.sendQueue = Queue.Queue()
         self.recvQueue = Queue.Queue()
-        
-        
+
     def connect(self):
         if self.adapterString.lower() == 'simulate':
             self.adapter = simulate.Adapter()
@@ -165,27 +166,26 @@ class Connection(object):
             self.recvThread.join()
         self.sendThread = None
         self.recvThread = None
-        
+
         self.adapter.disconnect()
         self.adapter = None
-        
+
     def isConnected(self):
         if self.sendThread.isrunning() and self.recvThread.isrunning():
             return True
         else:
             return False
 
-
     def sendFrame(self, frame):
-        if self.adapter == None:
+        if self.adapter is None:
             raise BusInitError("No Connection to CAN-Bus")
         self.sendQueue.put(frame)
 
-    def recvFrame(self, timeout = 0.25):
-        if self.adapter == None:
+    def recvFrame(self, timeout=0.25):
+        if self.adapter is None:
             raise BusInitError("No Connection to CAN-Bus")
         try:
-            frame = self.recvQueue.get(timeout = timeout)
+            frame = self.recvQueue.get(timeout=timeout)
             return frame
         except Queue.Empty:
             raise DeviceTimeout()
