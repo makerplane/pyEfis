@@ -19,20 +19,24 @@ class BusError(Exception):
     """Base class for exceptions in this module"""
     pass
 
+
 class BusInitError(BusError):
     """CAN Bus Initialization Error"""
     def __init__(self, msg):
         self.msg = msg
+
 
 class BusReadError(BusError):
     """CAN Bus Read Error"""
     def __init__(self, msg):
         self.msg = msg
 
+
 class BusWriteError(BusError):
     """CAN Bus Write Error"""
     def __init__(self, msg):
         self.msg = msg
+
 
 class DeviceTimeout(Exception):
     """Device Timeout Exception"""
