@@ -25,18 +25,19 @@ import struct
 import time
 import canbus
 
+
 class NodeAlarm(object):
     """Represents a Node Alarm"""
     def __init__(self, frame=None):
         if frame != None:
             self.setFrame(frame)
-            
+
     def setFrame(self, frame):
         self.node = frame.id
-        self.alarm = frame.data[0] + frame.data[1]*256
+        self.alarm = frame.data[0] + frame.data[1] * 256
         self.data = frame.data[2:]
-        self.data += [0] * (5-len(self.data)) # Pad data with zeros
-    
+        self.data += [0] * (5 - len(self.data))  # Pad data with zeros
+
     def getFrame(self):
         frame = canbus.Frame()
         frame.id = self.node
@@ -45,12 +46,13 @@ class NodeAlarm(object):
         for each in self.data:
             frame.data.append(each)
         return frame
-    
+
     frame = property(getFrame, setFrame)
-    
+
     def __str__(self):
         s = "[" + str(self.node) + "] Node Alarm " + str(self.alarm) + " Data " + str(self.data)
         return s
+
 
 class Parameter(object):
     """Represents a normal parameter update frame"""
@@ -81,7 +83,7 @@ class Parameter(object):
         self.multiplier = p.multiplier
         if self.multiplier == None:
             self.multiplier = 1
-            
+
     def setIdentifier(self, identifier):
         """Set the identifier of the Parameter, identifier can be either
         the actual integer identifier or the name of the parameter"""
@@ -89,15 +91,15 @@ class Parameter(object):
             self.frame = canbus.Frame(identifier)
         else:
             raise ValueError("Bad Parameter Identifier Given")
-            
+
         self.__identifier = self.frame.id
         self.__parameterData(self.frame.id)
-        
+
     def getIdentifier(self):
         return self.__identifier
-    
+
     identifier = property(getIdentifier, setIdentifier)
-    
+
     def setName(self, name):
         s = name.upper()
         for i in parameters:
@@ -107,12 +109,12 @@ class Parameter(object):
                 self.__parameterData(self.__frame.id)
                 return
         raise ValueError("Unknown Parameter Name")
-        
+
     def getName(self):
         return self.__name
 
     name = property(getName, setName)
-    
+
     def setFailure(self, failure):
         if failure:
             self.function |= 0x04
@@ -120,12 +122,12 @@ class Parameter(object):
         else:
             self.function &= ~0x04
             self.__failure = False
-    
+
     def getFailure(self):
         return self.__failure
-    
+
     failure = property(getFailure, setFailure)
-    
+
     def setQuality(self, quality):
         if quality:
             self.function |= 0x02
@@ -133,12 +135,12 @@ class Parameter(object):
         else:
             self.function &= ~0x02
             self.__quality = False
-    
+
     def getQuality(self):
         return self.__quality
-    
+
     quality = property(getQuality, setQuality)
-    
+
     def setAnnunciate(self, annunciate):
         if annunciate:
             self.function |= 0x01
@@ -146,12 +148,12 @@ class Parameter(object):
         else:
             self.function &= ~0x01
             self.__annunciate = False
-    
+
     def getAnnunciate(self):
         return self.__annunciate
-    
+
     annunciate = property(getAnnunciate, setAnnunciate)
-    
+
     def setMeta(self, meta):
         if isinstance(meta, int):
             self.function &= 0x0F
@@ -163,15 +165,15 @@ class Parameter(object):
                 if p.auxdata[each].upper() == meta.upper():
                     self.function &= 0x0F
                     self.function |= each << 4
-                    self.__meta = p.auxdata[each] # Get's the case right 
+                    self.__meta = p.auxdata[each] # Get's the case right
         else:
             self.__meta = None
-        
+
     def getMeta(self):
         return self.__meta
-        
+
     meta = property(getMeta, setMeta)
-    
+
     def setFrame(self, frame):
         self.__frame = frame
         p = parameters[frame.id]
@@ -198,9 +200,9 @@ class Parameter(object):
             self.meta = p.auxdata[self.function>>4]
         except KeyError:
             self.meta = None
-        
+
         self.updated = time.time()
-        
+
     def getFrame(self):
         self.data = []
         self.data.append(self.node % 256)
@@ -208,35 +210,35 @@ class Parameter(object):
             self.data.append(self.index % 256)
         else:
             self.data.append(0)
-        
+
         self.data.append(self.function)
         self.data.extend(self.pack())
         self.__frame.data = self.data
         return self.__frame
-    
+
     frame = property(getFrame, setFrame)
-    
+
     def getFullName(self):
         if self.indexName:
             return "%s %s %i" % (self.__name, self.indexName, self.index + 1)
         else:
-            return self.__name 
-        
+            return self.__name
+
     fullName = property(getFullName)
-    
+
     def valueStr(self, units=False):
-        if self.__identifier == 0x580: #Time  
+        if self.__identifier == 0x580:  # Time
             return "%02i:%02i:%02i" % (self.value[0], self.value[1], self.value[2])
-        elif self.__identifier == 0x581: #Date
+        elif self.__identifier == 0x581:  # Date
             return "%i-%i-%i" % (self.value[0], self.value[1], self.value[2])
         else:
             if self.units:
                 return str(self.value) + " " + self.units
             else:
                 return str(self.value)
-        
+
     def unpack(self):
-        if self.type == "UINT, USHORT[2]": #Unusual case of the date
+        if self.type == "UINT, USHORT[2]":  # Unusual case of the date
             x = []
             x.append(getValue("UINT", self.data[0:2],1))
             x.append(getValue("USHORT", self.data[2:3], 1))
@@ -258,7 +260,7 @@ class Parameter(object):
             x = getValue(self.type, self.data, self.multiplier)
             if x == None: self.__failure = True
         return x
-    
+
     def pack(self):
         if self.type == "UINT, USHORT[2]": # unusual case of the date
            x=[]
@@ -277,7 +279,7 @@ class Parameter(object):
             return x
         else:
             return setValue(self.type, self.value, self.multiplier)
-    
+
     def __cmp__(self, other):
         if self.__identifier < other.__identifier:
             return -1
@@ -291,7 +293,7 @@ class Parameter(object):
             else:
                 return 0
 
-    
+
     def __str__(self):
         s = '[' + str(self.node) + '] ' + self.name
         if self.meta: s = s + ' ' + self.meta
@@ -325,7 +327,7 @@ class Parameter(object):
             if self.annunciate:
                 s = s + ' [ANNUNC]'
         return s
-        
+
 class TwoWayMsg(object):
     """Represents 2 Way communication channel data"""
     def __init__(self, frame=None):
@@ -333,7 +335,7 @@ class TwoWayMsg(object):
             self.setFrame(frame)
         else:
             self.type = "Request"
-    
+
     def setFrame(self, frame):
         self.channel = (frame.id - 1760) /2
         self.data = frame.data
@@ -341,7 +343,7 @@ class TwoWayMsg(object):
             self.type = "Request"
         else:
             self.type = "Response"
-    
+
     def getFrame(self):
         frame = canbus.Frame()
         frame.id = self.channel*2 + 1760
@@ -349,7 +351,7 @@ class TwoWayMsg(object):
             frame.id += 1
         frame.data = self.data
         return frame
-    
+
     frame = property(getFrame, setFrame)
 
     def __str__(self):
@@ -361,7 +363,7 @@ class NodeSpecific(object):
     codes = ["Node Identification", "Bit Rate Set", "Node ID Set", "Disable Parameter",
              "Enable Parameter", "Node Report", "Node Status", "Update Firmware",
              "Connection Request", "Node Configuration Set", "Node Configuration Query"]
-    
+
     def __init__(self, frame=None):
         if frame != None:
             self.setFrame(frame)
@@ -374,7 +376,7 @@ class NodeSpecific(object):
         self.destNode = frame.data[0]
         self.controlCode = frame.data[1]
         self.data = frame.data[2:]
-    
+
     def getFrame(self):
         f = canbus.Frame(self.sendNode + 1792)
         f.data.append(self.destNode)
@@ -382,9 +384,9 @@ class NodeSpecific(object):
         for each in self.data:
             f.data.append(each)
         return f
-    
+
     frame = property(getFrame, setFrame)
-    
+
     def __str__(self):
         s = '[' + str(self.sendNode) + ']'
         s = s + "->[" + str(self.destNode) + '] '
@@ -413,7 +415,7 @@ def getValue(datatype, data, multiplier):
     table = {"SHORT":"<b", "USHORT":"<B", "UINT":"<H",
              "INT":"<h", "DINT":"<l", "UDINT":"<L", "FLOAT":"<f"}
     x = None
-    
+
     #This code handles the bit type data types
     if datatype == "BYTE":
         x = []
@@ -447,11 +449,11 @@ def getValue(datatype, data, multiplier):
         return None
     except struct.error:
         return None
-        
+
 def setValue(datatype, value, multiplier=1):
     table = {"SHORT":"<b", "USHORT":"<B", "UINT":"<H",
              "INT":"<h", "DINT":"<l", "UDINT":"<L", "FLOAT":"<f"}
-    
+
     if datatype == "BYTE":
         return None
     elif datatype == "WORD":
@@ -463,7 +465,7 @@ def setValue(datatype, value, multiplier=1):
         if "CHAR" in datatype:
             return [ord(value)]
         return None
-        
+
 def parseFrame(frame):
     """Determine what type of CAN-FIX frame this is and return an object
        that represents that frame type properly.  Returns None on error"""
@@ -480,7 +482,7 @@ def parseFrame(frame):
     else:
         return None
 
-        
+
 def __getText(element, text):
     try:
         return element.find(text).text
@@ -510,7 +512,7 @@ class ParameterDef():
         self.format = None
         self.auxdata = {}
         self.remarks = []
-    
+
     def __str__(self):
         s = "(0x%03X, %d) %s\n" % (self.id, self.id, self.name)
         if self.type:
@@ -528,7 +530,7 @@ class ParameterDef():
             s = s + "  Max:       %s\n" % str(self.max)
         if self.format:
             s = s + "  Format:    %s\n" % self.format
-        
+
         if self.index:
             s = s + "  Index:     %s\n" % self.index
         if self.auxdata:
@@ -540,10 +542,10 @@ class ParameterDef():
             for each in self.remarks:
                 s = s + "    " + each + "\n"
         return s
-    
-        
+
+
 tree = ET.parse(os.path.dirname(__file__)+"/canfix.xml")
-root = tree.getroot()            
+root = tree.getroot()
 if root.tag != "protocol":
     raise ValueError("Root Tag is not protocol'")
 
@@ -568,7 +570,7 @@ def __add_group(element):
 def __add_parameter(element):
     pid = int(element.find("id").text)
     count = int(element.find("count").text)
-    
+
     p = ParameterDef(element.find("name").text)
     p.units = __getText(element, "units")
     p.format = __getText(element, "format")
@@ -578,12 +580,12 @@ def __add_parameter(element):
     p.min = __getFloat(__getText(element, "min"))
     p.max = __getFloat(__getText(element, "max"))
     p.index = __getText(element, "index")
-    
+
     l = element.findall('aux')
     for each in l:
         p.auxdata[int(each.attrib['id'])] = each.text
     l = element.findall('remarks')
-    
+
     for each in l:
         p.remarks.append(each.text)
 
@@ -596,7 +598,7 @@ def __add_parameter(element):
     else:
         p.id = pid
         parameters[pid] = p
-    
+
 for child in root:
     if child.tag == "group":
         __add_group(child)
@@ -607,13 +609,13 @@ def getGroup(id):
     for each in groups:
         if id >= each['startid'] and id <= each['endid']:
             return each
-            
+
 #if __name__ == "__main__":
     #print "CANFIX Protocol Version " + version
     #print "Groups:"
     #for each in groups:
         #print "  %s %d-%d" % (each["name"], each["startid"], each["endid"])
-    
+
     #print "Parameters:"
     #for each in parameters:
         #print parameters[each]
