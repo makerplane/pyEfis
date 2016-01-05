@@ -18,14 +18,16 @@
 
 import sys
 sys.path.insert(0, './lib/AeroCalc-0.11/')
+sys.path.insert(0, '/home/neil/Project/FIX-Gateway/src/')
 
-import Queue
+import queue
 import argparse
-import ConfigParser  # configparser for Python 3
+import configparser
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from decimal import *
 from aerocalc import std_atm
+#from plugins import command
 
 import fix
 import gauges
@@ -53,7 +55,6 @@ class FlightData (QObject):
     OilTempChanged = pyqtSignal(float, name="OilTempChanged")
     FuelFlowChanged = pyqtSignal(float, name="FuelFlowChanged")
     FuelQtyChanged = pyqtSignal(float, name="FuelQtyChanged")
-    #Changed = pyqtSignal(float, name="Changed")
 
     def getParameter(self, param):
         if param.name == "Roll Angle":
@@ -87,7 +88,7 @@ class main(QMainWindow):
         super(main, self).__init__(parent)
 
         resolution = QDesktopWidget().screenGeometry()
-        config = ConfigParser.RawConfigParser()
+        config = configparser.RawConfigParser()
         config.read('config')
         self.screen = config.getboolean("Screen", "screenFullSize")
         if self.screen:
@@ -99,18 +100,17 @@ class main(QMainWindow):
         self.screenColor = config.get("Screen", "screenColor")
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.setupUi(self, test)
         self.start = 0
         if self.screen:
-            self.showFullScreen()
+           self.showFullScreen()
 
         if test == 'normal':
             self.flightData = FlightData()
             self.cfix = fix.Fix(self.canAdapter, self.canDevice)
             self.cfix.setParameterCallback(self.flightData.getParameter)
         self.setupUi(self, test)
-
 
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
@@ -278,6 +278,7 @@ class main(QMainWindow):
             self.timer.start(6)
 
             self.thread1 = fgfs.UDP_Process(self.queue)
+            self.thread1.setDaemon(True)
             self.thread1.start()
 
     def MSL_Altitude(self, pressure_alt):
@@ -290,10 +291,8 @@ class main(QMainWindow):
         Pull messages from the Queue and updates the Respected gauges.
         """
         try:
-            msg = self.queue.get(0)
-
+            msg = self.queue.get(0).decode('UTF-8')
             msg = msg.split(',')
-
             try:
                 self.as_tape.setAirspeed(float(msg[0]))
                 if self.asd_Box.getMode() == 2:
@@ -319,7 +318,7 @@ class main(QMainWindow):
             except:
                 pass
 
-        except Queue.Empty:
+        except queue.Empty:
             pass
 
     def closeEvent(self, event):
@@ -348,12 +347,11 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['normal', 'fgfs'],
-        default='normal', help='Run pyEFIS in specific mode')
+        default='fgfs', help='Run pyEFIS in specific mode')
 
     args = parser.parse_args()
-    print("Starting in %s Mode" % (args.mode,))
+    print(("Starting in %s Mode" % (args.mode,)))
     form = main(args.mode)
-    form.show()
 
     if args.mode == 'normal':
         form.cfix.start()
