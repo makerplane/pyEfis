@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 import socket
 import threading
+import os
+import time
 
 
 class UDP_Process(threading.Thread):
@@ -43,7 +45,7 @@ if __name__ == '__main__':
     Name_List = []
     Name_Value = []
 
-    for node in tree.findall('.//name'):
+    for node in tree.findall('.//key'):
         Name_List.append(node.text)
 
     for node in tree.findall('.//node'):
@@ -52,12 +54,20 @@ if __name__ == '__main__':
     while True:
         try:
             data_test = q.get(0)
+            data_test = data_test.decode()
+            data_test = data_test.split(',')
+
             for data in data_test:
                 if len(Name_List) == len(Name_Value):
-                    for l, a, d in zip(Name_List, Name_Value, data_test):
-                        print((l, a, d))
+                    for l, d in zip(Name_List, data_test):
+                        try:
+                            print((l, float(d)))
+                        except ValueError:
+                            print((l, d))
                 else:
                     print(('Name value mismatch in :', f))
+                time.sleep(0.01)
+                os.system('clear')
         except queue.Empty:
             pass
     t.join()
