@@ -103,8 +103,6 @@ class main(QMainWindow):
         self.queue = queue.Queue()
         self.setupUi(self, test)
         self.start = 0
-        if self.screen:
-           self.showFullScreen()
 
         if test == 'normal':
             self.flightData = FlightData()
@@ -352,6 +350,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(("Starting in %s Mode" % (args.mode,)))
     form = main(args.mode)
+    config = configparser.RawConfigParser()
+    config.read('config')
+    screen = config.getboolean("Screen", "screenFullSize")
+    if screen:
+        form.showFullScreen()
+    else:
+        form.show()
 
     if args.mode == 'normal':
         form.cfix.start()
