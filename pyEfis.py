@@ -102,15 +102,12 @@ class main(QMainWindow):
         self.queue = Queue.Queue()
         self.setupUi(self, test)
         self.start = 0
-        if self.screen:
-            self.showFullScreen()
 
         if test == 'normal':
             self.flightData = FlightData()
             self.cfix = fix.Fix(self.canAdapter, self.canDevice)
             self.cfix.setParameterCallback(self.flightData.getParameter)
         self.setupUi(self, test)
-
 
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
@@ -353,7 +350,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print("Starting in %s Mode" % (args.mode,))
     form = main(args.mode)
-    form.show()
+    config = ConfigParser.RawConfigParser()
+    config.read('config')
+    screen = config.getboolean("Screen", "screenFullSize")
+    if screen:
+        form.showFullScreen()
+    else:
+        form.show()
 
     if args.mode == 'normal':
         form.cfix.start()
