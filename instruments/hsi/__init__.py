@@ -149,7 +149,7 @@ class DG_Tape(QGraphicsView):
         self._headingSelect = 1
         self._courseSelect = 1
         self._courseDevation = 1
-        self.cardinal = ["N", "E", "S", "W"]
+        self.cardinal = ["N", "E", "S", "W", "N"]
 
     def resizeEvent(self, event):
         w = self.width()
@@ -190,12 +190,20 @@ class DG_Tape(QGraphicsView):
                     t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
                     t.setY(h - t.boundingRect().height())
                 else:
-                    t = self.scene.addText(str(i))
-                    t.setFont(f)
-                    self.scene.setFont(f)
-                    t.setDefaultTextColor(QColor(Qt.white))
-                    t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
-                    t.setY(h - t.boundingRect().height())
+                    if i % 90 == 0:
+                        t = self.scene.addText(self.cardinal[int(i / 90)])
+                        t.setFont(f)
+                        self.scene.setFont(f)
+                        t.setDefaultTextColor(QColor(Qt.cyan))
+                        t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
+                        t.setY(h - t.boundingRect().height())
+                    else:  
+                        t = self.scene.addText(str(i))
+                        t.setFont(f)
+                        self.scene.setFont(f)
+                        t.setDefaultTextColor(QColor(Qt.white))
+                        t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
+                        t.setY(h - t.boundingRect().height())
             else:
                 self.scene.addLine((i * 10) + w / 2, 0,
                                    (i * 10) + w / 2, h / 2 - 20,
