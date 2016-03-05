@@ -16,19 +16,6 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
-sys.path.insert(0, './lib/AeroCalc-0.11/')
-sys.path.insert(0, '/home/neil/Project/FIX-Gateway/src/')
-
-import queue
-import argparse
-import configparser
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-from decimal import *
-from aerocalc import std_atm
-#from plugins import command
-
 import fix
 import gauges
 import ai
@@ -37,6 +24,19 @@ import airspeed
 import altimeter
 import fgfs
 import vsi
+import sys
+import queue
+import argparse
+import configparser
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+from decimal import *
+
+# from plugins import command
+sys.path.insert(0, './lib/AeroCalc-0.11/')
+sys.path.insert(0, '/home/neil/Project/FIX-Gateway/src/')
+from aerocalc import std_atm
+
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -255,8 +255,8 @@ class main(QMainWindow):
             self.flightData.rollChanged.connect(self.a.setRollAngle)
             self.flightData.headingChanged.connect(self.head_tape.setHeading)
             self.flightData.altitudeChanged.connect(self.alt_tape.setAltimeter)
-            self.flightData.altitudeChanged.connect(self.alt_Trend.setAlt_Trend)
-            #self.flightData.vsiChanged.connect(self.alt_Trend.setAlt_Trend)
+            self.flightData.altitudeChanged.connect(self.alt_Trend.setAltTrend)
+            # self.flightData.vsiChanged.connect(self.alt_Trend.setAlt_Trend)
             self.flightData.airspeedChanged.connect(self.as_tape.setAirspeed)
             self.flightData.airspeedChanged.connect(self.as_Trend.setAS_Trend)
             self.flightData.airspeedChanged.connect(self.asd_Box.setIAS)
@@ -269,9 +269,9 @@ class main(QMainWindow):
 
         elif test == 'fgfs':
             self.timer = QTimer()
-            #Timer Signal to run guiUpdate
+            # Timer Signal to run guiUpdate
             QObject.connect(self.timer,
-                               SIGNAL("timeout()"), self.guiUpdate)
+                            SIGNAL("timeout()"), self.guiUpdate)
             # Start the timer 1 msec update
             self.timer.start(6)
 
@@ -295,7 +295,7 @@ class main(QMainWindow):
                 self.as_tape.setAirspeed(float(msg[0]))
                 if self.asd_Box.getMode() == 2:
                     self.asd_Box.setAS_Data(float(msg[15]), float(msg[4]),
-                                             float(msg[18]))
+                                            float(msg[18]))
                 else:
                     self.asd_Box.setAS_Data(float(msg[0]), float(msg[4]),
                                             float(msg[18]))
@@ -312,7 +312,7 @@ class main(QMainWindow):
                 self.rpm.setValue(int(float(msg[7])))
                 self.map_g.setValue(float(msg[8]))
                 self.fuel.setValue(float(msg[13]) + float(msg[14]))
- #('Lat: ', msg[16], 'Long: ', msg[17])
+                # ('Lat: ', msg[16], 'Long: ', msg[17])
             except:
                 pass
 
@@ -345,7 +345,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['normal', 'fgfs'],
-        default='fgfs', help='Run pyEFIS in specific mode')
+                        default='fgfs', help='Run pyEFIS in specific mode')
 
     args = parser.parse_args()
     print(("Starting in %s Mode" % (args.mode,)))

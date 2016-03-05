@@ -64,13 +64,13 @@ class TurnCoordinator(QWidget):
 
         # TC Box
         self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
-        self.boxTop = self.center.y() + (self.r -
-                      length) * math.sin(math.radians(30)) + thickness
+        self.boxTop = self.center.y() + (self.r - length) * (
+                      math.sin(math.radians(30))) + thickness
         rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,
                             self.boxTop + length))
         p.drawRect(rect)
-        #Draw the little airplane center
+        # Draw the little airplane center
         p.drawEllipse(self.center, thickness, thickness)
         # vertical black lines on TC
         pen.setColor(QColor(Qt.black))
@@ -99,7 +99,8 @@ class TurnCoordinator(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        center = QPointF(self.center.x() + self.boxHalfWidth * 4 * self._latAcc,
+        center = QPointF(self.center.x() + self.boxHalfWidth * 4 *
+                         self._latAcc,
                          self.boxTop + length / 2)
         p.drawEllipse(center, length / 2, length / 2)
 

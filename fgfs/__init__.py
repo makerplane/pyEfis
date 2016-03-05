@@ -14,7 +14,7 @@ class UDP_Process(threading.Thread):
         UDP_PORT = 34200
 
         self.sock = socket.socket(socket.AF_INET,  # Internet
-                             socket.SOCK_DGRAM)  # UDP
+                                  socket.SOCK_DGRAM)  # UDP
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.sock.bind((UDP_IP, UDP_PORT))
@@ -22,7 +22,7 @@ class UDP_Process(threading.Thread):
 
     def run(self):
         while self.running:
-            #Reads the UDP packet splits then sends it to the Queue
+            # Reads the UDP packet splits then sends it to the Queue
             data, addr = self.sock.recvfrom(1024)  # buffer size is 1024 bytes
             data_test = data
             if (data_test):
