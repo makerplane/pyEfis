@@ -28,13 +28,13 @@ from decimal import *
 from aerocalc import std_atm
 
 import fix
-import gauges
-import ai
-import hsi
-import airspeed
-import altimeter
+from instruments import gauges
+from instruments import ai
+from instruments import hsi
+from instruments import airspeed
+from instruments import altimeter
 import fgfs
-import vsi
+from instruments import vsi
 
 # This is a container object to hold the callback for the FIX thread
 # which when called emits the signals for each parameter
@@ -54,7 +54,7 @@ class FlightData (QObject):
     FuelFlowChanged = pyqtSignal(float, name="FuelFlowChanged")
     FuelQtyChanged = pyqtSignal(float, name="FuelQtyChanged")
     #Changed = pyqtSignal(float, name="Changed")
-    
+
     def getParameter(self, param):
         if param.name == "Roll Angle":
             self.rollChanged.emit(param.value)
@@ -80,7 +80,7 @@ class FlightData (QObject):
             self.FuelFlowChanged.emit(param.value)
         elif param.name == "Fuel Quantity #1":
             self.FuelQtyChanged.emit(param.value)
-           
+
 
 class main(QMainWindow):
     def __init__(self, test, parent=None):
@@ -94,13 +94,13 @@ class main(QMainWindow):
         self.canAdapter = config.get("CAN-FIX", "canAdapter")
         self.canDevice = config.get("CAN-FIX", "canDevice")
         self.queue = Queue.Queue()
-        
+
         if test == 'normal':
             self.flightData = FlightData()
             self.cfix = fix.Fix(self.canAdapter, self.canDevice)
             self.cfix.setParameterCallback(self.flightData.getParameter)
         self.setupUi(self, test)
-        
+
 
     def setupUi(self, MainWindow, test):
         MainWindow.setObjectName("PFD")
