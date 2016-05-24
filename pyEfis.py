@@ -23,8 +23,9 @@ sys.path.insert(0, './lib/AeroCalc-0.11/')
 import Queue
 import argparse
 import ConfigParser  # configparser for Python 3
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 from decimal import *
 from aerocalc import std_atm
 
@@ -87,12 +88,11 @@ class main(QMainWindow):
         super(main, self).__init__(parent)
 
         config = ConfigParser.RawConfigParser()
-        config.read('config')
+        # TODO: Read command line paramters and set new config path if necessary
+        config.read('config/main.cfg')
         self.width = int(config.get("Screen", "screenSize.Width"))
         self.height = int(config.get("Screen", "screenSize.Height"))
         self.screenColor = config.get("Screen", "screenColor")
-        self.canAdapter = config.get("CAN-FIX", "canAdapter")
-        self.canDevice = config.get("CAN-FIX", "canDevice")
         self.queue = Queue.Queue()
 
         self.setupUi(self, test)
@@ -383,7 +383,7 @@ class main(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
-    parser.add_argument('-m', '--mode', choices=['test', 'normal', 'fgfs'],
+    parser.add_argument('-m', '--mode', choices=['test', 'normal'],
         default='normal', help='Run pyEFIS in specific mode')
 
     args = parser.parse_args()

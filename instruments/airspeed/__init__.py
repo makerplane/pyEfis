@@ -18,9 +18,9 @@ import sys
 sys.path.insert(0, './lib/AeroCalc-0.11/')
 from aerocalc import airspeed
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 class Airspeed(QWidget):
     def __init__(self, parent=None):
@@ -338,7 +338,7 @@ class Airspeed_Mode(QGraphicsView):
             elif self._Mode_Indicator == 2:
                 self._AS_Data_Box = int(AS_Data)
         self.redraw()
-        
+
     def setIAS(self, IAS):
         self.setAS_Data(IAS, 0, 0)
 

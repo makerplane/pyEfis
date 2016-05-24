@@ -15,9 +15,9 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 class Altimeter(QWidget):
     def __init__(self, parent=None):
@@ -150,7 +150,7 @@ class Altimeter_Tape(QGraphicsView):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                       -self._altimeter * self.pph + 5000 + self.height() / 2)
-    
+
 
 #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
