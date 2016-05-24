@@ -17,6 +17,7 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
+# TODO: Should remove and install AeroCalc Properly
 sys.path.insert(0, './lib/AeroCalc-0.11/')
 
 import Queue
@@ -33,7 +34,6 @@ from instruments import ai
 from instruments import hsi
 from instruments import airspeed
 from instruments import altimeter
-import fgfs
 from instruments import vsi
 
 # This is a container object to hold the callback for the FIX thread
@@ -95,10 +95,6 @@ class main(QMainWindow):
         self.canDevice = config.get("CAN-FIX", "canDevice")
         self.queue = Queue.Queue()
 
-        if test == 'normal':
-            self.flightData = FlightData()
-            self.cfix = fix.Fix(self.canAdapter, self.canDevice)
-            self.cfix.setParameterCallback(self.flightData.getParameter)
         self.setupUi(self, test)
 
 
@@ -258,17 +254,6 @@ class main(QMainWindow):
             self.flightData.OilTempChanged.connect(self.ot.setValue)
             self.flightData.FuelFlowChanged.connect(self.ff.setValue)
             self.flightData.FuelQtyChanged.connect(self.fuel.setValue)
-
-        elif test == 'fgfs':
-            self.timer = QTimer()
-            #Timer Signal to run guiUpdate
-            QObject.connect(self.timer,
-                               SIGNAL("timeout()"), self.guiUpdate)
-            # Start the timer 1 msec update
-            self.timer.start(1)
-
-            self.thread1 = fgfs.UDP_Process(self.queue)
-            self.thread1.start()
 
         elif test == 'test':
             roll = QSlider(Qt.Horizontal, w)
