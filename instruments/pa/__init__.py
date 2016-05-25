@@ -16,8 +16,14 @@
 
 import sys
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+try:
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+except:
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+
 
 class Panel_Annunciator(QGraphicsView):
     def __init__(self, parent=None):
@@ -65,7 +71,7 @@ class Panel_Annunciator(QGraphicsView):
         t.setDefaultTextColor(QColor(Qt.white))
         t.setX((self.w - t.boundingRect().width()) / 2)
         t.setY(((self.h - t.boundingRect().height()) / 2))
-                           
+
         self.setScene(self.scene)
 
     def getState(self):
@@ -83,7 +89,7 @@ class Panel_Annunciator(QGraphicsView):
                 self.pcolor = QPen(QColor(Qt.gray))
             elif Mode == 2:
                 self._Mode_Indicator = 2
-                self.bcolor = QBrush(QColor(Qt.red)) 
+                self.bcolor = QBrush(QColor(Qt.red))
                 self.pcolor = QPen(QColor(Qt.gray))
             elif Mode == 3:
                 self._Mode_Indicator = 3
@@ -96,6 +102,6 @@ class Panel_Annunciator(QGraphicsView):
 
     def setWARNING_Name(self, w_Name):
         self.Warning_State_Label = str(w_Name)
-        
+
 
     panel_annunciator = property(getState, setState, getWARNING_Name, setWARNING_Name)
