@@ -140,6 +140,48 @@ class DB_Item(object):
 
 class Database(object):
     def __init__(self):
+        pass
+
+
+
+def initialize():
+    thread = client.ClientThread('127.0.0.1', 3490)
+    thread.start()
+    thread.join()
+>>>>>>> 66b3f5f1bd8ac06e419f471d9394bd4f6e85ca79
+
+    @min.setter
+    def min(self, x):
+        try:
+            self._min = self.dtype(x)
+        except ValueError:
+            log.error("Bad minimum value '" + str(x) + "' given for " + self.description)
+
+    @property
+    def max(self):
+        return self._max
+
+    @max.setter
+    def max(self, x):
+        try:
+            self._max = self.dtype(x)
+        except ValueError:
+            log.error("Bad maximum value '" + str(x) + "' given for " + self.description)
+
+    @property
+    def tol(self):
+        return self._tol
+
+    @tol.setter
+    def tol(self, x):
+        try:
+            self._tol = int(x)
+        except ValueError:
+            log.error("Time to live should be an integer for " + self.description)
+
+
+class Database(object):
+    def __init__(self):
         items = {}
 
 
