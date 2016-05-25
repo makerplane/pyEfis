@@ -21,11 +21,18 @@ import sys
 sys.path.insert(0, './lib/AeroCalc-0.11/')
 
 import Queue
+import logging
+import logging.config
 import argparse
 import ConfigParser  # configparser for Python 3
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+try:
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+except:
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+
 from decimal import *
 from aerocalc import std_atm
 
@@ -385,9 +392,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['test', 'normal'],
         default='normal', help='Run pyEFIS in specific mode')
+    parser.add_argument('--debug', action='store_true',
+                        help='Run in debug mode')
+    parser.add_argument('--config-file', type=argparse.FileType('r'),
+                        help='Alternate configuration file')
+    parser.add_argument('--log-config', type=argparse.FileType('w'),
+                        help='Alternate logger configuration file')
 
     args = parser.parse_args()
-    print("Starting in %s Mode" % (args.mode,))
+    logging.config.fileConfig('config/main.cfg')
+    log = logging.getLogger()
+    if args.debug:
+        log.setLevel(logging.DEBUG)
+    log.info("Starting PyEFIS in %s Mode" % (args.mode,))
+    fix.initialize()
     form = main(args.mode)
     form.show()
 
@@ -397,4 +415,6 @@ if __name__ == "__main__":
     result = app.exec_()
     if args.mode == 'normal':
         form.cfix.quit()
+    log.info("PyEFIS Exiting Normally")
+    fix.stop()
     sys.exit(result)

@@ -20,7 +20,9 @@
 import socket
 import threading
 import Queue
+import logging
 
+log = logging.getLogger(__name__)
 
 class SendThread(threading.Thread):
     def __init__(self, sock):
@@ -39,7 +41,7 @@ class SendThread(threading.Thread):
 
     def stop(self):
         self.queue.put('exit')
-    
+
 
 
 class ClientThread(threading.Thread):
@@ -80,6 +82,7 @@ class ClientThread(threading.Thread):
             if not data:
                 print("No Data, Bailing Out")
                 self.sendthread.stop()
+                self.sendthread.join()
                 break
 
 

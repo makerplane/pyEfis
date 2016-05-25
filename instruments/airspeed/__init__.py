@@ -18,9 +18,14 @@ import sys
 sys.path.insert(0, './lib/AeroCalc-0.11/')
 from aerocalc import airspeed
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+try:
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+except:
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+
 
 class Airspeed(QWidget):
     def __init__(self, parent=None):
