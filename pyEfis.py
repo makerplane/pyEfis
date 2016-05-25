@@ -415,6 +415,6 @@ if __name__ == "__main__":
     result = app.exec_()
     if args.mode == 'normal':
         form.cfix.quit()
-    log.info("PyEFIS Exiting Normally")
     fix.stop()
+    log.info("PyEFIS Exiting Normally")
     sys.exit(result)

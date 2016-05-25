@@ -140,13 +140,16 @@ class DB_Item(object):
 
 class Database(object):
     def __init__(self):
-        pass
+        items = {}
+
+
 
 
 
 def initialize():
     global __thread
-    __thread = client.ClientThread('127.0.0.1', 3490)
+    db = Database()
+    __thread = client.ClientThread('127.0.0.1', 3490, db)
     __thread.start()
 
 def stop():

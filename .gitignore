@@ -2,3 +2,4 @@
 *.py~
 config.py
 .DS_Store
+*.log

@@ -21,8 +21,7 @@ import socket
 import threading
 import Queue
 import logging
-
-log = logging.getLogger(__name__)
+import time
 
 class SendThread(threading.Thread):
     def __init__(self, sock):
@@ -33,11 +32,16 @@ class SendThread(threading.Thread):
 
     def run(self):
         self.running = True
+        log.debug("SendThread - Starting")
         while True:
             data = self.queue.get()
             if data == 'exit': break
-            self.sock.sendall(data)
+            try:
+                self.sock.sendall(data)
+            except Exception as e:
+                log.debug("SendThread: {0}".format(e))
         self.running = False
+        log.debug("SendThread - Stopping")
 
     def stop(self):
         self.queue.put('exit')
@@ -45,46 +49,60 @@ class SendThread(threading.Thread):
 
 
 class ClientThread(threading.Thread):
-    def __init__(self, host, port):
+    def __init__(self, host, port, db):
         super(ClientThread, self).__init__()
+        global log
+        log = logging.getLogger(__name__)
         self.host = host
         self.port = port
+        self.db = db  # Main FIX database
         self.getout = False
         self.timeout = 1.0
 
     def handle_request(self, data):
-        print(data.decode())
+        print("data: " + data.decode())
 
     def run(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.settimeout(self.timeout)
-
-        try:
-            s.connect((self.host, self.port))
-        except Exception as e:
-            print(e)
-
-        self.sendthread = SendThread(s)
-        self.sendthread.queue.put("@l\n")
-        self.sendthread.start()
-
         while True:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.settimeout(self.timeout)
+
             try:
-                data = s.recv(1024)
-                self.handle_request(data)
-            except socket.timeout:
-                if self.getout:
-                    self.sendthread.stop()
-                    break;
-                print("Timeout")
+                s.connect((self.host, self.port))
+            except Exception as e:
+                log.debug("Failed to connect {0}".format(e))
+            else:
+                log.info("Connected to {0}:{1}".format(self.host, self.port))
+                self.sendthread = SendThread(s)
+                self.sendthread.queue.put("@l\n")
+                self.sendthread.start()
 
-            if not data:
-                print("No Data, Bailing Out")
-                self.sendthread.stop()
-                self.sendthread.join()
+                while True:
+                    try:
+                        data = s.recv(1024)
+                    except socket.timeout:
+                        if self.getout:
+                            self.sendthread.stop()
+                            self.sendthread.join()
+                            break;
+                        print("client.py - Timeout")
+                    except Exception as e:
+                        log.debug("Receive Failure {0}".format(e))
+                    else:
+                        if not data:
+                            log.debug("No Data, Bailing Out")
+                            self.sendthread.stop()
+                            self.sendthread.join()
+                            break
+                        else:
+                            self.handle_request(data)
+            if self.getout:
                 break
-
+            else:
+                # TODO: Replace with configuration time
+                time.sleep(2)
+                log.info("Attempting to Reconnect to {0}:{1}".format(self.host, self.port))
 
     def stop(self):
         self.getout = True
