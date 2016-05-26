@@ -90,9 +90,9 @@ class FlightData (QObject):
             self.FuelQtyChanged.emit(param.value)
 
 
-class main(QMainWindow):
+class Main(QMainWindow):
     def __init__(self, test, parent=None):
-        super(main, self).__init__(parent)
+        super(Main, self).__init__(parent)
 
         config = ConfigParser.RawConfigParser()
         # TODO: Read command line paramters and set new config path if necessary
@@ -407,15 +407,12 @@ if __name__ == "__main__":
         log.setLevel(logging.DEBUG)
     log.info("Starting PyEFIS in %s Mode" % (args.mode,))
     fix.initialize()
-    form = main(args.mode)
+
+    form = Main(args.mode)
     form.show()
 
-    if args.mode == 'normal':
-        form.cfix.start()
-
     result = app.exec_()
-    if args.mode == 'normal':
-        form.cfix.quit()
+
     fix.stop()
     log.info("PyEFIS Exiting Normally")
     sys.exit(result)

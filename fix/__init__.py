@@ -28,27 +28,30 @@ from datetime import datetime
 import client
 
 class DB_Item(QObject):
+    #valueChanged = pyqtSignal(float)
+    valueChanged = pyqtSignal([float,int,bool,str])
+    annunciateChanged = pyqtSignal(bool)
+    oldChanged = pyqtSignal(bool)
+    badChanged = pyqtSignal(bool)
+    failChanged = pyqtSignal(bool)
+
     def __init__(self, key, dtype='float'):
-        types = {'float':float, 'int':int, 'bool':bool, 'str':str}
-        try:
-            self.dtype = types[dtype]
-            self.typestring = dtype
-        except:
-            log.error("Unknown datatype - " + str(dtype))
-            raise
+        super(DB_Item, self).__init__()
+        self.dtype = dtype
         self.key = key
         self._value = 0.0
         self.description = ""
         self.units = ""
-        self.annunciate = False
-        self.old = False
-        self.bad = False
-        self.fail = False
+        self._annunciate = False
+        self._old = False
+        self._bad = True
+        self._fail = True
         self._max = None
         self._min = None
-        self._tol = 100     # Time to live in milliseconds.  Any older and quality is bad
+        self._tol = 100     # Timeout lifetime in milliseconds.  Any older and quality is bad
         self.timestamp = datetime.utcnow()
         self.aux = {}
+
 
     # initialize the auxiliary data dictionary.  aux should be a comma delimited
     # string of the items to include.
@@ -94,6 +97,7 @@ class DB_Item(QObject):
 
     @value.setter
     def value(self, x):
+        last = self._value
         try:
             self._value = self.dtype(x)
         except ValueError:
@@ -109,6 +113,26 @@ class DB_Item(QObject):
             pass  # ignore at this point
         # set the timestamp to right now
         self.timestamp = datetime.utcnow()
+        if last != self._value:
+            self.valueChanged.emit(self._value)
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @dtype.setter
+    def dtype(self, dtype):
+        types = {'float':float, 'int':int, 'bool':bool, 'str':str}
+        try:
+            self._dtype = types[dtype]
+            self._typestring = dtype
+        except:
+            log.error("Unknown datatype - " + str(dtype))
+            raise
+
+    @property
+    def typestring(self):
+        return self._typestring
 
     @property
     def min(self):
@@ -143,22 +167,71 @@ class DB_Item(QObject):
         except ValueError:
             log.error("Time to live should be an integer for " + self.description)
 
+    @property
+    def annunciate(self):
+        return self._annunciate
+
+    @annunciate.setter
+    def annunciate(self, x):
+        last = self._annunciate
+        self._annunciate = bool(x)
+        if self._annunciate != last:
+            self.annunciateChanged.emit(self._annunciate)
+
+    @property
+    def old(self):
+        return self._old
+
+    @old.setter
+    def old(self, x):
+        last = self._old
+        self._old = bool(x)
+        if self._old != last:
+            self.oldChanged.emit(self._old)
+
+    @property
+    def bad(self):
+        return self._bad
+
+    @bad.setter
+    def bad(self, x):
+        last = self._bad
+        self._bad = bool(x)
+        if self._bad != last:
+            self.badChanged.emit(self._bad)
+
+    @property
+    def fail(self):
+        return self._fail
+
+    @fail.setter
+    def fail(self, x):
+        last = self._fail
+        self._fail = bool(x)
+        if self._fail != last:
+            self.failChanged.emit(self._fail)
+
 
 class Database(object):
     def __init__(self):
         self.__items = {}
 
+    # Either add an item or redefine the item if it already exists.
+    #  This is mostly useful when the FIXGW client reconnects.  The
+    #  server may have different information.
     def define_item(self, key, desc, dtype, min, max, units, tol, aux):
         if key in self.__items:
             log.debug("Redefining Item {0}".format(key))
             item = self.__items[key]
+            item.dtype = dtype #Just in case it's different
         else:
             log.debug("Adding Item {0}".format(key))
             item = DB_Item(key, dtype)
+        item.dtype = dtype
         item.annunciate = False
         item.old = False
-        item.bad = False
-        item.fail = False
+        item.bad = True
+        item.fail = True
         item.desc = desc
         item.min = min
         item.max = max
@@ -167,17 +240,22 @@ class Database(object):
         item.init_aux(aux)
         self.__items[key] = item
 
-    def get_item(self, key):
-        return self.__items[key]
+    # If the create flag is set to True this function will create an
+    # item with the given key if it does not exist.  Otherwise just
+    # return the item if found.
+    def get_item(self, key, create=False):
+        try:
+            return self.__items[key]
+        except KeyError:
+            if create:
+                self.__items[key] = DB_Item(key)
+            else:
+                raise  # Send the exception up otherwise
+
 
     def mark_all_fail(self):
         for each in self.__items:
             self.__items[each].fail = True
-
-    # def mark_all_dirty(self):
-    #     for each in self.__items:
-    #         self.__items[each].dirty = True
-    #         self.__items[each].timestamp = datetime.utcnow()
 
 
 def initialize():
