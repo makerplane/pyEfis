@@ -183,6 +183,10 @@ class AI(QGraphicsView):
     def keyPressEvent(self, event):
         pass
 
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+
     def setRollAngle(self, angle):
         if angle != self._rollAngle:
             self._rollAngle = efis.bounds(-180, 180, angle)
