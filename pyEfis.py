@@ -34,7 +34,6 @@ except:
     from PyQt4.QtCore import *
 
 from decimal import *
-from aerocalc import std_atm
 
 import fix
 from instruments import gauges
@@ -43,52 +42,6 @@ from instruments import hsi
 from instruments import airspeed
 from instruments import altimeter
 from instruments import vsi
-
-# This is a container object to hold the callback for the FIX thread
-# which when called emits the signals for each parameter
-
-
-class FlightData (QObject):
-    rollChanged = pyqtSignal(float, name="rollChanged")
-    pitchChanged = pyqtSignal(float, name="pitchChanged")
-    headingChanged = pyqtSignal(float, name="headingChanged")
-    altitudeChanged = pyqtSignal(float, name="altitudeChanged")
-    airspeedChanged = pyqtSignal(float, name="airspeedChanged")
-    vsiChanged = pyqtSignal(float, name="vsiChanged")
-    RPMChanged = pyqtSignal(float, name="RPMChanged")
-    MAPChanged = pyqtSignal(float, name="MAPChanged")
-    OilPressChanged = pyqtSignal(float, name="OilPressChanged")
-    OilTempChanged = pyqtSignal(float, name="OilTempChanged")
-    FuelFlowChanged = pyqtSignal(float, name="FuelFlowChanged")
-    FuelQtyChanged = pyqtSignal(float, name="FuelQtyChanged")
-    #Changed = pyqtSignal(float, name="Changed")
-
-    def getParameter(self, param):
-        if param.name == "Roll Angle":
-            self.rollChanged.emit(param.value)
-        elif param.name == "Pitch Angle":
-            self.pitchChanged.emit(param.value)
-        elif param.name == "Heading":
-            self.headingChanged.emit(param.value)
-        elif param.name == "Indicated Altitude":
-            self.altitudeChanged.emit(param.value)
-        elif param.name == "Vertical Speed":
-            self.vsiChanged.emit(param.value)
-        elif param.name == "Calibrated Airspeed":
-            self.airspeedChanged.emit(param.value)
-        elif param.name == "N1 or Engine RPM #1":
-            self.RPMChanged.emit(param.value)
-        elif param.name == "Manifold Pressure #1":
-            self.MAPChanged.emit(param.value)
-        elif param.name == "Oil Pressure #1":
-            self.OilPressChanged.emit(param.value)
-        elif param.name == "Oil Temperature #1":
-            self.OilTempChanged.emit(param.value)
-        elif param.name == "Fuel Flow #1":
-            self.FuelFlowChanged.emit(param.value)
-        elif param.name == "Fuel Quantity #1":
-            self.FuelQtyChanged.emit(param.value)
-
 
 class Main(QMainWindow):
     def __init__(self, test, parent=None):
@@ -247,21 +200,7 @@ class Main(QMainWindow):
         self.egt.value = 1350
 
         if test == 'normal':
-            self.flightData.pitchChanged.connect(self.a.setPitchAngle)
-            self.flightData.rollChanged.connect(self.a.setRollAngle)
-            self.flightData.headingChanged.connect(self.head_tape.setHeading)
-            self.flightData.altitudeChanged.connect(self.alt_tape.setAltimeter)
-            self.flightData.altitudeChanged.connect(self.alt_Trend.setAlt_Trend)
-            #self.flightData.vsiChanged.connect(self.alt_Trend.setAlt_Trend)
-            self.flightData.airspeedChanged.connect(self.as_tape.setAirspeed)
-            self.flightData.airspeedChanged.connect(self.as_Trend.setAS_Trend)
-            self.flightData.airspeedChanged.connect(self.asd_Box.setIAS)
-            self.flightData.RPMChanged.connect(self.rpm.setValue)
-            self.flightData.MAPChanged.connect(self.map_g.setValue)
-            self.flightData.OilPressChanged.connect(self.op.setValue)
-            self.flightData.OilTempChanged.connect(self.ot.setValue)
-            self.flightData.FuelFlowChanged.connect(self.ff.setValue)
-            self.flightData.FuelQtyChanged.connect(self.fuel.setValue)
+            fix.db.get_item("IAS").valueChanged[float].connect(self.as_tape.setAirspeed)
 
         elif test == 'test':
             roll = QSlider(Qt.Horizontal, w)

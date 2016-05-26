@@ -29,7 +29,7 @@ import client
 
 class DB_Item(QObject):
     #valueChanged = pyqtSignal(float)
-    valueChanged = pyqtSignal([float,int,bool,str])
+    valueChanged = pyqtSignal([float],[int],[bool],[str])
     annunciateChanged = pyqtSignal(bool)
     oldChanged = pyqtSignal(bool)
     badChanged = pyqtSignal(bool)
@@ -215,6 +215,13 @@ class DB_Item(QObject):
 class Database(object):
     def __init__(self):
         self.__items = {}
+        global log
+        log = logging.getLogger(__name__)
+
+        # TODO Replace with configuation data
+        self.__thread = client.ClientThread('127.0.0.1', 3490, self)
+        self.__thread.start()
+
 
     # Either add an item or redefine the item if it already exists.
     #  This is mostly useful when the FIXGW client reconnects.  The
@@ -257,16 +264,14 @@ class Database(object):
         for each in self.__items:
             self.__items[each].fail = True
 
+    def stop(self):
+        self.__thread.stop()
+        self.__thread.join()
+
 
 def initialize():
-    global __thread
-    global log
-    log = logging.getLogger(__name__)
-
+    global db
     db = Database()
-    __thread = client.ClientThread('127.0.0.1', 3490, db)
-    __thread.start()
 
 def stop():
-    __thread.stop()
-    __thread.join()
+    db.stop()
