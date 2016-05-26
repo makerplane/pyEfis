@@ -17,13 +17,18 @@
 # This module is a FIX-Net client used primarily to get the flight data
 # from FIX-Gateway.
 
+try:
+    from PyQt5.QtCore import *
+except:
+    from PyQt4.QtCore import *
+
 import logging
-log = logging.getLogger(__name__)
+from datetime import datetime
 
 import client
 
-class DB_Item(object):
-    def __init__(self, dtype='float'):
+class DB_Item(QObject):
+    def __init__(self, key, dtype='float'):
         types = {'float':float, 'int':int, 'bool':bool, 'str':str}
         try:
             self.dtype = types[dtype]
@@ -31,6 +36,7 @@ class DB_Item(object):
         except:
             log.error("Unknown datatype - " + str(dtype))
             raise
+        self.key = key
         self._value = 0.0
         self.description = ""
         self.units = ""
@@ -140,10 +146,45 @@ class DB_Item(object):
 
 class Database(object):
     def __init__(self):
-        pass
+        self.__items = {}
+
+    def define_item(self, key, desc, dtype, min, max, units, tol, aux):
+        if key in self.__items:
+            log.debug("Redefining Item {0}".format(key))
+            item = self.__items[key]
+        else:
+            log.debug("Adding Item {0}".format(key))
+            item = DB_Item(key, dtype)
+        item.annunciate = False
+        item.old = False
+        item.bad = False
+        item.fail = False
+        item.desc = desc
+        item.min = min
+        item.max = max
+        item.units = units
+        item.tol = tol
+        item.init_aux(aux)
+        self.__items[key] = item
+
+    def get_item(self, key):
+        return self.__items[key]
+
+    def mark_all_fail(self):
+        for each in self.__items:
+            self.__items[each].fail = True
+
+    # def mark_all_dirty(self):
+    #     for each in self.__items:
+    #         self.__items[each].dirty = True
+    #         self.__items[each].timestamp = datetime.utcnow()
+
 
 def initialize():
     global __thread
+    global log
+    log = logging.getLogger(__name__)
+
     db = Database()
     __thread = client.ClientThread('127.0.0.1', 3490, db)
     __thread.start()

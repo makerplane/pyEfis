@@ -116,39 +116,40 @@ class main(QMainWindow):
             p.setColor(w.backgroundRole(), QColor(self.screenColor))
             w.setPalette(p)
             w.setAutoFillBackground(True)
-        instWidth = self.width - 410
+        instWidth = self.width - 210
         instHeight = self.height - 200
         self.a = ai.AI(w)
         self.a.resize(instWidth, instHeight)
-        self.a.move(100, 100)
+        self.a.move(0, 100)
 
         self.alt_tape = altimeter.Altimeter_Tape(w)
         self.alt_tape.resize(90, instHeight)
-        self.alt_tape.move(instWidth + 110, 100)
+        self.alt_tape.move(instWidth -90, 100)
 
-        self.alt_Trend = vsi.Alt_Trend_Tape(w)
-        self.alt_Trend.resize(10, instHeight)
-        self.alt_Trend.move(instWidth + 100, 100)
-
-        self.alt_setting = altimeter.Altimeter_Setting(w)
-        self.alt_setting.resize(90, 100)
-        self.alt_setting.move(instWidth + 110, instHeight + 100)
+        #self.alt_Trend = vsi.Alt_Trend_Tape(w)
+        #self.alt_Trend.resize(10, instHeight)
+        #self.alt_Trend.move(instWidth , 100)
 
         self.as_tape = airspeed.Airspeed_Tape(w)
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 100)
 
-        self.as_Trend = vsi.AS_Trend_Tape(w)
-        self.as_Trend.resize(10, instHeight)
-        self.as_Trend.move(90, 100)
+        #self.as_Trend = vsi.AS_Trend_Tape(w)
+        #self.as_Trend.resize(10, instHeight)
+        #self.as_Trend.move(90, 100)
 
         self.asd_Box = airspeed.Airspeed_Mode(w)
         self.asd_Box.resize(90, 100)
         self.asd_Box.move(0, instHeight + 100)
 
         self.head_tape = hsi.DG_Tape(w)
-        self.head_tape.resize(instWidth, 100)
+        self.head_tape.resize(instWidth-200, 100)
         self.head_tape.move(100, instHeight + 100)
+
+        self.alt_setting = altimeter.Altimeter_Setting(w)
+        self.alt_setting.resize(90, 100)
+        self.alt_setting.move(instWidth -100, instHeight + 100)
+
 
         self.map_g = gauges.RoundGauge(w)
         self.map_g.name = "MAP"
@@ -309,7 +310,7 @@ class main(QMainWindow):
             alt_gauge.setMaximum(10000)
             alt_gauge.setValue(0)
             alt_gauge.setSingleStep(10)
-            alt_gauge.move(instWidth + 100, 100)
+            alt_gauge.move(instWidth - 100, 100)
             alt_gauge.valueChanged.connect(self.alt_tape.setAltimeter)
 
             as_gauge = QSpinBox(w)
