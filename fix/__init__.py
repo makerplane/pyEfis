@@ -213,13 +213,12 @@ class DB_Item(QObject):
 
 
 class Database(object):
-    def __init__(self):
+    def __init__(self, host, port):
         self.__items = {}
         global log
         log = logging.getLogger(__name__)
 
-        # TODO Replace with configuation data
-        self.__thread = client.ClientThread('127.0.0.1', 3490, self)
+        self.__thread = client.ClientThread(host, port, self)
         self.__thread.start()
 
 
@@ -255,7 +254,9 @@ class Database(object):
             return self.__items[key]
         except KeyError:
             if create:
-                self.__items[key] = DB_Item(key)
+                newitem = DB_Item(key)
+                self.__items[key] = newitem
+                return newitem
             else:
                 raise  # Send the exception up otherwise
 
@@ -269,9 +270,9 @@ class Database(object):
         self.__thread.join()
 
 
-def initialize():
+def initialize(host, port):
     global db
-    db = Database()
+    db = Database(host, port)
 
 def stop():
     db.stop()

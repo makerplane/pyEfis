@@ -47,12 +47,9 @@ class Main(QMainWindow):
     def __init__(self, test, parent=None):
         super(Main, self).__init__(parent)
 
-        config = ConfigParser.RawConfigParser()
-        # TODO: Read command line paramters and set new config path if necessary
-        config.read('config/main.cfg')
-        self.width = int(config.get("Screen", "screenSize.Width"))
-        self.height = int(config.get("Screen", "screenSize.Height"))
-        self.screenColor = config.get("Screen", "screenColor")
+        self.width = int(config.get("screen", "screenSize.Width"))
+        self.height = int(config.get("screen", "screenSize.Height"))
+        self.screenColor = config.get("screen", "screenColor")
         self.queue = Queue.Queue()
 
         self.setupUi(self, test)
@@ -200,7 +197,10 @@ class Main(QMainWindow):
         self.egt.value = 1350
 
         if test == 'normal':
-            fix.db.get_item("IAS").valueChanged[float].connect(self.as_tape.setAirspeed)
+            fix.db.get_item("IAS", True).valueChanged[float].connect(self.as_tape.setAirspeed)
+            fix.db.get_item("IAS", True).valueChanged[float].connect(self.asd_Box.setIAS)
+            fix.db.get_item("TACH1", True).valueChanged[float].connect(self.rpm.setValue)
+
 
         elif test == 'test':
             roll = QSlider(Qt.Horizontal, w)
@@ -334,18 +334,31 @@ if __name__ == "__main__":
         default='normal', help='Run pyEFIS in specific mode')
     parser.add_argument('--debug', action='store_true',
                         help='Run in debug mode')
-    parser.add_argument('--config-file', type=argparse.FileType('r'),
+    parser.add_argument('--config-file',
                         help='Alternate configuration file')
-    parser.add_argument('--log-config', type=argparse.FileType('w'),
+    parser.add_argument('--log-config',
                         help='Alternate logger configuration file')
 
     args = parser.parse_args()
-    logging.config.fileConfig('config/main.cfg')
+
+    config_file = args.config_file if args.config_file else 'config/main.cfg'
+    log_config_file = args.log_config if args.log_config else config_file
+    config = ConfigParser.RawConfigParser()
+
+    config.read(config_file)
+    print(config_file)
+
+    logging.config.fileConfig(log_config_file)
     log = logging.getLogger()
+
     if args.debug:
         log.setLevel(logging.DEBUG)
     log.info("Starting PyEFIS in %s Mode" % (args.mode,))
-    fix.initialize()
+
+    host = config.get("main", "FixServer")
+    port = int(config.get("main", "FixPort"))
+
+    fix.initialize(host, port)
 
     form = Main(args.mode)
     form.show()
