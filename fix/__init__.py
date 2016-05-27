@@ -34,6 +34,7 @@ class DB_Item(QObject):
     oldChanged = pyqtSignal(bool)
     badChanged = pyqtSignal(bool)
     failChanged = pyqtSignal(bool)
+    auxChanged = pyqtSignal(dict)
 
     def __init__(self, key, dtype='float'):
         super(DB_Item, self).__init__()
@@ -65,7 +66,10 @@ class DB_Item(QObject):
 
     def set_aux_value(self, name, value):
         try:
+            last = self.aux[name]
             self.aux[name] = self.dtype(value)
+            if self.aux[name] != last:
+                self.auxChanged.emit(self.aux)
         except ValueError:
             log.error("Bad Value for aux {0} {1}".format(name, value))
             raise

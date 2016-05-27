@@ -85,7 +85,8 @@ class ClientThread(threading.Thread):
             try:
                 x = d.strip().split(';')
                 if len(x) != 3:
-                    self.log.debug("Bad Frame {0} from {1}".format(d.strip(), self.addr[0]))
+                    log.debug("Bad Frame {0} from {1}".format(d.strip(), self.host))
+                # TODO Deal with aux data here
                 item = self.db.get_item(x[0])
                 try:
                     item.annunciate = True if x[2][0] == '1' else False
@@ -112,7 +113,7 @@ class ClientThread(threading.Thread):
             except Exception as e:
                 # We pretty much ignore this stuff for now
                 log.debug("Problem with input {0}: {1}".format(d.strip, e))
-
+                
 
     def run(self):
         while True:
