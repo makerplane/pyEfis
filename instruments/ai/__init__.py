@@ -24,6 +24,7 @@ except:
 import math
 import efis
 
+import fix
 
 class AI(QGraphicsView):
     def __init__(self, parent=None):
@@ -36,6 +37,11 @@ class AI(QGraphicsView):
         self._rollAngle = 0
         self._pitchAngle = 0
         self.fontSize = 30
+        # Number of degrees shown from top to bottom
+        self.pitchDegreesShown = 60
+
+        fix.db.get_item("PITCH", True).valueChanged[float].connect(self.setPitchAngle)
+        fix.db.get_item("ROLL", True).valueChanged[float].connect(self.setRollAngle)
 
     def resizeEvent(self, event):
         #Setup the scene that we use for the background of the AI
@@ -43,7 +49,7 @@ class AI(QGraphicsView):
         sceneWidth = math.sqrt(self.width() * self.width() +
                                self.height() * self.height())
         #This makes about 30 deg appear on instrument
-        self.pixelsPerDeg = self.height() / 60.0
+        self.pixelsPerDeg = self.height() / self.pitchDegreesShown
         self.scene = QGraphicsScene(0, 0, sceneWidth, sceneHeight)
         #Draw the Blue and Brown rectangles
         gradientBlue = QLinearGradient(0, 0, 0, sceneHeight / 2)

@@ -26,6 +26,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
+import fix
 
 class Airspeed(QWidget):
     def __init__(self, parent=None):
@@ -33,6 +34,9 @@ class Airspeed(QWidget):
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._airspeed = 0
+        fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
+
+
 
     def paintEvent(self, event):
         w = self.width()
@@ -153,6 +157,8 @@ class Airspeed_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._airspeed = 0
+        fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
+
 
     def resizeEvent(self, event):
 

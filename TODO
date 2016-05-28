@@ -1,0 +1,18 @@
+Get instruments to read Min and Max ranges, warning setpoints and other aux data from the database
+
+Set Default for screen in configuration
+
+Add screen sizes to configuration or screen def or something.  Still need to figure this one out.
+
+Add flags to the instruments so they will indicate badness, oldness or failure
+
+Clean up instruments
+
+Add a user module hook for defining macros or callbacks or any other custom functionality.  This would be used
+for things like switching screens on data input or calculating averages, reacting to signals, calculations and
+sending output, definig custom alarms for annunciators etc.
+
+Writing output from the database to FIX-Gateway
+
+Documentation
+

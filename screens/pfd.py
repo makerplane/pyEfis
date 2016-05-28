@@ -1,0 +1,191 @@
+#  Copyright (c) 2016 Phil Birkelbach
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+try:
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+except:
+    from PyQt4.QtGui import *
+    from PyQt4.QtCore import *
+
+from instruments import ai
+from instruments import gauges
+from instruments import hsi
+from instruments import airspeed
+from instruments import altimeter
+from instruments import vsi
+
+class Screen(QWidget):
+    def __init__(self, parent=None):
+        super(Screen, self).__init__(parent)
+        self.parent = parent
+        p = self.parent.palette()
+
+        self.screenColor = (0,0,0)
+        if self.screenColor:
+            p.setColor(self.backgroundRole(), QColor(self.screenColor))
+            self.setPalette(p)
+            self.setAutoFillBackground(True)
+
+        self.ai = ai.AI(self)
+        self.ai.fontSize = 20
+        self.ai.pitchDegreesShown = 90
+
+        self.alt_tape = altimeter.Altimeter_Tape(self)
+        self.alt_Trend = vsi.Alt_Trend_Tape(self)
+        self.as_tape = airspeed.Airspeed_Tape(self)
+        self.as_Trend = vsi.AS_Trend_Tape(self)
+        self.asd_Box = airspeed.Airspeed_Mode(self)
+        self.head_tape = hsi.DG_Tape(self)
+        self.alt_setting = altimeter.Altimeter_Setting(self)
+
+        self.map_g = gauges.RoundGauge(self)
+        self.map_g.name = "MAP"
+        self.map_g.decimalPlaces = 1
+        self.map_g.lowRange = 0.0
+        self.map_g.highRange = 30.0
+        self.map_g.highWarn = 28.0
+        self.map_g.highAlarm = 29.0
+
+        self.rpm = gauges.RoundGauge(self)
+        self.rpm.name = "RPM"
+        self.rpm.decimalPlaces = 0
+        self.rpm.lowRange = 0.0
+        self.rpm.highRange = 2800.0
+        self.rpm.highWarn = 2600.0
+        self.rpm.highAlarm = 2760.0
+
+        self.op = gauges.HorizontalBar(self)
+        self.op.name = "Oil Press"
+        self.op.units = "psi"
+        self.op.decimalPlaces = 1
+        self.op.lowRange = 0.0
+        self.op.highRange = 100.0
+        self.op.highWarn = 90.0
+        self.op.highAlarm = 95.0
+        self.op.lowWarn = 45.0
+        self.op.lowAlarm = 10.0
+        self.op.value = 45.2
+
+
+        self.ot = gauges.HorizontalBar(self)
+        self.ot.name = "Oil Temp"
+        self.ot.units = "degF"
+        self.ot.decimalPlaces = 1
+        self.ot.lowRange = 160.0
+        self.ot.highRange = 250.0
+        self.ot.highWarn = 210.0
+        self.ot.highAlarm = 230.0
+        self.ot.lowWarn = None
+        self.ot.lowAlarm = None
+        self.ot.value = 215.2
+
+        self.fuel = gauges.HorizontalBar(self)
+        self.fuel.name = "Fuel Qty"
+        self.fuel.units = "gal"
+        self.fuel.decimalPlaces = 1
+        self.fuel.lowRange = 0.0
+        self.fuel.highRange = 50.0
+        self.fuel.lowWarn = 2.0
+        self.fuel.value = 15.2
+
+
+        self.ff = gauges.HorizontalBar(self)
+        self.ff.name = "Fuel Flow"
+        self.ff.units = "gph"
+        self.ff.decimalPlaces = 1
+        self.ff.lowRange = 0.0
+        self.ff.highRange = 20.0
+        self.ff.highWarn = None
+        self.ff.highAlarm = None
+        self.ff.lowWarn = None
+        self.ff.lowAlarm = None
+        self.ff.value = 5.2
+
+
+        self.cht = gauges.HorizontalBar(self)
+        self.cht.name = "Max CHT"
+        self.cht.units = "degF"
+        self.cht.decimalPlaces = 0
+        self.cht.lowRange = 0.0
+        self.cht.highRange = 500.0
+        self.cht.highWarn = 380
+        self.cht.highAlarm = 400
+        self.cht.value = 350
+
+
+        self.egt = gauges.HorizontalBar(self)
+        self.egt.name = "Avg EGT"
+        self.egt.units = "degF"
+        self.egt.decimalPlaces = 0
+        self.egt.lowRange = 0.0
+        self.egt.highRange = 1500.0
+        self.egt.value = 1350
+
+
+
+    def resizeEvent(self, event):
+        
+        instWidth = self.width() - 210
+        instHeight = self.height() - 200
+        self.ai.move(0, 100)
+        self.ai.resize(instWidth, instHeight)
+
+        self.alt_tape.resize(90, instHeight)
+        self.alt_tape.move(instWidth -90, 100)
+
+        self.alt_Trend.resize(10, instHeight)
+        self.alt_Trend.move(instWidth , 100)
+
+        self.as_tape.resize(90, instHeight)
+        self.as_tape.move(0, 100)
+
+        self.as_Trend.resize(10, instHeight)
+        self.as_Trend.move(90, 100)
+
+        self.asd_Box.resize(90, 100)
+        self.asd_Box.move(0, instHeight + 100)
+
+        self.head_tape.resize(instWidth-200, 100)
+        self.head_tape.move(100, instHeight + 100)
+
+        self.alt_setting.resize(90, 100)
+        self.alt_setting.move(instWidth -100, instHeight + 100)
+
+        self.map_g.resize(200, 100)
+        self.map_g.move(self.width() - 200, 100)
+
+        self.rpm.resize(200, 100)
+        self.rpm.move(self.width() - 200, 0)
+
+        self.op.resize(190, 75)
+        self.op.move(self.width() - 200, 220)
+
+        self.ot.resize(190, 75)
+        self.ot.move(self.width() - 200, 300)
+
+        self.fuel.resize(190, 75)
+        self.fuel.move(self.width() - 200, 380)
+
+        self.ff.resize(190, 75)
+        self.ff.move(self.width() - 200, 460)
+
+        self.cht.resize(190, 75)
+        self.cht.move(self.width() - 200, 540)
+
+        self.egt.resize(190, 75)
+        self.egt.move(self.width() - 200, 620)

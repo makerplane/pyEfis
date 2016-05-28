@@ -23,6 +23,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
+import fix
 
 class Altimeter(QWidget):
     def __init__(self, parent=None):
@@ -30,6 +31,8 @@ class Altimeter(QWidget):
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
+        fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
+
 
     def paintEvent(self, event):
         w = self.width()
@@ -117,7 +120,9 @@ class Altimeter_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
-        self.test = Altimeter_Setting()
+        #self.test = Altimeter_Setting()
+        fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
+
 
     def resizeEvent(self, event):
         w = self.width()
@@ -191,6 +196,8 @@ class Altimeter_Setting(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter_setting = 29.92
+        fix.db.get_item("BARO", True).valueChanged[float].connect(self.setAltimeter_Setting)
+
 
     def resizeEvent(self, event):
         self.w = self.width()
