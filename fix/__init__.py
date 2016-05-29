@@ -28,8 +28,8 @@ from datetime import datetime
 import client
 
 class DB_Item(QObject):
-    #valueChanged = pyqtSignal(float)
     valueChanged = pyqtSignal([float],[int],[bool],[str])
+    valueWrite = pyqtSignal([float],[int],[bool],[str])
     annunciateChanged = pyqtSignal(bool)
     oldChanged = pyqtSignal(bool)
     badChanged = pyqtSignal(bool)
@@ -119,6 +119,7 @@ class DB_Item(QObject):
         self.timestamp = datetime.utcnow()
         if last != self._value:
             self.valueChanged.emit(self._value)
+        self.valueWrite.emit(self._value)
 
     @property
     def dtype(self):
