@@ -32,11 +32,10 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-from decimal import *
 import importlib
 
 import fix
-import screens.test
+import hooks
 
 _screens = []
 
@@ -62,6 +61,8 @@ class Screen(object):
         self.default = False
 
 class Main(QMainWindow):
+    keyPress = pyqtSignal()
+
     def __init__(self, test, parent=None):
         super(Main, self).__init__(parent)
 
@@ -94,18 +95,7 @@ class Main(QMainWindow):
 
     def keyReleaseEvent(self, event):
         #  Increase Altimeter Setting
-        if event.key() == Qt.Key_BracketLeft:
-            self.alt_setting.setAltimeter_Setting(
-                                self.alt_setting.getAltimeter_Setting() + 0.01)
-
-        #  Decrease Altimeter Setting
-        elif event.key() == Qt.Key_BracketRight:
-            self.alt_setting.setAltimeter_Setting(
-                                self.alt_setting.getAltimeter_Setting() - 0.01)
-
-        #  Decrease Altimeter Setting
-        elif event.key() == Qt.Key_M:
-            self.asd_Box.setMode(self.asd_Box.getMode() + 1)
+        hooks.signals.keyPressEmit(event)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -127,6 +117,16 @@ if __name__ == "__main__":
 
     config.read(config_file)
 
+    # Initialize Logger
+    logging.config.fileConfig(log_config_file)
+    log = logging.getLogger()
+
+    # Quick way to set the logger to debug using command line argument
+    if args.debug:
+        log.setLevel(logging.DEBUG)
+        log.info("Starting PyEFIS in %s Mode" % (args.mode,))
+
+    # Load the Screens
     for each in config.sections():
         if each[:7] == "Screen.":
             module = config.get(each, "module")
@@ -140,23 +140,20 @@ if __name__ == "__main__":
     # TODO Use configuration instead of defaulting to first
     _screens[0].default = True
 
-    logging.config.fileConfig(log_config_file)
-    log = logging.getLogger()
-
-    if args.debug:
-        log.setLevel(logging.DEBUG)
-    log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
     host = config.get("main", "FixServer")
     port = int(config.get("main", "FixPort"))
 
     fix.initialize(host, port)
+    hooks.initialize()
 
-    form = Main(args.mode)
-    form.show()
+    mainWindow = Main(args.mode)
+    mainWindow.show()
 
+    # Main program loop
     result = app.exec_()
 
+    # Clean up and get out
     fix.stop()
     log.info("PyEFIS Exiting Normally")
     sys.exit(result)

@@ -81,7 +81,6 @@ class Screen(QWidget):
         self.op.lowAlarm = 10.0
         self.op.value = 45.2
 
-
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
         self.ot.units = "degF"
@@ -103,7 +102,6 @@ class Screen(QWidget):
         self.fuel.lowWarn = 2.0
         self.fuel.value = 15.2
 
-
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
         self.ff.units = "gph"
@@ -116,7 +114,6 @@ class Screen(QWidget):
         self.ff.lowAlarm = None
         self.ff.value = 5.2
 
-
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         self.cht.units = "degF"
@@ -126,7 +123,6 @@ class Screen(QWidget):
         self.cht.highWarn = 380
         self.cht.highAlarm = 400
         self.cht.value = 350
-
 
         self.egt = gauges.HorizontalBar(self)
         self.egt.name = "Avg EGT"
@@ -139,7 +135,6 @@ class Screen(QWidget):
 
 
     def resizeEvent(self, event):
-        
         instWidth = self.width() - 210
         instHeight = self.height() - 200
         self.ai.move(0, 100)
