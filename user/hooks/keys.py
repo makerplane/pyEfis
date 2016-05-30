@@ -19,43 +19,23 @@ try:
 except:
     from PyQt4.QtCore import *
 
-import logging
-import importlib
+import hooks
 
-class Signals(QObject):
-    keyPress = pyqtSignal(QEvent)
+def keySignal(event):
+    if event.key() == Qt.Key_BracketLeft:
+        hooks.log.debug("Raise Altimeter Setting")
+        #self.alt_setting.setAltimeter_Setting(
+        #                    self.alt_setting.getAltimeter_Setting() + 0.01)
 
-    def __init__(self):
-        super(Signals, self).__init__()
+    #  Decrease Altimeter Setting
+    elif event.key() == Qt.Key_BracketRight:
+        #self.alt_setting.setAltimeter_Setting(
+        #                    self.alt_setting.getAltimeter_Setting() - 0.01)
+        hooks.log.debug("Lower Altimeter Setting")
 
-    def keyPressEmit(self, event):
-        self.keyPress.emit(event)
+    #  Decrease Altimeter Setting
+    elif event.key() == Qt.Key_M:
+        hooks.log.debug("Change Airspeed Mode")
+        #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
-
-signals = Signals()
-
-def initialize(config):
-    global log
-    log = logging.getLogger(__name__)
-
-
-    # Load the Screens
-    for each in config.sections():
-        if each[:5] == "Hook.":
-            module = config.get(each, "module")
-            try:
-                name = each[5:]
-                importlib.import_module(module)
-                #load_screen(each[7:], module, config)
-            except Exception as e:
-                logging.critical("Unable to load module - " + module + ": " + str(e))
-                raise
-    
-
-    
-        
-
-
-
-
-
+hooks.signals.keyPress.connect(keySignal)

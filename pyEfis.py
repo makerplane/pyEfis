@@ -93,8 +93,8 @@ class Main(QMainWindow):
     def closeEvent(self, event):
         pass
 
+    # Send a keypress signal through the hooks module for each key event we get
     def keyReleaseEvent(self, event):
-        #  Increase Altimeter Setting
         hooks.signals.keyPressEmit(event)
 
 if __name__ == "__main__":
@@ -140,12 +140,12 @@ if __name__ == "__main__":
     # TODO Use configuration instead of defaulting to first
     _screens[0].default = True
 
+    hooks.initialize(config)
 
     host = config.get("main", "FixServer")
     port = int(config.get("main", "FixPort"))
 
     fix.initialize(host, port)
-    hooks.initialize()
 
     mainWindow = Main(args.mode)
     mainWindow.show()
