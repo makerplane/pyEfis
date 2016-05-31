@@ -24,10 +24,10 @@ import logging
 import time
 
 class SendThread(threading.Thread):
-    def __init__(self, sock):
+    def __init__(self, sock, queue):
         super(SendThread, self).__init__()
         self.sock = sock
-        self.queue = Queue.Queue()
+        self.queue = queue
         self.getout = False
 
     def run(self):
@@ -38,7 +38,7 @@ class SendThread(threading.Thread):
             if data == 'exit': break
             try:
                 self.sock.sendall(data)
-                #print("SendThread.run()" + data)
+                print("SendThread.run()" + data)
             except Exception as e:
                 log.debug("SendThread: {0}".format(e))
         self.running = False
@@ -59,6 +59,7 @@ class ClientThread(threading.Thread):
         self.db = db  # Main FIX database
         self.getout = False
         self.timeout = 1.0
+        self.sendqueue = Queue.Queue()
 
     def handle_request(self, d):
         if d[0] == '@': # It's a command response frame
@@ -74,13 +75,26 @@ class ClientThread(threading.Thread):
                 #print("List ID's")
                 return
             else:
-                id = x[0].strip()
+                key = x[0].strip()
             if d[1] == 's':
-                log.debug("Subscription Acknowledged for {0}".format(id))
+                log.debug("Subscription Acknowledged for {0}".format(key))
+                try:
+                    item = self.db.get_item(key)
+                    item.is_subscribed = True
+                except:
+                    log.error("Unable to set subscribed bit for {0}".format(key))
+            if d[1] == 'u':
+                log.debug("Un-Subscripe Acknowledged for {0}".format(key))
+                try:
+                    item = self.db.get_item(key)
+                    item.is_subscribed = False
+                except:
+                    log.error("Unable to clear subscribed bit for {0}".format(key))
             elif d[1] == 'q':
-                self.db.define_item(id, x[1], x[2], x[3], x[4], x[5], x[6], x[7])
-                self.sendthread.queue.put("@r{0}\n".format(id).encode())
-                self.sendthread.queue.put("@s{0}\n".format(id).encode())
+                self.db.define_item(key, x[1], x[2], x[3], x[4], x[5], x[6], x[7])
+                #self.sendthread.queue.put("@r{0}\n".format(key).encode())
+                #self.sendthread.queue.put("@s{0}\n".format(key).encode())
+
 
         else:  # If no '@' then it must be a value update
             try:
@@ -128,7 +142,7 @@ class ClientThread(threading.Thread):
                 log.debug("Failed to connect {0}".format(e))
             else:
                 log.info("Connected to {0}:{1}".format(self.host, self.port))
-                self.sendthread = SendThread(s)
+                self.sendthread = SendThread(s, self.sendqueue)
                 self.sendthread.queue.put("@l\n".encode())
                 self.sendthread.start()
 

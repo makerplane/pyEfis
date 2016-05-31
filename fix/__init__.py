@@ -27,6 +27,10 @@ from datetime import datetime
 
 import client
 
+
+# This class represents a single data point in the database.  It contains
+# all of the Qt signals for communicating the data as well as the properties
+# and quality flags of each point.
 class DB_Item(QObject):
     valueChanged = pyqtSignal([float],[int],[bool],[str])
     valueWrite = pyqtSignal([float],[int],[bool],[str])
@@ -53,6 +57,9 @@ class DB_Item(QObject):
         self.timestamp = datetime.utcnow()
         self.aux = {}
         self.output = False
+        self.subscribe = True
+        self.is_subscribed = False
+        log.debug("Creating Item {0}".format(key))
 
 
     # initialize the auxiliary data dictionary.  aux should be a comma delimited
@@ -96,7 +103,6 @@ class DB_Item(QObject):
 
         db.queue_out("{0};{1};{2}\n".format(self.key, self.value, flags).encode())
 
-
     # return the age of the item in milliseconds
     @property
     def age(self):
@@ -105,7 +111,7 @@ class DB_Item(QObject):
 
     @property
     def value(self):
-        if self.age > self.tol:
+        if self.age > self.tol and self.tol != 0:
             self.old = True
         else:
             self.old = False
@@ -231,14 +237,17 @@ class DB_Item(QObject):
             self.failChanged.emit(self._fail)
 
 
+# This Class represents the database itself.  Once instantiated it
+# creates and starts the thread that handles all the communication to
+# the server.
 class Database(object):
     def __init__(self, host, port):
         self.__items = {}
         global log
         log = logging.getLogger(__name__)
 
-        self.__thread = client.ClientThread(host, port, self)
-        self.__thread.start()
+        self.clientthread = client.ClientThread(host, port, self)
+        self.clientthread.start()
         self.__configured_outputs = {}
 
 
@@ -251,7 +260,7 @@ class Database(object):
             item = self.__items[key]
             item.dtype = dtype #Just in case it's different
         else:
-            log.debug("Adding Item {0}".format(key))
+            #log.debug("Adding Item {0}".format(key))
             item = DB_Item(key, dtype)
         item.dtype = dtype
         item.annunciate = False
@@ -265,10 +274,21 @@ class Database(object):
         item.tol = tol
         item.init_aux(aux)
         if key in self.__configured_outputs:
+            self.subscribe = False
+            self.queue_out("@u{0}\n".format(key).encode())
             if self.__configured_outputs[key] in ["onchange", "both"]:
                 print "Setting output for {0} to True".format(key)
                 item.output = True
+        else:
+            self.queue_out("@s{0}\n".format(key).encode())
         self.__items[key] = item
+
+        self.queue_out("@r{0}\n".format(key).encode())
+        # if item.subscribe:
+        #     self.queue_out("@s{0}\n".format(key).encode())
+        # elif item.is_subscribed: # If we are subscribed and we don't want to be
+        #     self.queue_out("@u{0}\n".format(key).encode())
+
 
 
     # If the create flag is set to True this function will create an
@@ -296,14 +316,16 @@ class Database(object):
             raise ValueError("Unknown output method for {0}".format(key))
         else:
             self.__configured_outputs[key] = m
+            self.subscribe = False
+            self.queue_out("@u{0}\n".format(key).encode())
         log.debug("Adding output for {0}, method = {1}".format(key, method))
 
     def queue_out(self, output):
-        self.__thread.sendthread.queue.put(output)
+        self.clientthread.sendqueue.put(output)
 
     def stop(self):
-        self.__thread.stop()
-        self.__thread.join()
+        self.clientthread.stop()
+        self.clientthread.join()
 
 
 def initialize(host, port):

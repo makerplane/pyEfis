@@ -24,7 +24,7 @@ import fix
 
 def keySignal(event):
     if event.key() == Qt.Key_BracketRight:
-        hooks.log.debug("Raise Altimeter Setting")
+        #hooks.log.debug("Raise Altimeter Setting")
         x = fix.db.get_item("BARO")
         x.value = x.value + 0.01
         #self.alt_setting.setAltimeter_Setting(
@@ -34,7 +34,7 @@ def keySignal(event):
     elif event.key() == Qt.Key_BracketLeft:
         #self.alt_setting.setAltimeter_Setting(
         #                    self.alt_setting.getAltimeter_Setting() - 0.01)
-        hooks.log.debug("Lower Altimeter Setting")
+        #hooks.log.debug("Lower Altimeter Setting")
         x = fix.db.get_item("BARO")
         x.value = x.value - 0.01
 
