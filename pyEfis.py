@@ -90,8 +90,11 @@ class Main(QMainWindow):
                 scr.object.show()
 
 
+    def showEvent(self, event):
+        hooks.signals.mainWindowShowEmit(event)
+
     def closeEvent(self, event):
-        pass
+        hooks.signals.mainWindowCloseEmit(event)
 
     # Send a keypress signal through the hooks module for each key event we get
     def keyReleaseEvent(self, event):
@@ -126,6 +129,8 @@ if __name__ == "__main__":
         log.setLevel(logging.DEBUG)
         log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
+    hooks.initialize(config)
+
     # Load the Screens
     for each in config.sections():
         if each[:7] == "Screen.":
@@ -150,7 +155,6 @@ if __name__ == "__main__":
         except ValueError as e:
             log.warning(e)
 
-    hooks.initialize(config)
 
     mainWindow = Main(args.mode)
     mainWindow.show()

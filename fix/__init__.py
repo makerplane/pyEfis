@@ -26,6 +26,7 @@ import logging
 from datetime import datetime
 
 import client
+import hooks
 
 
 # This class represents a single data point in the database.  It contains
@@ -95,7 +96,7 @@ class DB_Item(QObject):
     # Outputs the value to the send queue and on to the fixgw server
     def output_value(self, aux=None):
         flags = "1" if self.annunciate else "0"
-        flags += "1" if self.old else "0"
+        flags += "0" # if self.old else "0"
         flags += "1" if self.bad else "0"
         flags += "1" if self.fail else "0"
 
@@ -236,6 +237,40 @@ class DB_Item(QObject):
         if self._fail != last:
             self.failChanged.emit(self._fail)
 
+class OutputTimer(object):
+    def __init__(self, interval):
+        print("Creating timer {0}".format(interval))
+        self.timer = QTimer()
+        self.interval = interval
+        self.keylist = []
+
+        self.timer.timeout.connect(self.fire_timer)
+
+
+    def add_key(self, key):
+        print("Adding key {0} to timer".format(key))
+        if key not in self.keylist:
+            self.keylist.append(key)
+            #if len(self.keylist) == 1: # First Once
+            #    self.timer.start(self.interval)
+
+
+    def del_key(self, key):
+        try:
+            self.keylist.remove( key )
+            #if len(self.keylist) == 0:
+            #    self.timer.stop()
+        except ValueError:
+            pass
+
+    def start(self):
+        print("Starting Timer")
+        self.timer.start(self.interval)
+
+    def fire_timer(self):
+        for each in self.keylist:
+            print("Sending Data for {0}".format(each))
+
 
 # This Class represents the database itself.  Once instantiated it
 # creates and starts the thread that handles all the communication to
@@ -249,6 +284,9 @@ class Database(object):
         self.clientthread = client.ClientThread(host, port, self)
         self.clientthread.start()
         self.__configured_outputs = {}
+        self.__timers = []
+
+        hooks.signals.mainWindowShow.connect(self.start_output_timers)
 
 
     # Either add an item or redefine the item if it already exists.
@@ -277,8 +315,23 @@ class Database(object):
             self.subscribe = False
             self.queue_out("@u{0}\n".format(key).encode())
             if self.__configured_outputs[key] in ["onchange", "both"]:
-                print "Setting output for {0} to True".format(key)
+                #print "Setting output for {0} to True".format(key)
                 item.output = True
+                # TODO raise an error if the method is not 'interval' ?????
+            else:  # Any other method and we'll do an interval
+                timer = None
+                t = int(tol)/2
+                # look for an existing timer with the same interval
+                for each in self.__timers:
+                    if each.interval == t:
+                        timer = each
+                        break
+                # If we didn't find one create one.
+                if not timer:
+                    timer = OutputTimer(t) #We set the interval to half of the timout
+                    self.__timers.append(timer)
+                timer.add_key(key)
+
         else:
             self.queue_out("@s{0}\n".format(key).encode())
         self.__items[key] = item
@@ -322,6 +375,11 @@ class Database(object):
 
     def queue_out(self, output):
         self.clientthread.sendqueue.put(output)
+
+    def start_output_timers(self):
+        print("Starting All Timers")
+        for each in self.__timers:
+            each.start()
 
     def stop(self):
         self.clientthread.stop()

@@ -38,7 +38,7 @@ class SendThread(threading.Thread):
             if data == 'exit': break
             try:
                 self.sock.sendall(data)
-                print("SendThread.run()" + data)
+                #print "SendThread.run()" + data,
             except Exception as e:
                 log.debug("SendThread: {0}".format(e))
         self.running = False
