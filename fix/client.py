@@ -157,7 +157,7 @@ class ClientThread(QThread):
                     except socket.timeout:
                         if self.getout:
                             self.sendthread.stop()
-                            self.sendthread.join()
+                            self.sendthread.wait()
                             break;
                     except Exception as e:
                         log.debug("Receive Failure {0}".format(e))
