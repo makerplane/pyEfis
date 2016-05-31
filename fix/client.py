@@ -17,13 +17,17 @@
 # This module is a FIX-Net client used primarily to get the flight data
 # from FIX-Gateway.
 
+try:
+    from PyQt5.QtCore import *
+except:
+    from PyQt4.QtCore import *
+
 import socket
-import threading
 import Queue
 import logging
 import time
 
-class SendThread(threading.Thread):
+class SendThread(QThread):
     def __init__(self, sock, queue):
         super(SendThread, self).__init__()
         self.sock = sock
@@ -49,7 +53,7 @@ class SendThread(threading.Thread):
 
 
 
-class ClientThread(threading.Thread):
+class ClientThread(QThread):
     def __init__(self, host, port, db):
         super(ClientThread, self).__init__()
         global log
@@ -161,7 +165,7 @@ class ClientThread(threading.Thread):
                         if not data:
                             log.debug("No Data, Bailing Out")
                             self.sendthread.stop()
-                            self.sendthread.join()
+                            self.sendthread.wait()
                             self.db.mark_all_fail()
                             break
                         else:

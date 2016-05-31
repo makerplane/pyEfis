@@ -383,7 +383,7 @@ class Database(object):
 
     def stop(self):
         self.clientthread.stop()
-        self.clientthread.join()
+        self.clientthread.wait()
 
 
 def initialize(host, port):
