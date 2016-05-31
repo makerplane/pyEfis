@@ -52,6 +52,7 @@ class DB_Item(QObject):
         self._tol = 100     # Timeout lifetime in milliseconds.  Any older and quality is bad
         self.timestamp = datetime.utcnow()
         self.aux = {}
+        self.output = False
 
 
     # initialize the auxiliary data dictionary.  aux should be a comma delimited
@@ -84,6 +85,17 @@ class DB_Item(QObject):
             log.error("No aux {0} for {1}".format(name, self.description))
             raise
 
+    # Outputs the value to the send queue and on to the fixgw server
+    def output_value(self, aux=None):
+        flags = "1" if self.annunciate else "0"
+        flags += "1" if self.old else "0"
+        flags += "1" if self.bad else "0"
+        flags += "1" if self.fail else "0"
+
+        # TODO Handle the Aux data.
+
+        db.queue_out("{0};{1};{2}\n".format(self.key, self.value, flags).encode())
+
 
     # return the age of the item in milliseconds
     @property
@@ -97,7 +109,7 @@ class DB_Item(QObject):
             self.old = True
         else:
             self.old = False
-        return (self._value, self.annunciate, self.old, self.bad, self.fail)
+        return self._value #, self.annunciate, self.old, self.bad, self.fail)
 
     @value.setter
     def value(self, x):
@@ -119,6 +131,8 @@ class DB_Item(QObject):
         self.timestamp = datetime.utcnow()
         if last != self._value:
             self.valueChanged.emit(self._value)
+            if self.output:
+                self.output_value(self.key)
         self.valueWrite.emit(self._value)
 
     @property
@@ -225,6 +239,7 @@ class Database(object):
 
         self.__thread = client.ClientThread(host, port, self)
         self.__thread.start()
+        self.__configured_outputs = {}
 
 
     # Either add an item or redefine the item if it already exists.
@@ -249,7 +264,12 @@ class Database(object):
         item.units = units
         item.tol = tol
         item.init_aux(aux)
+        if key in self.__configured_outputs:
+            if self.__configured_outputs[key] in ["onchange", "both"]:
+                print "Setting output for {0} to True".format(key)
+                item.output = True
         self.__items[key] = item
+
 
     # If the create flag is set to True this function will create an
     # item with the given key if it does not exist.  Otherwise just
@@ -269,6 +289,17 @@ class Database(object):
     def mark_all_fail(self):
         for each in self.__items:
             self.__items[each].fail = True
+
+    def add_output(self, key, method):
+        m = method.lower()
+        if m not in ["interval", "onchange", "both"]:
+            raise ValueError("Unknown output method for {0}".format(key))
+        else:
+            self.__configured_outputs[key] = m
+        log.debug("Adding output for {0}, method = {1}".format(key, method))
+
+    def queue_out(self, output):
+        self.__thread.sendthread.queue.put(output)
 
     def stop(self):
         self.__thread.stop()

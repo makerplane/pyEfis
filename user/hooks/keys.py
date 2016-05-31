@@ -20,18 +20,24 @@ except:
     from PyQt4.QtCore import *
 
 import hooks
+import fix
 
 def keySignal(event):
-    if event.key() == Qt.Key_BracketLeft:
+    if event.key() == Qt.Key_BracketRight:
         hooks.log.debug("Raise Altimeter Setting")
+        x = fix.db.get_item("BARO")
+        x.value = x.value + 0.01
         #self.alt_setting.setAltimeter_Setting(
         #                    self.alt_setting.getAltimeter_Setting() + 0.01)
 
     #  Decrease Altimeter Setting
-    elif event.key() == Qt.Key_BracketRight:
+    elif event.key() == Qt.Key_BracketLeft:
         #self.alt_setting.setAltimeter_Setting(
         #                    self.alt_setting.getAltimeter_Setting() - 0.01)
         hooks.log.debug("Lower Altimeter Setting")
+        x = fix.db.get_item("BARO")
+        x.value = x.value - 0.01
+
 
     #  Decrease Altimeter Setting
     elif event.key() == Qt.Key_M:

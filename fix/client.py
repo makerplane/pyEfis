@@ -38,6 +38,7 @@ class SendThread(threading.Thread):
             if data == 'exit': break
             try:
                 self.sock.sendall(data)
+                #print("SendThread.run()" + data)
             except Exception as e:
                 log.debug("SendThread: {0}".format(e))
         self.running = False
@@ -113,7 +114,7 @@ class ClientThread(threading.Thread):
             except Exception as e:
                 # We pretty much ignore this stuff for now
                 log.debug("Problem with input {0}: {1}".format(d.strip, e))
-                
+
 
     def run(self):
         while True:

@@ -43,7 +43,7 @@ class Screen(object):
     def __init__(self, name, module, config):
         # strings here remove the options from the list before it is
         # sent to the plugin.
-        print("Screen class __init__({0},{1},{2})".format(name, module, config))
+        # print("Screen class __init__({0},{1},{2})".format(name, module, config))
         exclude_options = ["module"]
         self.module = importlib.import_module(module)
         # Here items winds up being a list of tuples [('key', 'value'),...]
@@ -140,12 +140,17 @@ if __name__ == "__main__":
     # TODO Use configuration instead of defaulting to first
     _screens[0].default = True
 
-    hooks.initialize(config)
-
     host = config.get("main", "FixServer")
     port = int(config.get("main", "FixPort"))
 
     fix.initialize(host, port)
+    for each in config.items("Outputs"):
+        try:
+            fix.db.add_output(each[0].upper(), each[1])
+        except ValueError as e:
+            log.warning(e)
+
+    hooks.initialize(config)
 
     mainWindow = Main(args.mode)
     mainWindow.show()
