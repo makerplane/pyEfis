@@ -41,9 +41,14 @@ def keyPress(event):
         hooks.log.debug("Change Airspeed Mode")
         #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
-    elif event.key() == Qt.Key_S:
-        hooks.log.debug("Screen Change")
+    elif event.key() == Qt.Key_A:
+        #hooks.log.debug("Screen Change")
         gui.mainWindow.showScreen(0)
+        #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
+
+    elif event.key() == Qt.Key_S:
+        #hooks.log.debug("Screen Change")
+        gui.mainWindow.showScreen(1)
         #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
 
