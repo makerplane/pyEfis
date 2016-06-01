@@ -8,7 +8,7 @@ It was created for use in the MakerPlane Open Source Aircraft Project.
 pyEfis is written primarily in Python and PyQt.
 
 It does not have any method of reading flight information directly from the
-hardware but instead uses FIX Gateway  as it's source of information.  FIX
+hardware but instead uses FIX Gateway as it's source of information.  FIX
 Gateway is a plugin based program that allows different types of flight
 information systems to communicate to one another.  pyEfis contains a client
 to FIX Gateway and so has access to all the flight data that FIX Gateway
@@ -22,3 +22,7 @@ Controls
 '[' and ']' Keys changes the Altimeter Setting
 
 'm' Changes Airspeed mode from IAS , TAS, and GS
+
+'a' and 's' select the different screens.
+
+See the user.hooks module for ways to define other keys.

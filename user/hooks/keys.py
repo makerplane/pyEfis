@@ -43,12 +43,12 @@ def keyPress(event):
 
     elif event.key() == Qt.Key_A:
         #hooks.log.debug("Screen Change")
-        gui.mainWindow.showScreen(0)
+        gui.mainWindow.showScreen("PFD")
         #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
     elif event.key() == Qt.Key_S:
         #hooks.log.debug("Screen Change")
-        gui.mainWindow.showScreen(1)
+        gui.mainWindow.showScreen("SixPack")
         #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
 

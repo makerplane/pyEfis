@@ -37,7 +37,6 @@ class Airspeed(QWidget):
         fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
 
 
-
     def paintEvent(self, event):
         w = self.width()
         h = self.height()

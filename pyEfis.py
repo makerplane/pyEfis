@@ -26,13 +26,8 @@ import argparse
 import ConfigParser  # configparser for Python 3
 try:
     from PyQt5.QtGui import *
-#    from PyQt5.QtCore import *
-#    from PyQt5.QtWidgets import *
 except:
     from PyQt4.QtGui import *
-#    from PyQt4.QtCore import *
-
-#import importlib
 
 import scheduler
 import fix
@@ -70,8 +65,6 @@ if __name__ == "__main__":
         log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
     scheduler.initialize()
-
-
 
     host = config.get("main", "FixServer")
     port = int(config.get("main", "FixPort"))
