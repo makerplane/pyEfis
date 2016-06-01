@@ -26,7 +26,7 @@ import logging
 from datetime import datetime
 
 import client
-import hooks
+import scheduler
 
 
 # This class represents a single data point in the database.  It contains
@@ -94,14 +94,14 @@ class DB_Item(QObject):
             raise
 
     # Outputs the value to the send queue and on to the fixgw server
-    def output_value(self, aux=None):
+    def output_value(self):
+        #print("output_value called for {0}".format(self.key))
         flags = "1" if self.annunciate else "0"
         flags += "0" # if self.old else "0"
         flags += "1" if self.bad else "0"
         flags += "1" if self.fail else "0"
 
         # TODO Handle the Aux data.
-
         db.queue_out("{0};{1};{2}\n".format(self.key, self.value, flags).encode())
 
     # return the age of the item in milliseconds
@@ -121,25 +121,31 @@ class DB_Item(QObject):
     @value.setter
     def value(self, x):
         last = self._value
-        try:
-            self._value = self.dtype(x)
-        except ValueError:
-            log.error("Bad value '" + str(x) + "' given for " + self.description)
-        # bounds check and cap
-        try:
-            if self._value < self._min: self._value = self._min
-        except:  # Probably only fails if min has not been set
-            pass  # ignore at this point
-        try:
-            if self._value > self._max: self._value = self._max
-        except:  # Probably only fails if max has not been set
-            pass  # ignore at this point
+        if self.dtype == bool:
+            if type(x) == bool:
+                self._value = x
+            else:
+                self._value = (x == True or x.lower() in ["yes", "true", "1", 1])
+        else:
+            try:
+                self._value = self.dtype(x)
+            except ValueError:
+                log.error("Bad value '" + str(x) + "' given for " + self.description)
+            # bounds check and cap
+            try:
+                if self._value < self._min: self._value = self._min
+            except:  # Probably only fails if min has not been set
+                pass  # ignore at this point
+            try:
+                if self._value > self._max: self._value = self._max
+            except:  # Probably only fails if max has not been set
+                pass  # ignore at this point
         # set the timestamp to right now
         self.timestamp = datetime.utcnow()
         if last != self._value:
             self.valueChanged.emit(self._value)
             if self.output:
-                self.output_value(self.key)
+                self.output_value()
         self.valueWrite.emit(self._value)
 
     @property
@@ -237,39 +243,6 @@ class DB_Item(QObject):
         if self._fail != last:
             self.failChanged.emit(self._fail)
 
-class OutputTimer(object):
-    def __init__(self, interval):
-        print("Creating timer {0}".format(interval))
-        self.timer = QTimer()
-        self.interval = interval
-        self.keylist = []
-
-        self.timer.timeout.connect(self.fire_timer)
-
-
-    def add_key(self, key):
-        print("Adding key {0} to timer".format(key))
-        if key not in self.keylist:
-            self.keylist.append(key)
-            #if len(self.keylist) == 1: # First Once
-            #    self.timer.start(self.interval)
-
-
-    def del_key(self, key):
-        try:
-            self.keylist.remove( key )
-            #if len(self.keylist) == 0:
-            #    self.timer.stop()
-        except ValueError:
-            pass
-
-    def start(self):
-        print("Starting Timer")
-        self.timer.start(self.interval)
-
-    def fire_timer(self):
-        for each in self.keylist:
-            print("Sending Data for {0}".format(each))
 
 
 # This Class represents the database itself.  Once instantiated it
@@ -286,7 +259,7 @@ class Database(object):
         self.__configured_outputs = {}
         self.__timers = []
 
-        hooks.signals.mainWindowShow.connect(self.start_output_timers)
+        #hooks.signals.mainWindowShow.connect(self.start_output_timers)
 
 
     # Either add an item or redefine the item if it already exists.
@@ -296,9 +269,7 @@ class Database(object):
         if key in self.__items:
             log.debug("Redefining Item {0}".format(key))
             item = self.__items[key]
-            item.dtype = dtype #Just in case it's different
         else:
-            #log.debug("Adding Item {0}".format(key))
             item = DB_Item(key, dtype)
         item.dtype = dtype
         item.annunciate = False
@@ -315,33 +286,21 @@ class Database(object):
             self.subscribe = False
             self.queue_out("@u{0}\n".format(key).encode())
             if self.__configured_outputs[key] in ["onchange", "both"]:
-                #print "Setting output for {0} to True".format(key)
                 item.output = True
                 # TODO raise an error if the method is not 'interval' ?????
-            else:  # Any other method and we'll do an interval
-                timer = None
+            if self.__configured_outputs[key] in ["interval", "both"]:
                 t = int(tol)/2
-                # look for an existing timer with the same interval
-                for each in self.__timers:
-                    if each.interval == t:
-                        timer = each
-                        break
-                # If we didn't find one create one.
-                if not timer:
-                    timer = OutputTimer(t) #We set the interval to half of the timout
-                    self.__timers.append(timer)
-                timer.add_key(key)
-
+                timer = scheduler.scheduler.getTimer(t)
+                if timer:
+                    timer.add_callback(item.output_value)
+                else:
+                    log.warning("Unable to find a scheduler timer with interval of {0}".format(t))
+            # TODO Error for unknown output method
         else:
             self.queue_out("@s{0}\n".format(key).encode())
         self.__items[key] = item
 
         self.queue_out("@r{0}\n".format(key).encode())
-        # if item.subscribe:
-        #     self.queue_out("@s{0}\n".format(key).encode())
-        # elif item.is_subscribed: # If we are subscribed and we don't want to be
-        #     self.queue_out("@u{0}\n".format(key).encode())
-
 
 
     # If the create flag is set to True this function will create an
@@ -358,7 +317,6 @@ class Database(object):
             else:
                 raise  # Send the exception up otherwise
 
-
     def mark_all_fail(self):
         for each in self.__items:
             self.__items[each].fail = True
@@ -370,16 +328,12 @@ class Database(object):
         else:
             self.__configured_outputs[key] = m
             self.subscribe = False
-            self.queue_out("@u{0}\n".format(key).encode())
+            #self.queue_out("@u{0}\n".format(key).encode())
         log.debug("Adding output for {0}, method = {1}".format(key, method))
 
     def queue_out(self, output):
         self.clientthread.sendqueue.put(output)
 
-    def start_output_timers(self):
-        print("Starting All Timers")
-        for each in self.__timers:
-            each.start()
 
     def stop(self):
         self.clientthread.stop()
@@ -389,6 +343,7 @@ class Database(object):
 def initialize(host, port):
     global db
     db = Database(host, port)
+    log.info("Initializing FIX Client")
 
 def stop():
     db.stop()

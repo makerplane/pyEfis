@@ -27,6 +27,8 @@ import Queue
 import logging
 import time
 
+# This thread simply watches the queue that is passed to it in it's
+# constructor and sends any text that if finds there.
 class SendThread(QThread):
     def __init__(self, sock, queue):
         super(SendThread, self).__init__()
@@ -51,8 +53,7 @@ class SendThread(QThread):
     def stop(self):
         self.queue.put('exit')
 
-
-
+# This is the main communication thread of the FIX Gateway client.
 class ClientThread(QThread):
     def __init__(self, host, port, db):
         super(ClientThread, self).__init__()
@@ -76,7 +77,6 @@ class ClientThread(QThread):
                     for each in y:
                         log.debug("Requesting a report for {0}".format(each))
                         self.sendthread.queue.put("@q{0}\n".format(each).encode())
-                #print("List ID's")
                 return
             else:
                 key = x[0].strip()
@@ -88,7 +88,7 @@ class ClientThread(QThread):
                 except:
                     log.error("Unable to set subscribed bit for {0}".format(key))
             if d[1] == 'u':
-                log.debug("Un-Subscripe Acknowledged for {0}".format(key))
+                log.debug("Un-Subscribe Acknowledged for {0}".format(key))
                 try:
                     item = self.db.get_item(key)
                     item.is_subscribed = False
@@ -96,8 +96,6 @@ class ClientThread(QThread):
                     log.error("Unable to clear subscribed bit for {0}".format(key))
             elif d[1] == 'q':
                 self.db.define_item(key, x[1], x[2], x[3], x[4], x[5], x[6], x[7])
-                #self.sendthread.queue.put("@r{0}\n".format(key).encode())
-                #self.sendthread.queue.put("@s{0}\n".format(key).encode())
 
 
         else:  # If no '@' then it must be a value update
@@ -131,7 +129,7 @@ class ClientThread(QThread):
                 item.value = x[1]
             except Exception as e:
                 # We pretty much ignore this stuff for now
-                log.debug("Problem with input {0}: {1}".format(d.strip, e))
+                log.debug("Problem handling request {0}: {1}".format(d.strip, e))
 
 
     def run(self):
@@ -175,10 +173,10 @@ class ClientThread(QThread):
                                 self.log.debug("Bad Message from {0}".format(self.addr[0]))
                             for d in dstring:
                                 if d=='\n':
-                                    #try:
-                                    self.handle_request(buff)
-                                    #except Exception as e:
-                                    #    log.debug("Error handling request {0}".format(buff))
+                                    try:
+                                        self.handle_request(buff)
+                                    except Exception as e:
+                                        log.debug("Error handling request {0}".format(buff))
                                     buff = ""
                                 else:
                                     buff += d

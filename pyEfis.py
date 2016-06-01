@@ -34,16 +34,18 @@ except:
 
 import importlib
 
+import scheduler
 import fix
 import hooks
 
 _screens = []
 
+# This class is just a structure to hold information about a single
+# screen that will be loaded.
 class Screen(object):
     def __init__(self, name, module, config):
         # strings here remove the options from the list before it is
         # sent to the plugin.
-        # print("Screen class __init__({0},{1},{2})".format(name, module, config))
         exclude_options = ["module"]
         self.module = importlib.import_module(module)
         # Here items winds up being a list of tuples [('key', 'value'),...]
@@ -59,6 +61,7 @@ class Screen(object):
         # This would hold the instantiated Screen object from the module.
         self.object = None
         self.default = False
+
 
 class Main(QMainWindow):
     keyPress = pyqtSignal()
@@ -129,6 +132,7 @@ if __name__ == "__main__":
         log.setLevel(logging.DEBUG)
         log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
+    scheduler.initialize()
     hooks.initialize(config)
 
     # Load the Screens

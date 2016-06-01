@@ -38,6 +38,10 @@ def keySignal(event):
         x = fix.db.get_item("BARO")
         x.value = x.value - 0.01
 
+    elif event.key() == Qt.Key_Q:
+        x = fix.db.get_item("BTN16")
+        if x.value == False: x.value = True
+        else: x.value = False
 
     #  Decrease Altimeter Setting
     elif event.key() == Qt.Key_M:
