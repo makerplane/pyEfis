@@ -17,7 +17,6 @@
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
 except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
@@ -113,11 +112,11 @@ class Main(QMainWindow):
                 if s.name == scr:
                     found = i
                     break
-        print found
         if found is not None:
-            screens[found].show()
-            screens[self.running_screen].hide()
-            self.running_screen = found
+            if found != self.running_screen:  # Make sure it's different.
+                screens[found].show()
+                screens[self.running_screen].hide()
+                self.running_screen = found
         else:
             raise KeyError("Screen {0} Not Found".format(scr))
 
