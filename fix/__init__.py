@@ -317,6 +317,9 @@ class Database(object):
             else:
                 raise  # Send the exception up otherwise
 
+    def set_value(self, key, value):
+        self.__items[key].value = value
+
     def mark_all_fail(self):
         for each in self.__items:
             self.__items[each].fail = True

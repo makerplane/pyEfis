@@ -23,30 +23,6 @@ import logging
 import importlib
 
 
-# Instead of creating callbacks and putting hook calls all over the code
-# we just create a bunch of signals and emit them for different events
-# To create hooks just have the module loaded via the main configuration file
-# import this module and connect to signals on the signals object.
-class Signals(QObject):
-    keyPress = pyqtSignal(QEvent)
-    mainWindowShow = pyqtSignal(QEvent)
-    mainWindowClose = pyqtSignal(QEvent)
-
-    def __init__(self):
-        super(Signals, self).__init__()
-
-    def keyPressEmit(self, event):
-        self.keyPress.emit(event)
-
-    def mainWindowShowEmit(self, event):
-        self.mainWindowShow.emit(event)
-
-    def mainWindowCloseEmit(self, event):
-        self.mainWindowClose.emit(event)
-
-
-signals = Signals()
-
 # Read through the configuration and load the hook modules
 def initialize(config):
     global log

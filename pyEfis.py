@@ -32,76 +32,13 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import importlib
+#import importlib
 
 import scheduler
 import fix
 import hooks
+import gui
 
-_screens = []
-
-# This class is just a structure to hold information about a single
-# screen that will be loaded.
-class Screen(object):
-    def __init__(self, name, module, config):
-        # strings here remove the options from the list before it is
-        # sent to the plugin.
-        exclude_options = ["module"]
-        self.module = importlib.import_module(module)
-        # Here items winds up being a list of tuples [('key', 'value'),...]
-        items = [item for item in config.items("Screen." + name)
-                 if item[0] not in exclude_options]
-        # Append the command line arguments to the items list as a tuple
-        items.append(('argv', sys.argv))
-        # Convert this to a dictionary before passing to the plugin
-        self.config = {}
-        for each in items:
-            self.config[each[0]] = each[1]
-
-        # This would hold the instantiated Screen object from the module.
-        self.object = None
-        self.default = False
-
-
-class Main(QMainWindow):
-    keyPress = pyqtSignal()
-
-    def __init__(self, test, parent=None):
-        super(Main, self).__init__(parent)
-
-        self.width = int(config.get("mainscreen", "screenSize.Width"))
-        self.height = int(config.get("mainscreen", "screenSize.Height"))
-        self.screenColor = config.get("mainscreen", "screenColor")
-
-        self.setObjectName("PFD")
-        self.resize(self.width, self.height)
-        w = QWidget(self)
-        w.setGeometry(0, 0, self.width, self.height)
-
-        p = w.palette()
-        if self.screenColor:
-             p.setColor(w.backgroundRole(), QColor(self.screenColor))
-             w.setPalette(p)
-             w.setAutoFillBackground(True)
-
-        for scr in _screens:
-            scr.object = scr.module.Screen(self)
-            # TODO Figure out how to have different size screens
-            scr.object.resize(self.width, self.height)
-            scr.object.move(0,0)
-            if scr.default:
-                scr.object.show()
-
-
-    def showEvent(self, event):
-        hooks.signals.mainWindowShowEmit(event)
-
-    def closeEvent(self, event):
-        hooks.signals.mainWindowCloseEmit(event)
-
-    # Send a keypress signal through the hooks module for each key event we get
-    def keyReleaseEvent(self, event):
-        hooks.signals.keyPressEmit(event)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -133,21 +70,8 @@ if __name__ == "__main__":
         log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
     scheduler.initialize()
-    hooks.initialize(config)
 
-    # Load the Screens
-    for each in config.sections():
-        if each[:7] == "Screen.":
-            module = config.get(each, "module")
-            try:
-                name = each[7:]
-                _screens.append( Screen(name, module, config) )
-                #load_screen(each[7:], module, config)
-            except Exception as e:
-                logging.critical("Unable to load module - " + module + ": " + str(e))
-                raise
-    # TODO Use configuration instead of defaulting to first
-    _screens[0].default = True
+
 
     host = config.get("main", "FixServer")
     port = int(config.get("main", "FixPort"))
@@ -159,9 +83,8 @@ if __name__ == "__main__":
         except ValueError as e:
             log.warning(e)
 
-
-    mainWindow = Main(args.mode)
-    mainWindow.show()
+    gui.initialize(config)
+    hooks.initialize(config)
 
     # Main program loop
     result = app.exec_()

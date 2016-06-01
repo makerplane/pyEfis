@@ -19,33 +19,38 @@ try:
 except:
     from PyQt4.QtCore import *
 
-import hooks
+import gui
 import fix
+import hooks
 
-def keySignal(event):
+def keyPress(event):
     if event.key() == Qt.Key_BracketRight:
-        #hooks.log.debug("Raise Altimeter Setting")
         x = fix.db.get_item("BARO")
         x.value = x.value + 0.01
-        #self.alt_setting.setAltimeter_Setting(
-        #                    self.alt_setting.getAltimeter_Setting() + 0.01)
 
     #  Decrease Altimeter Setting
     elif event.key() == Qt.Key_BracketLeft:
-        #self.alt_setting.setAltimeter_Setting(
-        #                    self.alt_setting.getAltimeter_Setting() - 0.01)
-        #hooks.log.debug("Lower Altimeter Setting")
         x = fix.db.get_item("BARO")
         x.value = x.value - 0.01
 
     elif event.key() == Qt.Key_Q:
-        x = fix.db.get_item("BTN16")
-        if x.value == False: x.value = True
-        else: x.value = False
+        fix.db.set_value("BTN16", True)
 
     #  Decrease Altimeter Setting
     elif event.key() == Qt.Key_M:
         hooks.log.debug("Change Airspeed Mode")
         #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
 
-hooks.signals.keyPress.connect(keySignal)
+    elif event.key() == Qt.Key_S:
+        hooks.log.debug("Screen Change")
+        gui.mainWindow.showScreen(0)
+        #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
+
+
+def keyRelease(event):
+    if event.key() == Qt.Key_Q:
+        fix.db.set_value("BTN16", False)
+
+
+gui.mainWindow.keyPress.connect(keyPress)
+gui.mainWindow.keyRelease.connect(keyRelease)
