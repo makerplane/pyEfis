@@ -42,11 +42,41 @@ class AbstractGauge(QWidget):
         self.highRange = 100.0
         self.lowRange = 0.0
         self._value = 0.0
+        self.fail = False
+        self.bad = False
+        self.annunciate = False
+
+        # All these colors can be set from caller
         self.outlineColor = QColor(Qt.darkGray)
-        self.bgColor = QColor(Qt.black)
-        self.safeColor = QColor(Qt.green)
-        self.warnColor = QColor(Qt.yellow)
-        self.alarmColor = QColor(Qt.red)
+        # These are the colors that are used when the value's
+        # quality is marked as good
+        self.bgGoodColor = QColor(Qt.black)
+        self.safeGoodColor = QColor(Qt.green)
+        self.warnGoodColor = QColor(Qt.yellow)
+        self.alarmGoodColor = QColor(Qt.red)
+        self.textGoodColor = QColor(Qt.white)
+        self.penGoodColor = QColor(Qt.white)
+
+        # These colors are used for bad and fail
+        self.bgBadColor = QColor(Qt.black)
+        self.safeBadColor = QColor(Qt.darkGray)
+        self.warnBadColor = QColor(Qt.darkYellow)
+        self.alarmBadColor = QColor(Qt.darkRed)
+        self.textBadColor = QColor(Qt.gray)
+        self.penBadColor = QColor(Qt.gray)
+
+        # Annunciate changes the text color
+        self.textAnnunciateColor = QColor(Qt.red)
+
+        # These are the colors that are actually used
+        # for drawing gauge.  These can't be changed by caller
+        self.bgColor = self.bgGoodColor
+        self.safeColor = self.safeGoodColor
+        self.warnColor = self.warnGoodColor
+        self.alarmColor = self.alarmGoodColor
+        self.textColor = self.textGoodColor
+        self.penColor = self.penGoodColor
+
         self.decimalPlaces = 1
         self._dbkey = None
 
@@ -61,11 +91,21 @@ class AbstractGauge(QWidget):
         return self._value
 
     def setValue(self, value):
-        if value != self._value:
+        if self.fail:
+            self._value = 0.0
+        elif value != self._value:
             self._value = efis.bounds(self.lowRange, self.highRange, value)
             self.update()
 
     value = property(getValue, setValue)
+
+    def getValueText(self):
+        if self.fail:
+            return 'xxx'
+        else:
+            return '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
+
+    valueText = property(getValueText)
 
     def getDbkey(self):
         return self._dbkey
@@ -79,6 +119,11 @@ class AbstractGauge(QWidget):
         item.valueChanged[float].connect(self.setValue)
         item.auxChanged.connect(self.setAuxData)
         item.reportReceived.connect(self.setupGauge)
+        item.annunciateChanged.connect(self.annunciateFlag)
+        #item.oldChanged = pyqtSignal(bool)
+        item.badChanged.connect(self.badFlag)
+        item.failChanged.connect(self.failFlag)
+
         self.setupGauge()
         self._dbkey = key
 
@@ -91,6 +136,13 @@ class AbstractGauge(QWidget):
         # min and max should always be set for FIX Gateway data.
         if item.min: self.lowRange = item.min
         if item.max: self.highRange = item.max
+        self.units = item.units
+        # set the flags
+        self.fail = item.fail
+        self.bad = item.bad
+        self.annunciate = item.annunciate
+        self.setColors()
+        # set the axuliiary data and the value
         self.setAuxData(item.aux)
         self.setValue(item.value)
 
@@ -103,13 +155,47 @@ class AbstractGauge(QWidget):
         if "lowWarn" in auxdata:
             self.lowWarn = auxdata["lowWarn"]
         if "lowAlarm" in auxdata:
-            self.lowWarn = auxdata["lowAlarm"]
+            self.lowAlarm = auxdata["lowAlarm"]
         if "highWarn" in auxdata:
             self.highWarn = auxdata["highWarn"]
         if "highAlarm" in auxdata:
             self.highAlarm = auxdata["highAlarm"]
+        self.update()
 
+    def setColors(self):
+        if self.bad or self.fail:
+            self.bgColor = self.bgBadColor
+            self.safeColor = self.safeBadColor
+            self.warnColor = self.warnBadColor
+            self.alarmColor = self.alarmBadColor
+            self.textColor = self.textBadColor
+            self.penColor = self.penBadColor
+        else:
+            self.bgColor = self.bgGoodColor
+            self.safeColor = self.safeGoodColor
+            self.warnColor = self.warnGoodColor
+            self.alarmColor = self.alarmGoodColor
+            self.textColor = self.textGoodColor
+            self.penColor = self.penGoodColor
+        if self.annunciate and not self.fail:
+            self.textColor = self.textAnnunciateColor
+        self.update()
 
+    def annunciateFlag(self, flag):
+        self.annunciate = flag
+        self.setColors()
+
+    def failFlag(self, flag):
+        self.fail = flag
+        if flag:
+            self.setValue(0.0)
+        else:
+            self.setValue(fix.db.get_item(self.dbkey).value)
+        self.setColors()
+
+    def badFlag(self, flag):
+        self.bad = flag
+        self.setColors()
 
 class HorizontalBar(AbstractGauge):
     def __init__(self, parent=None):
@@ -133,15 +219,15 @@ class HorizontalBar(AbstractGauge):
         pen = QPen()
         pen.setWidth(1)
         pen.setCapStyle(Qt.FlatCap)
-        pen.setColor(QColor(Qt.white))
+        pen.setColor(self.textColor)
         p.setPen(pen)
         p.setFont(self.smallFont)
         p.drawText(self.nameTextRect, self.name)
         # Main Value
         p.setFont(self.bigFont)
-        s = '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
+        #s = '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
         opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
-        p.drawText(self.valueTextRect, s, opt)
+        p.drawText(self.valueTextRect, self.valueText, opt)
         # Units
         p.setFont(self.smallFont)
         opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
@@ -149,13 +235,13 @@ class HorizontalBar(AbstractGauge):
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)
-        pen.setColor(QColor(Qt.green))
-        brush = QColor(Qt.green)
+        pen.setColor(self.safeColor)
+        brush = self.safeColor
         p.setPen(pen)
         p.setBrush(brush)
         p.drawRect(0, self.barTop, self.width(), self.barHeight)
-        pen.setColor(QColor(Qt.yellow))
-        brush = QColor(Qt.yellow)
+        pen.setColor(self.warnColor)
+        brush = self.warnColor
         p.setPen(pen)
         p.setBrush(brush)
         if(self.lowWarn):
@@ -166,8 +252,8 @@ class HorizontalBar(AbstractGauge):
             x = self.interpolate(self.highWarn, self.width())
             p.drawRect(x, self.barTop,
                        self.width() - x, self.barHeight)
-        pen.setColor(QColor(Qt.red))
-        brush = QColor(Qt.red)
+        pen.setColor(self.alarmColor)
+        brush = self.alarmColor
         p.setPen(pen)
         p.setBrush(brush)
         if(self.lowAlarm):
@@ -189,9 +275,9 @@ class HorizontalBar(AbstractGauge):
                    x, self.barTop + self.barHeight + 4)
 
 
-class RoundGauge(AbstractGauge):
+class ArcGauge(AbstractGauge):
     def __init__(self, parent=None):
-        super(RoundGauge, self).__init__(parent)
+        super(ArcGauge, self).__init__(parent)
         self.setMinimumSize(100, 50)
         self.startAngle = 45
         self.sweepAngle = 180 - 45
@@ -219,20 +305,21 @@ class RoundGauge(AbstractGauge):
         pen = QPen()
         pen.setWidth(10)
         pen.setCapStyle(Qt.FlatCap)
-        pen.setColor(QColor(Qt.red))
+        pen.setColor(self.alarmColor)
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
                    start, alarmAngle)
-        pen.setColor(QColor(Qt.yellow))
+        pen.setColor(self.warnColor)
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
                    start + alarmAngle, warnAngle - alarmAngle)
-        pen.setColor(QColor(Qt.green))
+        pen.setColor(self.safeColor)
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
                    start + warnAngle, sweep - warnAngle)
         # Now we draw the line pointer
-        pen.setColor(QColor(0xAA, 0xAA, 0xAA))
+        #pen.setColor(QColor(0xAA, 0xAA, 0xAA))
+        pen.setColor(self.penColor)
         pen.setWidth(2)
         p.setPen(pen)
         valAngle = sweep - int(self.interpolate(self._value, sweep))
@@ -242,7 +329,7 @@ class RoundGauge(AbstractGauge):
         endPoint = QPoint(self.arcCenter.y() + y, self.arcCenter.x() - x)
         p.drawLine(self.arcCenter, endPoint)
         # Draw Text
-        pen.setColor(QColor(Qt.white))
+        pen.setColor(self.textColor)
         pen.setWidth(1)
         p.setPen(pen)
         f = QFont()
@@ -252,10 +339,9 @@ class RoundGauge(AbstractGauge):
 
         f.setPixelSize(self.height() / 2)
         p.setFont(f)
-        s = '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
         opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
         rect = QRectF(0, 0, self.width(), self.height())
-        p.drawText(rect, s, opt)
+        p.drawText(rect, self.valueText, opt)
 
 
 class VerticalBar(AbstractGauge):

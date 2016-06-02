@@ -53,34 +53,28 @@ class Screen(QWidget):
         self.head_tape = hsi.DG_Tape(self)
         self.alt_setting = altimeter.Altimeter_Setting(self)
 
-        self.map_g = gauges.RoundGauge(self)
+        self.map_g = gauges.ArcGauge(self)
         self.map_g.name = "MAP"
         self.map_g.decimalPlaces = 1
-        self.map_g.lowRange = 0.0
-        self.map_g.highRange = 30.0
-        self.map_g.highWarn = 28.0
-        self.map_g.highAlarm = 29.0
+        self.map_g.dbkey = "MAP1"
 
-        self.rpm = gauges.RoundGauge(self)
+        self.rpm = gauges.ArcGauge(self)
         self.rpm.name = "RPM"
         self.rpm.decimalPlaces = 0
         self.rpm.dbkey = "TACH1"
-        #self.rpm.lowRange = 0.0
-        #self.rpm.highRange = 2800.0
-        #self.rpm.highWarn = 2600.0
-        #self.rpm.highAlarm = 2760.0
 
         self.op = gauges.HorizontalBar(self)
         self.op.name = "Oil Press"
-        self.op.units = "psi"
+        #self.op.units = "psi"
         self.op.decimalPlaces = 1
-        self.op.lowRange = 0.0
-        self.op.highRange = 100.0
-        self.op.highWarn = 90.0
-        self.op.highAlarm = 95.0
-        self.op.lowWarn = 45.0
-        self.op.lowAlarm = 10.0
-        self.op.value = 45.2
+        self.op.dbkey = "OILP1"
+        # self.op.lowRange = 0.0
+        # self.op.highRange = 100.0
+        # self.op.highWarn = 90.0
+        # self.op.highAlarm = 95.0
+        # self.op.lowWarn = 45.0
+        # self.op.lowAlarm = 10.0
+        # self.op.value = 45.2
 
 
         self.ot = gauges.HorizontalBar(self)

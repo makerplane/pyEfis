@@ -71,7 +71,7 @@ class DB_Item(QObject):
         for each in l:
             if each != "":
                 self.aux[each.strip()] = None
-        
+
     def get_aux_list(self):
         return list(self.aux.keys())
 
@@ -100,7 +100,6 @@ class DB_Item(QObject):
 
     # Outputs the value to the send queue and on to the fixgw server
     def output_value(self):
-        #print("output_value called for {0}".format(self.key))
         flags = "1" if self.annunciate else "0"
         flags += "0" # if self.old else "0"
         flags += "1" if self.bad else "0"

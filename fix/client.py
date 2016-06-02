@@ -100,8 +100,6 @@ class ClientThread(QThread):
         else:  # If no '@' then it must be a value update
             try:
                 x = d.strip().split(';')
-                if len(x) != 3:
-                    log.debug("Bad Frame {0} from {1}".format(d.strip(), self.host))
                 if "." in x[0]: # If there is a period in the key it's aux data
                     y = x[0].split(".")
                     item = self.db.get_item(y[0])

@@ -1,6 +1,8 @@
-Get instruments to read Min and Max ranges, warning setpoints and other aux data from the database
+Get instruments to read Min and Max ranges, warning setpoints and other aux data
+from the database
 
-Add screen sizes to configuration or screen def or something.  Still need to figure this one out.
+Add screen sizes to configuration or screen def or something.  Still need to
+figure this one out.
 
 Add flags to the instruments so they will indicate badness, oldness or failure
 
@@ -8,5 +10,8 @@ Clean up instruments
 
 There is a funny border on the ALT and Airspeed tapes in Linux.  It's not
 there on my Mac.  It might just be KDE too?
+
+Handle Auxiliary data output.  This may not really be necessary for en EFIS but
+it would make the client complete.
 
 Documentation
