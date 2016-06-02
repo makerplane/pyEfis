@@ -22,8 +22,9 @@ try:
 except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
-import efis
 
+import efis
+import fix
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRect(x - r, y - r, r * 2, r * 2)
@@ -40,12 +41,15 @@ class AbstractGauge(QWidget):
         self.lowAlarm = None
         self.highRange = 100.0
         self.lowRange = 0.0
-        self._value = 0
+        self._value = 0.0
         self.outlineColor = QColor(Qt.darkGray)
         self.bgColor = QColor(Qt.black)
         self.safeColor = QColor(Qt.green)
         self.warnColor = QColor(Qt.yellow)
         self.alarmColor = QColor(Qt.red)
+        self.decimalPlaces = 1
+        self._dbkey = None
+
 
     def interpolate(self, value, range_):
         h = float(range_)
@@ -53,22 +57,64 @@ class AbstractGauge(QWidget):
         m = float(self.highRange)
         return ((value - l) / (m - l)) * h
 
+    def getValue(self):
+        return self._value
+
     def setValue(self, value):
         if value != self._value:
             self._value = efis.bounds(self.lowRange, self.highRange, value)
             self.update()
 
-    def getValue(self):
-        return self._value
-
     value = property(getValue, setValue)
+
+    def getDbkey(self):
+        return self._dbkey
+
+    def setDbkey(self, key):
+        #TODO Should disconnect any other signals
+        # If this doesn't exist it will be a silent error.  We either have to
+        # set the create flag to true or risk that we'll start before the database
+        # is fully initialized.
+        item = fix.db.get_item(key, True)
+        item.valueChanged[float].connect(self.setValue)
+        item.auxChanged.connect(self.setAuxData)
+        item.reportReceived.connect(self.setupGauge)
+        self.setupGauge()
+        self._dbkey = key
+
+    dbkey = property(getDbkey, setDbkey)
+
+    # This should get called when the gauge is created and then again
+    # anytime a new report of the db item is recieved from the server
+    def setupGauge(self):
+        item = fix.db.get_item(self.dbkey, True)
+        # min and max should always be set for FIX Gateway data.
+        if item.min: self.lowRange = item.min
+        if item.max: self.highRange = item.max
+        self.setAuxData(item.aux)
+        self.setValue(item.value)
+
+
+    def setAuxData(self, auxdata):
+        if "Min" in auxdata and auxdata["Min"] != None:
+            self.lowRange = auxdata["Min"]
+        if "Max" in auxdata and auxdata["Max"] != None:
+            self.highRange = auxdata["Max"]
+        if "lowWarn" in auxdata:
+            self.lowWarn = auxdata["lowWarn"]
+        if "lowAlarm" in auxdata:
+            self.lowWarn = auxdata["lowAlarm"]
+        if "highWarn" in auxdata:
+            self.highWarn = auxdata["highWarn"]
+        if "highAlarm" in auxdata:
+            self.highAlarm = auxdata["highAlarm"]
+
 
 
 class HorizontalBar(AbstractGauge):
     def __init__(self, parent=None):
         super(HorizontalBar, self).__init__(parent)
         self.setMinimumSize(100, 50)
-        self.decimalPlaces = 1
 
     def resizeEvent(self, event):
         self.bigFont = QFont()
@@ -149,7 +195,6 @@ class RoundGauge(AbstractGauge):
         self.setMinimumSize(100, 50)
         self.startAngle = 45
         self.sweepAngle = 180 - 45
-        self.decimalPlaces = 1
 
     def resizeEvent(self, event):
         self.arcCenter = QPoint(self.width() / 2, self.height())
@@ -159,8 +204,14 @@ class RoundGauge(AbstractGauge):
         start = self.startAngle
         sweep = self.sweepAngle
         r = self.arcRadius
-        warnAngle = sweep - self.interpolate(self.highWarn, sweep)
-        alarmAngle = sweep - self.interpolate(self.highAlarm, sweep)
+        if self.highWarn:
+            warnAngle = sweep - self.interpolate(self.highWarn, sweep)
+        else:
+            warnAngle = 0
+        if self.highAlarm:
+            alarmAngle = sweep - self.interpolate(self.highAlarm, sweep)
+        else:
+            alarmAngle = 0
         centerX = self.arcCenter.x()
         centerY = self.arcCenter.y()
         p = QPainter(self)

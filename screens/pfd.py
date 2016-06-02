@@ -64,10 +64,11 @@ class Screen(QWidget):
         self.rpm = gauges.RoundGauge(self)
         self.rpm.name = "RPM"
         self.rpm.decimalPlaces = 0
-        self.rpm.lowRange = 0.0
-        self.rpm.highRange = 2800.0
-        self.rpm.highWarn = 2600.0
-        self.rpm.highAlarm = 2760.0
+        self.rpm.dbkey = "TACH1"
+        #self.rpm.lowRange = 0.0
+        #self.rpm.highRange = 2800.0
+        #self.rpm.highWarn = 2600.0
+        #self.rpm.highAlarm = 2760.0
 
         self.op = gauges.HorizontalBar(self)
         self.op.name = "Oil Press"
@@ -80,6 +81,7 @@ class Screen(QWidget):
         self.op.lowWarn = 45.0
         self.op.lowAlarm = 10.0
         self.op.value = 45.2
+
 
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
