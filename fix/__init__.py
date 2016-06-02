@@ -40,6 +40,7 @@ class DB_Item(QObject):
     badChanged = pyqtSignal(bool)
     failChanged = pyqtSignal(bool)
     auxChanged = pyqtSignal(dict)
+    reportReceived = pyqtSignal()
 
     def __init__(self, key, dtype='float'):
         super(DB_Item, self).__init__()
@@ -68,15 +69,19 @@ class DB_Item(QObject):
     def init_aux(self, aux):
         l = aux.split(',')
         for each in l:
-            self.aux[each.strip()] = None
-
+            if each != "":
+                self.aux[each.strip()] = None
+        
     def get_aux_list(self):
         return list(self.aux.keys())
 
     def set_aux_value(self, name, value):
         try:
             last = self.aux[name]
-            self.aux[name] = self.dtype(value)
+            if value == None or value == "None":
+                self.aux[name] = None
+            else:
+                self.aux[name] = self.dtype(value)
             if self.aux[name] != last:
                 self.auxChanged.emit(self.aux)
         except ValueError:
@@ -259,9 +264,6 @@ class Database(object):
         self.__configured_outputs = {}
         self.__timers = []
 
-        #hooks.signals.mainWindowShow.connect(self.start_output_timers)
-
-
     # Either add an item or redefine the item if it already exists.
     #  This is mostly useful when the FIXGW client reconnects.  The
     #  server may have different information.
@@ -297,11 +299,15 @@ class Database(object):
                     log.warning("Unable to find a scheduler timer with interval of {0}".format(t))
             # TODO Error for unknown output method
         else:
+            # If we are not an output then subscribe to the point
             self.queue_out("@s{0}\n".format(key).encode())
         self.__items[key] = item
 
+        # Send a read command to the server to get initial data
         self.queue_out("@r{0}\n".format(key).encode())
-
+        for each in item.aux: # Read the Auxiliary data
+            self.queue_out("@r{0}.{1}\n".format(key, each).encode())
+        item.reportReceived.emit()
 
     # If the create flag is set to True this function will create an
     # item with the given key if it does not exist.  Otherwise just

@@ -97,36 +97,39 @@ class ClientThread(QThread):
             elif d[1] == 'q':
                 self.db.define_item(key, x[1], x[2], x[3], x[4], x[5], x[6], x[7])
 
-
         else:  # If no '@' then it must be a value update
             try:
                 x = d.strip().split(';')
                 if len(x) != 3:
                     log.debug("Bad Frame {0} from {1}".format(d.strip(), self.host))
-                # TODO Deal with aux data here
-                item = self.db.get_item(x[0])
-                try:
-                    item.annunciate = True if x[2][0] == '1' else False
-                except:
-                    pass
-                try:
-                    item.old = True if x[2][1] == '1' else False
-                except:
-                    pass
-                try:
-                    item.bad = True if x[2][2] == '1' else False
-                except:
-                    pass
-                try:
-                    item.fail = True if x[2][3] == '1' else False
-                except:
-                    pass
-                #try:
-                #    item.secondary_fail = True if x[2][4] == '1' else False
-                #except:
-                #    pass
-                # if x[2] != '00000' or x[2] != '0000':
-                item.value = x[1]
+                if "." in x[0]: # If there is a period in the key it's aux data
+                    y = x[0].split(".")
+                    item = self.db.get_item(y[0])
+                    item.set_aux_value(y[1], x[1])
+                else:
+                    item = self.db.get_item(x[0])
+                    try:
+                        item.annunciate = True if x[2][0] == '1' else False
+                    except:
+                        pass
+                    try:
+                        item.old = True if x[2][1] == '1' else False
+                    except:
+                        pass
+                    try:
+                        item.bad = True if x[2][2] == '1' else False
+                    except:
+                        pass
+                    try:
+                        item.fail = True if x[2][3] == '1' else False
+                    except:
+                        pass
+                    #try:
+                    #    item.secondary_fail = True if x[2][4] == '1' else False
+                    #except:
+                    #    pass
+                    # if x[2] != '00000' or x[2] != '0000':
+                    item.value = x[1]
             except Exception as e:
                 # We pretty much ignore this stuff for now
                 log.debug("Problem handling request {0}: {1}".format(d.strip, e))
