@@ -48,7 +48,7 @@ class DB_Item(QObject):
         self.key = key
         self._value = 0.0
         self.description = ""
-        self.units = ""
+        self._units = ""
         self._annunciate = False
         self._old = False
         self._bad = True
@@ -169,6 +169,14 @@ class DB_Item(QObject):
     @property
     def typestring(self):
         return self._typestring
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, value):
+        self._units = value.replace("deg",u'\N{DEGREE SIGN}')
 
     @property
     def min(self):

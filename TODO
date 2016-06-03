@@ -1,5 +1,6 @@
 Get instruments to read Min and Max ranges, warning setpoints and other aux data
-from the database
+from the database.  This is working for gauges at the moment.  It still needs
+to be added to the rest of the instruments.
 
 Add screen sizes to configuration or screen def or something.  Still need to
 figure this one out.
