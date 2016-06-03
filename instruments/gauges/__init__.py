@@ -41,12 +41,19 @@ class AbstractGauge(QWidget):
         self.lowAlarm = None
         self.highRange = 100.0
         self.lowRange = 0.0
+        self._dbkey = None
         self._value = 0.0
+        self._units = ""
         self.fail = False
         self.bad = False
         self.annunciate = False
 
-        # All these colors can be set from caller
+        # These properties can be modified by the parent
+        self.clipping = False
+        self.unitsOverride = None
+        self.conversionFunction = lambda x: x
+        self.decimalPlaces = 1
+        # All these colors can be modified by the parent
         self.outlineColor = QColor(Qt.darkGray)
         # These are the colors that are used when the value's
         # quality is marked as good
@@ -68,17 +75,15 @@ class AbstractGauge(QWidget):
         # Annunciate changes the text color
         self.textAnnunciateColor = QColor(Qt.red)
 
+        # The following properties should not be changed by the user.
         # These are the colors that are actually used
-        # for drawing gauge.  These can't be changed by caller
+        # for drawing gauge.
         self.bgColor = self.bgGoodColor
         self.safeColor = self.safeGoodColor
         self.warnColor = self.warnGoodColor
         self.alarmColor = self.alarmGoodColor
         self.textColor = self.textGoodColor
         self.penColor = self.penGoodColor
-
-        self.decimalPlaces = 1
-        self._dbkey = None
 
 
     def interpolate(self, value, range_):
@@ -93,9 +98,14 @@ class AbstractGauge(QWidget):
     def setValue(self, value):
         if self.fail:
             self._value = 0.0
-        elif value != self._value:
-            self._value = efis.bounds(self.lowRange, self.highRange, value)
-            self.update()
+        else:
+            cvalue = self.conversionFunction(value)
+            if cvalue != self._value:
+                if self.clipping:
+                    self._value = efis.bounds(self.lowRange, self.highRange, cvalue)
+                else:
+                    self._value = cvalue
+                self.update()
 
     value = property(getValue, setValue)
 
@@ -129,6 +139,17 @@ class AbstractGauge(QWidget):
 
     dbkey = property(getDbkey, setDbkey)
 
+    def getUnits(self):
+        if self.unitsOverride:
+            return self.unitsOverride
+        else:
+            return self._units
+
+    def setUnits(self, value):
+        self._units = value
+
+    units = property(getUnits, setUnits)
+
     # This should get called when the gauge is created and then again
     # anytime a new report of the db item is recieved from the server
     def setupGauge(self):
@@ -136,7 +157,7 @@ class AbstractGauge(QWidget):
         # min and max should always be set for FIX Gateway data.
         if item.min: self.lowRange = item.min
         if item.max: self.highRange = item.max
-        self.units = item.units
+        self._units = item.units
         # set the flags
         self.fail = item.fail
         self.bad = item.bad
@@ -149,17 +170,17 @@ class AbstractGauge(QWidget):
 
     def setAuxData(self, auxdata):
         if "Min" in auxdata and auxdata["Min"] != None:
-            self.lowRange = auxdata["Min"]
+            self.lowRange = self.conversionFunction(auxdata["Min"])
         if "Max" in auxdata and auxdata["Max"] != None:
-            self.highRange = auxdata["Max"]
-        if "lowWarn" in auxdata:
-            self.lowWarn = auxdata["lowWarn"]
-        if "lowAlarm" in auxdata:
-            self.lowAlarm = auxdata["lowAlarm"]
-        if "highWarn" in auxdata:
-            self.highWarn = auxdata["highWarn"]
-        if "highAlarm" in auxdata:
-            self.highAlarm = auxdata["highAlarm"]
+            self.highRange = self.conversionFunction(auxdata["Max"])
+        if "lowWarn" in auxdata and auxdata["lowWarn"] != None:
+            self.lowWarn = self.conversionFunction(auxdata["lowWarn"])
+        if "lowAlarm" in auxdata and auxdata["lowAlarm"] != None:
+            self.lowAlarm = self.conversionFunction(auxdata["lowAlarm"])
+        if "highWarn" in auxdata and auxdata["highWarn"] != None:
+            self.highWarn = self.conversionFunction(auxdata["highWarn"])
+        if "highAlarm" in auxdata and auxdata["highAlarm"] != None:
+            self.highAlarm = self.conversionFunction(auxdata["highAlarm"])
         self.update()
 
     def setColors(self):
@@ -197,6 +218,7 @@ class AbstractGauge(QWidget):
         self.bad = flag
         self.setColors()
 
+
 class HorizontalBar(AbstractGauge):
     def __init__(self, parent=None):
         super(HorizontalBar, self).__init__(parent)
@@ -225,12 +247,12 @@ class HorizontalBar(AbstractGauge):
         p.drawText(self.nameTextRect, self.name)
         # Main Value
         p.setFont(self.bigFont)
-        #s = '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
         opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
         p.drawText(self.valueTextRect, self.valueText, opt)
         # Units
         p.setFont(self.smallFont)
         opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
+
         p.drawText(self.valueTextRect, self.units, opt)
 
         # Draws the bar

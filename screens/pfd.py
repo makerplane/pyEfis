@@ -65,39 +65,25 @@ class Screen(QWidget):
 
         self.op = gauges.HorizontalBar(self)
         self.op.name = "Oil Press"
-        #self.op.units = "psi"
         self.op.decimalPlaces = 1
         self.op.dbkey = "OILP1"
-        # self.op.lowRange = 0.0
-        # self.op.highRange = 100.0
-        # self.op.highWarn = 90.0
-        # self.op.highAlarm = 95.0
-        # self.op.lowWarn = 45.0
-        # self.op.lowAlarm = 10.0
-        # self.op.value = 45.2
 
 
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
-        self.ot.units = "degF"
+        # Use a lambda to convert the values internally
+        self.ot.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        # This causes the units sent from the server to be overridden
+        self.ot.unitsOverride = u'\N{DEGREE SIGN}F'
         self.ot.decimalPlaces = 1
-        self.ot.lowRange = 160.0
-        self.ot.highRange = 250.0
-        self.ot.highWarn = 210.0
-        self.ot.highAlarm = 230.0
-        self.ot.lowWarn = None
-        self.ot.lowAlarm = None
-        self.ot.value = 215.2
+        self.ot.dbkey = "OILT1"
+
 
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
-        self.fuel.units = "gal"
         self.fuel.decimalPlaces = 1
-        self.fuel.lowRange = 0.0
-        self.fuel.highRange = 50.0
-        self.fuel.lowWarn = 2.0
-        self.fuel.value = 15.2
-
+        self.fuel.dbkey = "FUELQ1"
+        
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
         self.ff.units = "gph"
