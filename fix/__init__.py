@@ -44,6 +44,8 @@ class DB_Item(QObject):
 
     def __init__(self, key, dtype='float'):
         super(DB_Item, self).__init__()
+        if key == None:
+            raise ValueError("Trying to create a Null Item")
         self.dtype = dtype
         self.key = key
         self._value = 0.0
@@ -124,6 +126,7 @@ class DB_Item(QObject):
 
     @value.setter
     def value(self, x):
+        #print("Value called {0} {1} Min {2} Max {3}".format(self.key, x, self.min, self.max))
         last = self._value
         if self.dtype == bool:
             if type(x) == bool:
@@ -139,17 +142,21 @@ class DB_Item(QObject):
             try:
                 if self._value < self._min: self._value = self._min
             except:  # Probably only fails if min has not been set
+                #raise
                 pass  # ignore at this point
             try:
                 if self._value > self._max: self._value = self._max
             except:  # Probably only fails if max has not been set
+                #raise
                 pass  # ignore at this point
         # set the timestamp to right now
         self.timestamp = datetime.utcnow()
         if last != self._value:
+            #print("ValueChanged {0} {1}".format(self.key, self._value))
             self.valueChanged.emit(self._value)
             if self.output:
                 self.output_value()
+        #print("ValueWrite {0} {1}".format(self.key, self._value))
         self.valueWrite.emit(self._value)
 
     @property

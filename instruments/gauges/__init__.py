@@ -134,8 +134,9 @@ class AbstractGauge(QWidget):
         item.badChanged.connect(self.badFlag)
         item.failChanged.connect(self.failFlag)
 
-        self.setupGauge()
         self._dbkey = key
+        self.setupGauge()
+        
 
     dbkey = property(getDbkey, setDbkey)
 
