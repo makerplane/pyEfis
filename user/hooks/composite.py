@@ -37,8 +37,14 @@ class CompositeFloatItem(object):
             item.oldChanged.connect(self.oldFlag)
             item.badChanged.connect(self.badFlag)
             item.failChanged.connect(self.failFlag)
-            #item.auxChanged.connect(setup)
-            #item.reportReceived.connect(self.setup)
+
+        self.items[0].auxChanged.connect(self.setup)
+        #item.reportReceived.connect(self.setup)
+
+    def getAuxData(self):
+        print("GetAuxData called for {0}".format(self.key))
+        for each in self.items[0].aux:
+            self.item.aux[each] = self.items[0].aux[each]
 
 
     def setup(self):
@@ -47,9 +53,8 @@ class CompositeFloatItem(object):
         self.item.units = self.items[0].units
         self.item.tol = self.items[0].tol
         self.item.description = self.items[0].description
-        
-        #for each in self.items[0].aux:
-        #    self.item.aux[each] = self.items[0].aux[each]
+
+        self.getAuxData()
 
         self.annunciateFlag(False)
         self.badFlag(False)
@@ -68,7 +73,7 @@ class CompositeFloatItem(object):
                 a = True
                 break
         self.item.annunciate = a
-        
+
     def badFlag(self, flag):
         a = False
         for each in self.items:
@@ -97,18 +102,21 @@ class CompositeFloatItem(object):
     # This function should be reimplemented in the child class
     def calcValue(self, value):
         raise NotImplemented
-        
+
 
 
 class CompositeSumItem(CompositeFloatItem):
     def __init__(self, key, itemkeys):
         super(CompositeSumItem, self).__init__(key, itemkeys)
 
+    def getAuxData(self):  #The Auxiliary data might not make sense for sum
+        pass
+
     # We redefine the annunciate because we'll handle it ourselves
     def annunciateFlag(self, flag):
         pass
 
-    
+
     def calcValue(self, value):
         total = 0.0
         for each in self.items:
@@ -120,6 +128,25 @@ class CompositeSumItem(CompositeFloatItem):
             self.item.annunciate = False
 
 
+class CompositeAvgItem(CompositeFloatItem):
+    def __init__(self, key, itemkeys):
+        super(CompositeAvgItem, self).__init__(key, itemkeys)
+
+    def calcValue(self, value):
+        total = 0.0
+        for each in self.items:
+            total += each.value
+        self.item.value = total / len(self.items)
+
+class CompositeMaxItem(CompositeFloatItem):
+    def __init__(self, key, itemkeys):
+        super(CompositeMaxItem, self).__init__(key, itemkeys)
+
+    def calcValue(self, value):
+        self.item.value = max(item.value for item in self.items)
+
+
+
 fuel_total = CompositeSumItem("FUELQ", ["FUELQ1", "FUELQ2"])
 # TODO Should have a way to do this automatically if needed
 fuel_total.item.min = 0.0
@@ -129,5 +156,10 @@ fuel_total.item.aux["Min"] = 0.0
 fuel_total.item.aux["lowWarn"] = 5.0
 fuel_total.item.aux["lowAlarm"] = 2.0
 fuel_total.item.aux["highAlarm"] = 42.0
-#fuel_total.item.units = "gal"
-fuel_total.setup()
+fuel_total.setup() # Force an update
+
+cht_max = CompositeMaxItem("CHTMAX", ["CHT11", "CHT12", "CHT13", "CHT14"])
+cht_max.setup()
+
+egt_avg = CompositeAvgItem("EGTAVG", ["EGT11", "EGT12", "EGT13", "EGT14"])
+egt_avg.setup()
