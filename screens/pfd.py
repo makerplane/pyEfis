@@ -86,16 +86,9 @@ class Screen(QWidget):
 
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
-        self.ff.units = "gph"
         self.ff.decimalPlaces = 1
-        self.ff.lowRange = 0.0
-        self.ff.highRange = 20.0
-        self.ff.highWarn = None
-        self.ff.highAlarm = None
-        self.ff.lowWarn = None
-        self.ff.lowAlarm = None
-        self.ff.value = 5.2
-
+        self.ff.dbkey = "FUELF1"
+        
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         # Use a lambda to convert the values internally

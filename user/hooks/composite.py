@@ -39,10 +39,9 @@ class CompositeFloatItem(object):
             item.failChanged.connect(self.failFlag)
 
         self.items[0].auxChanged.connect(self.setup)
-        #item.reportReceived.connect(self.setup)
+
 
     def getAuxData(self):
-        print("GetAuxData called for {0}".format(self.key))
         for each in self.items[0].aux:
             self.item.aux[each] = self.items[0].aux[each]
 
@@ -137,6 +136,7 @@ class CompositeAvgItem(CompositeFloatItem):
         for each in self.items:
             total += each.value
         self.item.value = total / len(self.items)
+
 
 class CompositeMaxItem(CompositeFloatItem):
     def __init__(self, key, itemkeys):

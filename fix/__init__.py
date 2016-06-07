@@ -55,8 +55,8 @@ class DB_Item(QObject):
         self._old = False
         self._bad = True
         self._fail = True
-        self._max = None
-        self._min = None
+        self._max = 100.0
+        self._min = 0.0
         self._tol = 100     # Timeout lifetime in milliseconds.  Any older and quality is bad
         self.timestamp = datetime.utcnow()
         self.aux = {}

@@ -26,6 +26,7 @@ import argparse
 import ConfigParser  # configparser for Python 3
 try:
     from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
 except:
     from PyQt4.QtGui import *
 
