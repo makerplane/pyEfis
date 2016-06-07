@@ -22,6 +22,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 import efis
+import fix
 
 class HSI(QWidget):
     def __init__(self, parent=None):
@@ -29,11 +30,22 @@ class HSI(QWidget):
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = 25
+        self._heading_key = None
         self._heading = 1
         self._headingSelect = 1
         self._courseSelect = 1
         self._courseDevation = 1
         self.cardinal = ["N", "E", "S", "W"]
+
+        item = fix.db.get_item("BEAR", True)
+        item.valueChanged[float].connect(self.setHeading)
+
+        #item.oldChanged.connect(self.oldFlag)
+        #item.badChanged.connect(self.badFlag)
+        #item.failChanged.connect(self.failFlag)
+
+        fix.db.get_item("COURSE", True).valueChanged[float].connect(self.setHeadingBug)
+
 
     def resizeEvent(self, event):
         self.cx = self.width() / 2
@@ -151,6 +163,15 @@ class DG_Tape(QGraphicsView):
         self._courseDevation = 1
         self.cardinal = ["N", "E", "S", "W", "N"]
 
+        item = fix.db.get_item("HEAD", True)
+        item.valueChanged[float].connect(self.setHeading)
+
+        #item.oldChanged.connect(self.oldFlag)
+        #item.badChanged.connect(self.badFlag)
+        #item.failChanged.connect(self.failFlag)
+
+        #fix.db.get_item("COURSE", True).valueChanged[float].connect(self.setHeadingBug)
+
     def resizeEvent(self, event):
         w = self.width()
         h = self.height()
@@ -197,7 +218,7 @@ class DG_Tape(QGraphicsView):
                         t.setDefaultTextColor(QColor(Qt.cyan))
                         t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
                         t.setY(h - t.boundingRect().height())
-                    else:  
+                    else:
                         t = self.scene.addText(str(i))
                         t.setFont(f)
                         self.scene.setFont(f)
