@@ -35,7 +35,8 @@ class IntervalTimer(object):
             func()
 
     def add_callback(self, func):
-        self.callbacks.append(func)
+        if func not in self.callbacks:
+            self.callbacks.append(func)
 
     def start(self):
         self.timer.start()
