@@ -33,7 +33,8 @@ class Altimeter(QWidget):
         self._altimeter = 0
         fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
 
-
+    # TODO We continuously draw things that don't change.  Should draw the
+    # background save to pixmap or something and then blit it and draw arrows.
     def paintEvent(self, event):
         w = self.width()
         h = self.height()
@@ -54,11 +55,7 @@ class Altimeter(QWidget):
         # Dial Setup
         dial.setPen(dialPen)
         dial.setFont(f)
-        dial.drawEllipse(
-                      25,
-                      25,
-                      w - 50,
-                      h - 50)
+        dial.drawEllipse(25, 25, w - 50, h - 50)
 
         dial.translate(w / 2, h / 2)
         count = 0
@@ -79,8 +76,8 @@ class Altimeter(QWidget):
         while count < 360:
             dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
 
-            dial.rotate(3.6)
-            count += 3.6
+            dial.rotate(7.2)
+            count += 7.2
 
         dial.setBrush(dialBrush)
         #Needle Movement
