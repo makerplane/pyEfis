@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #  Copyright (c) 2013 Phil Birkelbach
 #
@@ -23,7 +23,10 @@ sys.path.insert(0, './lib/AeroCalc-0.11/')
 import logging
 import logging.config
 import argparse
-import ConfigParser  # configparser for Python 3
+try:
+    import ConfigParser
+except:
+    import configparser as ConfigParser
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtWidgets import *

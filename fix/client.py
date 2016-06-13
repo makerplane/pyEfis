@@ -23,7 +23,10 @@ except:
     from PyQt4.QtCore import *
 
 import socket
-import Queue
+try:
+    import Queue
+except:
+    import queue as Queue
 import logging
 import time
 
@@ -130,7 +133,7 @@ class ClientThread(QThread):
                     item.value = x[1]
             except Exception as e:
                 # We pretty much ignore this stuff for now
-                log.debug("Problem handling request {0}: {1}".format(d.strip, e))
+                log.debug("Problem handling request {0}: {1}".format(d.strip(), e))
 
 
     def run(self):

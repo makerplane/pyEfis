@@ -26,7 +26,7 @@ import importlib
 import logging
 import sys
 import hooks
-import ConfigParser
+#import ConfigParser
 
 screens = []
 

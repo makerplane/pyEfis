@@ -25,7 +25,7 @@ except:
 import logging
 from datetime import datetime
 
-import client
+from . import client
 import scheduler
 
 
@@ -138,26 +138,27 @@ class DB_Item(QObject):
                 self._value = self.dtype(x)
             except ValueError:
                 log.error("Bad value '" + str(x) + "' given for " + self.description)
-            # bounds check and cap
-            try:
-                if self._value < self._min: self._value = self._min
-            except:  # Probably only fails if min has not been set
-                #raise
-                pass  # ignore at this point
-            try:
-                if self._value > self._max: self._value = self._max
-            except:  # Probably only fails if max has not been set
-                #raise
-                pass  # ignore at this point
+            if self.dtype != str:
+                # bounds check and cap
+                try:
+                    if self._value < self._min: self._value = self._min
+                except:  # Probably only fails if min has not been set
+                    #raise
+                    pass  # ignore at this point
+                try:
+                    if self._value > self._max: self._value = self._max
+                except:  # Probably only fails if max has not been set
+                    #raise
+                    pass  # ignore at this point
         # set the timestamp to right now
         self.timestamp = datetime.utcnow()
         if last != self._value:
             #print("ValueChanged {0} {1}".format(self.key, self._value))
-            self.valueChanged.emit(self._value)
+            self.valueChanged[self.dtype].emit(self._value)
             if self.output:
                 self.output_value()
         #print("ValueWrite {0} {1}".format(self.key, self._value))
-        self.valueWrite.emit(self._value)
+        self.valueWrite[self.dtype].emit(self._value)
 
     @property
     def dtype(self):
