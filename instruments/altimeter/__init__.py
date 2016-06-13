@@ -41,7 +41,7 @@ class Altimeter(QWidget):
         dial = QPainter(self)
         dial.setRenderHint(QPainter.Antialiasing)
 
-        #Draw the Black Background
+        # Draw the Black Background
         dial.fillRect(0, 0, w, h, Qt.black)
 
         # Setup Pens
@@ -65,7 +65,7 @@ class Altimeter(QWidget):
                 dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
 
                 dial.drawText(-9.5, -(h / 2 - 67),
-                           str(altimeter_numbers))
+                              str(altimeter_numbers))
                 altimeter_numbers += 1
             else:
                 dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
@@ -80,7 +80,7 @@ class Altimeter(QWidget):
             count += 7.2
 
         dial.setBrush(dialBrush)
-        #Needle Movement
+        # Needle Movement
         sm_dial = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
                             QPoint(0, -(h / 2 - 40))])
         lg_dial = QPolygon([QPoint(10, -(h / 2 - 120)), QPoint(5, 0),
@@ -146,8 +146,8 @@ class Altimeter_Tape(QGraphicsView):
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
                 t.setX(0)
-                t.setY(((-i * 50) + 5000 + h / 2)
-                       - t.boundingRect().height() / 2)
+                t.setY(((-i * 50) + 5000 + h / 2) -
+                            t.boundingRect().height() / 2)
             else:
                 self.scene.addLine(w / 2 + 30, (-i * 50) + 5000 + h / 2,
                                    w, (-i * 50) + 5000 + h / 2, dialPen)
@@ -157,7 +157,6 @@ class Altimeter_Tape(QGraphicsView):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                       -self._altimeter * self.pph + 5000 + self.height() / 2)
-
 
 #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):

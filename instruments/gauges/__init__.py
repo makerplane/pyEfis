@@ -270,7 +270,7 @@ class HorizontalBar(AbstractGauge):
         if(self.lowWarn):
             p.drawRect(0, self.barTop,
                        self.interpolate(self.lowWarn, self.width()),
-                                        self.barHeight)
+                       self.barHeight)
         if(self.highWarn):
             x = self.interpolate(self.highWarn, self.width())
             p.drawRect(x, self.barTop,
@@ -282,7 +282,7 @@ class HorizontalBar(AbstractGauge):
         if(self.lowAlarm):
             p.drawRect(0, self.barTop,
                        self.interpolate(self.lowAlarm, self.width()),
-                                        self.barHeight)
+                       self.barHeight)
         if(self.highAlarm):
             x = self.interpolate(self.highAlarm, self.width())
             p.drawRect(x, self.barTop,
