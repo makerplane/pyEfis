@@ -23,4 +23,6 @@ aspects of the program.
 Handle Auxiliary data output.  This may not really be necessary for en EFIS but
 it would make the client complete.
 
+Move the code to Python 3
+
 Documentation
