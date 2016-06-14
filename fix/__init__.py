@@ -118,10 +118,6 @@ class DB_Item(QObject):
 
     @property
     def value(self):
-        if self.age > self.tol and self.tol != 0:
-            self.old = True
-        else:
-            self.old = False
         return self._value #, self.annunciate, self.old, self.bad, self.fail)
 
     @value.setter

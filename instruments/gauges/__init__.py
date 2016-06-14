@@ -97,7 +97,6 @@ class AbstractGauge(QWidget):
         return self._value
 
     def setValue(self, value):
-        print("setValue() called - {0}".format(value))
         if self.fail:
             self._value = 0.0
         else:
@@ -182,10 +181,8 @@ class AbstractGauge(QWidget):
             pass # One will probably fail all the time
 
         if item.dtype == float:
-            print("Connecting to float")
             item.valueChanged[float].connect(self.setValue)
         elif item.dtype == int:
-            print("Connecting to int")
             item.valueChanged[int].connect(self.setValue)
 
 
