@@ -46,6 +46,7 @@ class AbstractGauge(QWidget):
         self._units = ""
         self.fail = False
         self.bad = False
+        self.old = False
         self.annunciate = False
 
         # These properties can be modified by the parent
@@ -96,6 +97,7 @@ class AbstractGauge(QWidget):
         return self._value
 
     def setValue(self, value):
+        print("setValue() called - {0}".format(value))
         if self.fail:
             self._value = 0.0
         else:
@@ -126,17 +128,16 @@ class AbstractGauge(QWidget):
         # set the create flag to true or risk that we'll start before the database
         # is fully initialized.
         item = fix.db.get_item(key, True)
-        item.valueChanged[float].connect(self.setValue)
         item.auxChanged.connect(self.setAuxData)
         item.reportReceived.connect(self.setupGauge)
         item.annunciateChanged.connect(self.annunciateFlag)
-        #item.oldChanged = pyqtSignal(bool)
+        item.oldChanged.connect(self.oldFlag)
         item.badChanged.connect(self.badFlag)
         item.failChanged.connect(self.failFlag)
 
         self._dbkey = key
         self.setupGauge()
-        
+
 
     dbkey = property(getDbkey, setDbkey)
 
@@ -162,11 +163,31 @@ class AbstractGauge(QWidget):
         # set the flags
         self.fail = item.fail
         self.bad = item.bad
+        self.old = item.old
         self.annunciate = item.annunciate
         self.setColors()
         # set the axuliiary data and the value
         self.setAuxData(item.aux)
         self.setValue(item.value)
+
+        # TODO We have to redo the valueChanged signals because the
+        # datatype may have changed
+        try:
+            item.valueChanged[float].disconnect(self.setValue)
+        except:
+            pass # One will probably fail all the time
+        try:
+            item.valueChanged[int].disconnect(self.setValue)
+        except:
+            pass # One will probably fail all the time
+
+        if item.dtype == float:
+            print("Connecting to float")
+            item.valueChanged[float].connect(self.setValue)
+        elif item.dtype == int:
+            print("Connecting to int")
+            item.valueChanged[int].connect(self.setValue)
+
 
 
     def setAuxData(self, auxdata):
@@ -185,7 +206,7 @@ class AbstractGauge(QWidget):
         self.update()
 
     def setColors(self):
-        if self.bad or self.fail:
+        if self.bad or self.fail or self.old:
             self.bgColor = self.bgBadColor
             self.safeColor = self.safeBadColor
             self.warnColor = self.warnBadColor
@@ -217,6 +238,10 @@ class AbstractGauge(QWidget):
 
     def badFlag(self, flag):
         self.bad = flag
+        self.setColors()
+
+    def oldFlag(self, flag):
+        self.old = flag
         self.setColors()
 
 
