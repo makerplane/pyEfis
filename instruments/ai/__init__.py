@@ -144,9 +144,9 @@ class AI(QGraphicsView):
 
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.yellow))
-        p.drawRect(w / 4, h / 2 - 2, w / 6, 4)
-        p.drawRect(w - w / 4 - w / 6, h / 2 - 2, w / 6, 4)
-        p.drawRect(w / 2 - 2, h / 2 - 2, 4, 4)
+        p.drawRect(w / 4, h / 2 - 3, w / 6, 6)
+        p.drawRect(w - w / 4 - w / 6, h / 2 - 3, w / 6, 6)
+        p.drawRect(w / 2 - 3, h / 2 - 3, 8, 8)
 
         # Add non-moving Bank Angle Markers
         marks = QPen(Qt.white)
