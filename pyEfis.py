@@ -30,8 +30,10 @@ except:
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtWidgets import *
+    PYQT = 5
 except:
     from PyQt4.QtGui import *
+    PYQT = 4
 
 import scheduler
 import fix
@@ -68,6 +70,7 @@ if __name__ == "__main__":
         log.setLevel(logging.DEBUG)
         log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
+    log.debug("PyQT Version = %d" % PYQT)
     scheduler.initialize()
 
     host = config.get("main", "FixServer")
