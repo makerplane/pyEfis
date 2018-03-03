@@ -37,7 +37,7 @@ class Screen(QWidget):
 
         self.screenColor = (0,0,0)
         if self.screenColor:
-            p.setColor(self.backgroundRole(), QColor(self.screenColor))
+            p.setColor(self.backgroundRole(), QColor(*self.screenColor))
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
@@ -48,7 +48,7 @@ class Screen(QWidget):
         self.alt_tape = altimeter.Altimeter_Tape(self)
         self.alt_Trend = vsi.Alt_Trend_Tape(self)
         self.as_tape = airspeed.Airspeed_Tape(self)
-        self.as_Trend = vsi.AS_Trend_Tape(self)
+        #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
         self.head_tape = hsi.DG_Tape(self)
         self.alt_setting = altimeter.Altimeter_Setting(self)
@@ -88,7 +88,7 @@ class Screen(QWidget):
         self.ff.name = "Fuel Flow"
         self.ff.decimalPlaces = 1
         self.ff.dbkey = "FUELF1"
-        
+
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         # Use a lambda to convert the values internally
@@ -123,8 +123,8 @@ class Screen(QWidget):
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 100)
 
-        self.as_Trend.resize(10, instHeight)
-        self.as_Trend.move(90, 100)
+        #self.as_Trend.resize(10, instHeight)
+        #self.as_Trend.move(90, 100)
 
         self.asd_Box.resize(90, 100)
         self.asd_Box.move(0, instHeight + 100)

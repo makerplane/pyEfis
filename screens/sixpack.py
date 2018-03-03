@@ -38,7 +38,7 @@ class Screen(QWidget):
 
         self.screenColor = (0,0,0)
         if self.screenColor:
-            p.setColor(self.backgroundRole(), QColor(self.screenColor))
+            p.setColor(self.backgroundRole(), QColor(*self.screenColor))
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
