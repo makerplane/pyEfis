@@ -357,7 +357,7 @@ class Database(object):
 
     def stop(self):
         self.clientthread.stop()
-        self.clientthread.wait()
+        self.clientthread.join()
 
 
 def initialize(host, port):
