@@ -23,8 +23,11 @@ except:
     from PyQt4.QtCore import *
 import math
 import efis
+import logging
 
 import fix
+
+log = logging.getLogger(__name__)
 
 class AI(QGraphicsView):
     def __init__(self, parent=None):
@@ -44,6 +47,7 @@ class AI(QGraphicsView):
         fix.db.get_item("ROLL", True).valueChanged[float].connect(self.setRollAngle)
 
     def resizeEvent(self, event):
+        log.debug("resizeEvent")
         #Setup the scene that we use for the background of the AI
         sceneHeight = self.height() * 4.5
         sceneWidth = math.sqrt(self.width() * self.width() +
@@ -128,6 +132,7 @@ class AI(QGraphicsView):
             t.setY(y - t.boundingRect().height() / 2)
 
     def redraw(self):
+        log.debug("redraw")
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                       self.scene.height() / 2 +
@@ -136,6 +141,7 @@ class AI(QGraphicsView):
 
 # We use the paintEvent to draw on the viewport the parts that aren't moving.
     def paintEvent(self, event):
+        log.debug("paint")
         super(AI, self).paintEvent(event)
         w = self.width()
         h = self.height()
@@ -154,7 +160,7 @@ class AI(QGraphicsView):
         p.translate(w / 2, h / 2)
         p.setPen(marks)
         smallMarks = [10, 20, 45]
-        largeMarks = [30, 60, 90]
+        largeMarks = [30, 60]
         shortLine = QLine(0, - (h / 3), 0, - (h / 3 - 10))
         longLine = QLine(0, - (h / 3 + 10), 0, - (h / 3 - 10))
         for angle in smallMarks:
@@ -194,6 +200,7 @@ class AI(QGraphicsView):
         pass
 
     def setRollAngle(self, angle):
+        log.debug("Set Roll")
         if angle != self._rollAngle:
             self._rollAngle = efis.bounds(-180, 180, angle)
             self.redraw()
@@ -204,6 +211,7 @@ class AI(QGraphicsView):
     rollAngle = property(getRollAngle, setRollAngle)
 
     def setPitchAngle(self, angle):
+        log.debug("Set Pitch")
         if angle != self._pitchAngle:
             self._pitchAngle = efis.bounds(-90, 90, angle)
             self.redraw()

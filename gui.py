@@ -125,6 +125,7 @@ class Main(QMainWindow):
         self.windowShow.emit(event)
 
     def closeEvent(self, event):
+        log.debug("Window Close event received")
         self.windowClose.emit(event)
 
     def keyPressEvent(self, event):
