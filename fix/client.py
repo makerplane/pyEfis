@@ -17,11 +17,8 @@
 # This module is a FIX-Net client used primarily to get the flight data
 # from FIX-Gateway.
 
-try:
-    from PyQt5.QtCore import *
-except:
-    from PyQt4.QtCore import *
 
+import threading
 import socket
 try:
     import Queue
@@ -32,7 +29,7 @@ import time
 
 # This thread simply watches the queue that is passed to it in it's
 # constructor and sends any text that if finds there.
-class SendThread(QThread):
+class SendThread(threading.Thread):
     def __init__(self, sock, queue):
         super(SendThread, self).__init__()
         self.sock = sock
@@ -49,7 +46,8 @@ class SendThread(QThread):
                 self.sock.sendall(data)
                 #print "SendThread.run()" + data,
             except Exception as e:
-                log.debug("SendThread: {0}".format(e))
+                log.debug("SendThread Exception: {0}".format(e))
+                break
         self.running = False
         log.debug("SendThread - Stopping")
 
@@ -57,7 +55,7 @@ class SendThread(QThread):
         self.queue.put('exit')
 
 # This is the main communication thread of the FIX Gateway client.
-class ClientThread(QThread):
+class ClientThread(threading.Thread):
     def __init__(self, host, port, db):
         super(ClientThread, self).__init__()
         global log
@@ -137,6 +135,7 @@ class ClientThread(QThread):
 
 
     def run(self):
+        log.debug("ClientThread - Starting")
         while True:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -149,7 +148,7 @@ class ClientThread(QThread):
             else:
                 log.info("Connected to {0}:{1}".format(self.host, self.port))
                 self.sendthread = SendThread(s, self.sendqueue)
-                self.sendthread.queue.put("@l\n".encode())
+                self.sendqueue.put("@l\n".encode())
                 self.sendthread.start()
 
                 buff = ""
@@ -159,15 +158,17 @@ class ClientThread(QThread):
                     except socket.timeout:
                         if self.getout:
                             self.sendthread.stop()
-                            self.sendthread.wait()
+                            self.sendthread.join()
                             break;
+
                     except Exception as e:
                         log.debug("Receive Failure {0}".format(e))
+                        break
                     else:
                         if not data:
                             log.debug("No Data, Bailing Out")
                             self.sendthread.stop()
-                            self.sendthread.wait()
+                            self.sendthread.join()
                             self.db.mark_all_fail()
                             break
                         else:
@@ -185,6 +186,7 @@ class ClientThread(QThread):
                                 else:
                                     buff += d
             if self.getout:
+                log.debug("ClientThread - Exiting")
                 break
             else:
                 # TODO: Replace with configuration time

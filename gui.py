@@ -74,14 +74,14 @@ class Main(QMainWindow):
     def __init__(self, config, parent=None):
         super(Main, self).__init__(parent)
 
-        self.width = int(config.get("mainscreen", "screenSize.Width"))
-        self.height = int(config.get("mainscreen", "screenSize.Height"))
+        self.screenWidth = int(config.get("mainscreen", "screenSize.Width"))
+        self.screenHeight = int(config.get("mainscreen", "screenSize.Height"))
         self.screenColor = config.get("mainscreen", "screenColor")
 
         self.setObjectName("PFD")
-        self.resize(self.width, self.height)
+        self.resize(self.screenWidth, self.screenHeight)
         w = QWidget(self)
-        w.setGeometry(0, 0, self.width, self.height)
+        w.setGeometry(0, 0, self.screenWidth, self.screenHeight)
 
         p = w.palette()
         if self.screenColor:
@@ -94,7 +94,7 @@ class Main(QMainWindow):
             scr.object = scr.module.Screen(self)
             log.debug("Loading Screen {0}".format(scr.name))
             # TODO Figure out how to have different size screens
-            scr.object.resize(self.width, self.height)
+            scr.object.resize(self.width(), self.height())
             scr.object.move(0,0)
             if scr.default:
                 scr.show()
@@ -125,6 +125,7 @@ class Main(QMainWindow):
         self.windowShow.emit(event)
 
     def closeEvent(self, event):
+        log.debug("Window Close event received")
         self.windowClose.emit(event)
 
     def keyPressEvent(self, event):
@@ -182,4 +183,11 @@ def initialize(config):
     setDefaultScreen(d)
 
     mainWindow = Main(config)
-    mainWindow.show()
+
+    screen = config.getboolean("mainscreen", "screenFullSize")
+    if screen:
+        mainWindow.showFullScreen()
+    else:
+        mainWindow.width = int(config.get("mainscreen", "screenSize.Width"))
+        mainWindow.height = int(config.get("mainscreen", "screenSize.Height"))
+        mainWindow.show()

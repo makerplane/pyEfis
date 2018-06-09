@@ -35,10 +35,10 @@ class Screen(QWidget):
         self.parent = parent
         p = self.parent.palette()
 
-        self.screenColor = (0,0,0)
+        self.screenColor = (0, 0, 0)
         if self.screenColor:
-            p.setColor(self.backgroundRole(), QColor(self.screenColor))
             self.setPalette(p)
+            p.setColor(self.backgroundRole(), QColor(*self.screenColor))
             self.setAutoFillBackground(True)
 
         self.airspeed = airspeed.Airspeed(self)

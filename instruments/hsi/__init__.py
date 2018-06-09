@@ -37,7 +37,7 @@ class HSI(QWidget):
         self._courseDevation = 1
         self.cardinal = ["N", "E", "S", "W"]
 
-        item = fix.db.get_item("BEAR", True)
+        item = fix.db.get_item("TRACK", True)
         item.valueChanged[float].connect(self.setHeading)
 
         #item.oldChanged.connect(self.oldFlag)
