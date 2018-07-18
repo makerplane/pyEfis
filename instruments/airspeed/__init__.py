@@ -33,6 +33,7 @@ class Airspeed(QWidget):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
+        self.fontsize = 20
         self._airspeed = 0
         fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
 
@@ -48,7 +49,7 @@ class Airspeed(QWidget):
 
         # Setup Pens
         f = QFont()
-        f.setPixelSize(20)
+        f.setPixelSize(self.fontsize)
         fontMetrics = QFontMetricsF(f)
 
         dialPen = QPen(QColor(Qt.white))
