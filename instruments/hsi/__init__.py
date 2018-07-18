@@ -157,6 +157,7 @@ class DG_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
+        self.fontsize = 20
         self._heading = 1
         self._headingSelect = 1
         self._courseSelect = 1
@@ -184,7 +185,7 @@ class DG_Tape(QGraphicsView):
         headingPen.setWidth(8)
 
         f = QFont()
-        f.setPixelSize(20)
+        f.setPixelSize(self.fontsize)
 
         self.scene = QGraphicsScene(0, 0, 5000, h)
         self.scene.addRect(0, 0, 5000, h,
