@@ -64,14 +64,14 @@ class Test_density_conv(unittest.TestCase):
         Value = U.density_conv(1, from_units='kg/m**3',
                                to_units='slug/ft**3')
         Truth = (3.6127292e-5 * 12 ** 3) / 32.174
-        print Value, Truth
+        print(Value, Truth)
         self.failUnless(RE(Value, Truth) <= 1e-5)
 
     def test_02(self):
         Value = U.density_conv(1, from_units='slug/ft**3',
                                to_units='lb/ft**3')
         Truth = 32.174
-        print Value, Truth
+        print(Value, Truth)
         self.failUnless(RE(Value, Truth) <= 1e-5)
 
 
@@ -149,7 +149,7 @@ class Test_power_conv(unittest.TestCase):
     # def test_05(self):
     #     Value = U.power_conv(0.017584264, from_units='kW', to_units='BTU/hr')
     #     Truth = 60
-    #     print Value, Truth
+    #     print(Value, Truth)
     #     self.failUnless(RE(Value, Truth) <= 1e-5)
     #
     # def test_06(self):

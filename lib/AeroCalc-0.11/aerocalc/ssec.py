@@ -106,15 +106,15 @@ def gps2tas(GS, TK, verbose = 0):
     if 2 < len(GS) < 5:
         pass
     else:
-        raise ValueError, 'GS must be a list of three or four items'
+        raise ValueError('GS must be a list of three or four items')
         
     if 2 < len(TK) < 5:
         pass
     else:
-        raise ValueError, 'TK must be a list of three or four items'
+        raise ValueError('TK must be a list of three or four items')
     
     if len(GS) != len(TK):
-        raise ValueError, 'The ground speed and track arrays must have the same number of elements.'
+        raise ValueError('The ground speed and track arrays must have the same number of elements.')
         
     if len(GS) == 3:
         result = gps2tas3(GS, TK, verbose)
@@ -161,7 +161,7 @@ def gps2tas(GS, TK, verbose = 0):
         elif verbose == 2:
             return ave_TAS, std_dev_TAS, ((results[0][1][0], results[0][1][1]),(results[1][1][0], results[1][1][1]),(results[2][1][0], results[2][1][1]),(results[3][1][0], results[3][1][1]))
         else:
-            raise ValueError, 'The value of verbose must be equal to 0, 1 or 2'
+            raise ValueError('The value of verbose must be equal to 0, 1 or 2')
 
 
 def gps2tas3(GS, TK, verbose=0):
@@ -215,7 +215,7 @@ def gps2tas3(GS, TK, verbose=0):
     elif verbose == 0:
         return TAS
     else:
-        raise ValueError, 'The value of verbose must be equal to 0, 1 or 2'
+        raise ValueError('The value of verbose must be equal to 0, 1 or 2')
 
 
 def main():
