@@ -67,6 +67,38 @@ class ClientThread(threading.Thread):
         self.timeout = 1.0
         self.sendqueue = Queue.Queue()
 
+    def handle_value(self, d):
+        x = d.strip().split(';')
+        if "." in x[0]: # If there is a period in the key it's aux data
+            y = x[0].split(".")
+            item = self.db.get_item(y[0])
+            item.set_aux_value(y[1], x[1])
+        else:
+            item = self.db.get_item(x[0])
+            try:
+                item.annunciate = True if x[2][0] == '1' else False
+            except:
+                pass
+            try:
+                item.old = True if x[2][1] == '1' else False
+            except:
+                pass
+            try:
+                item.bad = True if x[2][2] == '1' else False
+            except:
+                pass
+            try:
+                item.fail = True if x[2][3] == '1' else False
+            except:
+                pass
+            #try:
+            #    item.secondary_fail = True if x[2][4] == '1' else False
+            #except:
+            #    pass
+            # if x[2] != '00000' or x[2] != '0000':
+            item.value = x[1]
+
+
     def handle_request(self, d):
         if d[0] == '@': # It's a command response frame
             x = d[2:].split(';')
@@ -88,47 +120,21 @@ class ClientThread(threading.Thread):
                     item.is_subscribed = True
                 except:
                     log.error("Unable to set subscribed bit for {0}".format(key))
-            if d[1] == 'u':
+            elif d[1] == 'u':
                 log.debug("Un-Subscribe Acknowledged for {0}".format(key))
                 try:
                     item = self.db.get_item(key)
                     item.is_subscribed = False
                 except:
                     log.error("Unable to clear subscribed bit for {0}".format(key))
+            elif d[1] == 'r':
+                self.handle_value(d[2:])
             elif d[1] == 'q':
                 self.db.define_item(key, x[1], x[2], x[3], x[4], x[5], x[6], x[7])
 
         else:  # If no '@' then it must be a value update
             try:
-                x = d.strip().split(';')
-                if "." in x[0]: # If there is a period in the key it's aux data
-                    y = x[0].split(".")
-                    item = self.db.get_item(y[0])
-                    item.set_aux_value(y[1], x[1])
-                else:
-                    item = self.db.get_item(x[0])
-                    try:
-                        item.annunciate = True if x[2][0] == '1' else False
-                    except:
-                        pass
-                    try:
-                        item.old = True if x[2][1] == '1' else False
-                    except:
-                        pass
-                    try:
-                        item.bad = True if x[2][2] == '1' else False
-                    except:
-                        pass
-                    try:
-                        item.fail = True if x[2][3] == '1' else False
-                    except:
-                        pass
-                    #try:
-                    #    item.secondary_fail = True if x[2][4] == '1' else False
-                    #except:
-                    #    pass
-                    # if x[2] != '00000' or x[2] != '0000':
-                    item.value = x[1]
+                self.handle_value(d)
             except Exception as e:
                 # We pretty much ignore this stuff for now
                 log.debug("Problem handling request {0}: {1}".format(d.strip(), e))
