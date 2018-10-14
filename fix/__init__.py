@@ -26,7 +26,7 @@ import logging
 from datetime import datetime
 
 from . import client
-import scheduler
+#import scheduler
 
 
 # This class represents a single data point in the database.  It contains
