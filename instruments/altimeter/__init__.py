@@ -116,6 +116,7 @@ class Altimeter_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
+        self.fontsize = 20
         self._altimeter = 0
         #self.test = Altimeter_Setting()
         fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
@@ -126,7 +127,7 @@ class Altimeter_Tape(QGraphicsView):
         h = self.height()
         self.pph = 0.5
         f = QFont()
-        f.setPixelSize(20)
+        f.setPixelSize(self.fontsize)
         height_pixel = 5000 + h
 
         dialPen = QPen(QColor(Qt.white))
