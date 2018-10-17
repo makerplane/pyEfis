@@ -118,7 +118,9 @@ class Altimeter_Tape(QGraphicsView):
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = 20
         self._altimeter = 0
-        #self.test = Altimeter_Setting()
+        self._altimeter_setting = 29.92
+        self._Alt_correction = 0
+        fix.db.get_item("BARO", True).valueChanged[float].connect(self.setAltimeter_Setting)
         fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
 
 
@@ -157,7 +159,8 @@ class Altimeter_Tape(QGraphicsView):
     def redraw(self):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
-                      -self._altimeter * self.pph + 5000 + self.height() / 2)
+                     (-self._altimeter + self._Alt_correction)* self.pph +
+                     5000 + self.height() / 2)
 
 #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
@@ -183,6 +186,16 @@ class Altimeter_Tape(QGraphicsView):
 
     altimeter = property(getAltimeter, setAltimeter)
 
+    def getAltimeter_Setting(self):
+        return self._altimeter_setting
+
+    def setAltimeter_Setting(self, altimeter_setting):
+        if altimeter_setting != self._altimeter_setting:
+            self._altimeter_setting = altimeter_setting
+            self._Alt_correction = (29.92 - self._altimeter_setting) * 1000
+            self.redraw()
+
+    altimeter_setting = property(getAltimeter_Setting, setAltimeter_Setting)
 
 class Altimeter_Setting(QGraphicsView):
     def __init__(self, parent=None):
