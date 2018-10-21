@@ -52,7 +52,6 @@ class AI(QGraphicsView):
         sceneHeight = self.height() * 4.5
         sceneWidth = math.sqrt(self.width() * self.width() +
                                self.height() * self.height())
-        #This makes about 30 deg appear on instrument
         self.pixelsPerDeg = self.height() / self.pitchDegreesShown
         self.scene = QGraphicsScene(0, 0, sceneWidth, sceneHeight)
         #Draw the Blue and Brown rectangles
@@ -92,9 +91,9 @@ class AI(QGraphicsView):
 
             # Draw the ticks above the line
             y = h / 2 - (self.pixelsPerDeg * 10) * i
-            self.scene.addLine(left, y, right, y, pen)
+            self.scene.addLine(left, y, right, y, pen).setZValue(1)
             yy = y + self.pixelsPerDeg * 5
-            self.scene.addLine(left + inset, yy, right - inset, yy, pen)
+            self.scene.addLine(left + inset, yy, right - inset, yy, pen).setZValue(1)
             # Draw the text for each of these
             t = self.scene.addText(str(i * 10))
             t.setFont(f)
@@ -102,6 +101,7 @@ class AI(QGraphicsView):
             t.setDefaultTextColor(QColor(Qt.white))
             t.setX(right + 5)
             t.setY(y - t.boundingRect().height() / 2)
+            t.setZValue(1)
 
             t = self.scene.addText(str(i * 10))
             t.setFont(f)
@@ -109,12 +109,13 @@ class AI(QGraphicsView):
             t.setDefaultTextColor(QColor(Qt.white))
             t.setX(left - (t.boundingRect().width() + 5))
             t.setY(y - t.boundingRect().height() / 2)
+            t.setZValue(1)
 
             # Draw the tick marks below the line
             y = h / 2 + (self.pixelsPerDeg * 10) * i
-            self.scene.addLine(left, y, right, y, pen)
+            self.scene.addLine(left, y, right, y, pen).setZValue(1)
             yy = y - self.pixelsPerDeg * 5
-            self.scene.addLine(left + inset, yy, right - inset, yy, pen)
+            self.scene.addLine(left + inset, yy, right - inset, yy, pen).setZValue(1)
             # Draw the text for these
             y = h / 2 + (self.pixelsPerDeg * 10) * i
             t = self.scene.addText(str(i * - 10))
@@ -123,6 +124,7 @@ class AI(QGraphicsView):
             t.setDefaultTextColor(QColor(Qt.white))
             t.setX(right + 5)
             t.setY(y - t.boundingRect().height() / 2)
+            t.setZValue(1)
 
             t = self.scene.addText(str(i * - 10))
             t.setFont(f)
@@ -130,6 +132,7 @@ class AI(QGraphicsView):
             t.setDefaultTextColor(QColor(Qt.white))
             t.setX(left - (t.boundingRect().width() + 5))
             t.setY(y - t.boundingRect().height() / 2)
+            t.setZValue(1)
 
     def redraw(self):
         log.debug("redraw")
