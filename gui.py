@@ -134,6 +134,12 @@ class Main(QMainWindow):
     def keyReleaseEvent(self, event):
         self.keyRelease.emit(event)
 
+    def get_config_item(self, child, key):
+        for s in screens:
+            if s.object == child:
+                return s.config[key]
+        else:
+            return None
 
 def setDefaultScreen(s):
     found = False
@@ -163,7 +169,7 @@ def initialize(config):
 
     # Load the Screens
     for each in config.sections():
-        if each[:7] == "Screen.":
+        if each.startswith ("Screen."):
             module = config.get(each, "module")
             try:
                 name = each[7:]

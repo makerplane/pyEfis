@@ -23,6 +23,7 @@ except:
     from PyQt4.QtCore import *
 
 from instruments import ai
+from instruments.ai.VirtualVfr import VirtualVfr
 from instruments import gauges
 from instruments import hsi
 from instruments import airspeed
@@ -41,7 +42,7 @@ class Screen(QWidget):
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
-        self.ai = ai.AI(self)
+        self.ai = VirtualVfr(self)
         self.ai.fontSize = 20
         self.ai.pitchDegreesShown = 90
 
@@ -158,3 +159,6 @@ class Screen(QWidget):
 
         self.egt.resize(190, 75)
         self.egt.move(self.width() - 200, 620)
+
+    def get_config_item(self, key):
+        return self.parent.get_config_item(self, key)
