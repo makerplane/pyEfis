@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik
+#  Copyright (c) 2013 Neil Domalik, 2018 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ except:
     from PyQt4.QtCore import *
 
 import fix
+
+from instruments.NumericalDisplay import NumericalDisplay
 
 class Altimeter(QWidget):
     def __init__(self, parent=None):
@@ -156,11 +158,21 @@ class Altimeter_Tape(QGraphicsView):
                                    w, (-i * 50) + 5000 + h / 2, dialPen)
         self.setScene(self.scene)
 
+        self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
+        self.numerical_display.resize (50, 20)
+        self.numeric_box_pos = QPoint(3, h/2-10)
+        self.numerical_display.move(self.numeric_box_pos)
+        self.numeric_box_pos.setX(self.numeric_box_pos.x()+self.numerical_display.width())
+        self.numeric_box_pos.setY(self.numeric_box_pos.y()+10)
+        self.numerical_display.show()
+
+
     def redraw(self):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                      (-self._altimeter + self._Alt_correction)* self.pph +
                      5000 + self.height() / 2)
+        self.numerical_display.value = self._altimeter
 
     #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
@@ -170,11 +182,14 @@ class Altimeter_Tape(QGraphicsView):
         p = QPainter(self.viewport())
         p.setRenderHint(QPainter.Antialiasing)
 
-        marks = QPen(Qt.white)
-        marks.setWidth(4)
-        p.translate(w , h / 2)
+        marks = QPen(Qt.white, 3)
+        p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
-        p.drawLine(QLine(0, 0, -w / 5, 0))
+        p.setBrush(QBrush(Qt.black))
+        triangle_size = 6
+        p.drawConvexPolygon(QPolygon([QPoint(0, -triangle_size),
+                             QPoint(0, triangle_size),
+                             QPoint(triangle_size, 0)]))
 
     def getAltimeter(self):
         return self._altimeter
