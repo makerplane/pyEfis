@@ -162,7 +162,7 @@ class Altimeter_Tape(QGraphicsView):
                      (-self._altimeter + self._Alt_correction)* self.pph +
                      5000 + self.height() / 2)
 
-#  Index Line that doesn't move to make it easy to read the altimeter.
+    #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
         super(Altimeter_Tape, self).paintEvent(event)
         w = self.width()
