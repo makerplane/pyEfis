@@ -139,6 +139,13 @@ class Main(QMainWindow):
     def change_asd_mode_event (self, event):
         self.change_asd_mode.emit(event)
 
+    def get_config_item(self, child, key):
+        for s in screens:
+            if s.object == child:
+                return s.config[key]
+        else:
+            return None
+
 def setDefaultScreen(s):
     found = False
     if type(s) == int:
