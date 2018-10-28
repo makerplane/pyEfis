@@ -32,14 +32,14 @@ Virtual VFR
 In order to take advantage of virtual VFR chart object rendering, download the latest
 FAA CIFP file from here: https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/
 
-Extract the FAACIFP18 file into the pyEfis directory. Make note of the FAA disclaimers also in the zip file.
+Extract the FAACIFP18 file into the pyEfis/CIFP directory. Make note of the FAA disclaimers also in the zip file.
 
 Create an index file:
-```
-CIFPObjects.py FAACIFP18
-```
+'''
+./MakeCIFPIndex.py CIFP/FAACIFP18
+'''
 
-This creates an index.bin file
+This creates an index.bin file in CIFP directory
 
 
 Update the config file [Screen.PFD] section dbpath and indexpath

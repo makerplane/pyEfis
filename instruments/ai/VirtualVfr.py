@@ -14,6 +14,10 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import copy
+import math
+import time
+
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
@@ -21,8 +25,6 @@ try:
 except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
-import copy
-import math
 import efis
 import logging
 
@@ -258,6 +260,17 @@ class VirtualVfr(AI):
             if clkey in self.display_objects:
                 self.scene.removeItem (self.display_objects[clkey])
                 del self.display_objects[clkey]
+            rwlabels = self.get_runway_labels (name)
+            for label in rwlabels:
+                lkey = key + label
+                if lkey in self.display_objects:
+                    self.scene.removeItem (self.display_objects[lkey])
+                    del self.display_objects[lkey]
+            pkey = key + "_p"
+            if pkey in self.display_objects:
+                for l in self.display_objects[pkey]:
+                    self.scene.removeItem (l)
+                del self.display_objects[pkey]
 
 
         # Add an extended centerline, if appropriate
@@ -359,6 +372,7 @@ class VirtualVfr(AI):
 VIEWPORT_ANGLE100 = 35.0 / 2.0 * util.RAD_DEG
 
 class PointOfView:
+    UPDATE_PERIOD = .1
     def __init__(self, dbpath, index_path):
         # Inputs
         self.altitude = 0
@@ -375,6 +389,8 @@ class PointOfView:
         self.view_screen = None
         self.object_cache = dict()
         self.elevation = 0
+        self.last_time = None
+        self.do_render = False
 
     def initialize(self, show_what, display_width):
         self.display_width = display_width
@@ -404,6 +420,8 @@ class PointOfView:
         self.update_screen()
 
     def update_screen(self):
+        if self.last_time is not None and (time.time() - self.last_time < self.UPDATE_PERIOD):
+            return
         earth_radius = util.EARTH_RADIUS + self.elevation
         pov_radius = util.EARTH_RADIUS + self.altitude
         if pov_radius <= earth_radius:
@@ -464,6 +482,8 @@ class PointOfView:
         xvec.div(xvec.norm())
         yvec = view_vector.cross_product(xvec)
         self.view_screen = Spatial.Screen(viewplane, self.pov_position, xvec=xvec, yvec=yvec)
+        self.last_time = time.time()
+        self.do_render = True
         #print ("new view screen %s"%str(self.view_screen))
 
     def update_cache(self):
@@ -508,7 +528,7 @@ class PointOfView:
                 if rwsearch is None:
                     break
                 else:
-                    print ("Unable to find match for %s"%str(rwsearch))
+                    log.debug ("Unable to find match for %s"%str(rwsearch))
                     del self.object_cache[rwsearchblock][rwsearchnum]
 
 
@@ -548,6 +568,8 @@ class PointOfView:
         return elevation
 
     def render(self, display_object):
+        if not self.do_render:
+            return
         """     To test runway rendering with artificial data:
         r = CIFPObjects.Runway()
         r.airport_id = 'test'
@@ -569,6 +591,7 @@ class PointOfView:
             for ob in oblist:
                 if ob.typestr() in self.show_object_types:
                     ob.render (self, display_object, self.display_width, (self.gps_lng, self.gps_lat))
+        self.do_render = False
 
     def point2D (self, lat, lng, debug=False):
         """ Find the projected point on the view screen given a latitude and longitude
@@ -583,7 +606,7 @@ class PointOfView:
         except:
             p = None
         if debug:
-            print ("point2D %s->%s ==> %s ==> %s"%(str(self.pov_position), str(point_position), str(r), str(p)))
+            log.debug ("point2D %s->%s ==> %s ==> %s"%(str(self.pov_position), str(point_position), str(r), str(p)))
         return p
 
 def yvec_points_east (yvec, pov_position, pov_polar):

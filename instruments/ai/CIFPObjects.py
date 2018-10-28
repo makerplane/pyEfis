@@ -460,12 +460,14 @@ def find_nodes(ifd, find_lat, find_long):
 def parse_line(dbfd):
     line = dbfd.read(256)
     if len(line) < 30:
-        print ("Error parsing CIFP database. Got '%s'"%line)
+        log.debug ("Error parsing CIFP database. Got '%s'"%line)
+        return None
     line = line.decode('utf-8')
     if '\n' in line:
         line = line[:line.index('\n')]
     if len(line) < 30:
-        print ("Error parsing CIFP database line. Got '%s'"%line)
+        log.debug ("Error parsing CIFP database line. Got '%s'"%line)
+        return None
     ret = None
     if line[12] == 'A':
         try: 
