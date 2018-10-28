@@ -51,6 +51,7 @@ class Screen(QWidget):
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
+        self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.head_tape = hsi.DG_Tape(self)
         self.alt_setting = altimeter.Altimeter_Setting(self)
 
@@ -160,5 +161,5 @@ class Screen(QWidget):
         self.egt.resize(190, 75)
         self.egt.move(self.width() - 200, 620)
 
-    def get_config_item(self, key):
-        return self.parent.get_config_item(self, key)
+    def change_asd_mode(self, event):
+        self.asd_Box.setMode(self.asd_Box.getMode() + 1)

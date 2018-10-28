@@ -26,6 +26,7 @@ import importlib
 import logging
 import sys
 import hooks
+from menu import Menu
 
 screens = []
 
@@ -70,6 +71,7 @@ class Main(QMainWindow):
     keyRelease = pyqtSignal(QEvent)
     windowShow = pyqtSignal(QEvent)
     windowClose = pyqtSignal(QEvent)
+    change_asd_mode = pyqtSignal(QEvent)
 
     def __init__(self, config, parent=None):
         super(Main, self).__init__(parent)
@@ -134,12 +136,8 @@ class Main(QMainWindow):
     def keyReleaseEvent(self, event):
         self.keyRelease.emit(event)
 
-    def get_config_item(self, child, key):
-        for s in screens:
-            if s.object == child:
-                return s.config[key]
-        else:
-            return None
+    def change_asd_mode_event (self, event):
+        self.change_asd_mode.emit(event)
 
 def setDefaultScreen(s):
     found = False
@@ -189,6 +187,8 @@ def initialize(config):
     setDefaultScreen(d)
 
     mainWindow = Main(config)
+    menu = Menu(mainWindow, config.get("menu", "config_file"))
+    menu.start()
 
     screen = config.getboolean("mainscreen", "screenFullSize")
     if screen:
