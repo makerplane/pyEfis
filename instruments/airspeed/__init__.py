@@ -236,7 +236,7 @@ class Airspeed_Tape(QGraphicsView):
         self.centerOn(self.scene.width() / 2,
                       -self._airspeed * self.pph + tape_start)
 
-#  Index Line that doesn't move to make it easy to read the airspeed.
+    #  Index Line that doesn't move to make it easy to read the airspeed.
     def paintEvent(self, event):
         super(Airspeed_Tape, self).paintEvent(event)
         w = self.width()
