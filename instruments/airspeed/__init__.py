@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik
+#  Copyright (c) 2013 Neil Domalik, 2018 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ except:
     from PyQt4.QtCore import *
 
 import fix
+
+from instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
     def __init__(self, parent=None):
@@ -227,6 +229,13 @@ class Airspeed_Tape(QGraphicsView):
                            30, -self.Vne * self.pph + tape_start,
                            vnePen)
 
+        self.numerical_display = NumericalDisplay(self)
+        self.numerical_display.resize (34, 20)
+        self.numeric_box_pos = QPoint(w-38, h/2-10)
+        self.numerical_display.move(self.numeric_box_pos)
+        self.numeric_box_pos.setY(self.numeric_box_pos.y()+10)
+        self.numerical_display.show()
+
         self.setScene(self.scene)
 
     def redraw(self):
@@ -235,6 +244,7 @@ class Airspeed_Tape(QGraphicsView):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                       -self._airspeed * self.pph + tape_start)
+        self.numerical_display.value = self._airspeed
 
 #  Index Line that doesn't move to make it easy to read the airspeed.
     def paintEvent(self, event):
@@ -244,11 +254,14 @@ class Airspeed_Tape(QGraphicsView):
         p = QPainter(self.viewport())
         p.setRenderHint(QPainter.Antialiasing)
 
-        marks = QPen(Qt.white)
-        marks.setWidth(3)
-        p.translate(0, h / 2-2)
+        marks = QPen(Qt.white, 3)
+        p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
-        p.drawLine(QLine(w / 3, 0, 0, 0))
+        p.setBrush(QBrush(Qt.black))
+        triangle_size = 6
+        p.drawConvexPolygon(QPolygon([QPoint(0, -triangle_size),
+                             QPoint(0, triangle_size),
+                             QPoint(-triangle_size, 0)]))
 
     def getAirspeed(self):
         return self._airspeed
