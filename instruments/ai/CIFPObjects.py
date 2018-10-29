@@ -144,6 +144,29 @@ SUSAP KABQK2AABQ     0     137YHN35022015W106362974E011005355         1800018000
         self.name = line[93:123]
         self.name = self.name.strip()
 
+    def render(self, pov, display_object, display_width, aircraft_pos, space_occupied):
+        # see if we're in view
+        centerpoint = pov.point2D (self.lat, self.lng)
+        if centerpoint is None:
+            #print ("%s out of screen: %f,%f"%(str(self), self.lat, self.lng))
+            display_object.eliminate_airport (self.id)
+            return None
+        px,py = centerpoint
+
+        dw2 = display_width / 2
+        clip_minx = -dw2
+        clip_maxx = dw2
+        clip_miny = 0
+        clip_maxy = dw2
+
+        if px < clip_minx or px > clip_maxx or py < clip_miny or py > clip_maxy:
+            #print ("%s out of clipping: %f,%f"%(str(self), px, py))
+            display_object.eliminate_airport (self.id)
+            return None
+        else:
+            return display_object.render_airport (centerpoint, self.name, self.id,
+                                                    pov.zoom, space_occupied)
+
     def __str__(self):
         return "Airport " + self.id + "(" + self.name + ") " + str(self.lat) + " / " + str(self.lng)
 
@@ -335,6 +358,27 @@ SUSAD        GSB   K7011650 TLW                    GSB N35200671W077581674W00800
         devsign = line[74]
         self.deviation = (1 if devsign == 'E' else -1) * make_float(line[75:80], 3)
 
+    def render(self, pov, display_object, display_width, aircraft_pos):
+        # see if we're in view
+        centerpoint = pov.point2D (self.lat, self.lng)
+        if centerpoint is None:
+            #print ("%s out of screen: %f,%f"%(str(self), self.lat, self.lng))
+            display_object.eliminate_navaid (self.id)
+            return
+        px,py = centerpoint
+
+        dw2 = display_width / 2
+        clip_minx = -dw2
+        clip_maxx = dw2
+        clip_miny = 0
+        clip_maxy = dw2
+
+        if px < clip_minx or px > clip_maxx or py < clip_miny or py > clip_maxy:
+            #print ("%s out of clipping: %f,%f"%(str(self), px, py))
+            display_object.eliminate_navaid (self.id)
+            return
+        display_object.render_navaid (centerpoint, self.id)
+
     def __str__(self):
         return "NAVAID " + self.id + " (" + self.name + ") " + \
                 str(self.lat) + " / " + str(self.lng) + \
@@ -469,7 +513,8 @@ def parse_line(dbfd):
         logger.debug ("Error parsing CIFP database line. Got '%s'"%line)
         return None
     ret = None
-    if line[12] == 'A':
+    if line[12] == 'A' and line[21] == '0' and (line[22] == '1' or line[22] == ' ') and \
+        line[16] != 'H':
         try: 
             ret = Airport()
             ret.parseCIFP (line)

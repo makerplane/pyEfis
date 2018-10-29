@@ -23,6 +23,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
+import fix
 
 class VSI(QWidget):
     def __init__(self, parent=None):
@@ -206,15 +207,13 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._altitude = 0
-        self._altitude_diff = 0
-        self._altitude_trend = []
-        self.freq = 10
+        self._vs = 0
+        fix.db.get_item("VS", True).valueChanged[float].connect(self.setVertSpeed)
 
     def resizeEvent(self, event):
         w = self.width()
         h = self.height()
-        self.pph = 0.5
+        self.pph = 0.1
         self.zeroPen = QPen(QColor(Qt.white))
         self.zeroPen.setWidth(4)
 
@@ -234,28 +233,16 @@ class Alt_Trend_Tape(QGraphicsView):
                            self.width(), self.height() / 2,
                            self.zeroPen)
 
-        self._altitude_diff = (sum(self._altitude_trend) /
-                               len(self._altitude_trend)) * 60
-
         self.scene.addRect(0, self.height() / 2,
                            self.width() / 2,
-                           self._altitude_diff * -self.pph,
+                           self._vs * -self.pph,
                            QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
 
         self.setScene(self.scene)
 
-    def setAltTrend(self, altitude):
-        if altitude != self._altitude:
-            if len(self._altitude_trend) == self.freq:
-                del self._altitude_trend[0]
-            self._altitude_trend.append(altitude - self._altitude)
-            self._altitude = altitude
-            self.redraw()
-        elif altitude == self._altitude:
-            if len(self._altitude_trend) == self.freq:
-                del self._altitude_trend[0]
-            self._altitude_trend.append(altitude - self._altitude)
-            self._altitude = altitude
+    def setVertSpeed(self, vs):
+        if self._vs != vs:
+            self._vs = vs
             self.redraw()
 
-    altimeter = property(setAltTrend)
+    vs = property(setVertSpeed)
