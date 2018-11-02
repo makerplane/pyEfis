@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik, Phil Birkelbach
+#  Copyright (c) 2013 Neil Domalik, Phil Birkelbach; 2018 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
+import fix
 
 class VSI(QWidget):
     def __init__(self, parent=None):
@@ -199,6 +200,7 @@ class AS_Trend_Tape(QGraphicsView):
 
 
 class Alt_Trend_Tape(QGraphicsView):
+    RIGHT_MARGIN=5
     def __init__(self, parent=None):
         super(Alt_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
@@ -206,56 +208,85 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._altitude = 0
-        self._altitude_diff = 0
-        self._altitude_trend = []
-        self.freq = 10
+        item = fix.db.get_item("VS", True)
+        item.valueChanged[float].connect(self.setVs)
+        self._vs = item.value
+        self.maxvs = 2500
+        self.fontsize=10
+        self.indicator_line = None
 
     def resizeEvent(self, event):
-        w = self.width()
+        w = self.width()-self.RIGHT_MARGIN
+        w_2 = w/2
         h = self.height()
-        self.pph = 0.5
-        self.zeroPen = QPen(QColor(Qt.white))
-        self.zeroPen.setWidth(4)
-
+        f = QFont()
+        f.setPixelSize(self.fontsize)
+        bf = QFont()
+        bf.setPixelSize(self.fontsize+2)
+        bf.setBold(True)
         self.scene = QGraphicsScene(0, 0, w, h)
-
-        self.scene.addRect(0, 0, w, h,
+        self.scene.setFont(f)
+        self.scene.addRect(0, 0, self.width(), h,
                            QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+        t = self.scene.addText("VSI")
+        t.setFont(f)
+        t.setDefaultTextColor(QColor(Qt.white))
+        t.setX(0)
+        t.setY(0)
+        y = t.boundingRect().height() * .6
 
+        self.vstext = self.scene.addText(str(self._vs))
+        self.vstext.setFont(bf)
+        self.vstext.setDefaultTextColor(QColor(Qt.white))
+        self.vstext.setX(0)
+        self.vstext.setY(y)
+        self.top_margin = y + self.vstext.boundingRect().height()*1.2
+        remaining_height = self.height()-self.top_margin
+        self.zero_y = remaining_height/2 + self.top_margin
+
+        self.pph = float(remaining_height) / (self.maxvs*2)
+
+        tapePen = QPen(QColor(Qt.white))
+        for i in range(self.maxvs, -self.maxvs-1, -100):
+            y = self.y_offset(i)
+            if i % 200 == 0:
+                self.scene.addLine(w_2 + 5, y, w, y, tapePen)
+                t = self.scene.addText(str(int(i/100)))
+                t.setFont(f)
+                t.setDefaultTextColor(QColor(Qt.white))
+                t.setX(0)
+                t.setY(y - t.boundingRect().height() / 2)
+            else:
+                self.scene.addLine(w_2 + 10, y, w, y, tapePen)
         self.setScene(self.scene)
+        self.redraw()
+
+    def y_offset(self,vs):
+        return self.zero_y - vs*self.pph
 
     def redraw(self):
-        self.scene.clear()
-        self.scene.addRect(0, 0, self.width(), self.height(),
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
-
-        self.scene.addLine(0, self.height() / 2,
-                           self.width(), self.height() / 2,
-                           self.zeroPen)
-
-        self._altitude_diff = (sum(self._altitude_trend) /
-                               len(self._altitude_trend)) * 60
-
-        self.scene.addRect(0, self.height() / 2,
-                           self.width() / 2,
-                           self._altitude_diff * -self.pph,
+        y = self.y_offset(self._vs)
+        w = self.width()-self.RIGHT_MARGIN
+        x = w*6/7
+        width = w-x
+        if self._vs > 0:
+            top = y
+            bottom = self.zero_y
+        else:
+            top = self.zero_y
+            bottom = y
+        height = bottom-top
+        if self.indicator_line is None:
+            self.indicator_line = self.scene.addRect(x, top, width, height,
                            QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
+        else:
+            self.indicator_line.setRect (x, top, width, height)
+        self.vstext.setPlainText(str(int(self._vs)))
 
-        self.setScene(self.scene)
 
-    def setAltTrend(self, altitude):
-        if altitude != self._altitude:
-            if len(self._altitude_trend) == self.freq:
-                del self._altitude_trend[0]
-            self._altitude_trend.append(altitude - self._altitude)
-            self._altitude = altitude
-            self.redraw()
-        elif altitude == self._altitude:
-            if len(self._altitude_trend) == self.freq:
-                del self._altitude_trend[0]
-            self._altitude_trend.append(altitude - self._altitude)
-            self._altitude = altitude
+    def setVs(self, vs):
+        if vs != self._vs:
+            self._vs = vs
             self.redraw()
 
-    altimeter = property(setAltTrend)
+    vs = property(setVs)

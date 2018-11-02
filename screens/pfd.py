@@ -52,7 +52,7 @@ class Screen(QWidget):
         #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
         self.parent.change_asd_mode.connect(self.change_asd_mode)
-        self.head_tape = hsi.DG_Tape(self)
+        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
         self.alt_setting = altimeter.Altimeter_Setting(self)
 
         self.map_g = gauges.ArcGauge(self)
@@ -111,7 +111,7 @@ class Screen(QWidget):
 
 
     def resizeEvent(self, event):
-        instWidth = self.width() - 210
+        instWidth = self.width() - 240
         instHeight = self.height() - 200
         self.ai.move(0, 100)
         self.ai.resize(instWidth, instHeight)
@@ -119,7 +119,7 @@ class Screen(QWidget):
         self.alt_tape.resize(90, instHeight)
         self.alt_tape.move(instWidth -90, 100)
 
-        self.alt_Trend.resize(10, instHeight)
+        self.alt_Trend.resize(40, instHeight)
         self.alt_Trend.move(instWidth , 100)
 
         self.as_tape.resize(90, instHeight)
@@ -131,8 +131,10 @@ class Screen(QWidget):
         self.asd_Box.resize(90, 100)
         self.asd_Box.move(0, instHeight + 100)
 
-        self.head_tape.resize(instWidth-200, 100)
-        self.head_tape.move(100, instHeight + 100)
+        hsi_diameter=instWidth/5
+        hsi_height=hsi_diameter+20
+        self.hsi.resize(hsi_diameter, hsi_height)
+        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter/2)
 
         self.alt_setting.resize(90, 100)
         self.alt_setting.move(instWidth -100, instHeight + 100)
