@@ -49,20 +49,34 @@ class VirtualVfr(AI):
     def __init__(self, parent=None):
         super(VirtualVfr, self).__init__(parent)
         self.display_objects = dict()
-        fix.db.get_item("LONG", True).valueChanged[float].connect(self.setLongitude)
-        fix.db.get_item("LAT", True).valueChanged[float].connect(self.setLatitude)
-        fix.db.get_item("HEAD", True).valueChanged[float].connect(self.setHeading)
-        fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltitude)
+        time.sleep(.4)      # Pause to let DB load
+        lng = fix.db.get_item("LONG", True)
+        lng.valueChanged[float].connect(self.setLongitude)
+        lat = fix.db.get_item("LAT", True)
+        lat.valueChanged[float].connect(self.setLatitude)
+        head = fix.db.get_item("HEAD", True)
+        head.valueChanged[float].connect(self.setHeading)
+        alt = fix.db.get_item("ALT", True)
+        alt.valueChanged[float].connect(self.setAltitude)
         self.magnetic_declination = 0       # TODO: compute this from global position
-        self.lat = None
-        self.lng = None
-        self.altitude = 0
+        self.lat = lat.value
+        self.lng = lng.value
+        self.altitude = alt.value
+        # BUG: convert magnetic heading
+        self.true_heading = head.value
         self.myparent = parent
-        self.pov = None
         minfont = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, VirtualVfr.MIN_FONT_SIZE, QFont.Bold)
         t = QGraphicsSimpleTextItem ("9 9")
         t.setFont (minfont)
         self.min_font_width = t.boundingRect().width()
+
+    def resizeEvent(self, event):
+        super(VirtualVfr, self).resizeEvent(event)
+        self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
+                               self.myparent.get_config_item('indexpath'))
+        self.pov.initialize(["Runway"], self.scene.width(),
+                    self.lng, self.lat, self.altitude, self.true_heading)
+        self.pov.render(self)
 
     def get_largest_font_size(self, width):
         max_size = 25
@@ -95,14 +109,16 @@ class VirtualVfr(AI):
     def get_runway_labels(self, name):
         rwnum_string = ''.join([d for d in name if d >= '0' and d <= '9'])
         rwnum = int(rwnum_string)
-        ret = [rwnum_string]
+        postfix = name[4:]
+        ret = [rwnum_string + postfix]
         rwnum += 18
         if rwnum > 36:
             rwnum -= 36
         rwnum_string = str(rwnum)
         if len(rwnum_string) == 1:
             rwnum_string = "0" + rwnum_string
-        ret.append(rwnum_string)
+        recip_postfix = {"L":"R", "C":"C", "R":"L", "":""}
+        ret.append(rwnum_string + recip_postfix[postfix])
         return ret
 
     def render_runway(self, p11, p12, p21, p22, touchdown_distance,
@@ -188,7 +204,7 @@ class VirtualVfr(AI):
                 #print ("Runway label will fit underneath runway polygon. font size is %d"%font_size)
                 font_size = self.get_largest_font_size(draw_width)
                 font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, font_size, QFont.Bold)
-                label = label[0] + " " + label[1]
+                label = label[0] + " " + label[1:]
                 if lkey in self.display_objects:
                     # Update label position
                     qlabel = self.display_objects[lkey]
@@ -402,38 +418,20 @@ class VirtualVfr(AI):
     def setLatitude(self, lat):
         self.lat = lat
         #print ("New latitude %f"%self.lat)
-        if self.lng is not None:
-            if self.pov is None:
-                self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
-                                       self.myparent.get_config_item('indexpath'))
-                self.pov.initialize(["Runway", "Airport"], self.scene.width())
-            self.pov.update_position (self.lat, self.lng)
-            self.pov.render(self)
+        self.pov.update_position (self.lat, self.lng)
+        self.pov.render(self)
 
     def setLongitude(self, lng):
         self.lng = lng
         #print ("New longitude %f"%self.lng)
-        if self.lat is not None:
-            if self.pov is None:
-                self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
-                                       self.myparent.get_config_item('indexpath'))
-                self.pov.initialize(["Runway", "Airport"], self.scene.width())
-            self.pov.update_position (self.lat, self.lng)
-            self.pov.render(self)
+        self.pov.update_position (self.lat, self.lng)
+        self.pov.render(self)
 
     def setAltitude(self, alt):
         self.altitude = alt
-        if self.pov is None:
-            self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
-                                   self.myparent.get_config_item('indexpath'))
-            self.pov.initialize(["Runway", "Airport"], self.scene.width())
         self.pov.update_altitude (alt)
 
     def setHeading(self, heading):
-        if self.pov is None:
-            self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
-                                   self.myparent.get_config_item('indexpath'))
-            self.pov.initialize(["Runway", "Airport"], self.scene.width())
         self.pov.update_heading (heading - self.magnetic_declination)
         self.pov.render(self)
 
@@ -461,12 +459,19 @@ class PointOfView:
         self.last_time = None
         self.do_render = False
 
-    def initialize(self, show_what, display_width):
+    def initialize(self, show_what, display_width, lng, lat, alt, head):
         self.display_width = display_width
         if isinstance(show_what,list) or isinstance(show_what,set):
             self.show_object_types.update(show_what)
         else:
             self.show_object_types.add(show_what)
+        self.gps_lat = lat
+        self.gps_lng = lng
+        self.true_heading = head
+        self.altitude = alt
+        self.update_cache()
+        self.elevation = self.approximate_elevation()
+        self.update_screen()
 
     def dont_show(self, what):
         if isinstance(what,list) or isinstance(what,set):

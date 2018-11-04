@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Phil Birkelbach
+#  Copyright (c) 2013 Phil Birkelbach; 2018 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,14 +38,16 @@ class AI(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._rollAngle = 0
-        self._pitchAngle = 0
         self.fontSize = 30
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
 
-        fix.db.get_item("PITCH", True).valueChanged[float].connect(self.setPitchAngle)
-        fix.db.get_item("ROLL", True).valueChanged[float].connect(self.setRollAngle)
+        pitch = fix.db.get_item("PITCH", True)
+        pitch.valueChanged[float].connect(self.setPitchAngle)
+        self._pitchAngle = pitch.value
+        roll = fix.db.get_item("ROLL", True)
+        roll.valueChanged[float].connect(self.setRollAngle)
+        self._rollAngle = roll.value
 
     def resizeEvent(self, event):
         log.debug("resizeEvent")
@@ -135,6 +137,7 @@ class AI(QGraphicsView):
             t.setX(left - (t.boundingRect().width() + 5))
             t.setY(y - t.boundingRect().height() / 2)
             t.setZValue(1)
+        self.redraw()
 
     def redraw(self):
         log.debug("redraw")
