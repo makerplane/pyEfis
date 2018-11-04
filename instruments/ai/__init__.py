@@ -30,6 +30,7 @@ import fix
 log = logging.getLogger(__name__)
 
 class AI(QGraphicsView):
+    OVERLAY_COLOR = QColor(Qt.green)
     def __init__(self, parent=None):
         super(AI, self).__init__(parent)
         self.setStyleSheet("border: 0px")
@@ -78,6 +79,7 @@ class AI(QGraphicsView):
         self.scene.addLine(0, sceneHeight / 2, sceneWidth, sceneHeight / 2, pen)
         #draw the degree hash marks
         pen.setWidth(2)
+        pen.setColor(self.OVERLAY_COLOR)
         w = self.scene.width()
         h = self.scene.height()
         f = QFont()
@@ -98,7 +100,7 @@ class AI(QGraphicsView):
             t = self.scene.addText(str(i * 10))
             t.setFont(f)
             self.scene.setFont(f)
-            t.setDefaultTextColor(QColor(Qt.white))
+            t.setDefaultTextColor(self.OVERLAY_COLOR)
             t.setX(right + 5)
             t.setY(y - t.boundingRect().height() / 2)
             t.setZValue(1)
@@ -106,7 +108,7 @@ class AI(QGraphicsView):
             t = self.scene.addText(str(i * 10))
             t.setFont(f)
             self.scene.setFont(f)
-            t.setDefaultTextColor(QColor(Qt.white))
+            t.setDefaultTextColor(self.OVERLAY_COLOR)
             t.setX(left - (t.boundingRect().width() + 5))
             t.setY(y - t.boundingRect().height() / 2)
             t.setZValue(1)
@@ -121,7 +123,7 @@ class AI(QGraphicsView):
             t = self.scene.addText(str(i * - 10))
             t.setFont(f)
             self.scene.setFont(f)
-            t.setDefaultTextColor(QColor(Qt.white))
+            t.setDefaultTextColor(self.OVERLAY_COLOR)
             t.setX(right + 5)
             t.setY(y - t.boundingRect().height() / 2)
             t.setZValue(1)
@@ -129,7 +131,7 @@ class AI(QGraphicsView):
             t = self.scene.addText(str(i * - 10))
             t.setFont(f)
             self.scene.setFont(f)
-            t.setDefaultTextColor(QColor(Qt.white))
+            t.setDefaultTextColor(self.OVERLAY_COLOR)
             t.setX(left - (t.boundingRect().width() + 5))
             t.setY(y - t.boundingRect().height() / 2)
             t.setZValue(1)
@@ -158,7 +160,7 @@ class AI(QGraphicsView):
         p.drawRect(w / 2 - 3, h / 2 - 3, 8, 8)
 
         # Add non-moving Bank Angle Markers
-        marks = QPen(Qt.white)
+        marks = QPen(self.OVERLAY_COLOR)
         marks.setWidth(3)
         p.translate(w / 2, h / 2)
         p.setPen(marks)
@@ -179,7 +181,7 @@ class AI(QGraphicsView):
             p.drawLine(longLine)
             p.rotate(angle)
 
-        pen = QPen(QColor(Qt.white))
+        pen = QPen(self.OVERLAY_COLOR)
         pen.setWidth(1)
         p.setPen(pen)
         p.setBrush(QColor(Qt.white))
