@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik
+#  Copyright (c) 2013 Neil Domalik; 2018 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,61 +25,80 @@ import efis
 import fix
 
 class HSI(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontSize = 25
+        self.fontSize = font_size
+        self.fg_color = fgcolor
+        self.bg_color = bgcolor
         self._heading_key = None
-        self._heading = 1
-        self._headingSelect = 1
+        item = fix.db.get_item("COURSE", True)
+        self._headingSelect = item.value
+        item.valueChanged[float].connect(self.setHeadingBug)
         self._courseSelect = 1
-        self._courseDevation = 1
+
+        self.cdidb = fix.db.get_item("CDI", True)
+        self._courseDeviation = self.cdidb.value
+        self.cdidb.valueChanged[float].connect(self.setCdi)
+        self._showCDI = not self.cdidb.old
+
+        self.gsidb = fix.db.get_item("GSI", True)
+        self._glideSlopeIndicator = self.gsidb.value
+        self.gsidb.valueChanged[float].connect(self.setGsi)
+        self._showGSI = not self.gsidb.old
         self.cardinal = ["N", "E", "S", "W"]
 
-        item = fix.db.get_item("TRACK", True)
+        item = fix.db.get_item("HEAD", True)
+        self._heading = item.value
         item.valueChanged[float].connect(self.setHeading)
 
         #item.oldChanged.connect(self.oldFlag)
         #item.badChanged.connect(self.badFlag)
         #item.failChanged.connect(self.failFlag)
 
-        fix.db.get_item("COURSE", True).valueChanged[float].connect(self.setHeadingBug)
 
 
     def resizeEvent(self, event):
         self.cx = self.width() / 2
-        self.cy = self.height() / 2 + self.fontSize / 2 + 7
-        self.r = self.height() / 2 - 21
+        self.cy = self.height() / 2 + self.fontSize / 2
+        self.r = self.height() / 2 - self.fontSize - 5
+        self.cdippw = self.r * .5
+        self.gsipph = self.r * .5
 
     def paintEvent(self, event):
         c = QPainter(self)
         c.setRenderHint(QPainter.Antialiasing)
         f = QFont()
+        f.setBold(True)
+        f.setFamily ("Sans")
         f.setPixelSize(self.fontSize)
         c.setFont(f)
 
         #Draw the Black Background
-        c.fillRect(0, 0, self.width(), self.height(), Qt.black)
+        #c.fillRect(0, 0, self.width(), self.height(), Qt.black)
 
         # Setup Pens
-        compassPen = QPen(QColor(Qt.white))
-        compassPen.setWidth(2)
+        compassPen = QPen(QColor(self.fg_color))
+        compassBrush = QBrush(QColor(self.bg_color))
+        nobrush = QBrush()
 
         headingPen = QPen(QColor(Qt.red))
         headingBrush = QBrush(QColor(Qt.red))
         headingPen.setWidth(2)
 
-        planePen = QPen(QColor(Qt.yellow))
-        planePen.setWidth(3)
+        cdiPen = QPen(QColor(Qt.yellow))
+        cdiPen.setWidth(3)
 
         # Compass Setup
         c.setPen(compassPen)
+        c.setBrush(compassBrush)
         c.drawPoint(self.cx, self.cy)
         tr = QRect(self.cx - self.fontSize * 1.5, 3,
                    self.fontSize * 3, self.fontSize + 5)
         c.drawText(tr, Qt.AlignHCenter | Qt.AlignVCenter,
                    str(int(self._heading)))
+        c.setBrush(nobrush)
         c.drawRect(tr)
 
         # Compass Setup
@@ -90,9 +109,11 @@ class HSI(QWidget):
         c.translate(self.cx, self.cy)
         c.rotate(-(self._heading))
 
-        longLine = QLine(0, -self.r, 0, -(self.r - self.fontSize))
-        shortLine = QLine(0, -self.r, 0, -(self.r - self.fontSize / 2))
-        textRect = QRect(-40, -self.r + self.fontSize, 80, self.fontSize + 10)
+        refsize = self.fontSize*.7
+        longLine = QLine(0, -self.r, 0, -(self.r - refsize))
+        shortLine = QLine(0, -self.r, 0, -(self.r - refsize / 2))
+        textRect = QRect(-40, -self.r + refsize, 80, refsize + 10)
+        c.setBrush(compassBrush)
         for count in range(0, 360, 5):
             if count % 10 == 0:
                 c.drawLine(longLine)
@@ -121,12 +142,38 @@ class HSI(QWidget):
         c.restore()
 
         #Non-moving items
-        c.setPen(planePen)
+        c.setPen(cdiPen)
         c.drawLine(self.cx, self.cy - self.r - 5,
-                   self.cx, self.cy - self.r + self.fontSize + 5)
-        c.drawLine(self.cx, self.cy + 40, self.cx, self.cy - 20)
-        c.drawLine(self.cx - 40, self.cy, self.cx + 40, self.cy)
-        c.drawLine(self.cx - 20, self.cy + 30, self.cx + 20, self.cy + 30)
+                   self.cx, self.cy - self.r + self.fontSize*2)
+        c.drawLine(self.cx, self.cy + self.r - self.fontSize,
+                   self.cx, self.cy + self.r - self.fontSize*2)
+        c.drawLine(self.cx + self.r - self.fontSize, self.cy,
+                   self.cx + self.r - self.fontSize*2, self.cy)
+        c.drawLine(self.cx - self.r + self.fontSize, self.cy,
+                   self.cx - self.r + self.fontSize*2, self.cy)
+
+        # GSI index tics
+        c.setPen(compassPen)
+        deviation = -1.0
+        while deviation <= 1.0:
+            c.drawLine(self.cx - 5, self.cy + deviation*self.gsipph,
+                       self.cx + 5, self.cy + deviation*self.gsipph)
+            c.drawLine(self.cx + deviation*self.cdippw, self.cy - 5,
+                       self.cx + deviation*self.cdippw, self.cy + 5)
+            deviation += 1.0/3.0
+        c.setPen(cdiPen)
+        self._showCDI = not self.cdidb.old
+        if self._showCDI:
+            x = self.cx + self._courseDeviation * self.cdippw
+            c.drawLine(x, self.cy + self.r - self.fontSize*2 - 6,
+                   x, self.cy - self.r + self.fontSize*2 + 6)
+            
+        self._showGSI = not self.gsidb.old
+        if self._showGSI:
+            y = self.cy - self._glideSlopeIndicator * self.gsipph
+            c.drawLine(self.cx + self.r - self.fontSize*2 - 6, y,
+                   self.cx - self.r + self.fontSize*2 + 6, y)
+            
 
     def getHeading(self):
         return self._heading
@@ -147,6 +194,26 @@ class HSI(QWidget):
             self.update()
 
     headingBug = property(getHeadingBug, setHeadingBug)
+
+    def getCdi(self):
+        return self._courseDeviation
+
+    def setCdi(self, cdi):
+        if cdi != self._courseDeviation:
+            self._courseDeviation = cdi
+            self.update()
+
+    cdi = property(getCdi, setCdi)
+
+    def getGsi(self):
+        return self._glideSlopeIndicator
+
+    def setGsi(self, gsi):
+        if gsi != self._glideSlopeIndicator:
+            self._glideSlopeIndicator = gsi
+            self.update()
+
+    gsi = property(getGsi, setGsi)
 
 
 class DG_Tape(QGraphicsView):

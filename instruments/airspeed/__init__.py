@@ -158,8 +158,9 @@ class Airspeed_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._airspeed = 0
-        fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
+        item = fix.db.get_item("IAS", True)
+        item.valueChanged[float].connect(self.setAirspeed)
+        self._airspeed = item.value
 
         # V Speeds
         #Vs = 45
@@ -230,13 +231,17 @@ class Airspeed_Tape(QGraphicsView):
                            vnePen)
 
         self.numerical_display = NumericalDisplay(self)
-        self.numerical_display.resize (34, 20)
-        self.numeric_box_pos = QPoint(w-38, h/2-10)
+        nbh = 50
+        self.numerical_display.resize (34, nbh)
+        self.numeric_box_pos = QPoint(w-38, h/2-nbh/2)
         self.numerical_display.move(self.numeric_box_pos)
-        self.numeric_box_pos.setY(self.numeric_box_pos.y()+10)
+        self.numeric_box_pos.setY(self.numeric_box_pos.y()+nbh/2)
         self.numerical_display.show()
+        self.numerical_display.value = self._airspeed
 
         self.setScene(self.scene)
+        self.centerOn(self.scene.width() / 2,
+                      -self._airspeed * self.pph + tape_start)
 
     def redraw(self):
         tape_start = self.max * self.pph + self.height()/2

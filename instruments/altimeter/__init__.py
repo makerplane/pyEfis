@@ -111,67 +111,67 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, maxalt=50000):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontsize = 20
-        self._altimeter = 0
-        self._altimeter_setting = 29.92
-        self._Alt_correction = 0
-        fix.db.get_item("BARO", True).valueChanged[float].connect(self.setAltimeter_Setting)
-        fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
+        self.fontsize = 15
+        item = fix.db.get_item("ALT", True)
+        self._altimeter = item.value
+        self.maxalt = maxalt
+        self.pph = 0.3
+        item.valueChanged[float].connect(self.setAltimeter)
 
 
     def resizeEvent(self, event):
         w = self.width()
+        w_2 = w/2
         h = self.height()
-        self.pph = 0.5
         f = QFont()
         f.setPixelSize(self.fontsize)
-        height_pixel = 5000 + h
+        self.height_pixel = self.maxalt*self.pph + h
 
         dialPen = QPen(QColor(Qt.white))
         dialPen.setWidth(2)
 
-        self.scene = QGraphicsScene(0, 0, w, height_pixel)
-        self.scene.addRect(0, 0, w, height_pixel,
+        self.scene = QGraphicsScene(0, 0, w, self.height_pixel)
+        self.scene.addRect(0, 0, w, self.height_pixel,
                            QPen(QColor(32, 32, 32, 10)), QBrush(QColor(32, 32, 32, 10)))
 
-        for i in range(100, -1, -1):
-            if i % 2 == 0:
-                self.scene.addLine(w / 2 + 15, (-i * 50) + 5000 + h / 2,
-                                   w, (-i * 50) + 5000 + h / 2,
-                                   dialPen)
-                t = self.scene.addText(str(i * 100))
+        for i in range(self.maxalt, -1, -100):
+            y = self.y_offset(i)
+            if i % 200 == 0:
+                self.scene.addLine(w_2 + 15, y, w, y, dialPen)
+                t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
                 t.setX(0)
-                t.setY(((-i * 50) + 5000 + h / 2) -
-                            t.boundingRect().height() / 2)
+                t.setY(y - t.boundingRect().height() / 2)
             else:
-                self.scene.addLine(w / 2 + 30, (-i * 50) + 5000 + h / 2,
-                                   w, (-i * 50) + 5000 + h / 2, dialPen)
+                self.scene.addLine(w_2 + 30, y, w, y, dialPen)
         self.setScene(self.scene)
 
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
-        self.numerical_display.resize (50, 20)
-        self.numeric_box_pos = QPoint(3, h/2-10)
+        nbh=50
+        self.numerical_display.resize (50, nbh)
+        self.numeric_box_pos = QPoint(3, h/2-nbh/2)
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setX(self.numeric_box_pos.x()+self.numerical_display.width())
-        self.numeric_box_pos.setY(self.numeric_box_pos.y()+10)
+        self.numeric_box_pos.setY(self.numeric_box_pos.y()+nbh/2)
         self.numerical_display.show()
+        self.numerical_display.value = self._altimeter
+        self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
 
+    def y_offset(self, alt):
+        return self.height_pixel - (alt*self.pph) - self.height()/2
 
     def redraw(self):
         self.resetTransform()
-        self.centerOn(self.scene.width() / 2,
-                     (-self._altimeter + self._Alt_correction)* self.pph +
-                     5000 + self.height() / 2)
+        self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
         self.numerical_display.value = self._altimeter
 
     #  Index Line that doesn't move to make it easy to read the altimeter.
