@@ -41,8 +41,11 @@ class VirtualVfr(AI):
     CENTERLINE_WIDTH = 3
     MIN_FONT_SIZE=7
     RUNWAY_LABEL_FONT_FAMILY="Courier"
+    AIRPORT_FONT_FAMILY="Sans"
+    AIRPORT_FONT_SIZE=9
     PAPI_YOFFSET = 8
     PAPI_LIGHT_SPACING = 9
+    VORTAC_ICON_PATH="vortac.png"
     def __init__(self, parent=None):
         super(VirtualVfr, self).__init__(parent)
         self.display_objects = dict()
@@ -211,7 +214,7 @@ class VirtualVfr(AI):
                 else:
                     # Create new label
                     qlabel = self.scene.addSimpleText(label, font)
-                    qlabel.setPen(QPen(QColor(Qt.blue)))
+                    qlabel.setPen(QPen(QColor(Qt.black)))
                     qlabel.setBrush(QBrush(QColor(Qt.white)))
                     qlabel.setX(self.scene.width()/2 + left_bottom[0])
                     qlabel.setY(self.scene.height()/2 + left_bottom[1])
@@ -304,7 +307,7 @@ class VirtualVfr(AI):
                  extendedline.setLine(eline)
             else:
                 extendedline = self.scene.addLine (eline,
-                    QPen(QBrush(QColor(Qt.green)), 1, Qt.DashLine))
+                    QPen(QColor(Qt.white), 1, Qt.DashLine))
                 extendedline.setX(self.scene.width()/2)
                 extendedline.setY(self.scene.height()/2)
                 extendedline.setZValue(0)
@@ -346,6 +349,71 @@ class VirtualVfr(AI):
                 del self.display_objects[pkey]
 
 
+    def render_airport(self, point, name, airport_id, zoom, space_occupied):
+        akey = airport_id
+        if akey in self.display_objects:
+            ap = self.display_objects[akey]
+        else:
+            font = QFont(VirtualVfr.AIRPORT_FONT_FAMILY, VirtualVfr.AIRPORT_FONT_SIZE, QFont.Bold)
+            ap = self.scene.addSimpleText(airport_id, font)
+            ap.setPen(QPen(QColor(Qt.blue)))
+            ap.setBrush(QBrush(QColor(Qt.white)))
+            ap.setZValue(0)
+            self.display_objects[akey] = ap
+        rect = ap.boundingRect()
+        xoff = self.scene.width()/2 + point[0] - rect.width()/2
+        ap.setX(xoff)
+        yoff = self.scene.height()/2 + point[1] - rect.height()/2
+        ap.setY(yoff)
+        rect.translate(xoff,yoff)
+        for s in space_occupied:
+            if s.intersects(rect):
+                self.eliminate_airport(airport_id)
+                return None
+        return rect
+
+    def eliminate_airport(self, airport_id):
+        akey = airport_id
+        if akey in self.display_objects:
+            ap = self.display_objects[akey]
+            self.scene.removeItem(ap)
+            del self.display_objects[akey]
+
+    def render_navaid(self, point, navaid_id):
+        vkey = navaid_id
+        vlkey = navaid_id + "_l"
+        if vkey in self.display_objects:
+            vtlabel = self.display_objects[vlkey]
+            vticon = self.display_objects[vkey]
+        else:
+            font = QFont(VirtualVfr.AIRPORT_FONT_FAMILY, VirtualVfr.AIRPORT_FONT_SIZE-2, QFont.Bold)
+            vtlabel = self.scene.addSimpleText(navaid_id, font)
+            vtlabel.setPen(QPen(QColor(Qt.blue)))
+            vtlabel.setBrush(QBrush(QColor(Qt.white)))
+            vtlabel.setZValue(0)
+            vticon = self.scene.addPixmap (QPixmap (VirtualVfr.VORTAC_ICON_PATH))
+            self.display_objects[vlkey] = vtlabel
+            self.display_objects[vkey] = vticon
+        rect = vtlabel.boundingRect()
+        xoff = self.scene.width()/2 + point[0] - rect.width()/2
+        vtlabel.setX(xoff)
+        yoff = self.scene.height()/2 + point[1]
+        vtlabel.setY(yoff)
+
+        rect = vticon.boundingRect()
+        xoff = self.scene.width()/2 + point[0] - rect.width()/2
+        vticon.setX(xoff)
+        yoff = self.scene.height()/2 + point[1] - rect.height()
+        vticon.setY(yoff)
+
+    def eliminate_navaid(self, navaid_id):
+        vkey = navaid_id
+        vlkey = navaid_id + "_l"
+        if vkey in self.display_objects:
+            self.scene.removeItem (self.display_objects[vkey])
+            self.scene.removeItem (self.display_objects[vlkey])
+            del self.display_objects[vkey]
+            del self.display_objects[vlkey]
 
     def setLatitude(self, lat):
         self.lat = lat
@@ -371,6 +439,7 @@ VIEWPORT_ANGLE100 = 35.0 / 2.0 * util.RAD_DEG
 
 class PointOfView:
     UPDATE_PERIOD = .1
+    sorted_object_types = ["Airport", "Fix"]
     def __init__(self, dbpath, index_path):
         # Inputs
         self.altitude = 0
@@ -592,10 +661,26 @@ class PointOfView:
         r.opposing_rw.elevation = 0
         r.render (self, display_object, self.display_width)
         """
+        sorted_objects = list()
         for oblist in self.object_cache.values():
             for ob in oblist:
                 if ob.typestr() in self.show_object_types:
-                    ob.render (self, display_object, self.display_width, (self.gps_lng, self.gps_lat))
+                    if ob.typestr() in self.sorted_object_types:
+                        sorted_objects.append (ob)
+                    else:
+                        ob.render (self, display_object, self.display_width,
+                                    (self.gps_lng, self.gps_lat))
+        sorted_objects = [(util.TrueHeadingAndDistance(
+                                            [(self.gps_lng, self.gps_lat), (so.lng,so.lat)]) [1],
+                           so) for so in sorted_objects]
+        sorted_objects.sort()
+        space_occupied = list()
+        for d,so in sorted_objects:
+            rect = so.render (self, display_object, self.display_width,
+                                    (self.gps_lng, self.gps_lat), space_occupied)
+            if rect is not None:
+                space_occupied.append(rect)
+
         self.do_render = False
 
     def point2D (self, lat, lng, debug=False):

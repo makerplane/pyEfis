@@ -208,6 +208,7 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
+
         item = fix.db.get_item("VS", True)
         item.valueChanged[float].connect(self.setVs)
         self._vs = item.value
@@ -219,11 +220,13 @@ class Alt_Trend_Tape(QGraphicsView):
         w = self.width()-self.RIGHT_MARGIN
         w_2 = w/2
         h = self.height()
+
         f = QFont()
         f.setPixelSize(self.fontsize)
         bf = QFont()
         bf.setPixelSize(self.fontsize+2)
         bf.setBold(True)
+
         self.scene = QGraphicsScene(0, 0, w, h)
         self.scene.setFont(f)
         self.scene.addRect(0, 0, self.width(), h,
@@ -261,6 +264,7 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setScene(self.scene)
         self.redraw()
 
+
     def y_offset(self,vs):
         return self.zero_y - vs*self.pph
 
@@ -278,6 +282,7 @@ class Alt_Trend_Tape(QGraphicsView):
         height = bottom-top
         if self.indicator_line is None:
             self.indicator_line = self.scene.addRect(x, top, width, height,
+
                            QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
         else:
             self.indicator_line.setRect (x, top, width, height)
