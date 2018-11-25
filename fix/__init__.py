@@ -166,6 +166,7 @@ class DB_Item(QObject):
         try:
             self._dtype = types[dtype]
             self._typestring = dtype
+            self._value = self._dtype()
         except:
             log.error("Unknown datatype - " + str(dtype))
             raise

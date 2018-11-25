@@ -121,9 +121,6 @@ class NumericalScrollDisplay(QGraphicsView):
         self.w = self.width()
         self.h = self.height()
 
-        self.scene = QGraphicsScene(0, 0, self.w, self.h)
-        self.scene.addRect(0, 0, self.w, self.h,
-                           QPen(QColor(Qt.white)), QBrush(QColor(Qt.black)))
         t = QGraphicsSimpleTextItem ("9")
         t.setFont (self.f)
         font_width = t.boundingRect().width()
@@ -169,9 +166,6 @@ class NumericalScrollDisplay(QGraphicsView):
         scroll_value = self._value
         self.resetTransform()
         self.centerOn(self.width() / 2, self.y_offset(scroll_value))
-
-    def paintEvent(self, event):
-        super(NumericalScrollDisplay, self).paintEvent(event)
 
     def getValue(self):
         return self._value

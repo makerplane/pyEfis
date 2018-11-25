@@ -1,18 +1,7 @@
 menus:
     PFDMenu:
-        - ['Six Pack', ['self.myparent.showScreen("SixPack")', 'self.activate_menu("spmenu")']]
         - ['ASD Mode', 'self.myparent.change_asd_mode_event (QEvent(QEvent.ActionAdded))']
-        - ['- Baro', 'self.myparent.keyPressEvent (QKeyEvent (QEvent.KeyPress, Qt.Key_BracketLeft, Qt.NoModifier))']
-        - ['+ Baro', 'self.myparent.keyPressEvent (QKeyEvent (QEvent.KeyPress, Qt.Key_BracketRight, Qt.NoModifier))']
-        - [test5, 'print ("test5")']
-        - [test6, 'print ("test6")']
-    spmenu:
-        - ['PFD', ['self.myparent.showScreen("PFD")', 'self.activate_menu("PFDMenu")']]
-        - [test2, 'print ("test2")']
-        - [test3, 'print ("test3")']
-        - [test4, 'print ("test4")']
-        - [test5, 'print ("test5")']
-        - [test6, 'print ("test6")']
+        - ['Baro', 'self.focus("BARO")']
 start_menu: PFDMenu
 number_of_buttons: 6
 buttons_spacing: 100

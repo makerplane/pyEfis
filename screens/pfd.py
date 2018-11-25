@@ -84,7 +84,7 @@ class Screen(QWidget):
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
         self.fuel.decimalPlaces = 1
-        self.fuel.dbkey = "FUELQ1"
+        self.fuel.dbkey = "FUELQ"
 
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
