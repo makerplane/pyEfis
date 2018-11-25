@@ -42,12 +42,31 @@ class AI(QGraphicsView):
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
 
-        pitch = fix.db.get_item("PITCH", True)
+        pitch = fix.db.get_item("PITCH")
         pitch.valueChanged[float].connect(self.setPitchAngle)
         self._pitchAngle = pitch.value
-        roll = fix.db.get_item("ROLL", True)
+        roll = fix.db.get_item("ROLL")
         roll.valueChanged[float].connect(self.setRollAngle)
         self._rollAngle = roll.value
+        self.fdrolldb = fix.db.get_item("FDROLL", True)
+        self.fdpitchdb = fix.db.get_item("FDPITCH", True)
+        self.fdondb = fix.db.get_item("FDON", True)
+        self.fdondb.valueChanged[bool].connect(self.fdon)
+        self.fdtarget_widget = None
+        self.fdt = None
+
+    def fdon(self, v):
+        if v and self.isVisible():
+            if self.fdtarget_widget is None:
+                self.fdtarget_widget = FDTarget(QPointF(self.scene.width()/2, self.scene.height()/2), self.pixelsPerDeg)
+
+                self.fdtarget_widget.resize (120, 120)
+                self.fdt = self.scene.addWidget (self.fdtarget_widget)
+        else:
+            if self.fdt is not None:
+                self.scene.removeItem(self.fdt)
+                self.fdt = None
+                self.fdtarget_widget = None
 
     def resizeEvent(self, event):
         log.debug("resizeEvent")
@@ -142,6 +161,8 @@ class AI(QGraphicsView):
     def redraw(self):
         log.debug("redraw")
         self.resetTransform()
+        if self.fdondb.value:
+            self.fdtarget_widget.update (self.fdpitchdb.value, self.fdrolldb.value)
         self.centerOn(self.scene.width() / 2,
                       self.scene.height() / 2 +
                       self._pitchAngle * self.pixelsPerDeg * - 1.0)
@@ -198,6 +219,10 @@ class AI(QGraphicsView):
                              QPoint(0 - 7, -(h / 3) + 25),
                              QPoint(0, - (h / 3 - 10))])
         p.drawPolygon(triangle)
+        pen = QPen(QColor(Qt.magenta))
+        pen.setWidth(3)
+        p.setPen(pen)
+        p.setBrush(QBrush())
 
     # We don't want this responding to keystrokes
     def keyPressEvent(self, event):
@@ -228,3 +253,47 @@ class AI(QGraphicsView):
         return self._pitchAngle
 
     pitchAngle = property(getPitchAngle, setPitchAngle)
+
+
+class FDTarget(QGraphicsView):
+    def __init__(self, center, pixelsPerDeg, parent=None):
+        super(FDTarget, self).__init__(parent)
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.aicenter = center
+        self.pixelsPerDeg = pixelsPerDeg
+
+    def resizeEvent(self, event):
+        self.w = self.width()
+        self.h = self.height()
+        polyheight = 8
+        self.poly_points = [(-self.w/2,-polyheight/2)
+                           ,( self.w/2,-polyheight/2)
+                           ,( self.w/2, polyheight/2)
+                           ,(-self.w/2, polyheight/2)]
+
+        self.scene = QGraphicsScene(0, 0, self.w*2, self.w*2)
+        pen = QPen(QColor(Qt.black))
+        brush = QBrush (QColor (Qt.magenta))
+        ps = [QPointF (x,y) for x,y in self.poly_points]
+        fdpoly = QPolygonF (ps)
+        self.poly = self.scene.addPolygon (fdpoly, pen, brush)
+        self.poly.setX(self.w)
+        self.poly.setY(self.w)
+
+        self.setScene(self.scene)
+        self.aicenter.setX (self.aicenter.x()-self.w/2)
+        self.aicenter.setY (self.aicenter.y()-self.h/2)
+        self.centerOn (self.w, self.w)
+
+    def update(self, fdpitch, fdroll):
+        self.move (self.aicenter.x(), (self.aicenter.y() - fdpitch * self.pixelsPerDeg))
+        roll = fdroll * math.pi / 180
+        sinroll = math.sin(roll)
+        cosroll = math.cos(roll)
+        ps = [QPointF (cosroll*x - sinroll*y, sinroll*x + cosroll*y) for x,y in self.poly_points]
+        fdpoly = QPolygonF (ps)
+        self.poly.setPolygon (fdpoly)

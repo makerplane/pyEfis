@@ -42,11 +42,15 @@ class Menu(QWidget):
             yml.close()
         super(Menu, self).__init__(parent)
         self.myparent = parent
+        self.registered_targets = dict()
         self.buttons = list()
         self.button_actions = list()
+        self.focused_object = None
+        self.focus_button = -1
+        self.last_button_clicked = -1
         last_x = self.config['left_margin']
         for b in range(self.config['number_of_buttons']):
-            self.buttons.append(QPushButton("BTN " + str(b), self))
+            self.buttons.append(QPushButton("", self))
             self.button_actions.append(None)
             button_function = eval("self.button_clicked" + str(b+1))
             self.buttons[-1].clicked.connect(button_function)
@@ -55,6 +59,7 @@ class Menu(QWidget):
             button_function = eval("button" + str(b+1))
             fix.db.get_item("BTN" + str(b+1), True).valueChanged[bool].connect(button_function)
         self.adjustSize()
+        self.register_target("BARO", BaroProxy())
         TheMenuObject = self
 
     def start(self):
@@ -63,9 +68,33 @@ class Menu(QWidget):
 
     def activate_menu(self, menu_name):
         logger.debug ("Menu.activate_menu (%s)", menu_name)
-        menu = self.config['menus'][menu_name]
-        for i,(label,actions) in enumerate(menu):
+        self.current_menu = self.config['menus'][menu_name]
+        for i,(label,actions) in enumerate(self.current_menu):
             self.set_button (i, label, actions)
+            self.buttons[i].show()
+            last_i = i
+        last_i += 1
+        while last_i < len(self.buttons):
+            self.buttons[last_i].hide()
+            last_i += 1
+
+    def register_target(self, key, obj):
+        self.registered_targets[key] = obj
+
+    def focus(self, target):
+        former_focus = None
+        if self.focused_object is not None:
+            self.focused_object.defocus()
+            self.buttons[self.focus_button].setText(self.current_menu[self.focus_button][0])
+            former_focus = self.focused_object
+            self.focused_object = None
+        if target is not None and ((former_focus is None) or (former_focus != self.registered_targets[target])):
+            self.focused_object = self.registered_targets[target]
+            self.focused_object.focus()
+            self.focus_button = self.last_button_clicked
+            self.buttons[self.focus_button].setText(self.current_menu[self.focus_button][0] + " Done")
+        else:
+            self.focused_object = None
 
     def set_button(self, i, label, actions):
         self.buttons[i].setText(label)
@@ -85,8 +114,18 @@ class Menu(QWidget):
         else:
             actions()
 
+    def toggle_db_bool(self, key):
+        db = fix.db.get_item(key)
+        db.value = not db.value
+        if db.value and self.last_button_clicked >= 0:
+            self.buttons[self.last_button_clicked].setStyleSheet ("color: green")
+        else:
+            self.buttons[self.last_button_clicked].setStyleSheet ("color: black")
+            
+
     def button_clicked(self, btn_num):
         if btn_num >= 0:
+            self.last_button_clicked = btn_num
             self.perform_action(self.button_actions[btn_num])
 
     def button_clicked1(self, _):
@@ -136,3 +175,22 @@ def button6():
     btn_item = fix.db.get_item("BTN6", True)
     if btn_item.value:
         TheMenuObject.button_clicked(5)
+
+class BaroProxy:
+    def __init__(self):
+        self.enc = fix.db.get_item("ENC1")
+        self.baro = fix.db.get_item("BARO")
+
+    def focus(self):
+        self.last_value = self.enc.value
+        self.enc.valueChanged[int].connect(self.change)
+
+    def defocus(self):
+        self.enc.valueChanged[int].disconnect(self.change)
+
+    def change(self, _):
+        val = self.enc.value
+        diff = val - self.last_value
+        self.baro.value += (diff * .01)
+        self.last_value = val
+

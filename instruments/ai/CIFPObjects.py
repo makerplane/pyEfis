@@ -133,7 +133,7 @@ class Airport:
         self.lng = 0
 
     def parseCIFP (self, line):
-        if line[12] != 'A':
+        if line[12] != 'A' or line[4] != 'P':
             raise RuntimeError ("CIFP line is not an airport: %s"%line)
         self.id = line[6:10]
         """ example:
@@ -203,7 +203,7 @@ class Runway:
         self.opposing_rw = None
 
     def parseCIFP (self, line):
-        if line[12] != 'G':
+        if line[12] != 'G' or line[4] != 'P':
             raise RuntimeError ("CIFP line is not a runway: %s"%line)
         self.airport_id = line[6:10]
         """ example:
@@ -276,6 +276,10 @@ SUSAP KABQK2GRW03    0100000340 N35012009W106375017         +1595705305000060150
         if px < clip_minx or px > clip_maxx or py < clip_miny or py > clip_maxy:
             #print ("%s out of clipping: %f,%f"%(str(self), px, py))
             side1_out = True
+        if px < -display_width or px > display_width or py < -display_width or py > display_width:
+            #print ("%s out of screen: %f,%f"%(str(self), self.lat, self.lng))
+            display_object.eliminate_runway (self.name, self.airport_id)
+            return
         otherpoint = pov.point2D (self.opposing_rw.lat, self.opposing_rw.lng)
         if otherpoint is None:
             #print ("%s side2 out of screen: %f,%f"%(str(self), self.opposing_rw.lat, self.opposing_rw.lng))
@@ -287,6 +291,10 @@ SUSAP KABQK2GRW03    0100000340 N35012009W106375017         +1595705305000060150
                 #print ("%s all out of clipping: %f,%f"%(str(self), px, py))
                 display_object.eliminate_runway (self.name, self.airport_id)
                 return
+        if px < -display_width or px > display_width or py < -display_width or py > display_width:
+            #print ("%s out of screen: %f,%f"%(str(self), self.lat, self.lng))
+            display_object.eliminate_runway (self.name, self.airport_id)
+            return
         width_2 = self.length * Runway.WIDTH_RATIO / 2
         width_2_nm = width_2 * NM_FEET
         width_bearing = self.bearing + 90
@@ -312,6 +320,10 @@ SUSAP KABQK2GRW03    0100000340 N35012009W106375017         +1595705305000060150
         p22_lng,p22_lat = util.AddPosition(otherpoint, width_2_nm, width_bearing)
         p22 = pov.point2D (p22_lat, p22_lng)
 
+        if p11 is None or p12 is None or p21 is None or p22 is None:
+            #print ("%s all out of clipping: %f,%f"%(str(self), px, py))
+            display_object.eliminate_runway (self.name, self.airport_id)
+            return
         ys = [p11[1], p12[1], p21[1], p22[1]]
         if max(ys) - min(ys) < Runway.RENDER_HEIGHT_THRESHOLD:
             #print ("%s too far off on the horizon"%str(self))
@@ -514,13 +526,13 @@ def parse_line(dbfd):
         return None
     ret = None
     if line[12] == 'A' and line[21] == '0' and (line[22] == '1' or line[22] == ' ') and \
-        line[16] != 'H':
+        line[4] == 'P' and line[16] != 'H':
         try: 
             ret = Airport()
             ret.parseCIFP (line)
         except Exception as e:
             print ("Error (%s) parsing airport:\n%s"%(str(e), line))
-    elif line[12] == 'G' and line[13:17] != " PAD":
+    elif line[12] == 'G' and line[4] == 'P' and line[13:17] != " PAD":
         try:
             ret = Runway()
             ret.parseCIFP (line)

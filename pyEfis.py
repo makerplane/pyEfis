@@ -39,6 +39,7 @@ import scheduler
 import fix
 import hooks
 import gui
+import importlib
 
 
 if __name__ == "__main__":
@@ -83,6 +84,11 @@ if __name__ == "__main__":
         except ValueError as e:
             log.warning(e)
 
+    if 'FMS' in config:
+        sys.path.insert(0, config.get("FMS", "module_dir"))
+        fms = importlib.import_module ("FixIntf")
+        fms.start(config.get("FMS", "aircraft_config"))
+
     gui.initialize(config)
     hooks.initialize(config)
 
@@ -91,5 +97,7 @@ if __name__ == "__main__":
 
     # Clean up and get out
     fix.stop()
+    if 'FMS' in config:
+        fms.stop()
     log.info("PyEFIS Exiting Normally")
     sys.exit(result)
