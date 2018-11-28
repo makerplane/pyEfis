@@ -197,6 +197,15 @@ def initialize(config):
     menu = Menu(mainWindow, config.get("menu", "config_file"))
     menu.start()
 
+
+    if 'FMS' in config:
+        sys.path.insert(0, config.get("FMS", "module_dir"))
+        ui = importlib.import_module ("qtui")
+        uiwidget = ui.FMSUI(config.get("FMS", "flight_plan_dir"), mainWindow)
+        uiwidget.resize (700, 65)
+        uiwidget.move (30, 32)
+        menu.register_target ("FMS", uiwidget)
+
     screen = config.getboolean("mainscreen", "screenFullSize")
     if screen:
         mainWindow.showFullScreen()

@@ -17,6 +17,9 @@
 import copy
 import math
 import time
+import threading
+
+from geomag import declination
 
 try:
     from PyQt5.QtGui import *
@@ -50,15 +53,18 @@ class VirtualVfr(AI):
         super(VirtualVfr, self).__init__(parent)
         self.display_objects = dict()
         time.sleep(.4)      # Pause to let DB load
-        lng = fix.db.get_item("LONG", True)
+        lng = fix.db.get_item("LONG")
         lng.valueChanged[float].connect(self.setLongitude)
-        lat = fix.db.get_item("LAT", True)
+        lat = fix.db.get_item("LAT")
         lat.valueChanged[float].connect(self.setLatitude)
-        head = fix.db.get_item("HEAD", True)
+        head = fix.db.get_item("HEAD")
         head.valueChanged[float].connect(self.setHeading)
-        alt = fix.db.get_item("ALT", True)
+        alt = fix.db.get_item("ALT")
         alt.valueChanged[float].connect(self.setAltitude)
-        self.magnetic_declination = 0       # TODO: compute this from global position
+        self.last_mag_update = 0
+        self.magnetic_declination = None
+        self.missing_lat = True
+        self.missing_lng = True
         self.lat = lat.value
         self.lng = lng.value
         self.altitude = alt.value
@@ -74,7 +80,7 @@ class VirtualVfr(AI):
         super(VirtualVfr, self).resizeEvent(event)
         self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
                                self.myparent.get_config_item('indexpath'))
-        self.pov.initialize(["Runway"], self.scene.width(),
+        self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
         self.pov.render(self)
 
@@ -142,6 +148,21 @@ class VirtualVfr(AI):
             rw.setZValue(0)
             self.display_objects[key] = rw
 
+        rwlabels = self.get_runway_labels (name)
+        if p11[1] > p21[1]:
+            draw_width = abs(p11[0] - p12[0])
+            if p11[0] < p12[0]:
+                left_bottom = p11
+            else:
+                left_bottom = p12
+            label = rwlabels[0]
+        else:
+            draw_width = abs(p21[0] - p22[0])
+            if p21[0] < p22[0]:
+                left_bottom = p21
+            else:
+                left_bottom = p22
+            label = rwlabels[1]
 
         # Add the runway centerline, if appropriate
         xdiff = p11[0] - p12[0]
@@ -183,23 +204,7 @@ class VirtualVfr(AI):
                 self.display_objects[clkey] = centerline
                 #print ("%s centerline because(%f,%f) %s->%s"%(key, dist1, dist2, clpoints[0], clpoints[1]))
             # Add a runway label, if appropriate
-            rwlabels = self.get_runway_labels (name)
-            if p11[1] > p21[1]:
-                draw_width = abs(p11[0] - p12[0])
-                if p11[0] < p12[0]:
-                    left_bottom = p11
-                else:
-                    left_bottom = p12
-                label = rwlabels[0]
-            else:
-                draw_width = abs(p21[0] - p22[0])
-                if p21[0] < p22[0]:
-                    left_bottom = p21
-                else:
-                    left_bottom = p22
-                label = rwlabels[1]
             lkey = key + label
-            pkey = key + "_p"
             if draw_width > self.min_font_width*1.5:
                 #print ("Runway label will fit underneath runway polygon. font size is %d"%font_size)
                 font_size = self.get_largest_font_size(draw_width)
@@ -221,50 +226,6 @@ class VirtualVfr(AI):
                     qlabel.setZValue(0)
                     self.display_objects[lkey] = qlabel
 
-                # Draw PAPI lights
-                height_touchdown = self.altitude - elevation
-                approach_angle = math.atan(height_touchdown / touchdown_distance) * util.DEG_RAD
-                self.approach_low = 2.5
-                self.approach_slightly_low = 2.8
-                self.approach_slightly_high = 3.2
-                self.approach_very_high = 3.5
-                if approach_angle < self.approach_low:
-                    papi_redcount = 4
-                elif approach_angle < self.approach_slightly_low:
-                    papi_redcount = 3
-                elif approach_angle < self.approach_slightly_high:
-                    papi_redcount = 2
-                elif approach_angle < self.approach_very_high:
-                    papi_redcount = 1
-                else:
-                    papi_redcount = 0
-                papi_total_width = 5 * VirtualVfr.PAPI_LIGHT_SPACING
-                x = left_bottom[0] - papi_total_width + VirtualVfr.PAPI_LIGHT_SPACING/2
-                y = left_bottom[1] - VirtualVfr.PAPI_YOFFSET
-                x += self.scene.width()/2
-                y += self.scene.height()/2
-                wpen = QPen(QColor(Qt.white))
-                rpen = QPen(QColor(Qt.red))
-                wbsh = QBrush(QColor(Qt.white))
-                rbsh = QBrush(QColor(Qt.red))
-                if pkey in self.display_objects:
-                    lights = self.display_objects[pkey]
-                else:
-                    lights = list()
-                for i in range(4):
-                    rect = QRectF (QPointF(-2,-2), QPointF(2,2))
-                    pen,bsh = (rpen,rbsh) if papi_redcount > 0 else (wpen,wbsh)
-                    light = self.scene.addEllipse (rect, pen, bsh)
-                    light.setX(x)
-                    light.setY(y)
-                    if len(lights) < i+1:
-                        lights.append(light)
-                    else:
-                        self.scene.removeItem (lights[i])
-                        lights[i] = light
-                    x += VirtualVfr.PAPI_LIGHT_SPACING
-                    papi_redcount -= 1
-                    self.display_objects[pkey] = lights
             elif lkey in self.display_objects:
                 #print ("remove runway label")
                 self.scene.removeItem (self.display_objects[lkey])
@@ -285,17 +246,13 @@ class VirtualVfr(AI):
                 if lkey in self.display_objects:
                     self.scene.removeItem (self.display_objects[lkey])
                     del self.display_objects[lkey]
-            pkey = key + "_p"
-            if pkey in self.display_objects:
-                for l in self.display_objects[pkey]:
-                    self.scene.removeItem (l)
-                del self.display_objects[pkey]
 
 
         # Add an extended centerline, if appropriate
         bottom_intercept = util.F(self.scene.height()/2, centerline_function)
         elkey = key + "_e"
-        if abs(bottom_intercept) < self.scene.width()/2:
+        pkey = key + "_p"
+        if abs(bottom_intercept) < self.scene.width():
             if clpoints[0][1] > clpoints[1][1]:
                 touchdown_point = QPoint (*clpoints[0])
             else:
@@ -313,10 +270,59 @@ class VirtualVfr(AI):
                 extendedline.setZValue(0)
                 self.display_objects[elkey] = extendedline
                 #print ("%s extendedline %s->%s"%(key, touchdown_point, extended_point))
+
+            # Draw PAPI lights
+            height_touchdown = self.altitude - elevation
+            approach_angle = math.atan(height_touchdown / touchdown_distance) * util.DEG_RAD
+            self.approach_low = 2.5
+            self.approach_slightly_low = 2.8
+            self.approach_slightly_high = 3.2
+            self.approach_very_high = 3.5
+            if approach_angle < self.approach_low:
+                papi_redcount = 4
+            elif approach_angle < self.approach_slightly_low:
+                papi_redcount = 3
+            elif approach_angle < self.approach_slightly_high:
+                papi_redcount = 2
+            elif approach_angle < self.approach_very_high:
+                papi_redcount = 1
+            else:
+                papi_redcount = 0
+            papi_total_width = 5 * VirtualVfr.PAPI_LIGHT_SPACING
+            x = left_bottom[0] - papi_total_width + VirtualVfr.PAPI_LIGHT_SPACING/2
+            y = left_bottom[1] - VirtualVfr.PAPI_YOFFSET
+            x += self.scene.width()/2
+            y += self.scene.height()/2
+            wpen = QPen(QColor(Qt.white))
+            rpen = QPen(QColor(Qt.red))
+            wbsh = QBrush(QColor(Qt.white))
+            rbsh = QBrush(QColor(Qt.red))
+            if pkey in self.display_objects:
+                lights = self.display_objects[pkey]
+            else:
+                lights = list()
+            for i in range(4):
+                rect = QRectF (QPointF(-2,-2), QPointF(2,2))
+                pen,bsh = (rpen,rbsh) if papi_redcount > 0 else (wpen,wbsh)
+                light = self.scene.addEllipse (rect, pen, bsh)
+                light.setX(x)
+                light.setY(y)
+                if len(lights) < i+1:
+                    lights.append(light)
+                else:
+                    self.scene.removeItem (lights[i])
+                    lights[i] = light
+                x += VirtualVfr.PAPI_LIGHT_SPACING
+                papi_redcount -= 1
+                self.display_objects[pkey] = lights
         else:
             if elkey in self.display_objects:
                 self.scene.removeItem (self.display_objects[elkey])
                 del self.display_objects[elkey]
+            if pkey in self.display_objects:
+                for l in self.display_objects[pkey]:
+                    self.scene.removeItem (l)
+                del self.display_objects[pkey]
 
 
     def eliminate_runway (self, name, airport_id):
@@ -417,12 +423,14 @@ class VirtualVfr(AI):
 
     def setLatitude(self, lat):
         self.lat = lat
+        self.missing_lat = False
         #print ("New latitude %f"%self.lat)
         self.pov.update_position (self.lat, self.lng)
         self.pov.render(self)
 
     def setLongitude(self, lng):
         self.lng = lng
+        self.missing_lng = False
         #print ("New longitude %f"%self.lng)
         self.pov.update_position (self.lat, self.lng)
         self.pov.render(self)
@@ -432,7 +440,16 @@ class VirtualVfr(AI):
         self.pov.update_altitude (alt)
 
     def setHeading(self, heading):
-        self.pov.update_heading (heading - self.magnetic_declination)
+        curtime = time.time()
+        if curtime - self.last_mag_update > 60 or self.magnetic_declination is None:
+            # update every minute at the most
+            if not (self.missing_lat or self.missing_lng):
+                self.last_mag_update = curtime
+                self.magnetic_declination = declination (self.lat, self.lng, self.altitude)
+        md = self.magnetic_declination
+        if md is None:
+            md = 0
+        self.pov.update_heading (heading + md)
         self.pov.render(self)
 
 VIEWPORT_ANGLE100 = 35.0 / 2.0 * util.RAD_DEG
