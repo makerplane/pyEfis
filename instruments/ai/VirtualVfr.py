@@ -233,10 +233,6 @@ class VirtualVfr(AI):
                 #print ("remove runway label")
                 self.scene.removeItem (self.display_objects[lkey])
                 del self.display_objects[lkey]
-                if pkey in self.display_objects:
-                    for l in self.display_objects[pkey]:
-                        self.scene.removeItem (l)
-                    del self.display_objects[pkey]
             #print ("make or update runway label finished")
 
         else:
