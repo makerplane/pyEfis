@@ -123,7 +123,7 @@ class VirtualVfr(AI):
         rwnum_string = str(rwnum)
         if len(rwnum_string) == 1:
             rwnum_string = "0" + rwnum_string
-        recip_postfix = {"L":"R", "C":"C", "R":"L", "":""}
+        recip_postfix = {"L":"R", "C":"C", "R":"L", "W":"W", "":""}
         ret.append(rwnum_string + recip_postfix[postfix])
         return ret
 
@@ -131,22 +131,6 @@ class VirtualVfr(AI):
                             elevation, length, bearing, name, airport_id, zoom):
         if not self.isVisible():
             return
-        key = name+airport_id
-        if key in self.display_objects:
-            # print ("update existing runway polygon %s"%key)
-            poly = QPolygonF([QPoint(*p11), QPoint(*p12), QPoint(*p21), QPoint(*p22)])
-            rw = self.display_objects[key]
-            rw.setPolygon(poly)
-        else:
-            # print ("make new runway polygon %s"%key)
-            poly = QPolygonF([QPoint(*p11), QPoint(*p12), QPoint(*p21), QPoint(*p22)])
-            pen = QPen(QColor(Qt.white))
-            brush = QBrush(QColor(Qt.black))
-            rw = self.scene.addPolygon(poly, pen, brush)
-            rw.setX(self.scene.width()/2)
-            rw.setY(self.scene.height()/2)
-            rw.setZValue(0)
-            self.display_objects[key] = rw
 
         rwlabels = self.get_runway_labels (name)
         if p11[1] > p21[1]:
@@ -163,6 +147,25 @@ class VirtualVfr(AI):
             else:
                 left_bottom = p22
             label = rwlabels[1]
+
+        key = name+airport_id
+        if key in self.display_objects:
+            # print ("update existing runway polygon %s"%key)
+            poly = QPolygonF([QPoint(*p11), QPoint(*p12), QPoint(*p21), QPoint(*p22)])
+            rw = self.display_objects[key]
+            rw.setPolygon(poly)
+        else:
+            # print ("make new runway polygon %s"%key)
+            poly = QPolygonF([QPoint(*p11), QPoint(*p12), QPoint(*p21), QPoint(*p22)])
+            pen = QPen(QColor(Qt.white))
+            brush = QBrush(QColor(Qt.black))
+            if label[-1] == "W":
+                brush = QBrush(QColor("#000070"))
+            rw = self.scene.addPolygon(poly, pen, brush)
+            rw.setX(self.scene.width()/2)
+            rw.setY(self.scene.height()/2)
+            rw.setZValue(0)
+            self.display_objects[key] = rw
 
         # Add the runway centerline, if appropriate
         xdiff = p11[0] - p12[0]
@@ -230,10 +233,6 @@ class VirtualVfr(AI):
                 #print ("remove runway label")
                 self.scene.removeItem (self.display_objects[lkey])
                 del self.display_objects[lkey]
-                if pkey in self.display_objects:
-                    for l in self.display_objects[pkey]:
-                        self.scene.removeItem (l)
-                    del self.display_objects[pkey]
             #print ("make or update runway label finished")
 
         else:

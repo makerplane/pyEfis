@@ -237,6 +237,8 @@ SUSAP KABQK2GRW03    0100000340 N35012009W106375017         +1595705305000060150
         # match parallel runways
         if self.name[-1] == 'C' and candidate.name[-1] != 'C':
             return False
+        if self.name[-1] == 'W' and candidate.name[-1] != 'W':
+            return False
         if self.name[-1] == 'L' and candidate.name[-1] != 'R':
             return False
         if self.name[-1] == 'R' and candidate.name[-1] != 'L':
