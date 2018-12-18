@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #!/usr/bin/env python3
 
 #  Copyright (c) 2013 Phil Birkelbach
