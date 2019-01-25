@@ -121,7 +121,7 @@ class Menu(QWidget):
             self.buttons[self.last_button_clicked].setStyleSheet ("color: green")
         else:
             self.buttons[self.last_button_clicked].setStyleSheet ("color: black")
-            
+
 
     def button_clicked(self, btn_num):
         if btn_num >= 0:
@@ -178,8 +178,8 @@ def button6():
 
 class BaroProxy:
     def __init__(self):
-        self.enc = fix.db.get_item("ENC1")
-        self.baro = fix.db.get_item("BARO")
+        self.enc = fix.db.get_item("ENC1", True)
+        self.baro = fix.db.get_item("BARO", True)
 
     def focus(self):
         self.last_value = self.enc.value
@@ -193,4 +193,3 @@ class BaroProxy:
         diff = val - self.last_value
         self.baro.value += (diff * .01)
         self.last_value = val
-

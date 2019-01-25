@@ -42,10 +42,10 @@ class AI(QGraphicsView):
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
 
-        pitch = fix.db.get_item("PITCH")
+        pitch = fix.db.get_item("PITCH", True)
         pitch.valueChanged[float].connect(self.setPitchAngle)
         self._pitchAngle = pitch.value
-        roll = fix.db.get_item("ROLL")
+        roll = fix.db.get_item("ROLL", True)
         roll.valueChanged[float].connect(self.setRollAngle)
         self._rollAngle = roll.value
         self.fdrolldb = fix.db.get_item("FDROLL", True)
