@@ -1,0 +1,9 @@
+menus:
+    PFDMenu:
+        - ['ASD Mode', 'self.myparent.change_asd_mode_event (QEvent(QEvent.ActionAdded))']
+        - ['Baro', 'self.focus("BARO")']
+start_menu: PFDMenu
+number_of_buttons: 6
+buttons_spacing: 100
+left_margin: 100
+top_margin: 5
