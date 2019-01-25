@@ -16,7 +16,7 @@
 
 import sys
 sys.path.insert(0, './lib/AeroCalc-0.11/')
-from aerocalc import airspeed
+#from aerocalc import airspeed
 
 try:
     from PyQt5.QtGui import *
