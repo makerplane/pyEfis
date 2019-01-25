@@ -15,8 +15,6 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
-sys.path.insert(0, './lib/AeroCalc-0.11/')
-#from aerocalc import airspeed
 
 try:
     from PyQt5.QtGui import *

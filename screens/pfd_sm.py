@@ -43,7 +43,8 @@ class Screen(QWidget):
 
         self.ai = ai.AI(self)
         self.ai.fontSize = 20
-        self.ai.pitchDegreesShown = 90
+        self.ai.pitchDegreesShown = 60
+        self.ai.overlayColor = QColor(Qt.white)
 
         self.alt_tape = altimeter.Altimeter_Tape(self)
         #self.alt_Trend = vsi.Alt_Trend_Tape(self)
