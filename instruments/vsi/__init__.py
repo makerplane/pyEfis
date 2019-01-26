@@ -32,8 +32,10 @@ class VSI(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = 30
         self._roc = 0
-        self.maxRange = 4000
-        self.maxAngle = 155.0
+        self.maxRange = 2000
+        self.maxAngle = 170.0
+        item = fix.db.get_item("VS", True)
+        item.valueChanged[float].connect(self.setROC)
 
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
@@ -52,7 +54,8 @@ class VSI(QWidget):
         p.drawEllipse(self.center, self.r, self.r)
 
         # Draw tick marks and text
-        tickCount = self.maxRange / 100
+        # ##### This should be condensed#########
+        tickCount = self.maxRange // 100
         tickAngle = self.maxAngle / float(tickCount)
         longLine = QLine(0, -self.r, 0, -(self.r - self.fontSize))
         shortLine = QLine(0, -self.r, 0, -(self.r - self.fontSize / 2))
@@ -64,10 +67,10 @@ class VSI(QWidget):
         p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter, '0')
         for each in range(1, tickCount + 1):
             p.rotate(tickAngle)
-            if each % 10 == 0:
+            if each % 5 == 0:
                 p.drawLine(longLine)
                 p.drawText(textRect, Qt.AlignHCenter |
-                           Qt.AlignVCenter, str(each / 10))
+                           Qt.AlignVCenter, str(each))
             else:
                 p.drawLine(shortLine)
         p.restore()
@@ -76,10 +79,10 @@ class VSI(QWidget):
         p.rotate(-90)
         for each in range(1, tickCount + 1):
             p.rotate(-tickAngle)
-            if each % 10 == 0:
+            if each % 5 == 0:
                 p.drawLine(longLine)
                 p.drawText(textRect, Qt.AlignHCenter |
-                           Qt.AlignVCenter, str(each / 10))
+                           Qt.AlignVCenter, str(each))
             else:
                 p.drawLine(shortLine)
         p.restore()
