@@ -60,21 +60,22 @@ class Screen(QWidget):
     def resizeEvent(self, event):
         instWidth = self.width()/3
         instHeight = instWidth
+        menu_offset = 100
 
-        self.airspeed.move(0,0)
+        self.airspeed.move(0,menu_offset)
         self.airspeed.resize(instWidth,instHeight)
 
-        self.ai.move(instWidth,0)
+        self.ai.move(instWidth,0 + menu_offset)
         self.ai.resize(instWidth,instHeight)
 
-        self.altimeter.move(instWidth*2,0)
+        self.altimeter.move(instWidth*2,0 + menu_offset)
         self.altimeter.resize(instWidth,instHeight)
 
-        self.tc.move(0,instHeight)
+        self.tc.move(0,instHeight + menu_offset)
         self.tc.resize(instWidth,instHeight)
 
-        self.hsi.move(instWidth,instHeight)
+        self.hsi.move(instWidth,instHeight  + menu_offset)
         self.hsi.resize(instWidth,instHeight)
 
-        self.vsi.move(instWidth*2,instHeight)
+        self.vsi.move(instWidth*2,instHeight + menu_offset)
         self.vsi.resize(instWidth,instHeight)
