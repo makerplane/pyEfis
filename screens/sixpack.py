@@ -52,7 +52,7 @@ class Screen(QWidget):
 
         self.tc = tc.TurnCoordinator(self)
 
-        self.hsi = hsi.HSI(self)
+        self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
 
         self.vsi = vsi.VSI(self)
 
