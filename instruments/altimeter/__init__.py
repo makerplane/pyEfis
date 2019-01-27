@@ -89,15 +89,21 @@ class Altimeter(QWidget):
                             QPoint(0, +5), QPoint(-5, 0),
                             QPoint(-10, -(h / 2 - 120)),
                             QPoint(0, -(h / 2 - 100))])
+        outside_dial = QPolygon([QPoint( 7.5, -(h / 2 - 25)), QPoint( -7.5 , -(h /2 - 25)),
+                                 QPoint(0, -(h / 2 - 35))])
 
-        sm_dial_angle = self._altimeter * .36
-        lg_dial_angle = self._altimeter / 10 * .36
+        sm_dial_angle = self._altimeter * .36 - 7.2
+        lg_dial_angle = self._altimeter / 10 * .36 - 7.2
+        outside_dial_angle = self._altimeter / 100 * .36 - 7.2
 
         dial.rotate(sm_dial_angle)
         dial.drawPolygon(sm_dial)
         dial.rotate(-sm_dial_angle)
         dial.rotate(lg_dial_angle)
         dial.drawPolygon(lg_dial)
+        dial.rotate(-lg_dial_angle)
+        dial.rotate(outside_dial_angle)
+        dial.drawPolygon(outside_dial)
 
     def getAltimeter(self):
         return self._altimeter
