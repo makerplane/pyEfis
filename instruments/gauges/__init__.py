@@ -156,8 +156,8 @@ class AbstractGauge(QWidget):
     def setupGauge(self):
         item = fix.db.get_item(self.dbkey, True)
         # min and max should always be set for FIX Gateway data.
-        if item.min: self.lowRange = item.min
-        if item.max: self.highRange = item.max
+        if item.min: self.lowRange = self.conversionFunction(item.min)
+        if item.max: self.highRange = self.conversionFunction(item.max)
         self._units = item.units
         # set the flags
         self.fail = item.fail
