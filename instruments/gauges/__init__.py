@@ -83,8 +83,9 @@ class AbstractGauge(QWidget):
         self.safeColor = self.safeGoodColor
         self.warnColor = self.warnGoodColor
         self.alarmColor = self.alarmGoodColor
-        self.textColor = self.textGoodColor
-        self.penColor = self.penGoodColor
+        self.textColor = self.textGoodColor # Non value text like units
+        self.valueColor = QColor(Qt.green) # The actual value text
+        self.penColor = self.penGoodColor # The line on the gauge
 
 
     def interpolate(self, value, range_):
@@ -106,6 +107,7 @@ class AbstractGauge(QWidget):
                     self._value = efis.bounds(self.lowRange, self.highRange, cvalue)
                 else:
                     self._value = cvalue
+                self.setColors()
                 self.update()
 
     value = property(getValue, setValue)
@@ -219,6 +221,22 @@ class AbstractGauge(QWidget):
             self.penColor = self.penGoodColor
         if self.annunciate and not self.fail:
             self.textColor = self.textAnnunciateColor
+
+        self.valueColor = self.textColor
+        if self.lowWarn != None and self.value < self.lowWarn:
+            self.valueColor = self.warnColor
+        if self.highWarn != None and self.value > self.highWarn:
+            self.valueColor = self.warnColor
+        if self.lowAlarm != None and self.value < self.lowAlarm:
+            self.valueColor = self.alarmColor
+        if self.highAlarm != None and self.value > self.highAlarm:
+            self.valueColor = self.alarmColor
+
+       # or self.value > self.highWarn:
+       #      self.valueColor = self.warnColor
+       #  elif self.value < self.lowAlarm or self.value > self.highAlarm:
+       #      self.valueColor = self.AlarmColor
+
         self.update()
 
     def annunciateFlag(self, flag):
@@ -268,15 +286,17 @@ class HorizontalBar(AbstractGauge):
         p.setPen(pen)
         p.setFont(self.smallFont)
         p.drawText(self.nameTextRect, self.name)
-        # Main Value
-        p.setFont(self.bigFont)
-        opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
-        p.drawText(self.valueTextRect, self.valueText, opt)
         # Units
         p.setFont(self.smallFont)
         opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
-
         p.drawText(self.valueTextRect, self.units, opt)
+
+        # Main Value
+        p.setFont(self.bigFont)
+        pen.setColor(self.valueColor)
+        p.setPen(pen)
+        opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
+        p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)
@@ -310,7 +330,7 @@ class HorizontalBar(AbstractGauge):
             p.drawRect(x, self.barTop,
                        self.width() - x, self.barHeight)
         # Indicator Line
-        pen.setColor(QColor(Qt.magenta))
+        pen.setColor(self.penColor)
         brush = QBrush()
         pen.setWidth(4)
         p.setPen(pen)
@@ -363,7 +383,6 @@ class ArcGauge(AbstractGauge):
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
                    start + warnAngle, sweep - warnAngle)
         # Now we draw the line pointer
-        #pen.setColor(QColor(0xAA, 0xAA, 0xAA))
         pen.setColor(self.penColor)
         pen.setWidth(2)
         p.setPen(pen)
@@ -383,6 +402,8 @@ class ArcGauge(AbstractGauge):
         p.drawText(QPoint(centerX - (r - 40), centerY - (r - 40)), self.name)
 
         f.setPixelSize(self.height() / 2)
+        pen.setColor(self.valueColor)
+        p.setPen(pen)
         p.setFont(f)
         opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
         rect = QRectF(0, 0, self.width(), self.height())
