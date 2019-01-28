@@ -297,7 +297,6 @@ class Database(object):
         item.tol = tol
         item.init_aux(aux)
         if key in self.__configured_outputs:
-            self.subscribe = False
             self.queue_out("@u{0}\n".format(key).encode())
             if self.__configured_outputs[key] in ["onchange", "both"]:
                 item.output = True
@@ -310,9 +309,8 @@ class Database(object):
                 else:
                     log.warning("Unable to find a scheduler timer with interval of {0}".format(t))
             # TODO Error for unknown output method
-        else:
-            # If we are not an output then subscribe to the point
-            self.queue_out("@s{0}\n".format(key).encode())
+        # Subscribe to the point
+        self.queue_out("@s{0}\n".format(key).encode())
         self.__items[key] = item
 
         # Send a read command to the server to get initial data
