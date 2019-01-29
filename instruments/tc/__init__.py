@@ -23,6 +23,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 import math
+import fix
 
 class TurnCoordinator(QWidget):
     def __init__(self, parent=None):
@@ -31,6 +32,8 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
+        item = fix.db.get_item("ALAT", True) # find the correct Value.
+        item.valueChanged[float].connect(self.setLatAcc)
 
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
@@ -103,8 +106,11 @@ class TurnCoordinator(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        center = QPointF(self.center.x() + self.boxHalfWidth * 4 *
-                         self._latAcc,
+        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (self._latAcc / 5)
+        if centerball < 83.3 or centerball > 257.7 :
+            if centerball > 257.7: centerball = 257.7
+            else: centerball = 83.3
+        center = QPointF(centerball,
                          self.boxTop + length / 2)
         p.drawEllipse(center, length / 2, length / 2)
 

@@ -89,15 +89,21 @@ class Altimeter(QWidget):
                             QPoint(0, +5), QPoint(-5, 0),
                             QPoint(-10, -(h / 2 - 120)),
                             QPoint(0, -(h / 2 - 100))])
+        outside_dial = QPolygon([QPoint( 7.5, -(h / 2 - 25)), QPoint( -7.5 , -(h /2 - 25)),
+                                 QPoint(0, -(h / 2 - 35))])
 
-        sm_dial_angle = self._altimeter * .36
-        lg_dial_angle = self._altimeter / 10 * .36
+        sm_dial_angle = self._altimeter * .36 - 7.2
+        lg_dial_angle = self._altimeter / 10 * .36 - 7.2
+        outside_dial_angle = self._altimeter / 100 * .36 - 7.2
 
         dial.rotate(sm_dial_angle)
         dial.drawPolygon(sm_dial)
         dial.rotate(-sm_dial_angle)
         dial.rotate(lg_dial_angle)
         dial.drawPolygon(lg_dial)
+        dial.rotate(-lg_dial_angle)
+        dial.rotate(outside_dial_angle)
+        dial.drawPolygon(outside_dial)
 
     def getAltimeter(self):
         return self._altimeter
@@ -201,17 +207,6 @@ class Altimeter_Tape(QGraphicsView):
 
     altimeter = property(getAltimeter, setAltimeter)
 
-    def getAltimeter_Setting(self):
-        return self._altimeter_setting
-
-    def setAltimeter_Setting(self, altimeter_setting):
-        if altimeter_setting != self._altimeter_setting:
-            self._altimeter_setting = altimeter_setting
-            self._Alt_correction = (29.92 - self._altimeter_setting) * 1000
-            self.redraw()
-
-    altimeter_setting = property(getAltimeter_Setting, setAltimeter_Setting)
-
 class Altimeter_Setting(QGraphicsView):
     def __init__(self, parent=None):
         super(Altimeter_Setting, self).__init__(parent)
@@ -220,8 +215,9 @@ class Altimeter_Setting(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._altimeter_setting = 29.92
-        fix.db.get_item("BARO", True).valueChanged[float].connect(self.setAltimeter_Setting)
+        item1 = fix.db.get_item("BARO", True)
+        self._altimeter_setting = item1.value
+        item1.valueChanged[float].connect(self.setAltimeter_Setting)
 
 
     def resizeEvent(self, event):
@@ -264,3 +260,5 @@ class Altimeter_Setting(QGraphicsView):
         if altimeter_setting != self._altimeter_setting:
             self._altimeter_setting = altimeter_setting
             self.redraw()
+
+    altimeter_setting = property(getAltimeter_Setting, setAltimeter_Setting)
