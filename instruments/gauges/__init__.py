@@ -188,7 +188,6 @@ class AbstractGauge(QWidget):
             item.valueChanged[int].connect(self.setValue)
 
 
-
     def setAuxData(self, auxdata):
         if "Min" in auxdata and auxdata["Min"] != None:
             self.lowRange = self.conversionFunction(auxdata["Min"])
@@ -232,11 +231,6 @@ class AbstractGauge(QWidget):
         if self.highAlarm != None and self.value > self.highAlarm:
             self.valueColor = self.alarmColor
 
-       # or self.value > self.highWarn:
-       #      self.valueColor = self.warnColor
-       #  elif self.value < self.lowAlarm or self.value > self.highAlarm:
-       #      self.valueColor = self.AlarmColor
-
         self.update()
 
     def annunciateFlag(self, flag):
@@ -274,7 +268,7 @@ class HorizontalBar(AbstractGauge):
         self.barTop = self.height() / 5 + 4
         self.nameTextRect = QRectF(1, 1, self.width(), self.height() / 5 + 10)
         self.valueTextRect = QRectF(1, self.barTop + self.barHeight + 4,
-                                    self.width(), self.height() / 2)
+                                    self.width()-5, self.height() / 2)
 
     def paintEvent(self, event):
         p = QPainter(self)
@@ -286,9 +280,10 @@ class HorizontalBar(AbstractGauge):
         p.setPen(pen)
         p.setFont(self.smallFont)
         p.drawText(self.nameTextRect, self.name)
+
         # Units
         p.setFont(self.smallFont)
-        opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
+        opt = QTextOption(Qt.AlignRight)
         p.drawText(self.valueTextRect, self.units, opt)
 
         # Main Value
@@ -397,10 +392,13 @@ class ArcGauge(AbstractGauge):
         pen.setWidth(1)
         p.setPen(pen)
         f = QFont()
-        f.setPixelSize(self.height() / 5)
+        f.setPixelSize(self.height() / 6)
         p.setFont(f)
-        p.drawText(QPoint(centerX - (r - 40), centerY - (r - 40)), self.name)
+        opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
+        #p.drawText(QPoint(centerX - (r - 40), centerY - (r - 40)), self.name)
+        p.drawText(QPoint(self.width() / 20,f.pixelSize()), self.name)
 
+        # Main value text
         f.setPixelSize(self.height() / 2)
         pen.setColor(self.valueColor)
         p.setPen(pen)
