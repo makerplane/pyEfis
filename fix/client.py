@@ -162,11 +162,7 @@ class ClientThread(threading.Thread):
                     try:
                         data = s.recv(1024)
                     except socket.timeout:
-                        if self.getout:
-                            self.sendthread.stop()
-                            self.sendthread.join()
-                            break;
-
+                        pass
                     except Exception as e:
                         log.debug("Receive Failure {0}".format(e))
                         break
@@ -191,6 +187,11 @@ class ClientThread(threading.Thread):
                                     buff = ""
                                 else:
                                     buff += d
+                    if self.getout:
+                        self.sendthread.stop()
+                        self.sendthread.join()
+                        break;
+
             if self.getout:
                 log.debug("ClientThread - Exiting")
                 break
