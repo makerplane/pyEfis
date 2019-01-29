@@ -28,51 +28,114 @@ from .abstract import AbstractGauge
 class VerticalBar(AbstractGauge):
     def __init__(self, parent=None):
         super(VerticalBar, self).__init__(parent)
-        self.setMinimumSize(10, 30)
+        self.setMinimumSize(50, 100)
+        self.showValue = True
+        self.showUnits = True
+        self.showName = True
+        self.barWidthPercent = 0.3
+        self.lineWidthPercent = 0.5
+        self.textGap = 3
+        self.smallFontPercent = 0.08
+        self.bigFontPercent = 0.10
 
-    def paintEvent(self, e):
-        p = QPainter()
-        p.begin(self)
-        p.setPen(self.outlineColor)
-        p.setBrush(self.bgColor)
-        height = self.height()  # keep from calling functions and shorten code
-        width = self.width()
-        p.drawRect(0, 0, width - 1, height - 1)
-        # Calculate the positions of the setpoint lines
-        if self.highWarn:
-            highWarnLine = self.height() - int(self.interpolate(self.highWarn,
-                                                                self.height()))
-        if self.highAlarm:
-            highAlarmLine = self.height() - int(self.interpolate(self.highAlarm,
-                                                                 self.height()))
-        # This calculates where the top of the graph should be
-        valueLine = self.height() - int(self.interpolate(self._value,
-                                                         self.height()))
-        # Draws the Alarm (Red) part of the graph
-        if self._value > self.highAlarm:
-            p.setPen(self.alarmColor)
-            p.setBrush(self.alarmColor)
-            p.drawRect(1, valueLine, width - 3, highAlarmLine - valueLine - 1)
-        # Draw the warning part of the graph if it's above the setpoint
-        if self._value > self.highWarn:
-            p.setPen(self.warnColor)
-            p.setBrush(self.warnColor)
-            start = max(valueLine, highAlarmLine)
-            p.drawRect(1, start, width - 3, highWarnLine - start - 1)
-        if self._value > 0:
-            # Draw the green part of the graph
-            p.setPen(self.safeColor)
-            p.setBrush(self.safeColor)
-            start = max(valueLine, highWarnLine)
-            p.drawRect(1, start, width - 3, height - start - 2)
-            # Draw the top of the graph
-            p.setPen(QColor(Qt.white))
-            p.drawLine(1, valueLine, width - 2, valueLine)
-        # Draw Setpoint Lines
-        if self.highWarn:
-            p.setPen(self.warnColor)
-            p.drawLine(1, highWarnLine, self.width() - 2, highWarnLine)
-        if self.highAlarm:
-            p.setPen(self.alarmColor)
-            p.drawLine(1, highAlarmLine, self.width() - 2, highAlarmLine)
-        p.end()
+    def resizeEvent(self, event):
+        self.barWidth = self.width() * self.barWidthPercent
+        self.lineWidth = self.width() * self.lineWidthPercent
+        self.bigFont = QFont()
+        self.bigFont.setPixelSize(self.height() * self.bigFontPercent)
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(self.height() * self.smallFontPercent)
+        #self.barHeight = self.height() / 6
+        if self.showName:
+            self.barTop = self.smallFont.pixelSize() + self.textGap
+        else:
+            self.barTop = 1
+        self.barBottom = self.height()
+        if self.showValue:
+            self.barBottom -= (self.bigFont.pixelSize() + self.textGap)
+        if self.showUnits:
+            self.barBottom -= (self.smallFont.pixelSize() + self.textGap)
+
+        self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
+        self.valueTextRect = QRectF(0, self.barBottom + self.textGap, self.width(), self.bigFont.pixelSize())
+        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize())
+
+    def paintEvent(self, event):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+
+        pen = QPen()
+        pen.setWidth(1)
+        pen.setCapStyle(Qt.FlatCap)
+        p.setPen(pen)
+        opt = QTextOption(Qt.AlignCenter)
+        if self.showName:
+            pen.setColor(self.textColor)
+            p.setPen(pen)
+            p.setFont(self.smallFont)
+            p.drawText(self.nameTextRect, self.name, opt)
+        if self.showValue:
+            # Draw Value
+            pen.setColor(self.valueColor)
+            p.setPen(pen)
+            p.setFont(self.bigFont)
+            p.drawText(self.valueTextRect, self.valueText, opt)
+        if self.showUnits:
+            # Units
+            pen.setColor(self.textColor)
+            p.setPen(pen)
+            p.setFont(self.smallFont)
+            p.drawText(self.unitsTextRect, self.units, opt)
+
+        barLeft = (self.width() - self.barWidth) / 2
+        barRight = barLeft + self.barWidth
+        lineLeft = (self.width() - self.lineWidth) / 2
+        lineRight = lineLeft + self.lineWidth
+        barHeight = self.barBottom - self.barTop
+
+        # Draws the bar
+        p.setRenderHint(QPainter.Antialiasing, False)
+        pen.setColor(self.safeColor)
+        brush = self.safeColor
+        p.setPen(pen)
+        p.setBrush(brush)
+        p.drawRect(barLeft, self.barTop, self.barWidth, barHeight)
+
+        # Draw Warning Bands
+        pen.setColor(self.warnColor)
+        brush = self.warnColor
+        p.setPen(pen)
+        p.setBrush(brush)
+        if(self.lowWarn):
+            x = self.interpolate(self.lowWarn, barHeight)
+            p.drawRect(barLeft, self.barBottom - x,
+                       self.barWidth,
+                       x + 1)
+        if(self.highWarn):
+            p.drawRect(barLeft, self.barTop,
+                       self.barWidth,
+                       barHeight - self.interpolate(self.highWarn, barHeight))
+
+        pen.setColor(self.alarmColor)
+        brush = self.alarmColor
+        p.setPen(pen)
+        p.setBrush(brush)
+        if(self.lowAlarm):
+            x = self.interpolate(self.lowAlarm, barHeight)
+            p.drawRect(barLeft, self.barBottom - x,
+                       self.barWidth,
+                       x + 1)
+        if(self.highAlarm):
+            p.drawRect(barLeft, self.barTop,
+                       self.barWidth,
+                       barHeight - self.interpolate(self.highAlarm, barHeight))
+
+        # Indicator Line
+        pen.setColor(self.penColor)
+        brush = QBrush()
+        pen.setWidth(4)
+        p.setPen(pen)
+        p.setBrush(brush)
+        x = self.barTop + (barHeight - self.interpolate(self._value, barHeight))
+        p.drawLine(lineLeft, x,
+                   lineRight, x)
