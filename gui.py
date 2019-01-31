@@ -80,7 +80,7 @@ class Main(QMainWindow):
         self.screenHeight = int(config.get("mainscreen", "screenSize.Height"))
         self.screenColor = config.get("mainscreen", "screenColor")
 
-        self.setObjectName("PFD")
+        self.setObjectName("EFIS")
         self.resize(self.screenWidth, self.screenHeight)
         w = QWidget(self)
         w.setGeometry(0, 0, self.screenWidth, self.screenHeight)
@@ -121,6 +121,21 @@ class Main(QMainWindow):
                 self.running_screen = found
         else:
             raise KeyError("Screen {0} Not Found".format(scr))
+
+    def showNextScreen(self):
+        if self.running_screen == len(screens)-1:
+            self.showScreen(0)
+        else:
+            self.showScreen(self.running_screen + 1)
+
+    def showPrevScreen(self):
+        if self.running_screen == 0:
+            self.showScreen(len(screens)-1)
+        else:
+            self.showScreen(self.running_screen-1)
+
+
+
 
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
