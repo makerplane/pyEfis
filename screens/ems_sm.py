@@ -23,6 +23,7 @@ except:
     from PyQt4.QtCore import *
 
 from instruments import gauges
+from instruments import misc
 
 class Screen(QWidget):
     def __init__(self, parent=None):
@@ -59,6 +60,8 @@ class Screen(QWidget):
         self.ot.unitsOverride = u'\N{DEGREE SIGN}F'
         self.ot.decimalPlaces = 1
         self.ot.dbkey = "OILT1"
+
+        self.fuel = misc.StaticText("Fuel", parent=self)
 
         self.fuell = gauges.VerticalBar(self)
         self.fuell.name = "Left"
@@ -126,7 +129,8 @@ class Screen(QWidget):
         self.ot.move(self.width() - 202, 75)
 
 
-
+        self.fuel.resize(200, 30)
+        self.fuel.move(self.width() - 200, 170)
 
         self.fuell.resize(50,150)
         self.fuell.move(self.width() - 200, 200)
