@@ -84,6 +84,11 @@ class Screen(QWidget):
         self.fuelp.dbkey = "FUELP1"
         self.fuelp.showUnits = False
 
+        self.fuelt = gauges.NumericDisplay(self)
+        self.fuelt.name = "Total"
+        self.fuelt.decimalPlaces = 1
+        self.fuelt.dbkey = "FUELQT"
+
 
         # self.cht = gauges.HorizontalBar(self)
         # self.cht.name = "Max CHT"
@@ -124,16 +129,21 @@ class Screen(QWidget):
 
 
         self.fuell.resize(50,150)
-        self.fuell.move(self.width() - 200, 180)
+        self.fuell.move(self.width() - 200, 200)
 
         self.fuelr.resize(50, 150)
-        self.fuelr.move(self.width() - 150, 180)
+        self.fuelr.move(self.width() - 150, 200)
 
         self.ff.resize(50, 150)
-        self.ff.move(self.width() - 100, 180)
+        self.ff.move(self.width() - 100, 200)
 
         self.fuelp.resize(50, 150)
-        self.fuelp.move(self.width() - 50, 180)
+        self.fuelp.move(self.width() - 50, 200)
+
+        self.fuelt.resize(100, 30)
+        self.fuelt.move(self.width() - 200, 355)
+        self.fuelt.showUnits = False
+        self.fuelt.showName = False
 
 
         # self.cht.resize(150, 50)

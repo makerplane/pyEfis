@@ -18,3 +18,4 @@
 from .horizontalBar import HorizontalBar
 from .verticalBar import VerticalBar
 from .arc import ArcGauge
+from .numeric import NumericDisplay
