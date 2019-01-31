@@ -22,8 +22,11 @@ except:
 import gui
 import fix
 import hooks
+import events
 
 def keyPress(event):
+    hooks.log.debug("KeyPress {} {}".format(event.key(),event.text()))
+
     if event.key() == Qt.Key_BracketRight:
         x = fix.db.get_item("BARO")
         x.value = x.value + 0.01
@@ -43,13 +46,13 @@ def keyPress(event):
 
     elif event.key() == Qt.Key_A:
         #hooks.log.debug("Screen Change")
-        gui.mainWindow.showScreen("PFD")
-        #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
+        events.actions.dispatch("Show Previous Screen")
 
     elif event.key() == Qt.Key_S:
-        #hooks.log.debug("Screen Change")
-        gui.mainWindow.showScreen("SixPack")
-        #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
+        events.actions.dispatch("Show Next Screen")
+
+    elif event.key() == Qt.Key_P:
+        events.actions.dispatch("Show Screen", "PFD")
 
 
 def keyRelease(event):

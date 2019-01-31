@@ -39,6 +39,7 @@ except:
 import scheduler
 import fix
 import hooks
+import events
 import gui
 import importlib
 
@@ -73,6 +74,7 @@ if __name__ == "__main__":
         log.info("Starting PyEFIS in %s Mode" % (args.mode,))
 
     log.debug("PyQT Version = %d" % PYQT)
+    events.initialize(config)
     scheduler.initialize()
 
     host = config.get("main", "FixServer")

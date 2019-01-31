@@ -26,6 +26,7 @@ import importlib
 import logging
 import sys
 import hooks
+import events
 from menu import Menu
 
 screens = []
@@ -71,7 +72,7 @@ class Main(QMainWindow):
     keyRelease = pyqtSignal(QEvent)
     windowShow = pyqtSignal(QEvent)
     windowClose = pyqtSignal(QEvent)
-    change_asd_mode = pyqtSignal(QEvent)
+    #change_asd_mode = pyqtSignal(QEvent)
 
     def __init__(self, config, parent=None):
         super(Main, self).__init__(parent)
@@ -122,6 +123,21 @@ class Main(QMainWindow):
         else:
             raise KeyError("Screen {0} Not Found".format(scr))
 
+    def showNextScreen(self, s=""):
+        if self.running_screen == len(screens)-1:
+            self.showScreen(0)
+        else:
+            self.showScreen(self.running_screen + 1)
+
+    def showPrevScreen(self, s=""):
+        if self.running_screen == 0:
+            self.showScreen(len(screens)-1)
+        else:
+            self.showScreen(self.running_screen-1)
+
+
+
+
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
         self.windowShow.emit(event)
@@ -136,8 +152,8 @@ class Main(QMainWindow):
     def keyReleaseEvent(self, event):
         self.keyRelease.emit(event)
 
-    def change_asd_mode_event (self, event):
-        self.change_asd_mode.emit(event)
+    # def change_asd_mode_event (self, event):
+    #     self.change_asd_mode.emit(event)
 
     def get_config_item(self, child, key):
         for s in screens:
@@ -171,7 +187,7 @@ def initialize(config):
     global mainWindow
     global log
     log = logging.getLogger(__name__)
-
+    log.info("Initializing Graphics")
     # Load the Screens
     for each in config.sections():
         if each.startswith ("Screen."):
@@ -194,6 +210,10 @@ def initialize(config):
     setDefaultScreen(d)
 
     mainWindow = Main(config)
+    events.actions.showNextScreen.connect(mainWindow.showNextScreen)
+    events.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
+    events.actions.showScreen.connect(mainWindow.showScreen)
+
     if 'menu' in config:
         menu = Menu(mainWindow, config.get("menu", "config_file"))
         menu.start()
