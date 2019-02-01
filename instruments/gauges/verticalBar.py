@@ -56,6 +56,12 @@ class VerticalBar(AbstractGauge):
         if self.showUnits:
             self.barBottom -= (self.smallFont.pixelSize() + self.textGap)
 
+        self.barLeft = (self.width() - self.barWidth) / 2
+        self.barRight = self.barLeft + self.barWidth
+        self.lineLeft = (self.width() - self.lineWidth) / 2
+        self.lineRight = self.lineLeft + self.lineWidth
+        self.barHeight = self.barBottom - self.barTop
+
         self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
         self.valueTextRect = QRectF(0, self.barBottom + self.textGap, self.width(), self.bigFont.pixelSize())
         self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize())
@@ -87,11 +93,6 @@ class VerticalBar(AbstractGauge):
             p.setFont(self.smallFont)
             p.drawText(self.unitsTextRect, self.units, opt)
 
-        barLeft = (self.width() - self.barWidth) / 2
-        barRight = barLeft + self.barWidth
-        lineLeft = (self.width() - self.lineWidth) / 2
-        lineRight = lineLeft + self.lineWidth
-        barHeight = self.barBottom - self.barTop
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)
@@ -99,36 +100,36 @@ class VerticalBar(AbstractGauge):
         brush = self.safeColor
         p.setPen(pen)
         p.setBrush(brush)
-        p.drawRect(barLeft, self.barTop, self.barWidth, barHeight)
+        p.drawRect(self.barLeft, self.barTop, self.barWidth, self.barHeight)
 
         # Draw Warning Bands
         pen.setColor(self.warnColor)
         brush = self.warnColor
         p.setPen(pen)
         p.setBrush(brush)
-        if(self.lowWarn):
-            x = self.interpolate(self.lowWarn, barHeight)
-            p.drawRect(barLeft, self.barBottom - x,
+        if(self.lowWarn and self.lowWarn >= self.lowRange):
+            x = self.interpolate(self.lowWarn, self.barHeight)
+            p.drawRect(self.barLeft, self.barBottom - x,
                        self.barWidth,
                        x + 1)
-        if(self.highWarn):
-            p.drawRect(barLeft, self.barTop,
+        if(self.highWarn and self.highWarn <= self.highRange):
+            p.drawRect(self.barLeft, self.barTop,
                        self.barWidth,
-                       barHeight - self.interpolate(self.highWarn, barHeight))
+                       self.barHeight - self.interpolate(self.highWarn, self.barHeight))
 
         pen.setColor(self.alarmColor)
         brush = self.alarmColor
         p.setPen(pen)
         p.setBrush(brush)
-        if(self.lowAlarm):
-            x = self.interpolate(self.lowAlarm, barHeight)
-            p.drawRect(barLeft, self.barBottom - x,
+        if(self.lowAlarm and self.lowAlarm >= self.lowRange):
+            x = self.interpolate(self.lowAlarm, self.barHeight)
+            p.drawRect(self.barLeft, self.barBottom - x,
                        self.barWidth,
                        x + 1)
-        if(self.highAlarm):
-            p.drawRect(barLeft, self.barTop,
+        if(self.highAlarm and self.highAlarm <= self.highRange):
+            p.drawRect(self.barLeft, self.barTop,
                        self.barWidth,
-                       barHeight - self.interpolate(self.highAlarm, barHeight))
+                       self.barHeight - self.interpolate(self.highAlarm, self.barHeight))
 
         # Indicator Line
         pen.setColor(self.penColor)
@@ -136,6 +137,8 @@ class VerticalBar(AbstractGauge):
         pen.setWidth(4)
         p.setPen(pen)
         p.setBrush(brush)
-        x = self.barTop + (barHeight - self.interpolate(self._value, barHeight))
-        p.drawLine(lineLeft, x,
-                   lineRight, x)
+        x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
+        if x < self.barTop: x = self.barTop
+        if x > self.barBottom: x = self.barBottom
+        p.drawLine(self.lineLeft, x,
+                   self.lineRight, x)

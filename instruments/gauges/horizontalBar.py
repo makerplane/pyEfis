@@ -102,5 +102,7 @@ class HorizontalBar(AbstractGauge):
         p.setPen(pen)
         p.setBrush(brush)
         x = self.interpolate(self._value, self.width())
+        if x < 0: x = 0
+        if x > self.width(): x = self.width()
         p.drawLine(x, self.barTop - 4,
                    x, self.barTop + self.barHeight + 4)

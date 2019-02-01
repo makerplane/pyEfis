@@ -192,7 +192,7 @@ class DB_Item(QObject):
         try:
             self._min = self.dtype(x)
         except ValueError:
-            log.error("Bad minimum value '" + str(x) + "' given for " + self.description)
+            log.error("Bad minimum value '" + str(x) + "' given for " + str(self))
 
     @property
     def max(self):
@@ -203,7 +203,7 @@ class DB_Item(QObject):
         try:
             self._max = self.dtype(x)
         except ValueError:
-            log.error("Bad maximum value '" + str(x) + "' given for " + self.description)
+            log.error("Bad maximum value '" + str(x) + "' given for " + str(self))
 
     @property
     def tol(self):
@@ -260,7 +260,11 @@ class DB_Item(QObject):
         if self._fail != last:
             self.failChanged.emit(self._fail)
 
-
+    def __str__(self):
+        s = "DBItem {}".format(self.key)
+        if self.description:
+            s += " - {}".format(self.description)
+        return s
 
 # This Class represents the database itself.  Once instantiated it
 # creates and starts the thread that handles all the communication to
