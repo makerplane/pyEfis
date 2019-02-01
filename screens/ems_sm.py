@@ -24,12 +24,14 @@ except:
 
 from instruments import gauges
 from instruments import misc
+import fix
 
 class Screen(QWidget):
     def __init__(self, parent=None):
         super(Screen, self).__init__(parent)
         self.parent = parent
         p = self.parent.palette()
+        self.cylCount = 4
 
         self.screenColor = (0,0,0)
         if self.screenColor:
@@ -92,24 +94,44 @@ class Screen(QWidget):
         self.fuelt.decimalPlaces = 1
         self.fuelt.dbkey = "FUELQT"
 
+        self.cht = misc.StaticText("CHT", parent=self)
+        self.chts = []
+        for x in range(self.cylCount):
+            cht = gauges.VerticalBar(self)
 
-        # self.cht = gauges.HorizontalBar(self)
-        # self.cht.name = "Max CHT"
-        # # Use a lambda to convert the values internally
-        # self.cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
-        # # This causes the units sent from the server to be overridden
-        # self.cht.unitsOverride = u'\N{DEGREE SIGN}F'
-        # self.cht.dbkey = "CHTMAX"
-        #
-        # self.egt = gauges.HorizontalBar(self)
-        # self.egt.name = "Avg EGT"
-        # # Use a lambda to convert the values internally
-        # self.egt.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
-        # # This causes the units sent from the server to be overridden
-        # self.egt.unitsOverride = u'\N{DEGREE SIGN}F'
-        # self.egt.decimalPlaces = 0
-        # self.egt.dbkey = "EGTAVG"
+            cht.name = str(x+1)
+            cht.decimalPlaces = 0
+            cht.dbkey = "CHT1{}".format(x+1)
+            cht.showUnits = False
+            cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+            self.chts.append(cht)
+            item = fix.db.get_item(cht.dbkey)
+            item.valueChanged.connect(self.chtMax)
 
+        self.chtmaxlabel = misc.StaticText("MAX", parent=self)
+
+        self.chtmax = gauges.NumericDisplay(self)
+        self.chtmax.name = "CHT Max"
+        self.chtmax.decimalPlaces = 0
+        self.chtmax.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.chtmax.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.chtmax.dbkey = "CHTMAX1"
+
+
+    # Find the hightest CHT and highlight it
+    # TODO: This could probably be optimized a little better
+    def chtMax(self):
+        max = self.chts[0].value
+        sel = 0
+        for x in range(self.cylCount - 1):
+            if self.chts[x+1].value > max:
+                sel = x+1
+                max = self.chts[x+1].value
+        for each in self.chts:
+            each.highlight = False
+        self.chts[sel].highlight = True
+        for each in self.chts:
+            each.update()
 
 
     def resizeEvent(self, event):
@@ -144,14 +166,20 @@ class Screen(QWidget):
         self.fuelp.resize(50, 150)
         self.fuelp.move(self.width() - 50, 200)
 
-        self.fuelt.resize(100, 30)
-        self.fuelt.move(self.width() - 200, 355)
+        self.fuelt.resize(90, 30)
+        self.fuelt.move(self.width() - 195, 355)
         self.fuelt.showUnits = False
         self.fuelt.showName = False
 
+        chtstartx = 380
+        self.cht.resize(200, 30)
+        self.cht.move(chtstartx, 170)
 
-        # self.cht.resize(150, 50)
-        # self.cht.move(self.width() - 150, 380)
-        #
-        # self.egt.resize(150, 50)
-        # self.egt.move(self.width() - 150, 430)
+        for x in range(len(self.chts)):
+            self.chts[x].resize(50, 150)
+            self.chts[x].move(chtstartx + (50*x), 200)
+
+        self.chtmaxlabel.resize(30,12)
+        self.chtmaxlabel.move(chtstartx + 10, 360)
+        self.chtmax.resize(75, 30)
+        self.chtmax.move(chtstartx + 45, 355)
