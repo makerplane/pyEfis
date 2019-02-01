@@ -31,11 +31,16 @@ class NumericDisplay(AbstractGauge):
        limits are reached or when failures occur"""
     def __init__(self, parent=None):
         super(NumericDisplay, self).__init__(parent)
-        self.alignment = Qt.AlignCenter
+        self.alignment = Qt.AlignLeft | Qt.AlignTop
+        self.unitsAlignment = Qt.AlignRight | Qt.AlignTop
+        self.showUnits = False
+        self.smallFontPercent = 0.4
 
     def resizeEvent(self, event):
         self.bigFont = QFont()
         self.bigFont.setPixelSize(self.height())
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(self.height() * self.smallFontPercent)
 
         self.valueTextRect = QRectF(0, 0, self.width(), self.height())
 
@@ -54,3 +59,8 @@ class NumericDisplay(AbstractGauge):
         p.setFont(self.bigFont)
         opt = QTextOption(self.alignment)
         p.drawText(self.valueTextRect, self.valueText, opt)
+
+        # Draw Units
+        p.setFont(self.smallFont)
+        opt = QTextOption(self.unitsAlignment)
+        p.drawText(self.valueTextRect, self.units, opt)
