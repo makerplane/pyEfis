@@ -45,6 +45,8 @@ class AbstractGauge(QWidget):
         self.bad = False
         self.old = False
         self.annunciate = False
+        self.highlight = False
+
 
         # These properties can be modified by the parent
         self.clipping = False
@@ -61,6 +63,7 @@ class AbstractGauge(QWidget):
         self.alarmGoodColor = QColor(Qt.red)
         self.textGoodColor = QColor(Qt.white)
         self.penGoodColor = QColor(Qt.white)
+        self.highlightGoodColor = QColor(Qt.magenta)
 
         # These colors are used for bad and fail
         self.bgBadColor = QColor(Qt.black)
@@ -69,6 +72,7 @@ class AbstractGauge(QWidget):
         self.alarmBadColor = QColor(Qt.darkRed)
         self.textBadColor = QColor(Qt.gray)
         self.penBadColor = QColor(Qt.gray)
+        self.highlightBadColor = QColor(Qt.magenta)
 
         # Annunciate changes the text color
         self.textAnnunciateColor = QColor(Qt.red)
@@ -81,8 +85,9 @@ class AbstractGauge(QWidget):
         self.warnColor = self.warnGoodColor
         self.alarmColor = self.alarmGoodColor
         self.textColor = self.textGoodColor # Non value text like units
-        self.valueColor = QColor(Qt.green) # The actual value text
+        self.valueColor = self.textGoodColor # The actual value text
         self.penColor = self.penGoodColor # The line on the gauge
+        self.highlightColor = self.highlightGoodColor
 
 
     def interpolate(self, value, range_):
@@ -208,6 +213,7 @@ class AbstractGauge(QWidget):
             self.alarmColor = self.alarmBadColor
             self.textColor = self.textBadColor
             self.penColor = self.penBadColor
+            self.highlightColor = self.highlightBadColor
         else:
             self.bgColor = self.bgGoodColor
             self.safeColor = self.safeGoodColor
@@ -215,6 +221,7 @@ class AbstractGauge(QWidget):
             self.alarmColor = self.alarmGoodColor
             self.textColor = self.textGoodColor
             self.penColor = self.penGoodColor
+            self.highlightColor = self.highlightGoodColor
         if self.annunciate and not self.fail:
             self.textColor = self.textAnnunciateColor
 

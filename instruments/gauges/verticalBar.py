@@ -65,6 +65,8 @@ class VerticalBar(AbstractGauge):
         self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
         self.valueTextRect = QRectF(0, self.barBottom + self.textGap, self.width(), self.bigFont.pixelSize())
         self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize())
+        self.ballRadius = self.barWidth * 0.40
+        self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 
     def paintEvent(self, event):
         p = QPainter(self)
@@ -130,6 +132,14 @@ class VerticalBar(AbstractGauge):
             p.drawRect(self.barLeft, self.barTop,
                        self.barWidth,
                        self.barHeight - self.interpolate(self.highAlarm, self.barHeight))
+
+        # Highlight Ball
+        if self.highlight:
+            pen.setColor(Qt.black)
+            pen.setWidth(1)
+            p.setPen(pen)
+            p.setBrush(self.highlightColor)
+            p.drawEllipse(self.ballCenter, self.ballRadius, self.ballRadius)
 
         # Indicator Line
         pen.setColor(self.penColor)
