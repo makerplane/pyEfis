@@ -25,6 +25,7 @@ except:
 
 import fix
 
+
 class VSI(QWidget):
     def __init__(self, parent=None):
         super(VSI, self).__init__(parent)
@@ -69,8 +70,8 @@ class VSI(QWidget):
             p.rotate(tickAngle)
             if each % 5 == 0:
                 p.drawLine(longLine)
-                p.drawText(textRect, Qt.AlignHCenter |
-                           Qt.AlignVCenter, str(each))
+                p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
+                           str(each))
             else:
                 p.drawLine(shortLine)
         p.restore()
@@ -81,8 +82,8 @@ class VSI(QWidget):
             p.rotate(-tickAngle)
             if each % 5 == 0:
                 p.drawLine(longLine)
-                p.drawText(textRect, Qt.AlignHCenter |
-                           Qt.AlignVCenter, str(each))
+                p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
+                           str(each))
             else:
                 p.drawLine(shortLine)
         p.restore()
@@ -175,8 +176,8 @@ class AS_Trend_Tape(QGraphicsView):
         self.centerOn(self.scene.width() / 2,
                       self.height() / 2)
 
-        self._airspeed_diff = (sum(self._airspeed_trend) /
-                               len(self._airspeed_trend)) * 60
+        self._airspeed_diff = (sum(self._airspeed_trend) / len(
+                               self._airspeed_trend)) * 60
 
         self.scene.addRect(self.width() / 2, self.height() / 2,
                            self.width() / 2 + 5,
@@ -203,7 +204,8 @@ class AS_Trend_Tape(QGraphicsView):
 
 
 class Alt_Trend_Tape(QGraphicsView):
-    RIGHT_MARGIN=5
+    RIGHT_MARGIN = 5
+
     def __init__(self, parent=None):
         super(Alt_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
@@ -216,18 +218,18 @@ class Alt_Trend_Tape(QGraphicsView):
         item.valueChanged[float].connect(self.setVs)
         self._vs = item.value
         self.maxvs = 2500
-        self.fontsize=10
+        self.fontsize = 10
         self.indicator_line = None
 
     def resizeEvent(self, event):
-        w = self.width()-self.RIGHT_MARGIN
-        w_2 = w/2
+        w = self.width() - self.RIGHT_MARGIN
+        w_2 = w / 2
         h = self.height()
 
         f = QFont()
         f.setPixelSize(self.fontsize)
         bf = QFont()
-        bf.setPixelSize(self.fontsize+2)
+        bf.setPixelSize(self.fontsize + 2)
         bf.setBold(True)
 
         self.scene = QGraphicsScene(0, 0, w, h)
@@ -246,18 +248,18 @@ class Alt_Trend_Tape(QGraphicsView):
         self.vstext.setDefaultTextColor(QColor(Qt.white))
         self.vstext.setX(0)
         self.vstext.setY(y)
-        self.top_margin = y + self.vstext.boundingRect().height()*1.2
-        remaining_height = self.height()-self.top_margin
-        self.zero_y = remaining_height/2 + self.top_margin
+        self.top_margin = y + self.vstext.boundingRect().height() * 1.2
+        remaining_height = self.height() - self.top_margin
+        self.zero_y = remaining_height / 2 + self.top_margin
 
-        self.pph = float(remaining_height) / (self.maxvs*2)
+        self.pph = float(remaining_height) / (self.maxvs * 2)
 
         tapePen = QPen(QColor(Qt.white))
-        for i in range(self.maxvs, -self.maxvs-1, -100):
+        for i in range(self.maxvs, -self.maxvs - 1, -100):
             y = self.y_offset(i)
             if i % 200 == 0:
                 self.scene.addLine(w_2 + 5, y, w, y, tapePen)
-                t = self.scene.addText(str(int(i/100)))
+                t = self.scene.addText(str(int(i / 100)))
                 t.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
                 t.setX(0)
@@ -267,30 +269,28 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setScene(self.scene)
         self.redraw()
 
-
-    def y_offset(self,vs):
-        return self.zero_y - vs*self.pph
+    def y_offset(self, vs):
+        return self.zero_y - vs * self.pph
 
     def redraw(self):
         y = self.y_offset(self._vs)
-        w = self.width()-self.RIGHT_MARGIN
-        x = w*6/7
-        width = w-x
+        w = self.width() - self.RIGHT_MARGIN
+        x = w * 6 / 7
+        width = w - x
         if self._vs > 0:
             top = y
             bottom = self.zero_y
         else:
             top = self.zero_y
             bottom = y
-        height = bottom-top
+        height = bottom - top
         if self.indicator_line is None:
             self.indicator_line = self.scene.addRect(x, top, width, height,
-
-                           QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
+                                                     QPen(QColor(Qt.white)),
+                                                     QBrush(QColor(Qt.white)))
         else:
-            self.indicator_line.setRect (x, top, width, height)
+            self.indicator_line.setRect(x, top, width, height)
         self.vstext.setPlainText(str(int(self._vs)))
-
 
     def setVs(self, vs):
         if vs != self._vs:
