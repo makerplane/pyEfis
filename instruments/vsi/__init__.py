@@ -77,7 +77,7 @@ class VSI(QWidget):
                             - pixelsHigh / 2)
         p.setTransform(transform)
         p.drawText(0, 0, pixelsWide, pixelsHigh,
-                   Qt.AlignHCenter | Qt.AlignVCenter, '0')
+                   Qt.AlignCenter, '0')
 
         pixelsWide = fm.width("2.0")
         transform = QTransform()
@@ -87,7 +87,7 @@ class VSI(QWidget):
                             - pixelsHigh / 2)
         p.setTransform(transform)
         p.drawText(0, 0, pixelsWide, pixelsHigh,
-                   Qt.AlignHCenter | Qt.AlignVCenter, '2.0')
+                   Qt.AlignCenter, '2.0')
 
         p.restore()
         p.rotate(-90)
@@ -96,7 +96,7 @@ class VSI(QWidget):
             if each % 5 == 0:
                 p.drawLine(longLine)
                 if each != 20:
-                    p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
+                    p.drawText(textRect, Qt.AlignCenter,
                                str(each))
             else:
                 p.drawLine(shortLine)
@@ -108,7 +108,7 @@ class VSI(QWidget):
                 p.drawLine(longLine)
                 if each != 20:
                     p.scale(-1.0, -1.0)
-                    p.drawText(textRInv, Qt.AlignCenter | Qt.AlignVCenter,
+                    p.drawText(textRInv, Qt.AlignCenter,
                                str(each))
                     p.scale(-1.0, -1.0)
             else:
