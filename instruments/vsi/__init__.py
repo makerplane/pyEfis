@@ -42,6 +42,7 @@ class VSI(QWidget):
         self.background = QPixmap(self.width(), self.height())
         f = QFont()
         f.setPixelSize(self.fontSize)
+        fm = QFontMetrics(f)
         p = QPainter(self.background)
         p.setRenderHint(QPainter.Antialiasing)
         p.setFont(f)
@@ -61,32 +62,57 @@ class VSI(QWidget):
         longLine = QLine(0, -self.r, 0, -(self.r - self.fontSize))
         shortLine = QLine(0, -self.r, 0, -(self.r - self.fontSize / 2))
         textRect = QRect(-40, -self.r + self.fontSize, 80, self.fontSize + 10)
-        p.save()
+        textRInv = QRect(40, self.r - self.fontSize, -80, -self.fontSize - 10)
+
+        pixelsWide = fm.width("0")
+        pixelsHigh = fm.height()
         p.translate(self.center)
+        p.save()
         p.rotate(-90)
         p.drawLine(longLine)
-        p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter, '0')
+        transform = QTransform()
+        transform.translate(p.device().width() / 2,
+                            p.device().height() / 2)
+        transform.translate(- self.r + self.fontSize + 5,
+                            - pixelsHigh / 2)
+        p.setTransform(transform)
+        p.drawText(0, 0, pixelsWide, pixelsHigh,
+                   Qt.AlignHCenter | Qt.AlignVCenter, '0')
+
+        pixelsWide = fm.width("2.0")
+        transform = QTransform()
+        transform.translate(p.device().width() / 2,
+                            p.device().height() / 2)
+        transform.translate(self.r - self.fontSize - pixelsWide,
+                            - pixelsHigh / 2)
+        p.setTransform(transform)
+        p.drawText(0, 0, pixelsWide, pixelsHigh,
+                   Qt.AlignHCenter | Qt.AlignVCenter, '2.0')
+
+        p.restore()
+        p.rotate(-90)
         for each in range(1, tickCount + 1):
             p.rotate(tickAngle)
             if each % 5 == 0:
                 p.drawLine(longLine)
-                p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
-                           str(each))
+                if each != 20:
+                    p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
+                               str(each))
             else:
                 p.drawLine(shortLine)
-        p.restore()
-        p.save()
-        p.translate(self.center)
-        p.rotate(-90)
+
+        p.rotate(-self.maxAngle)
         for each in range(1, tickCount + 1):
             p.rotate(-tickAngle)
             if each % 5 == 0:
                 p.drawLine(longLine)
-                p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
-                           str(each))
+                if each != 20:
+                    p.scale(-1.0, -1.0)
+                    p.drawText(textRInv, Qt.AlignCenter | Qt.AlignVCenter,
+                               str(each))
+                    p.scale(-1.0, -1.0)
             else:
                 p.drawLine(shortLine)
-        p.restore()
 
     def paintEvent(self, event):
         w = self.width()
