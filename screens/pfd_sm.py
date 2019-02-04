@@ -118,18 +118,9 @@ class Screen(QWidget):
         self.alt_tape.resize(60, instHeight)
         self.alt_tape.move(instWidth - 60, 0)
 
-        #self.alt_Trend.resize(10, instHeight)
-        #self.alt_Trend.move(instWidth , 100)
-
         self.as_tape.fontsize = 15
         self.as_tape.resize(60, instHeight)
         self.as_tape.move(0, 0)
-
-        #self.as_Trend.resize(10, instHeight)
-        #self.as_Trend.move(90, 100)
-
-        #self.asd_Box.resize(90, 100)
-        #self.asd_Box.move(0, instHeight + 100)
 
         self.head_tape.fontsize = 15
         self.head_tape.resize(instWidth, 60)
