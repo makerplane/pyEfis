@@ -35,6 +35,7 @@ class Menu(QWidget):
     def __init__(self, parent, config):
         global TheMenuObject
         super(Menu, self).__init__(parent)
+        self.config = config
         self.myparent = parent
         self.registered_targets = dict()
         self.buttons = list()
