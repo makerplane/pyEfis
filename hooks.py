@@ -25,9 +25,9 @@ import importlib
 
 # Read through the configuration and load the hook modules
 def initialize(config):
-    global log
     log = logging.getLogger(__name__)
 
+    if config == None: return # None Configured
     # Load the Hook Modules
     for each in config:
         module = config[each]["module"]

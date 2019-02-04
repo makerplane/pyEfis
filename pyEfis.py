@@ -97,6 +97,7 @@ if __name__ == "__main__":
         fms.start(config.get("FMS", "aircraft_config"))
 
     gui.initialize(config)
+    hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
 
     # Main program loop

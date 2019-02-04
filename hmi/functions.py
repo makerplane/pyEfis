@@ -14,16 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import logging
+import fix
 
-from .actions import ActionClass
-from .menu import Menu
-from . import keys
-
-actions = None
-
-def initialize(config):
-    global actions
-    log = logging.getLogger(__name__)
-    log.info("Initializing Actions")
-    actions = ActionClass()
+# Set a value in the FIX database.  arg should be "key,value"
+def setValue(arg):
+    args = arg.split(',')
+    fix.db.set_value(args[0].strip(), args[1].strip())

@@ -23,22 +23,40 @@ except:
     from PyQt4.QtCore import *
     from PyQt4.QtGui import *
 
+import hmi.functions
 
 class ActionClass(QWidget):
+    setAirspeedMode = pyqtSignal(str)
+    setEgtMode = pyqtSignal(str)
+    showScreen = pyqtSignal(str)
+    showNextScreen = pyqtSignal(str)
+    showPrevScreen = pyqtSignal(str)
+    activateMenu = pyqtSignal(str)
+
+
     def __init__(self):
         super(ActionClass, self).__init__()
         self.signalMap = {"change asd mode":self.setAirspeedMode,
                           "set egt mode":self.setEgtMode,
                           "show screen":self.showScreen,
                           "show next screen":self.showNextScreen,
-                          "show previous screen":self.showPrevScreen
+                          "show previous screen":self.showPrevScreen,
+                          "set value":hmi.functions.setValue,
+                          "activate menu":self.activateMenu
                     }
 
-    setAirspeedMode = pyqtSignal(str)
-    setEgtMode = pyqtSignal(str)
-    showScreen = pyqtSignal(str)
-    showNextScreen = pyqtSignal(str)
-    showPrevScreen = pyqtSignal(str)
 
     def trigger(self, action, argument=""):
-        self.signalMap[action.lower()].emit(argument)
+        a = self.signalMap[action.lower()]
+        if isinstance(a, pyqtSignal):
+            a.emit(argument)
+        else: # It's not a signal so assume it's a function
+            a(argument)
+
+
+    def findAction(self, action):
+        a = action.lower()
+        if a in self.signalMap:
+            return self.signalMap[a]
+        else:
+            return None

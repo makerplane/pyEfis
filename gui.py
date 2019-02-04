@@ -125,8 +125,6 @@ class Main(QMainWindow):
             self.showScreen(self.running_screen-1)
 
 
-
-
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
         self.windowShow.emit(event)
