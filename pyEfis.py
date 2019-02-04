@@ -18,16 +18,14 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
-# TODO: Should remove and install AeroCalc Properly
-sys.path.insert(0, './lib/AeroCalc-0.11/')
 
 import logging
 import logging.config
 import argparse
-try:
-    import ConfigParser
-except:
-    import configparser as ConfigParser
+# try:
+#     import ConfigParser
+# except:
+#     import configparser as ConfigParser
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtWidgets import *
@@ -35,6 +33,7 @@ try:
 except:
     from PyQt4.QtGui import *
     PYQT = 4
+import yaml
 
 import scheduler
 import fix
@@ -50,40 +49,45 @@ if __name__ == "__main__":
         default='normal', help='Run pyEFIS in specific mode')
     parser.add_argument('--debug', action='store_true',
                         help='Run in debug mode')
-    parser.add_argument('--config-file',
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Run in verbose mode')
+    parser.add_argument('--config-file', type=argparse.FileType('r'),
                         help='Alternate configuration file')
-    parser.add_argument('--log-config',
+    parser.add_argument('--log-config', type=argparse.FileType('r'),
                         help='Alternate logger configuration file')
 
     args = parser.parse_args()
 
-    config_file = args.config_file if args.config_file else 'config/main.cfg'
+    config_file = args.config_file if args.config_file else 'config/main.yaml'
     log_config_file = args.log_config if args.log_config else config_file
-    config = ConfigParser.RawConfigParser()
 
-    config.read(config_file)
+    # if we passed in a configuration file on the command line...
+    if args.config_file:
+        cf = args.config_file
+    else: # otherwise use the default
+        cf = open(config_file)
+    config = yaml.load(cf)
 
-    # Initialize Logger
-    logging.config.fileConfig(log_config_file)
+    # Either load the config file given as a command line argument or
+    # look in the configuration for the logging object
+    if args.log_config:
+        logging.config.fileConfig(args.log_config)
+    elif 'logging' in config:
+        logging.config.dictConfig(config['logging'])
+    else:
+        logging.basicConfig()
+
     log = logging.getLogger()
-
-    # Quick way to set the logger to debug using command line argument
+    if args.verbose:
+        log.setLevel(logging.INFO)
     if args.debug:
         log.setLevel(logging.DEBUG)
-        log.info("Starting PyEFIS in %s Mode" % (args.mode,))
+    log.info("Starting pyEFIS")
 
     log.debug("PyQT Version = %d" % PYQT)
     scheduler.initialize()
 
-    host = config.get("main", "FixServer")
-    port = int(config.get("main", "FixPort"))
-
-    fix.initialize(host, port)
-    for each in config.items("Outputs"):
-        try:
-            fix.db.add_output(each[0].upper(), each[1])
-        except ValueError as e:
-            log.warning(e)
+    fix.initialize(config)
 
     if 'FMS' in config:
         sys.path.insert(0, config.get("FMS", "module_dir"))
@@ -91,7 +95,7 @@ if __name__ == "__main__":
         fms.start(config.get("FMS", "aircraft_config"))
 
     gui.initialize(config)
-    hooks.initialize(config)
+    hooks.initialize(config['hooks'])
 
     # Main program loop
     result = app.exec_()
