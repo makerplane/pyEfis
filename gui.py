@@ -39,19 +39,8 @@ class Screen(QObject):
     def __init__(self, name, module, config):
         super(Screen, self).__init__()
         self.name = name
-        # strings here remove the options from the list before it is
-        # sent to the plugin.
-        exclude_options = ["module"]
         self.module = importlib.import_module(module)
-        # Here items winds up being a list of tuples [('key', 'value'),...]
-        items = [item for item in config.items("Screen." + name)
-                 if item[0] not in exclude_options]
-        # Append the command line arguments to the items list as a tuple
-        items.append(('argv', sys.argv))
-        # Convert this to a dictionary before passing to the plugin
-        self.config = {}
-        for each in items:
-            self.config[each[0]] = each[1]
+        self.config = config
 
         # This would hold the instantiated Screen object from the module.
         self.object = None
@@ -76,11 +65,11 @@ class Main(QMainWindow):
     def __init__(self, config, parent=None):
         super(Main, self).__init__(parent)
 
-        self.screenWidth = int(config.get("mainscreen", "screenSize.Width"))
-        self.screenHeight = int(config.get("mainscreen", "screenSize.Height"))
-        self.screenColor = config.get("mainscreen", "screenColor")
+        self.screenWidth = int(config["main"]["screenWidth"])
+        self.screenHeight = int(config["main"]["screenHeight"])
+        self.screenColor = config["main"]["screenColor"]
 
-        self.setObjectName("PFD")
+        self.setObjectName("EFIS")
         self.resize(self.screenWidth, self.screenHeight)
         w = QWidget(self)
         w.setGeometry(0, 0, self.screenWidth, self.screenHeight)
@@ -173,44 +162,42 @@ def initialize(config):
     log = logging.getLogger(__name__)
 
     # Load the Screens
-    for each in config.sections():
-        if each.startswith ("Screen."):
-            module = config.get(each, "module")
-            try:
-                name = each[7:]
-                screens.append(Screen(name, module, config))
-                log.debug("Creating Screen {0}".format(name))
-                #load_screen(each[7:], module, config)
-            except Exception as e:
-                log.critical("Unable to load module - " + module + ": " + str(e))
-                raise
-
+    for each in config['screens']:
+        module = config['screens'][each]["module"]
+        try:
+            name = each
+            screens.append(Screen(name, module, config['screens'][each]))
+            log.debug("Creating Screen {0}".format(name))
+        except Exception as e:
+            log.critical("Unable to load module - " + module + ": " + str(e))
+            raise
 
     try:
-        d = config.get("mainscreen", "defaultScreen")
-    except ConfigParser.NoOptionError:
+        d = config["main"]["defaultScreen"]
+    except KeyError:
         d = 0
 
     setDefaultScreen(d)
 
     mainWindow = Main(config)
     if 'menu' in config:
-        menu = Menu(mainWindow, config.get("menu", "config_file"))
+        menu = Menu(mainWindow, config["menu"])
         menu.start()
 
 
     if 'FMS' in config:
-        sys.path.insert(0, config.get("FMS", "module_dir"))
+        sys.path.insert(0, config["FMS"]["module_dir"])
         ui = importlib.import_module ("qtui")
-        uiwidget = ui.FMSUI(config.get("FMS", "flight_plan_dir"), mainWindow)
+        uiwidget = ui.FMSUI(config["FMS"]["flight_plan_dir"], mainWindow)
         uiwidget.resize (700, 65)
         uiwidget.move (30, 32)
         menu.register_target ("FMS", uiwidget)
 
-    screen = config.getboolean("mainscreen", "screenFullSize")
+    screen = bool(config["main"]["screenFullSize"])
     if screen:
+        log.debug("Setting Screen to Full Size")
         mainWindow.showFullScreen()
     else:
-        mainWindow.width = int(config.get("mainscreen", "screenSize.Width"))
-        mainWindow.height = int(config.get("mainscreen", "screenSize.Height"))
+        mainWindow.width = int(config["main"]["screenWidth"])
+        mainWindow.height = int(config["main"]["screenHeight"])
         mainWindow.show()

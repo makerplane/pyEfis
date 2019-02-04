@@ -359,10 +359,20 @@ class Database(object):
         self.clientthread.join()
 
 
-def initialize(host, port):
+def initialize(config):
     global db
+    host = config["main"]["FixServer"]
+    port = int(config["main"]["FixPort"])
+
     db = Database(host, port)
     log.info("Initializing FIX Client")
+
+    for output in config["outputs"]:
+        try:
+            db.add_output(output.upper(), config["outputs"][output])
+        except ValueError as e:
+            log.warning(e)
+
 
 def stop():
     db.stop()

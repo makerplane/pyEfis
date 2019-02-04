@@ -29,13 +29,12 @@ def initialize(config):
     log = logging.getLogger(__name__)
 
     # Load the Hook Modules
-    for each in config.sections():
-        if each[:5] == "Hook.":
-            module = config.get(each, "module")
-            try:
-                name = each[5:]
-                importlib.import_module(module)
-                #load_screen(each[7:], module, config)
-            except Exception as e:
-                logging.critical("Unable to load module - " + module + ": " + str(e))
-                raise
+    for each in config:
+        module = config[each]["module"]
+        try:
+            name = each
+            importlib.import_module(module)
+            #load_screen(each[7:], module, config)
+        except Exception as e:
+            logging.critical("Unable to load module - " + module + ": " + str(e))
+            raise
