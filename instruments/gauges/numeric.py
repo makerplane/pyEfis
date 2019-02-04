@@ -31,8 +31,8 @@ class NumericDisplay(AbstractGauge):
        limits are reached or when failures occur"""
     def __init__(self, parent=None):
         super(NumericDisplay, self).__init__(parent)
-        self.alignment = Qt.AlignLeft | Qt.AlignTop
-        self.unitsAlignment = Qt.AlignRight | Qt.AlignTop
+        self.alignment = Qt.AlignLeft | Qt.AlignVCenter
+        self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
         self.showUnits = False
         self.smallFontPercent = 0.4
 
