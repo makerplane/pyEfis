@@ -209,8 +209,9 @@ def initialize(config):
     setDefaultScreen(d)
 
     mainWindow = Main(config)
-    menu = Menu(mainWindow, config.get("menu", "config_file"))
-    menu.start()
+    if 'menu' in config:
+        menu = Menu(mainWindow, config.get("menu", "config_file"))
+        menu.start()
 
 
     if 'FMS' in config:
