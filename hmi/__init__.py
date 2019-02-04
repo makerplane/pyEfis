@@ -14,42 +14,23 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-try:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-
-except:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-
 import logging
+
+import yaml
+
+from .actions import ActionClass
+from .menu import Menu
 
 actions = None
 
-class ActionClass(QWidget):
-    def __init__(self):
-        super(ActionClass, self).__init__()
-        self.signalMap = {"change asd mode":self.setAirspeedMode,
-                          "set egt mode":self.setEgtMode,
-                          "show screen":self.showScreen,
-                          "show next screen":self.showNextScreen,
-                          "show previous screen":self.showPrevScreen
-                    }
-
-    setAirspeedMode = pyqtSignal(str)
-    setEgtMode = pyqtSignal(str)
-    showScreen = pyqtSignal(str)
-    showNextScreen = pyqtSignal(str)
-    showPrevScreen = pyqtSignal(str)
-
-    def dispatch(self, action, argument=""):
-        self.signalMap[action.lower()].emit(argument)
-
-
 def initialize(config):
     global actions
-    global log
+    #global log
     log = logging.getLogger(__name__)
     log.info("Initializing Event System")
     actions = ActionClass()
+
+    self.cfg_file = config["config_file"]
+    with open(self.cfg_file, 'r') as yml:
+        self.config = yaml.load (yml)
+        yml.close()

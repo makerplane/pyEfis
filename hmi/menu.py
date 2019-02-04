@@ -24,8 +24,6 @@ except:
 
 import logging
 
-import yaml
-
 import hooks
 import fix
 
@@ -34,12 +32,8 @@ logger=logging.getLogger(__name__)
 TheMenuObject=None
 
 class Menu(QWidget):
-    def __init__(self, parent, config_file):
+    def __init__(self, parent, config):
         global TheMenuObject
-        self.cfg_file = config_file
-        with open(self.cfg_file, 'r') as yml:
-            self.config = yaml.load (yml)
-            yml.close()
         super(Menu, self).__init__(parent)
         self.myparent = parent
         self.registered_targets = dict()

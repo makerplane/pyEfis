@@ -22,7 +22,7 @@ except:
 import gui
 import fix
 import hooks
-import events
+from hmi import actions
 
 def keyPress(event):
     hooks.log.debug("KeyPress {} {}".format(event.key(),event.text()))
@@ -46,13 +46,13 @@ def keyPress(event):
 
     elif event.key() == Qt.Key_A:
         #hooks.log.debug("Screen Change")
-        events.actions.dispatch("Show Previous Screen")
+        actions.trigger("Show Previous Screen")
 
     elif event.key() == Qt.Key_S:
-        events.actions.dispatch("Show Next Screen")
+        actions.trigger("Show Next Screen")
 
     elif event.key() == Qt.Key_P:
-        events.actions.dispatch("Show Screen", "PFD")
+        actions.trigger("Show Screen", "PFD")
 
 
 def keyRelease(event):

@@ -26,8 +26,8 @@ import importlib
 import logging
 import sys
 import hooks
-import events
-from menu import Menu
+import hmi
+from hmi import Menu
 
 screens = []
 
@@ -210,9 +210,9 @@ def initialize(config):
     setDefaultScreen(d)
 
     mainWindow = Main(config)
-    events.actions.showNextScreen.connect(mainWindow.showNextScreen)
-    events.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
-    events.actions.showScreen.connect(mainWindow.showScreen)
+    hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)
+    hmi.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
+    hmi.actions.showScreen.connect(mainWindow.showScreen)
 
     if 'menu' in config:
         menu = Menu(mainWindow, config.get("menu", "config_file"))
