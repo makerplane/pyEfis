@@ -111,6 +111,21 @@ class Main(QMainWindow):
         else:
             raise KeyError("Screen {0} Not Found".format(scr))
 
+    def showNextScreen(self):
+        if self.running_screen == len(screens)-1:
+            self.showScreen(0)
+        else:
+            self.showScreen(self.running_screen + 1)
+
+    def showPrevScreen(self):
+        if self.running_screen == 0:
+            self.showScreen(len(screens)-1)
+        else:
+            self.showScreen(self.running_screen-1)
+
+
+
+
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
         self.windowShow.emit(event)
