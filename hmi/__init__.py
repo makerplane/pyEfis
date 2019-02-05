@@ -19,6 +19,7 @@ import logging
 from .actions import ActionClass
 from .menu import Menu
 from . import keys
+from . import data
 
 actions = None
 
@@ -27,3 +28,6 @@ def initialize(config):
     log = logging.getLogger(__name__)
     log.info("Initializing Actions")
     actions = ActionClass()
+
+    if "databindings" in config:
+        data.initialize(config["databindings"])

@@ -31,7 +31,8 @@ class ActionClass(QWidget):
     showScreen = pyqtSignal(str)
     showNextScreen = pyqtSignal(str)
     showPrevScreen = pyqtSignal(str)
-    activateMenu = pyqtSignal(str)
+    activateMenuItem = pyqtSignal(str)
+    menuEncoder = pyqtSignal(str)
 
 
     def __init__(self):
@@ -42,7 +43,8 @@ class ActionClass(QWidget):
                           "show next screen":self.showNextScreen,
                           "show previous screen":self.showPrevScreen,
                           "set value":hmi.functions.setValue,
-                          "activate menu":self.activateMenu
+                          "activate menu item":self.activateMenuItem,
+                          "menu encoder":self.menuEncoder
                     }
 
 

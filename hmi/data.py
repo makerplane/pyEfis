@@ -27,61 +27,36 @@ log = logging.getLogger(__name__)
 
 import hmi
 
-__keypress = []
-__keyrelease = []
+__bindings = []
 
-class KeyBinding(object):
+class DataBinding(object):
     def __init__(self, config):
-        self.key = QKeySequence(config['key'])
+        self.key = config['key']
+        self.condition = None
         self.args = ""
-        self.direction = 'DN'
+        self.__value = None
 
-        if self.key.toString() == '':
-            log.error("Invalid Key {}".format(config['key']))
-            return None
         a = config['action']
         if hmi.actions.findAction(a):
             self.action = a
         else:
             log.error("Action Not Found - {}".format(a))
             return None
+
         if 'args' in config:
             self.args = config['args']
         if self.args == None: self.args = ""
-        if 'direction' in config:
-            d = config['direction'].lower()
-            if d == 'up':
-                self.direction = "UP"
+
 
     def __str__(self):
-        s = "Key Binding: {} - {}({})".format(self.key.toString(), self.action, self.args)
+        s = "Data Binding: {} - {}({})".format(self.key, self.action, self.args)
         return(s)
 
-
-def keyPress(event):
-    for each in __keypress:
-        if event.key() == each.key and not event.isAutoRepeat():
-            hmi.actions.trigger(each.action, each.args)
-
-
-def keyRelease(event):
-    for each in __keyrelease:
-        if event.key() == each.key and not event.isAutoRepeat():
-            hmi.actions.trigger(each.action, each.args)
-
-
-def initialize(window, config):
+def initialize(config):
     for x in config:
         try:
-            k = KeyBinding(x)
+            d = DataBinding(x)
+            print(d)
         except:
-            log.error("Unable to load Key Binding {}".format(x))
-        if k:
-            if k.direction == 'DN':
-                __keypress.append(k)
-            else:
-                __keyrelease.append(k)
-
-
-    window.keyPress.connect(keyPress)
-    window.keyRelease.connect(keyRelease)
+            log.error("Unable to load Data Binding {}".format(x))
+            raise

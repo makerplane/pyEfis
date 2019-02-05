@@ -54,6 +54,37 @@ keybindings:
     args: BTN6, False
     direction: UP
 
+# Data bindings tie actions to values in teh database
+# key is the database key and should match the FIX Gateway key
+databindings:
+  - key: BTN1
+    condition: True
+    action: Activate Menu Item
+    args: 1
+  - key: BTN2
+    condition: True
+    action: Activate Menu Item
+    args: 2
+  - key: BTN3
+    condition: True
+    action: Activate Menu Item
+    args: 3
+  - key: BTN4
+    condition: True
+    action: Activate Menu Item
+    args: 4
+  - key: BTN5
+    condition: True
+    action: Activate Menu Item
+    args: 5
+  - key: BTN6
+    condition: True
+    action: Activate Menu Item
+    args: 6
+  - key: ENC1
+    action: Menu Encoder
+    args: <VALUE>   # This sends the data value to the action
+
 
 # This section defines FIX IDs that we'll write out to the
 # FIX Gateway server.  Each can be defined as one of three
