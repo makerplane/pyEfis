@@ -24,8 +24,9 @@ except:
 
 import logging
 
-import hooks
+#import hooks
 import fix
+import hmi
 
 logger=logging.getLogger(__name__)
 
@@ -105,7 +106,8 @@ class Menu(QWidget):
             for a in actions:
                 self.perform_action(a)
         elif isinstance(actions,str):
-            eval(actions)
+            hmi.actions.trigger(actions)
+            #eval(actions)
         else:
             actions()
 

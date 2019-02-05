@@ -36,7 +36,7 @@ class ActionClass(QWidget):
 
     def __init__(self):
         super(ActionClass, self).__init__()
-        self.signalMap = {"change asd mode":self.setAirspeedMode,
+        self.signalMap = {"set airspeed mode":self.setAirspeedMode,
                           "set egt mode":self.setEgtMode,
                           "show screen":self.showScreen,
                           "show next screen":self.showNextScreen,
@@ -48,7 +48,7 @@ class ActionClass(QWidget):
 
     def trigger(self, action, argument=""):
         a = self.signalMap[action.lower()]
-        if isinstance(a, pyqtSignal):
+        if isinstance(a, pyqtBoundSignal):
             a.emit(argument)
         else: # It's not a signal so assume it's a function
             a(argument)

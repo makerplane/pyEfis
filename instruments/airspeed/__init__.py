@@ -15,8 +15,6 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
-sys.path.insert(0, './lib/AeroCalc-0.11/')
-#from aerocalc import airspeed
 
 try:
     from PyQt5.QtGui import *
@@ -27,7 +25,7 @@ except:
     from PyQt4.QtCore import *
 
 import fix
-
+import hmi
 from instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
@@ -290,6 +288,9 @@ class Airspeed_Mode(QGraphicsView):
         self._Mode_Indicator = 0
         self._AS_Data_Box = 0
         self._airspeed_mode = "IAS"
+        hmi.actions.setAirspeedMode.connect(self.setMode)
+        self.modes = ["IAS", "TAS", "GS"]
+
 
     def resizeEvent(self, event):
         self.w = self.width()
@@ -344,35 +345,35 @@ class Airspeed_Mode(QGraphicsView):
         return self._Mode_Indicator
 
     def setMode(self, Mode):
-        if Mode != self._Mode_Indicator:
-            if Mode == 0:
-                self._Mode_Indicator = 0
-                self._airspeed_mode = "IAS"
-            elif Mode == 1:
-                self._Mode_Indicator = 1
-                self._airspeed_mode = "TAS"
-            elif Mode == 2:
-                self._Mode_Indicator = 2
-                self._airspeed_mode = "GS"
-            elif Mode == 3:
-                self._Mode_Indicator = 0
-                self._airspeed_mode = "IAS"
-            self.redraw()
+        if Mode == "":
+            self._Mode_Indicator += 1
+            if self._Mode_Indicator == 3: self._Mode_Indicator = 0
+        else:
+            if Mode != self._Mode_Indicator:
+                if Mode == 0:
+                    self._Mode_Indicator = 0
+                elif Mode == 1:
+                    self._Mode_Indicator = 1
+                elif Mode == 2:
+                    self._Mode_Indicator = 2
 
-    def getAS_Data(self):
-        return self._Mode_Indicator
-
-    def setAS_Data(self, AS_Data, PA_Data, OAT):
-        if self._Mode_Indicator == 1:
-            self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
-        elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
-            if self._Mode_Indicator == 0:
-                self._AS_Data_Box = int(AS_Data)
-            elif self._Mode_Indicator == 2:
-                self._AS_Data_Box = int(AS_Data)
+        self._airspeed_mode = self.modes[self._Mode_Indicator]
         self.redraw()
 
-    def setIAS(self, IAS):
-        self.setAS_Data(IAS, 0, 0)
+    # def getAS_Data(self):
+    #     return self._Mode_Indicator
+    #
+    # def setAS_Data(self, AS_Data, PA_Data, OAT):
+    #     if self._Mode_Indicator == 1:
+    #         self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
+    #     elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
+    #         if self._Mode_Indicator == 0:
+    #             self._AS_Data_Box = int(AS_Data)
+    #         elif self._Mode_Indicator == 2:
+    #             self._AS_Data_Box = int(AS_Data)
+    #     self.redraw()
+    #
+    # def setIAS(self, IAS):
+    #     self.setAS_Data(IAS, 0, 0)
 
-    airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)
+    # airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)
