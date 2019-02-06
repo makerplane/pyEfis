@@ -26,13 +26,14 @@ except:
 import hmi.functions
 
 class ActionClass(QWidget):
-    setAirspeedMode = pyqtSignal(str)
-    setEgtMode = pyqtSignal(str)
-    showScreen = pyqtSignal(str)
-    showNextScreen = pyqtSignal(str)
-    showPrevScreen = pyqtSignal(str)
-    activateMenuItem = pyqtSignal(str)
-    menuEncoder = pyqtSignal(str)
+    setAirspeedMode = pyqtSignal(object)
+    setEgtMode = pyqtSignal(object)
+    showScreen = pyqtSignal(object)
+    showNextScreen = pyqtSignal(object)
+    showPrevScreen = pyqtSignal(object)
+    activateMenuItem = pyqtSignal(object)
+    menuEncoder = pyqtSignal(object)
+    setMenuFocus = pyqtSignal(object)
 
 
     def __init__(self):
@@ -44,7 +45,8 @@ class ActionClass(QWidget):
                           "show previous screen":self.showPrevScreen,
                           "set value":hmi.functions.setValue,
                           "activate menu item":self.activateMenuItem,
-                          "menu encoder":self.menuEncoder
+                          "menu encoder":self.menuEncoder,
+                          "set menu focus":self.setMenuFocus
                     }
 
 

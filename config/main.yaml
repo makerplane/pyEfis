@@ -20,8 +20,8 @@ main:
 menu:
   menus:
       PFDMenu:
-          - ['ASD Mode', 'set airspeed mode']
-          - ['Baro', 'self.focus("BARO")']
+          - ['ASD Mode', 'set airspeed mode','']
+          - ['Baro', 'set menu focus', BARO]
   start_menu: PFDMenu
   number_of_buttons: 6
   buttons_spacing: 100
@@ -53,6 +53,25 @@ keybindings:
     action: Set Value
     args: BTN6, False
     direction: UP
+
+  - key: F1
+    action: Activate Menu Item
+    args: 1
+  - key: F2
+    action: Activate Menu Item
+    args: 2
+  - key: F3
+    action: Activate Menu Item
+    args: 3
+  - key: F4
+    action: Activate Menu Item
+    args: 4
+  - key: F5
+    action: Activate Menu Item
+    args: 5
+  - key: F6
+    action: Activate Menu Item
+    args: 6
 
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
