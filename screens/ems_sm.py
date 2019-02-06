@@ -117,6 +117,7 @@ class Screen(QWidget):
         self.chtmax.unitsOverride = u'\N{DEGREE SIGN}F'
         self.chtmax.dbkey = "CHTMAX1"
 
+        self.egtgroup = gauges.EGTGroup(self, self.cylCount, ["EGT11", "EGT12", "EGT13", "EGT14"])
 
     # Find the hightest CHT and highlight it
     # TODO: This could probably be optimized a little better
@@ -183,3 +184,6 @@ class Screen(QWidget):
         self.chtmaxlabel.move(chtstartx + 10, 360)
         self.chtmax.resize(75, 30)
         self.chtmax.move(chtstartx + 45, 355)
+
+        self.egtgroup.resize(200, 150)
+        self.egtgroup.move(130, 200)
