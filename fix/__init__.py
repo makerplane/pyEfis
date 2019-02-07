@@ -90,7 +90,7 @@ class DB_Item(QObject):
             log.error("Bad Value for aux {0} {1}".format(name, value))
             raise
         except KeyError:
-            log.error("No aux {0} for {1}".format(name, self.description))
+            log.error("No aux {0} for {1}".format(name, self.key))
             raise
 
     def get_aux_value(self, name):

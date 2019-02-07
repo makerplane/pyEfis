@@ -68,26 +68,26 @@ class Screen(QWidget):
         self.fuell = gauges.VerticalBar(self)
         self.fuell.name = "Left"
         self.fuell.decimalPlaces = 1
-        self.fuell.dbkey = "FUELQ1"
         self.fuell.showUnits = False
+        self.fuell.dbkey = "FUELQ1"
 
         self.fuelr = gauges.VerticalBar(self)
         self.fuelr.name = "Right"
         self.fuelr.decimalPlaces = 1
-        self.fuelr.dbkey = "FUELQ2"
         self.fuelr.showUnits = False
+        self.fuelr.dbkey = "FUELQ2"
 
         self.ff = gauges.VerticalBar(self)
         self.ff.name = "Flow"
         self.ff.decimalPlaces = 1
-        self.ff.dbkey = "FUELF1"
         self.ff.showUnits = False
+        self.ff.dbkey = "FUELF1"
 
         self.fuelp = gauges.VerticalBar(self)
         self.fuelp.name = "Press"
         self.fuelp.decimalPlaces = 0
-        self.fuelp.dbkey = "FUELP1"
         self.fuelp.showUnits = False
+        self.fuelp.dbkey = "FUELP1"
 
         self.fuelt = gauges.NumericDisplay(self)
         self.fuelt.name = "Total"
@@ -101,9 +101,9 @@ class Screen(QWidget):
 
             cht.name = str(x+1)
             cht.decimalPlaces = 0
-            cht.dbkey = "CHT1{}".format(x+1)
-            cht.showUnits = False
             cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+            cht.showUnits = False
+            cht.dbkey = "CHT1{}".format(x+1)
             self.chts.append(cht)
             item = fix.db.get_item(cht.dbkey)
             item.valueChanged.connect(self.chtMax)
@@ -117,6 +117,7 @@ class Screen(QWidget):
         self.chtmax.unitsOverride = u'\N{DEGREE SIGN}F'
         self.chtmax.dbkey = "CHTMAX1"
 
+        self.egt = misc.StaticText("EGT", parent=self)
         self.egtgroup = gauges.EGTGroup(self, self.cylCount, ["EGT11", "EGT12", "EGT13", "EGT14"])
 
     # Find the hightest CHT and highlight it
@@ -151,7 +152,6 @@ class Screen(QWidget):
         self.ot.resize(200, 75)
         self.ot.move(self.width() - 202, 75)
 
-
         self.fuel.resize(200, 30)
         self.fuel.move(self.width() - 200, 170)
 
@@ -185,5 +185,7 @@ class Screen(QWidget):
         self.chtmax.resize(75, 30)
         self.chtmax.move(chtstartx + 45, 355)
 
+        self.egt.resize(200, 30)
+        self.egt.move(130, 170)
         self.egtgroup.resize(200, 150)
         self.egtgroup.move(130, 200)

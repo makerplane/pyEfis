@@ -72,7 +72,7 @@ class AbstractGauge(QWidget):
         self.alarmBadColor = QColor(Qt.darkRed)
         self.textBadColor = QColor(Qt.gray)
         self.penBadColor = QColor(Qt.gray)
-        self.highlightBadColor = QColor(Qt.magenta)
+        self.highlightBadColor = QColor(Qt.darkMagenta)
 
         # Annunciate changes the text color
         self.textAnnunciateColor = QColor(Qt.red)
@@ -141,7 +141,6 @@ class AbstractGauge(QWidget):
         self._dbkey = key
         self.setupGauge()
 
-
     dbkey = property(getDbkey, setDbkey)
 
     def getUnits(self):
@@ -191,6 +190,7 @@ class AbstractGauge(QWidget):
 
 
     def setAuxData(self, auxdata):
+        #print("Setting Auxdata for {} = {}".format(self.name, auxdata))
         if "Min" in auxdata and auxdata["Min"] != None:
             self.lowRange = self.conversionFunction(auxdata["Min"])
         if "Max" in auxdata and auxdata["Max"] != None:

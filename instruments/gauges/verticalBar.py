@@ -37,6 +37,28 @@ class VerticalBar(AbstractGauge):
         self.textGap = 3
         self.smallFontPercent = 0.08
         self.bigFontPercent = 0.10
+        self.normalizePenColor = QColor(Qt.blue)
+        self.normalizeRange = 0
+        self.normalizeReference = 0
+        self._normalizeMode = False
+
+    def getNormalizeMode(self):
+        return self._normalizeMode
+
+    def setNormalizeMode(self, x):
+        if x:
+            self._normalizeMode = True
+            self._oldpencolor = self.penGoodColor
+            self.penGoodColor = self.normalizePenColor
+            self.normalizeReference = self.value
+        else:
+            self._normalizeMode = False
+            self.penGoodColor = self._oldpencolor
+        self.setColors()
+        self.update()
+
+    normalizeMode = property(getNormalizeMode, setNormalizeMode)
+
 
     def resizeEvent(self, event):
         self.barWidth = self.width() * self.barWidthPercent
@@ -147,7 +169,12 @@ class VerticalBar(AbstractGauge):
         pen.setWidth(4)
         p.setPen(pen)
         p.setBrush(brush)
-        x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
+        if self.normalizeMode:
+            nval = self._value - self.normalizeReference
+            start = self.barTop + self.barHeight / 2
+            x = start - (nval * self.barHeight / self.normalizeRange)
+        else:
+            x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
         if x < self.barTop: x = self.barTop
         if x > self.barBottom: x = self.barBottom
         p.drawLine(self.lineLeft, x,
