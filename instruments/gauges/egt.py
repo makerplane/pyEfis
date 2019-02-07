@@ -38,23 +38,31 @@ class EGTGroup(QWidget):
             bar.name = str(i+1)
             bar.decimalPlaces = 0
             bar.showUnits = False
+            bar.peakMode = False
             bar.conversionFunction = self.conversionFunction
             bar.dbkey = dbkeys[i]
             bar.normalizeRange = 400
             self.bars.append(bar)
         self.smallFontPercent = 0.08
         self.bigFontPercent = 0.10
+        self.dummyMode = 0 # TESTING ONLY DELETE DELETE DELETE
 
     # TESTING ONLY DELETE DELETE DELETE
     def mousePressEvent(self, event):
-        if self.normalizeMode:
+        self.dummyMode += 1
+        if self.dummyMode == 3: self.dummyMode = 0
+        if self.dummyMode == 0:
             self.normalizeMode = False
-        else:
+            self.peakMode = False
+        elif self.dummyMode == 1:
             self.normalizeMode = True
+            self.peakMode = True
+        elif self.dummyMode == 2:
+            self.normalizeMode = True
+            self.peakMode = False
         for bar in self.bars:
             bar.normalizeMode = self.normalizeMode
-
-
+            bar.peakMode = self.peakMode
 
     def resizeEvent(self, event):
         cylcount = len(self.bars)
@@ -65,6 +73,3 @@ class EGTGroup(QWidget):
             bar.resize(barwidth, barheight)
             bar.move(barwidth * x, 0)
             x += 1
-
-    def paintEvent(self, event):
-        pass

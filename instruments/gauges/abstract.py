@@ -40,6 +40,7 @@ class AbstractGauge(QWidget):
         self.lowRange = 0.0
         self._dbkey = None
         self._value = 0.0
+        self.peakValue = 0.0
         self._units = ""
         self.fail = False
         self.bad = False
@@ -111,6 +112,7 @@ class AbstractGauge(QWidget):
                     self._value = cvalue
                 self.setColors()
                 self.update()
+        if self._value > self.peakValue: self.peakValue = self._value
 
     value = property(getValue, setValue)
 
@@ -256,3 +258,6 @@ class AbstractGauge(QWidget):
     def oldFlag(self, flag):
         self.old = flag
         self.setColors()
+
+    def resetPeak(self):
+        self.peakValue = self.value

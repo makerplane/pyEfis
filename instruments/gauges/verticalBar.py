@@ -41,12 +41,16 @@ class VerticalBar(AbstractGauge):
         self.normalizeRange = 0
         self.normalizeReference = 0
         self._normalizeMode = False
+        self.peakValue = 0.0
+        self._peakMode = False
+        self.peakColor = QColor(Qt.magenta)
 
     def getNormalizeMode(self):
         return self._normalizeMode
 
     def setNormalizeMode(self, x):
         if x:
+            if self._normalizeMode: return
             self._normalizeMode = True
             self._oldpencolor = self.penGoodColor
             self.penGoodColor = self.normalizePenColor
@@ -59,6 +63,18 @@ class VerticalBar(AbstractGauge):
 
     normalizeMode = property(getNormalizeMode, setNormalizeMode)
 
+    def getPeakMode(self):
+        return self._peakMode
+
+    def setPeakMode(self, x):
+        if x:
+            self.resetPeak()
+            self._peakMode = True
+        else:
+            self._peakMode = False
+        self.update()
+
+    peakMode = property(getPeakMode, setPeakMode)
 
     def resizeEvent(self, event):
         self.barWidth = self.width() * self.barWidthPercent
@@ -90,6 +106,12 @@ class VerticalBar(AbstractGauge):
         self.ballRadius = self.barWidth * 0.40
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 
+    def drawValue(self, p, pen):
+        pen.setColor(self.valueColor)
+        p.setPen(pen)
+        p.setFont(self.bigFont)
+        p.drawText(self.valueTextRect, self.valueText, QTextOption(Qt.AlignCenter))
+
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
@@ -105,18 +127,24 @@ class VerticalBar(AbstractGauge):
             p.setFont(self.smallFont)
             p.drawText(self.nameTextRect, self.name, opt)
         if self.showValue:
-            # Draw Value
-            pen.setColor(self.valueColor)
-            p.setPen(pen)
-            p.setFont(self.bigFont)
-            p.drawText(self.valueTextRect, self.valueText, opt)
+            if self.peakMode:
+                dv = self.value - self.peakValue
+                if dv <= -10:
+                    pen.setColor(self.peakColor)
+                    p.setFont(self.bigFont)
+                    p.setPen(pen)
+                    p.drawText(self.valueTextRect, str(round(dv)), opt)
+                else:
+                    self.drawValue(p, pen)
+            else:
+                # Draw Value
+                self.drawValue(p, pen)
         if self.showUnits:
             # Units
             pen.setColor(self.textColor)
             p.setPen(pen)
             p.setFont(self.smallFont)
             p.drawText(self.unitsTextRect, self.units, opt)
-
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)
@@ -162,6 +190,25 @@ class VerticalBar(AbstractGauge):
             p.setPen(pen)
             p.setBrush(self.highlightColor)
             p.drawEllipse(self.ballCenter, self.ballRadius, self.ballRadius)
+
+
+        # Draw Peak Value Line and text
+        if self.peakMode:
+            pen.setColor(self.peakColor)
+            brush = QBrush()
+            pen.setWidth(4)
+            p.setPen(pen)
+            p.setBrush(brush)
+            if self.normalizeMode:
+                nval = self.peakValue - self.normalizeReference
+                start = self.barTop + self.barHeight / 2
+                y = start - (nval * self.barHeight / self.normalizeRange)
+            else:
+                y = self.barTop + (self.barHeight - self.interpolate(self.peakValue, self.barHeight))
+            if y < self.barTop: y = self.barTop
+            if y > self.barBottom: y = self.barBottom
+            p.drawLine(self.lineLeft, y,
+                       self.lineRight, y)
 
         # Indicator Line
         pen.setColor(self.penColor)
