@@ -69,6 +69,7 @@ class ArcGauge(AbstractGauge):
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
                    start + warnAngle, sweep - warnAngle)
+
         # Now we draw the line pointer
         pen.setColor(self.penColor)
         pen.setWidth(2)
@@ -79,6 +80,7 @@ class ArcGauge(AbstractGauge):
         y = (r + 10) * math.cos(theta)
         endPoint = QPoint(self.arcCenter.y() + y, self.arcCenter.x() - x)
         p.drawLine(self.arcCenter, endPoint)
+
         # Draw Text
         pen.setColor(self.textColor)
         pen.setWidth(1)
@@ -91,10 +93,13 @@ class ArcGauge(AbstractGauge):
         p.drawText(QPoint(self.width() / 20,f.pixelSize()), self.name)
 
         # Main value text
-        f.setPixelSize(self.height() / 2)
-        pen.setColor(self.valueColor)
+        path = QPainterPath()
+        brush = QBrush(self.valueColor)
+        p.setBrush(brush)
+        pen.setColor(QColor(Qt.black))
         p.setPen(pen)
-        p.setFont(f)
-        opt = QTextOption(Qt.AlignRight | Qt.AlignBottom)
-        rect = QRectF(0, 0, self.width(), self.height())
-        p.drawText(rect, self.valueText, opt)
+        f.setPixelSize(self.height() / 2)
+        fm = QFontMetrics(f)
+        x = fm.width(self.valueText)
+        path.addText(QPointF( self.width()-x, self.height()-1),f, self.valueText)
+        p.drawPath(path)
