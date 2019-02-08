@@ -194,9 +194,9 @@ class VerticalBar(AbstractGauge):
 
         # Draw Peak Value Line and text
         if self.peakMode:
-            pen.setColor(self.peakColor)
-            brush = QBrush()
-            pen.setWidth(4)
+            pen.setColor(QColor(Qt.white))
+            brush = QBrush(self.peakColor)
+            pen.setWidth(1)
             p.setPen(pen)
             p.setBrush(brush)
             if self.normalizeMode:
@@ -207,22 +207,23 @@ class VerticalBar(AbstractGauge):
                 y = self.barTop + (self.barHeight - self.interpolate(self.peakValue, self.barHeight))
             if y < self.barTop: y = self.barTop
             if y > self.barBottom: y = self.barBottom
-            p.drawLine(self.lineLeft, y,
-                       self.lineRight, y)
+            p.drawRect(self.lineLeft, y-2, self.lineWidth, 4)
 
         # Indicator Line
-        pen.setColor(self.penColor)
-        brush = QBrush()
-        pen.setWidth(4)
-        p.setPen(pen)
+        brush = QBrush(self.penColor)
+        pen.setWidth(1)
         p.setBrush(brush)
         if self.normalizeMode:
+            pen.setColor(QColor(Qt.gray))
+            p.setPen(pen)
             nval = self._value - self.normalizeReference
             start = self.barTop + self.barHeight / 2
             x = start - (nval * self.barHeight / self.normalizeRange)
         else:
+            pen.setColor(QColor(Qt.darkGray))
+            p.setPen(pen)
             x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
         if x < self.barTop: x = self.barTop
         if x > self.barBottom: x = self.barBottom
-        p.drawLine(self.lineLeft, x,
-                   self.lineRight, x)
+        p.drawRect(self.lineLeft, x-2,self.lineWidth, 4)
+        

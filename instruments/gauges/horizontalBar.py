@@ -96,13 +96,12 @@ class HorizontalBar(AbstractGauge):
             p.drawRect(x, self.barTop,
                        self.width() - x, self.barHeight)
         # Indicator Line
-        pen.setColor(self.penColor)
-        brush = QBrush()
-        pen.setWidth(4)
+        pen.setColor(QColor(Qt.darkGray))
+        brush = QBrush(self.penColor)
+        pen.setWidth(1)
         p.setPen(pen)
         p.setBrush(brush)
         x = self.interpolate(self._value, self.width())
         if x < 0: x = 0
         if x > self.width(): x = self.width()
-        p.drawLine(x, self.barTop - 4,
-                   x, self.barTop + self.barHeight + 4)
+        p.drawRect(x-2, self.barTop-4, 4, self.barHeight+8)
