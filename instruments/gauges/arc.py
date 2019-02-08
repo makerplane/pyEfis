@@ -38,6 +38,15 @@ class ArcGauge(AbstractGauge):
         self.arcCenter = QPoint(self.width() / 2, self.height())
         self.arcRadius = self.height() - 10
 
+        # A polygon for the pointer
+        self.arrow = QPolygonF()
+        self.arrow.append(QPointF(0,self.arcRadius * .5))
+        self.arrow.append(QPointF(5,5+self.arcRadius * .5))
+        self.arrow.append(QPointF(1, self.arcRadius))
+        self.arrow.append(QPointF(-1, self.arcRadius))
+        self.arrow.append(QPointF(-5,5+self.arcRadius * .5))
+        self.arrow.append(QPointF(0,self.arcRadius * .5))
+
     def paintEvent(self, e):
         start = self.startAngle
         sweep = self.sweepAngle
@@ -71,15 +80,18 @@ class ArcGauge(AbstractGauge):
                    start + warnAngle, sweep - warnAngle)
 
         # Now we draw the line pointer
-        pen.setColor(self.penColor)
-        pen.setWidth(2)
+        brush = QBrush(self.penColor)
+        pen.setColor(QColor(Qt.black))
+        pen.setWidth(1)
         p.setPen(pen)
-        valAngle = sweep - int(self.interpolate(self._value, sweep))
-        theta = math.radians(start + valAngle)
-        x = (r + 10) * math.sin(theta)
-        y = (r + 10) * math.cos(theta)
-        endPoint = QPoint(self.arcCenter.y() + y, self.arcCenter.x() - x)
-        p.drawLine(self.arcCenter, endPoint)
+        p.setBrush(brush)
+        valAngle = 90 + self.interpolate(self._value, sweep)
+        t = QTransform()
+        t.translate(self.arcCenter.x(), self.arcCenter.y())
+        t.rotate(valAngle)
+        arrow = t.map(self.arrow)
+        p.drawPolygon(arrow)
+
 
         # Draw Text
         pen.setColor(self.textColor)
