@@ -90,9 +90,9 @@ if __name__ == "__main__":
     fix.initialize(config)
 
     if 'FMS' in config:
-        sys.path.insert(0, config.get("FMS", "module_dir"))
+        sys.path.insert(0, config["FMS"]["module_dir"])
         fms = importlib.import_module ("FixIntf")
-        fms.start(config.get("FMS", "aircraft_config"))
+        fms.start(config["FMS"]["aircraft_config"])
 
     gui.initialize(config)
     hooks.initialize(config['hooks'])
