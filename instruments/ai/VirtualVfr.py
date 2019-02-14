@@ -53,13 +53,13 @@ class VirtualVfr(AI):
         super(VirtualVfr, self).__init__(parent)
         self.display_objects = dict()
         time.sleep(.4)      # Pause to let DB load
-        lng = fix.db.get_item("LONG")
+        lng = fix.db.get_item("LONG", True)
         lng.valueChanged[float].connect(self.setLongitude)
-        lat = fix.db.get_item("LAT")
+        lat = fix.db.get_item("LAT", True)
         lat.valueChanged[float].connect(self.setLatitude)
-        head = fix.db.get_item("HEAD")
+        head = fix.db.get_item("HEAD", True)
         head.valueChanged[float].connect(self.setHeading)
-        alt = fix.db.get_item("ALT")
+        alt = fix.db.get_item("ALT", True)
         alt.valueChanged[float].connect(self.setAltitude)
         self.last_mag_update = 0
         self.magnetic_declination = None
@@ -78,7 +78,7 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
-        self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
+        self.pov = PointOfView(self.myparent.get_config_item('dbpath'),
                                self.myparent.get_config_item('indexpath'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
