@@ -53,13 +53,13 @@ class VirtualVfr(AI):
         super(VirtualVfr, self).__init__(parent)
         self.display_objects = dict()
         time.sleep(.4)      # Pause to let DB load
-        lng = fix.db.get_item("LONG", True)
+        lng = fix.db.get_item("LONG")
         lng.valueChanged[float].connect(self.setLongitude)
-        lat = fix.db.get_item("LAT", True)
+        lat = fix.db.get_item("LAT")
         lat.valueChanged[float].connect(self.setLatitude)
-        head = fix.db.get_item("HEAD", True)
+        head = fix.db.get_item("HEAD")
         head.valueChanged[float].connect(self.setHeading)
-        alt = fix.db.get_item("ALT", True)
+        alt = fix.db.get_item("ALT")
         alt.valueChanged[float].connect(self.setAltitude)
         self.last_mag_update = 0
         self.magnetic_declination = None

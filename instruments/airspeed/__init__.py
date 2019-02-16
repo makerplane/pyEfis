@@ -35,7 +35,7 @@ class Airspeed(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = 20
         self._airspeed = 0
-        fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
+        fix.db.get_item("IAS").valueChanged[float].connect(self.setAirspeed)
 
 
     def paintEvent(self, event):
@@ -156,7 +156,7 @@ class Airspeed_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        item = fix.db.get_item("IAS", True)
+        item = fix.db.get_item("IAS")
         item.valueChanged[float].connect(self.setAirspeed)
         self._airspeed = item.value
 

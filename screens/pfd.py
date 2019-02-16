@@ -84,7 +84,7 @@ class Screen(QWidget):
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
         self.fuel.decimalPlaces = 1
-        self.fuel.dbkey = "FUELQ"
+        self.fuel.dbkey = "FUELQT"
 
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
@@ -97,7 +97,7 @@ class Screen(QWidget):
         self.cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
         # This causes the units sent from the server to be overridden
         self.cht.unitsOverride = u'\N{DEGREE SIGN}F'
-        self.cht.dbkey = "CHTMAX"
+        self.cht.dbkey = "CHTMAX1"
 
         self.egt = gauges.HorizontalBar(self)
         self.egt.name = "Avg EGT"
@@ -106,7 +106,7 @@ class Screen(QWidget):
         # This causes the units sent from the server to be overridden
         self.egt.unitsOverride = u'\N{DEGREE SIGN}F'
         self.egt.decimalPlaces = 0
-        self.egt.dbkey = "EGTAVG"
+        self.egt.dbkey = "EGTAVG1"
 
 
 
