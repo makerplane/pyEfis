@@ -62,6 +62,11 @@ class DataBinding(object):
         if "condition" in config:
             self.parseCondition(config["condition"])
 
+        # If we are unconditionally sending the value then we need to send
+        # an initial one here in case the receiver needs it.
+        if self.args == None and self.compare == None:
+            hmi.actions.trigger(self.action, str(self.item.value))
+
         self.item.valueChanged[self.item.dtype].connect(self.changeFunctionFactory())
 
 
