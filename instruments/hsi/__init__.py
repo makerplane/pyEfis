@@ -33,23 +33,23 @@ class HSI(QWidget):
         self.fg_color = fgcolor
         self.bg_color = bgcolor
         self._heading_key = None
-        item = fix.db.get_item("COURSE", True)
+        item = fix.db.get_item("COURSE")
         self._headingSelect = item.value
         item.valueChanged[float].connect(self.setHeadingBug)
         self._courseSelect = 1
 
-        self.cdidb = fix.db.get_item("CDI", True)
+        self.cdidb = fix.db.get_item("CDI")
         self._courseDeviation = self.cdidb.value
         self.cdidb.valueChanged[float].connect(self.setCdi)
         self._showCDI = not self.cdidb.old
 
-        self.gsidb = fix.db.get_item("GSI", True)
+        self.gsidb = fix.db.get_item("GSI")
         self._glideSlopeIndicator = self.gsidb.value
         self.gsidb.valueChanged[float].connect(self.setGsi)
         self._showGSI = not self.gsidb.old
         self.cardinal = ["N", "E", "S", "W"]
 
-        item = fix.db.get_item("HEAD", True)
+        item = fix.db.get_item("HEAD")
         self._heading = item.value
         item.valueChanged[float].connect(self.setHeading)
 
@@ -167,13 +167,13 @@ class HSI(QWidget):
             x = self.cx + self._courseDeviation * self.cdippw
             c.drawLine(x, self.cy + self.r - self.fontSize*2 - 6,
                    x, self.cy - self.r + self.fontSize*2 + 6)
-            
+
         self._showGSI = not self.gsidb.old
         if self._showGSI:
             y = self.cy - self._glideSlopeIndicator * self.gsipph
             c.drawLine(self.cx + self.r - self.fontSize*2 - 6, y,
                    self.cx - self.r + self.fontSize*2 + 6, y)
-            
+
 
     def getHeading(self):
         return self._heading

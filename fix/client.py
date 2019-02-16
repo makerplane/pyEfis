@@ -107,6 +107,8 @@ class ClientThread(threading.Thread):
                     log.debug("Problem with ID list message")
                 else:
                     y = x[2].split(',')  # break up the list of Ids
+                    self.itemInitCount = len(y)
+                    log.debug("Waiting for {} database item definitions".format(self.itemInitCount))
                     for each in y:
                         log.debug("Requesting a report for {0}".format(each))
                         self.sendthread.queue.put("@q{0}\n".format(each).encode())
@@ -131,6 +133,10 @@ class ClientThread(threading.Thread):
                 self.handle_value(d[2:])
             elif d[1] == 'q':
                 self.db.define_item(key, x[1], x[2], x[3], x[4], x[5], x[6], x[7])
+                self.itemInitCount -= 1
+                if self.itemInitCount == 0:
+                    log.debug("Done Initializing Database")
+                    self.db.init_event.set()
 
         else:  # If no '@' then it must be a value update
             try:

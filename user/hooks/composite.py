@@ -25,11 +25,11 @@ class CompositeFloatItem(object):
     def __init__(self, key, itemkeys):
         self.key = key # This is our key name
         self.items = []
-        self.item = fix.db.get_item(key, create = True)
+        self.item = fix.db.get_item(key)
         self.item.type = 'float'
 
         for key in itemkeys:
-            item = fix.db.get_item(key, create = True)
+            item = fix.db.get_item(key)
             self.items.append(item)
             item.valueChanged[float].connect(self.calcValue)
             #valueWrite = pyqtSignal([float],[int],[bool],[str])
@@ -147,7 +147,7 @@ class CompositeMaxItem(CompositeFloatItem):
 
 
 
-fuel_total = CompositeSumItem("FUELQ", ["FUELQ1", "FUELQ2"])
+fuel_total = CompositeSumItem("FUELQT", ["FUELQ1", "FUELQ2"])
 # TODO Should have a way to do this automatically if needed
 fuel_total.item.min = 0.0
 fuel_total.item.max = 42.0
@@ -158,8 +158,8 @@ fuel_total.item.aux["lowAlarm"] = 2.0
 fuel_total.item.aux["highAlarm"] = 42.0
 fuel_total.setup() # Force an update
 
-cht_max = CompositeMaxItem("CHTMAX", ["CHT11", "CHT12", "CHT13", "CHT14"])
+cht_max = CompositeMaxItem("CHTMAX1", ["CHT11", "CHT12", "CHT13", "CHT14"])
 cht_max.setup()
 
-egt_avg = CompositeAvgItem("EGTAVG", ["EGT11", "EGT12", "EGT13", "EGT14"])
+egt_avg = CompositeAvgItem("EGTAVG1", ["EGT11", "EGT12", "EGT13", "EGT14"])
 egt_avg.setup()

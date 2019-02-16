@@ -25,6 +25,7 @@ except:
 import math
 import fix
 
+
 class TurnCoordinator(QWidget):
     def __init__(self, parent=None):
         super(TurnCoordinator, self).__init__(parent)
@@ -32,7 +33,7 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
-        item = fix.db.get_item("ALAT", True) # find the correct Value.
+        item = fix.db.get_item("ALAT")
         item.valueChanged[float].connect(self.setLatAcc)
 
     def resizeEvent(self, event):
@@ -81,12 +82,14 @@ class TurnCoordinator(QWidget):
         p.drawEllipse(self.center, thickness, thickness)
         # vertical black lines on TC
         pen.setColor(QColor(Qt.black))
-        pen.setWidth(4)
+        pen.setWidth(3)
         p.setPen(pen)
-        p.drawLine(self.center.x() - length + 8, self.boxTop,
-                   self.center.x() - length + 8, self.boxTop + length + 2)
-        p.drawLine(self.center.x() + length - 8, self.boxTop,
-                   self.center.x() + length - 8, self.boxTop + length + 2)
+        p.drawLine(self.center.x() - length / 2 - 1.8, self.boxTop,
+                   self.center.x() - length / 2 - 1.8, self.boxTop +
+                   length + 2)
+        p.drawLine(self.center.x() + length / 2 + 2.8, self.boxTop,
+                   self.center.x() + length / 2 + 2.8, self.boxTop +
+                   length + 2)
 
     def paintEvent(self, event):
 
@@ -106,13 +109,17 @@ class TurnCoordinator(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (self._latAcc / 5)
-        if centerball < 83.3 or centerball > 257.7 :
-            if centerball > 257.7: centerball = 257.7
-            else: centerball = 83.3
+        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (
+                     self._latAcc / 0.15)
+        if centerball < 83.3 or centerball > 257.7:
+            if centerball > 257.7:
+                centerball = 257.7
+            else:
+                centerball = 83.3
         center = QPointF(centerball,
                          self.boxTop + length / 2)
         p.drawEllipse(center, length / 2, length / 2)
+        print(length / 2)
 
         # the little airplane
         pen.setColor(QColor(Qt.white))
@@ -155,6 +162,7 @@ class TurnCoordinator(QWidget):
 
     latAcc = property(getLatAcc, setLatAcc)
 
+
 class TurnCoordinator_Tape(QWidget):
     def __init__(self, parent=None):
         super(TurnCoordinator_Tape, self).__init__(parent)
@@ -189,13 +197,13 @@ class TurnCoordinator_Tape(QWidget):
 
         # TC Box
         self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
-        self.boxTop = self.center.y() + (self.r -
-                      length) * math.sin(math.radians(30)) + thickness
+        self.boxTop = self.center.y() + (self.r - length) * math.sin(
+                      math.radians(30)) + thickness
         rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,
                             self.boxTop + length))
         p.drawRect(rect)
-        #Draw the little airplane center
+        # Draw the little airplane center
         p.drawEllipse(self.center, thickness, thickness)
         # vertical black lines on TC
         pen.setColor(QColor(Qt.black))
@@ -224,10 +232,9 @@ class TurnCoordinator_Tape(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        center = QPointF(self.center.x() + self.boxHalfWidth * 4 * self._latAcc,
-                         self.boxTop + length / 2)
-        p.drawEllipse(center,thickness , thickness)
-
+        center = QPointF(self.center.x() + self.boxHalfWidth *
+                         4 * self._latAcc, self.boxTop + length / 2)
+        p.drawEllipse(center, thickness, thickness)
 
     def getLatAcc(self):
         return self._latAcc

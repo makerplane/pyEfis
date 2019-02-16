@@ -25,6 +25,7 @@ except:
 
 import fix
 
+
 class VSI(QWidget):
     def __init__(self, parent=None):
         super(VSI, self).__init__(parent)
@@ -34,13 +35,14 @@ class VSI(QWidget):
         self._roc = 0
         self.maxRange = 2000
         self.maxAngle = 170.0
-        item = fix.db.get_item("VS", True)
+        item = fix.db.get_item("VS")
         item.valueChanged[float].connect(self.setROC)
 
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
         f = QFont()
         f.setPixelSize(self.fontSize)
+        fm = QFontMetrics(f)
         p = QPainter(self.background)
         p.setRenderHint(QPainter.Antialiasing)
         p.setFont(f)
@@ -60,32 +62,57 @@ class VSI(QWidget):
         longLine = QLine(0, -self.r, 0, -(self.r - self.fontSize))
         shortLine = QLine(0, -self.r, 0, -(self.r - self.fontSize / 2))
         textRect = QRect(-40, -self.r + self.fontSize, 80, self.fontSize + 10)
-        p.save()
+        textRInv = QRect(40, self.r - self.fontSize, -80, -self.fontSize - 10)
+
+        pixelsWide = fm.width("0")
+        pixelsHigh = fm.height()
         p.translate(self.center)
+        p.save()
         p.rotate(-90)
         p.drawLine(longLine)
-        p.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter, '0')
+        transform = QTransform()
+        transform.translate(p.device().width() / 2,
+                            p.device().height() / 2)
+        transform.translate(- self.r + self.fontSize + 5,
+                            - pixelsHigh / 2)
+        p.setTransform(transform)
+        p.drawText(0, 0, pixelsWide, pixelsHigh,
+                   Qt.AlignCenter, '0')
+
+        pixelsWide = fm.width("2.0")
+        transform = QTransform()
+        transform.translate(p.device().width() / 2,
+                            p.device().height() / 2)
+        transform.translate(self.r - self.fontSize - pixelsWide,
+                            - pixelsHigh / 2)
+        p.setTransform(transform)
+        p.drawText(0, 0, pixelsWide, pixelsHigh,
+                   Qt.AlignCenter, '2.0')
+
+        p.restore()
+        p.rotate(-90)
         for each in range(1, tickCount + 1):
             p.rotate(tickAngle)
             if each % 5 == 0:
                 p.drawLine(longLine)
-                p.drawText(textRect, Qt.AlignHCenter |
-                           Qt.AlignVCenter, str(each))
+                if each != 20:
+                    p.drawText(textRect, Qt.AlignCenter,
+                               str(each))
             else:
                 p.drawLine(shortLine)
-        p.restore()
-        p.save()
-        p.translate(self.center)
-        p.rotate(-90)
+
+        p.rotate(-self.maxAngle)
         for each in range(1, tickCount + 1):
             p.rotate(-tickAngle)
             if each % 5 == 0:
                 p.drawLine(longLine)
-                p.drawText(textRect, Qt.AlignHCenter |
-                           Qt.AlignVCenter, str(each))
+                if each != 20:
+                    p.scale(-1.0, -1.0)
+                    p.drawText(textRInv, Qt.AlignCenter,
+                               str(each))
+                    p.scale(-1.0, -1.0)
             else:
                 p.drawLine(shortLine)
-        p.restore()
 
     def paintEvent(self, event):
         w = self.width()
@@ -175,8 +202,8 @@ class AS_Trend_Tape(QGraphicsView):
         self.centerOn(self.scene.width() / 2,
                       self.height() / 2)
 
-        self._airspeed_diff = (sum(self._airspeed_trend) /
-                               len(self._airspeed_trend)) * 60
+        self._airspeed_diff = (sum(self._airspeed_trend) / len(
+                               self._airspeed_trend)) * 60
 
         self.scene.addRect(self.width() / 2, self.height() / 2,
                            self.width() / 2 + 5,
@@ -203,7 +230,8 @@ class AS_Trend_Tape(QGraphicsView):
 
 
 class Alt_Trend_Tape(QGraphicsView):
-    RIGHT_MARGIN=5
+    RIGHT_MARGIN = 5
+
     def __init__(self, parent=None):
         super(Alt_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
@@ -212,22 +240,22 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
 
-        item = fix.db.get_item("VS", True)
+        item = fix.db.get_item("VS")
         item.valueChanged[float].connect(self.setVs)
         self._vs = item.value
         self.maxvs = 2500
-        self.fontsize=10
+        self.fontsize = 10
         self.indicator_line = None
 
     def resizeEvent(self, event):
-        w = self.width()-self.RIGHT_MARGIN
-        w_2 = w/2
+        w = self.width() - self.RIGHT_MARGIN
+        w_2 = w / 2
         h = self.height()
 
         f = QFont()
         f.setPixelSize(self.fontsize)
         bf = QFont()
-        bf.setPixelSize(self.fontsize+2)
+        bf.setPixelSize(self.fontsize + 2)
         bf.setBold(True)
 
         self.scene = QGraphicsScene(0, 0, w, h)
@@ -246,18 +274,18 @@ class Alt_Trend_Tape(QGraphicsView):
         self.vstext.setDefaultTextColor(QColor(Qt.white))
         self.vstext.setX(0)
         self.vstext.setY(y)
-        self.top_margin = y + self.vstext.boundingRect().height()*1.2
-        remaining_height = self.height()-self.top_margin
-        self.zero_y = remaining_height/2 + self.top_margin
+        self.top_margin = y + self.vstext.boundingRect().height() * 1.2
+        remaining_height = self.height() - self.top_margin
+        self.zero_y = remaining_height / 2 + self.top_margin
 
-        self.pph = float(remaining_height) / (self.maxvs*2)
+        self.pph = float(remaining_height) / (self.maxvs * 2)
 
         tapePen = QPen(QColor(Qt.white))
-        for i in range(self.maxvs, -self.maxvs-1, -100):
+        for i in range(self.maxvs, -self.maxvs - 1, -100):
             y = self.y_offset(i)
             if i % 200 == 0:
                 self.scene.addLine(w_2 + 5, y, w, y, tapePen)
-                t = self.scene.addText(str(int(i/100)))
+                t = self.scene.addText(str(int(i / 100)))
                 t.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
                 t.setX(0)
@@ -267,30 +295,28 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setScene(self.scene)
         self.redraw()
 
-
-    def y_offset(self,vs):
-        return self.zero_y - vs*self.pph
+    def y_offset(self, vs):
+        return self.zero_y - vs * self.pph
 
     def redraw(self):
         y = self.y_offset(self._vs)
-        w = self.width()-self.RIGHT_MARGIN
-        x = w*6/7
-        width = w-x
+        w = self.width() - self.RIGHT_MARGIN
+        x = w * 6 / 7
+        width = w - x
         if self._vs > 0:
             top = y
             bottom = self.zero_y
         else:
             top = self.zero_y
             bottom = y
-        height = bottom-top
+        height = bottom - top
         if self.indicator_line is None:
             self.indicator_line = self.scene.addRect(x, top, width, height,
-
-                           QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
+                                                     QPen(QColor(Qt.white)),
+                                                     QBrush(QColor(Qt.white)))
         else:
-            self.indicator_line.setRect (x, top, width, height)
+            self.indicator_line.setRect(x, top, width, height)
         self.vstext.setPlainText(str(int(self._vs)))
-
 
     def setVs(self, vs):
         if vs != self._vs:

@@ -23,6 +23,7 @@ except:
     from PyQt4.QtCore import *
 
 import logging
+import threading
 from datetime import datetime
 
 from . import client
@@ -64,6 +65,10 @@ class DB_Item(QObject):
         self.subscribe = True
         self.is_subscribed = False
         log.debug("Creating Item {0}".format(key))
+
+    def __str__(self):
+        s = "{} = {}".format(self.key, self._value)
+        return s
 
 
     # initialize the auxiliary data dictionary.  aux should be a comma delimited
@@ -274,6 +279,7 @@ class Database(object):
         self.__items = {}
         global log
         log = logging.getLogger(__name__)
+        self.init_event = threading.Event()
 
         self.clientthread = client.ClientThread(host, port, self)
         self.clientthread.start()
@@ -326,7 +332,9 @@ class Database(object):
     # If the create flag is set to True this function will create an
     # item with the given key if it does not exist.  Otherwise just
     # return the item if found.
-    def get_item(self, key, create=False):
+    def get_item(self, key, wait=True, create=False):
+        if wait:
+            self.init_event.wait()
         try:
             return self.__items[key]
         except KeyError:

@@ -78,7 +78,7 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
-        self.pov = PointOfView(self.myparent.get_config_item('dbpath'), 
+        self.pov = PointOfView(self.myparent.get_config_item('dbpath'),
                                self.myparent.get_config_item('indexpath'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
