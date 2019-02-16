@@ -44,9 +44,11 @@ class ActionClass(QWidget):
                           "show next screen":self.showNextScreen,
                           "show previous screen":self.showPrevScreen,
                           "set value":hmi.functions.setValue,
+                          "toggle bit":hmi.functions.toggleBool,
                           "activate menu item":self.activateMenuItem,
                           "menu encoder":self.menuEncoder,
-                          "set menu focus":self.setMenuFocus
+                          "set menu focus":self.setMenuFocus,
+                          "evaluate":eval
                     }
 
 

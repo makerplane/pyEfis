@@ -20,3 +20,7 @@ import fix
 def setValue(arg):
     args = arg.split(',')
     fix.db.set_value(args[0].strip(), args[1].strip())
+
+def toggleBool(arg):
+    bit = fix.db.get_item(arg)
+    bit.value = not bit.value

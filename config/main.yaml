@@ -103,6 +103,10 @@ databindings:
   - key: ENC1
     action: Menu Encoder
     args: <VALUE>   # This sends the data value to the action
+  - key: OILP1
+    condition: < 25
+    action: Show Screen
+    args: SixPack
 
 
 # This section defines FIX IDs that we'll write out to the

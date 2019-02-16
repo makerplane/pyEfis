@@ -21,20 +21,30 @@ except:
     from PyQt4.QtCore import *
     from PyQt4.QtGui import *
 
+import operator
 import logging
 log = logging.getLogger(__name__)
 
-
+import fix
 import hmi
 
 __bindings = []
 
+
 class DataBinding(object):
+    __COMPARE_FUNCTIONS = {"=":operator.eq,
+                           "<":operator.lt,
+                           "<=":operator.le,
+                           ">":operator.gt,
+                           ">=":operator.ge}
+
     def __init__(self, config):
         self.key = config['key']
-        self.condition = None
+        self.compare = None
         self.args = ""
-        self.__value = None
+        self.value = None
+        self.item = fix.db.get_item(self.key)
+        self.lastResult = False
 
         a = config['action']
         if hmi.actions.findAction(a):
@@ -44,19 +54,73 @@ class DataBinding(object):
             return None
 
         if 'args' in config:
-            self.args = config['args']
+            self.args = str(config['args'])
         if self.args == None: self.args = ""
+        if self.args.lower() == "<value>":
+            self.args = None
+
+        if "condition" in config:
+            self.parseCondition(config["condition"])
+
+        self.item.valueChanged[self.item.dtype].connect(self.changeFunctionFactory())
+
+
+    def changeFunctionFactory(self):
+        if self.compare:
+            cfunc = self.__COMPARE_FUNCTIONS[self.compare]
+
+        def actionTrigger(value):
+            if self.args == None:
+                hmi.actions.trigger(self.action, str(value))
+            else:
+                hmi.actions.trigger(self.action, self.args)
+
+        def compareFunction(value):
+            if cfunc(value, self.value):
+                if self.lastResult: return
+                actionTrigger(value)
+                self.lastResult = True
+            else:
+                self.lastResult = False
+
+        if self.compare == None:
+            return actionTrigger
+        else:
+            return compareFunction
+
+
+    def parseCondition(self, condition):
+        if type(condition) in [bool, int, float]:
+            self.value = condition
+            self.compare = "="
+        else:
+            s = condition.replace(" ","")
+            op = ""
+            val = ""
+            for x,c in enumerate(s):
+                if c in "=><":
+                    op += c
+                else:
+                    val = s[x-1:]
+            if op not in ["<", ">", "<=", ">=", "="]:
+                log.error("Unknown Condition Operator {}".format(op))
+                return None
+            self.value = self.item.dtype(val)
+            self.compare = op
 
 
     def __str__(self):
-        s = "Data Binding: {} - {}({})".format(self.key, self.action, self.args)
+        if self.compare:
+            s = "Data Binding: {}{}{} - {}({})".format(self.key, self.compare, self.value, self.action, self.args)
+        else:
+            s = "Data Binding: {} - {}({})".format(self.key, self.action, self.args)
         return(s)
+
 
 def initialize(config):
     for x in config:
         try:
             d = DataBinding(x)
-            print(d)
         except:
             log.error("Unable to load Data Binding {}".format(x))
             raise

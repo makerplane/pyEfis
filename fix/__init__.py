@@ -66,6 +66,10 @@ class DB_Item(QObject):
         self.is_subscribed = False
         log.debug("Creating Item {0}".format(key))
 
+    def __str__(self):
+        s = "{} = {}".format(self.key, self._value)
+        return s
+
 
     # initialize the auxiliary data dictionary.  aux should be a comma delimited
     # string of the items to include.

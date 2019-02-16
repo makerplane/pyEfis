@@ -86,10 +86,10 @@ if __name__ == "__main__":
     log.info("Starting pyEFIS")
 
     log.debug("PyQT Version = %d" % PYQT)
-    hmi.initialize(config)
     scheduler.initialize()
 
     fix.initialize(config)
+    hmi.initialize(config)
 
     if 'FMS' in config:
         sys.path.insert(0, config["FMS"]["module_dir"])
@@ -98,6 +98,7 @@ if __name__ == "__main__":
 
     gui.initialize(config)
     hmi.keys.initialize(gui.mainWindow, config["keybindings"])
+    #hmi.data.initialize(config["databindings"])
     hooks.initialize(config['hooks'])
 
     # Main program loop
