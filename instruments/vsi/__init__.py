@@ -35,7 +35,7 @@ class VSI(QWidget):
         self._roc = 0
         self.maxRange = 2000
         self.maxAngle = 170.0
-        item = fix.db.get_item("VS", True)
+        item = fix.db.get_item("VS")
         item.valueChanged[float].connect(self.setROC)
 
     def resizeEvent(self, event):
@@ -240,7 +240,7 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
 
-        item = fix.db.get_item("VS", True)
+        item = fix.db.get_item("VS")
         item.valueChanged[float].connect(self.setVs)
         self._vs = item.value
         self.maxvs = 2500
