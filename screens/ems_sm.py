@@ -120,6 +120,16 @@ class Screen(QWidget):
         self.egt = misc.StaticText("EGT", parent=self)
         self.egtgroup = gauges.EGTGroup(self, self.cylCount, ["EGT11", "EGT12", "EGT13", "EGT14"])
 
+        self.hobbslabel = misc.StaticText("Engine Time", parent=self)
+
+        self.hobbs = gauges.NumericDisplay(self)
+        self.hobbs.name = "Hobbs"
+        self.hobbs.decimalPlaces = 1
+        self.hobbs.dbkey = "HOBBS1"
+        self.hobbs.alignment = Qt.AlignRight | Qt.AlignVCenter
+        self.hobbs.showUnits = True
+        self.hobbs.smallFontPercent = 0.6
+
     # Find the hightest CHT and highlight it
     # TODO: This could probably be optimized a little better
     def chtMax(self):
@@ -189,3 +199,8 @@ class Screen(QWidget):
         self.egt.move(130, 170)
         self.egtgroup.resize(200, 150)
         self.egtgroup.move(130, 200)
+
+        self.hobbslabel.resize(100,15)
+        self.hobbslabel.move(self.width()-115, self.height()-85)
+        self.hobbs.resize(110,20)
+        self.hobbs.move(self.width()-115, self.height()-70)

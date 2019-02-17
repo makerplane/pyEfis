@@ -41,8 +41,15 @@ class NumericDisplay(AbstractGauge):
         self.bigFont.setPixelSize(self.height())
         self.smallFont = QFont()
         self.smallFont.setPixelSize(self.height() * self.smallFontPercent)
+        qm = QFontMetrics(self.smallFont)
+        unitsWidth = qm.width(self.units)
 
-        self.valueTextRect = QRectF(0, 0, self.width(), self.height())
+        if self.showUnits:
+            self.valueTextRect = QRectF(0, 0, self.width()-unitsWidth-5, self.height())
+            self.unitsTextRect = QRectF(self.valueTextRect.width(), 0,
+                                        self.width()-self.valueTextRect.width(), self.height())
+        else:
+            self.valueTextRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):
         p = QPainter(self)
@@ -61,6 +68,7 @@ class NumericDisplay(AbstractGauge):
         p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draw Units
-        p.setFont(self.smallFont)
-        opt = QTextOption(self.unitsAlignment)
-        p.drawText(self.valueTextRect, self.units, opt)
+        if self.showUnits:
+            p.setFont(self.smallFont)
+            opt = QTextOption(self.unitsAlignment)
+            p.drawText(self.unitsTextRect, self.units, opt)
