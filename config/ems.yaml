@@ -33,6 +33,19 @@ keybindings:
     action: Show Previous Screen
   - key: S
     action: Show Next Screen
+  - key: N
+    action: Set EGT Mode
+    args: Normalize
+  - key: P
+    action: Set EGT Mode
+    args: Peak
+  - key: L
+    action: Set EGT Mode
+    args: Lean
+  - key: R
+    action: Set EGT Mode
+    args: Reset Peak
+
 
 # This section defines FIX IDs that we'll write out to the
 # FIX Gateway server.  Each can be defined as one of three

@@ -23,6 +23,7 @@ except:
     from PyQt4.QtCore import *
 
 import fix
+import hmi
 from .abstract import AbstractGauge
 from .verticalBar import VerticalBar
 
@@ -33,6 +34,7 @@ class EGTGroup(QWidget):
         self.bars = []
         self.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
         self.normalizeMode = False
+        self.peakMode = False
         for i in range(cylinders):
             bar = VerticalBar(self)
             bar.name = str(i+1)
@@ -45,24 +47,41 @@ class EGTGroup(QWidget):
             self.bars.append(bar)
         self.smallFontPercent = 0.08
         self.bigFontPercent = 0.10
-        self.dummyMode = 0 # TESTING ONLY DELETE DELETE DELETE
+        hmi.actions.setEgtMode.connect(self.setMode)
 
-    # TESTING ONLY DELETE DELETE DELETE
-    def mousePressEvent(self, event):
-        self.dummyMode += 1
-        if self.dummyMode == 3: self.dummyMode = 0
-        if self.dummyMode == 0:
-            self.normalizeMode = False
-            self.peakMode = False
-        elif self.dummyMode == 1:
+    def setMode(self, args):
+        if args.lower() == "normalize":
+            if self.normalizeMode:
+                self.normalizeMode = False
+            else:
+                self.normalizeMode = True
+            for bar in self.bars:
+                bar.normalizeMode = self.normalizeMode
+        elif args.lower() == "peak":
+            if self.peakMode:
+                self.peakMode = False
+            else:
+                self.peakMode = True
+            for bar in self.bars:
+                bar.peakMode = self.peakMode
+        elif args.lower() == "reset peak":
+            for bar in self.bars:
+                bar.resetPeak()
+        elif args.lower() == "lean":
             self.normalizeMode = True
             self.peakMode = True
-        elif self.dummyMode == 2:
-            self.normalizeMode = True
+            for bar in self.bars:
+                bar.resetPeak()
+                bar.normalizeMode = self.normalizeMode
+                bar.peakMode = self.peakMode
+        elif args.lower() == "normal":
+            self.normalizeMode = False
             self.peakMode = False
-        for bar in self.bars:
-            bar.normalizeMode = self.normalizeMode
-            bar.peakMode = self.peakMode
+            for bar in self.bars:
+                bar.normalizeMode = self.normalizeMode
+                bar.peakMode = self.peakMode
+
+
 
     def resizeEvent(self, event):
         cylcount = len(self.bars)

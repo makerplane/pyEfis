@@ -47,6 +47,7 @@ class AbstractGauge(QWidget):
         self.old = False
         self.annunciate = False
         self.highlight = False
+        self.peakMode = False
 
 
         # These properties can be modified by the parent
@@ -112,7 +113,8 @@ class AbstractGauge(QWidget):
                     self._value = cvalue
                 self.setColors()
                 self.update()
-        if self._value > self.peakValue: self.peakValue = self._value
+        if self._value > self.peakValue:
+            self.peakValue = self._value
 
     value = property(getValue, setValue)
 
@@ -128,11 +130,7 @@ class AbstractGauge(QWidget):
         return self._dbkey
 
     def setDbkey(self, key):
-        #TODO Should disconnect any other signals
-        # If this doesn't exist it will be a silent error.  We either have to
-        # set the create flag to true or risk that we'll start before the database
-        # is fully initialized.
-        item = fix.db.get_item(key, True)
+        item = fix.db.get_item(key)
         item.auxChanged.connect(self.setAuxData)
         item.reportReceived.connect(self.setupGauge)
         item.annunciateChanged.connect(self.annunciateFlag)
@@ -261,3 +259,4 @@ class AbstractGauge(QWidget):
 
     def resetPeak(self):
         self.peakValue = self.value
+        self.update()
