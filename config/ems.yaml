@@ -9,7 +9,7 @@ main:
   screenHeight: 480
 
   # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: True
+  screenFullSize: False
 
   # Screen background color RGB
   screenColor: (0,0,0)
@@ -28,6 +28,11 @@ main:
 #   left_margin: 100
 #   top_margin: 5
 
+keybindings:
+  - key: A
+    action: Show Previous Screen
+  - key: S
+    action: Show Next Screen
 
 # This section defines FIX IDs that we'll write out to the
 # FIX Gateway server.  Each can be defined as one of three
@@ -70,10 +75,10 @@ screens:
 # main window and default screen are shown.  We'll add more as the
 # need arises.
 hooks:
-  Keys:
-    module: user.hooks.keys
-  Composite:
-    module: user.hooks.composite
+  # Keys:
+  #   module: user.hooks.keys
+  # Composite:
+  #   module: user.hooks.composite
 
 
 # Logging configuration - See Python logging.config module documenation
