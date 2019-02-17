@@ -130,6 +130,9 @@ class Screen(QWidget):
         self.hobbs.showUnits = True
         self.hobbs.smallFontPercent = 0.6
 
+        self.timez = misc.ValueDisplay(self)
+        self.timez.dbkey = "TIMEZ"
+
     # Find the hightest CHT and highlight it
     # TODO: This could probably be optimized a little better
     def chtMax(self):
@@ -204,3 +207,6 @@ class Screen(QWidget):
         self.hobbslabel.move(self.width()-115, self.height()-85)
         self.hobbs.resize(110,20)
         self.hobbs.move(self.width()-115, self.height()-70)
+
+        self.timez.resize(100, 20)
+        self.timez.move(self.width()-115, self.height()-40)

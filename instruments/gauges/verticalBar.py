@@ -44,6 +44,7 @@ class VerticalBar(AbstractGauge):
         self.peakValue = 0.0
         self._peakMode = False
         self.peakColor = QColor(Qt.magenta)
+        self._oldpencolor = self.penGoodColor
 
     def getNormalizeMode(self):
         return self._normalizeMode
@@ -68,7 +69,6 @@ class VerticalBar(AbstractGauge):
 
     def setPeakMode(self, x):
         if x:
-            self.resetPeak()
             self._peakMode = True
         else:
             self._peakMode = False
@@ -226,4 +226,3 @@ class VerticalBar(AbstractGauge):
         if x < self.barTop: x = self.barTop
         if x > self.barBottom: x = self.barBottom
         p.drawRect(self.lineLeft, x-2,self.lineWidth, 4)
-        
