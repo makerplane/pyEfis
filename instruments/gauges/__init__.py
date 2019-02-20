@@ -126,7 +126,7 @@ class AbstractGauge(QWidget):
         # If this doesn't exist it will be a silent error.  We either have to
         # set the create flag to true or risk that we'll start before the database
         # is fully initialized.
-        item = fix.db.get_item(key, True)
+        item = fix.db.get_item(key)
         item.auxChanged.connect(self.setAuxData)
         item.reportReceived.connect(self.setupGauge)
         item.annunciateChanged.connect(self.annunciateFlag)
@@ -154,7 +154,7 @@ class AbstractGauge(QWidget):
     # This should get called when the gauge is created and then again
     # anytime a new report of the db item is recieved from the server
     def setupGauge(self):
-        item = fix.db.get_item(self.dbkey, True)
+        item = fix.db.get_item(self.dbkey)
         # min and max should always be set for FIX Gateway data.
         if item.min: self.lowRange = item.min
         if item.max: self.highRange = item.max

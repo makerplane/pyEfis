@@ -33,7 +33,7 @@ class Altimeter(QWidget):
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
-        fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
+        fix.db.get_item("ALT").valueChanged[float].connect(self.setAltimeter)
 
     # TODO We continuously draw things that don't change.  Should draw the
     # background save to pixmap or something and then blit it and draw arrows.
@@ -125,7 +125,7 @@ class Altimeter_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = 15
-        item = fix.db.get_item("ALT", True)
+        item = fix.db.get_item("ALT")
         self._altimeter = item.value
         self.maxalt = maxalt
         self.pph = 0.3
@@ -215,7 +215,7 @@ class Altimeter_Setting(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        item1 = fix.db.get_item("BARO", True)
+        item1 = fix.db.get_item("BARO")
         self._altimeter_setting = item1.value
         item1.valueChanged[float].connect(self.setAltimeter_Setting)
 

@@ -33,7 +33,7 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
-        item = fix.db.get_item("ALAT", True)
+        item = fix.db.get_item("ALAT")
         item.valueChanged[float].connect(self.setLatAcc)
 
     def resizeEvent(self, event):
