@@ -14,16 +14,27 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+# TODO: This file should eventually be deleted in favor of the hmi.keys
+#       functionality since that is more user configurable
+
 try:
     from PyQt5.QtCore import *
 except:
     from PyQt4.QtCore import *
 
+import logging
+
 import gui
 import fix
 import hooks
+from hmi import actions
+
+log = logging.getLogger(__name__)
+
 
 def keyPress(event):
+    log.debug("KeyPress {} {}".format(event.key(),event.text()))
+
     if event.key() == Qt.Key_BracketRight:
         x = fix.db.get_item("BARO")
         x.value = x.value + 0.01
@@ -33,27 +44,11 @@ def keyPress(event):
         x = fix.db.get_item("BARO")
         x.value = x.value - 0.01
 
-    elif event.key() == Qt.Key_Q:
-        fix.db.set_value("BTN16", True)
 
-    #  Decrease Altimeter Setting
-    elif event.key() == Qt.Key_M:
-        hooks.log.debug("Change Airspeed Mode")
-        #self.asd_Box.setMode(self.asd_Box.getMode() + 1)
-
-    elif event.key() == Qt.Key_A:
-        #hooks.log.debug("Screen Change")
-        gui.mainWindow.showPrevScreen()
-
-    elif event.key() == Qt.Key_S:
-        #hooks.log.debug("Screen Change")
-        gui.mainWindow.showNextScreen()
-
-
-def keyRelease(event):
-    if event.key() == Qt.Key_Q:
-        fix.db.set_value("BTN16", False)
+# def keyRelease(event):
+#     if event.key() == Qt.Key_Q:
+#         fix.db.set_value("BTN16", False)
 
 
 gui.mainWindow.keyPress.connect(keyPress)
-gui.mainWindow.keyRelease.connect(keyRelease)
+#gui.mainWindow.keyRelease.connect(keyRelease)

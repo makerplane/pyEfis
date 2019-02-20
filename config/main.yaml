@@ -20,13 +20,93 @@ main:
 menu:
   menus:
       PFDMenu:
-          - ['ASD Mode', 'self.myparent.change_asd_mode_event (QEvent(QEvent.ActionAdded))']
-          - ['Baro', 'self.focus("BARO")']
+          - ['ASD Mode', 'set airspeed mode','']
+          - ['Baro', 'set menu focus', BARO]
   start_menu: PFDMenu
   number_of_buttons: 6
   buttons_spacing: 100
   left_margin: 100
   top_margin: 5
+
+# The keybindings are used to attach keystrokes to actions.  The key can be
+# a string that represents a key Sequence.  See the documentation for more
+# information about key sequences and actions.
+keybindings:
+  - key: A
+    action: Show Previous Screen
+
+  - key: S
+    action: Show Next Screen
+
+  - key: P
+    action: Show Screen
+    args: PFD
+
+  - key: M
+    action: Set Airspeed Mode
+
+  - key: Q
+    action: Set Value
+    args: BTN6, True
+    direction: DN
+  - key: Q
+    action: Set Value
+    args: BTN6, False
+    direction: UP
+
+  - key: F1
+    action: Activate Menu Item
+    args: 1
+  - key: F2
+    action: Activate Menu Item
+    args: 2
+  - key: F3
+    action: Activate Menu Item
+    args: 3
+  - key: F4
+    action: Activate Menu Item
+    args: 4
+  - key: F5
+    action: Activate Menu Item
+    args: 5
+  - key: F6
+    action: Activate Menu Item
+    args: 6
+
+# Data bindings tie actions to values in teh database
+# key is the database key and should match the FIX Gateway key
+databindings:
+  - key: BTN1
+    condition: True
+    action: Activate Menu Item
+    args: 1
+  - key: BTN2
+    condition: True
+    action: Activate Menu Item
+    args: 2
+  - key: BTN3
+    condition: True
+    action: Activate Menu Item
+    args: 3
+  - key: BTN4
+    condition: True
+    action: Activate Menu Item
+    args: 4
+  - key: BTN5
+    condition: True
+    action: Activate Menu Item
+    args: 5
+  - key: BTN6
+    condition: True
+    action: Activate Menu Item
+    args: 6
+  - key: ENC1
+    action: Menu Encoder
+    args: <VALUE>   # This sends the data value to the action
+  - key: OILP1
+    condition: < 25
+    action: Show Screen
+    args: SixPack
 
 
 # This section defines FIX IDs that we'll write out to the

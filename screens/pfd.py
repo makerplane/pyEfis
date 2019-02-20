@@ -51,7 +51,7 @@ class Screen(QWidget):
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
-        self.parent.change_asd_mode.connect(self.change_asd_mode)
+        #self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
         self.alt_setting = altimeter.Altimeter_Setting(self)
 

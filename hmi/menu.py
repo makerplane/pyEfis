@@ -24,12 +24,13 @@ except:
 
 import logging
 
-import hooks
+#import hooks
 import fix
+import hmi
 
 logger=logging.getLogger(__name__)
 
-TheMenuObject=None
+# TheMenuObject=None
 
 class Menu(QWidget):
     def __init__(self, parent, config):
@@ -40,6 +41,7 @@ class Menu(QWidget):
         self.registered_targets = dict()
         self.buttons = list()
         self.button_actions = list()
+        self.button_args = list()
         self.focused_object = None
         self.focus_button = -1
         self.last_button_clicked = -1
@@ -47,15 +49,20 @@ class Menu(QWidget):
         for b in range(self.config['number_of_buttons']):
             self.buttons.append(QPushButton("", self))
             self.button_actions.append(None)
+            self.button_args.append(None)
             button_function = eval("self.button_clicked" + str(b+1))
             self.buttons[-1].clicked.connect(button_function)
             self.buttons[-1].move (last_x, self.config['top_margin'])
             last_x += self.config['buttons_spacing']
-            button_function = eval("button" + str(b+1))
-            fix.db.get_item("BTN" + str(b+1), True).valueChanged[bool].connect(button_function)
+
+            #button_function = buttonFactory(b)
+            #button_function = eval("button" + str(b+1))
+            #fix.db.get_item("BTN" + str(b+1), True).valueChanged[bool].connect(buttonFactory(b))
         self.adjustSize()
         self.register_target("BARO", BaroProxy())
-        TheMenuObject = self
+        # TheMenuObject = self
+        hmi.actions.activateMenuItem.connect(self.activateMenuItem)
+        hmi.actions.setMenuFocus.connect(self.focus)
 
     def start(self):
         start_menu = self.config['start_menu']
@@ -64,8 +71,8 @@ class Menu(QWidget):
     def activate_menu(self, menu_name):
         logger.debug ("Menu.activate_menu (%s)", menu_name)
         self.current_menu = self.config['menus'][menu_name]
-        for i,(label,actions) in enumerate(self.current_menu):
-            self.set_button (i, label, actions)
+        for i,(label,actions,args) in enumerate(self.current_menu):
+            self.set_button (i, label, actions, args)
             self.buttons[i].show()
             last_i = i
         last_i += 1
@@ -91,21 +98,23 @@ class Menu(QWidget):
         else:
             self.focused_object = None
 
-    def set_button(self, i, label, actions):
+    def set_button(self, i, label, actions, args):
         self.buttons[i].setText(label)
         self.button_actions[i] = actions
+        self.button_args[i] = args
 
-    def perform_action(self, actions):
+    def perform_action(self, actions, args):
         logger.debug ("perform_action: %s", str(actions))
         if actions is None:
             return
         if isinstance(actions,int):
-            self.perform_action (self.button_actions[actions])
-        elif isinstance(actions,list):
-            for a in actions:
-                self.perform_action(a)
+            self.perform_action (self.button_actions[actions], self.button_args[actions])
+        # elif isinstance(actions,list):
+        #     for a in actions:
+        #         self.perform_action(a)
         elif isinstance(actions,str):
-            eval(actions)
+            hmi.actions.trigger(actions, args)
+            #eval(actions)
         else:
             actions()
 
@@ -121,7 +130,7 @@ class Menu(QWidget):
     def button_clicked(self, btn_num):
         if btn_num >= 0:
             self.last_button_clicked = btn_num
-            self.perform_action(self.button_actions[btn_num])
+            self.perform_action(self.button_actions[btn_num], self.button_args[btn_num])
 
     def button_clicked1(self, _):
         self.button_clicked(0)
@@ -141,35 +150,9 @@ class Menu(QWidget):
     def button_clicked6(self, _):
         self.button_clicked(5)
 
-def button1():
-    btn_item = fix.db.get_item("BTN1", True)
-    if btn_item.value:
-        TheMenuObject.button_clicked(0)
+    def activateMenuItem(self, val):
+        self.button_clicked(int(val)-1)
 
-def button2():
-    btn_item = fix.db.get_item("BTN2", True)
-    if btn_item.value:
-        TheMenuObject.button_clicked(1)
-
-def button3():
-    btn_item = fix.db.get_item("BTN3", True)
-    if btn_item.value:
-        TheMenuObject.button_clicked(2)
-
-def button4():
-    btn_item = fix.db.get_item("BTN4", True)
-    if btn_item.value:
-        TheMenuObject.button_clicked(3)
-
-def button5():
-    btn_item = fix.db.get_item("BTN5", True)
-    if btn_item.value:
-        TheMenuObject.button_clicked(4)
-
-def button6():
-    btn_item = fix.db.get_item("BTN6", True)
-    if btn_item.value:
-        TheMenuObject.button_clicked(5)
 
 class BaroProxy:
     def __init__(self):

@@ -69,7 +69,6 @@ class AI(QGraphicsView):
                 self.fdtarget_widget = None
 
     def resizeEvent(self, event):
-        log.debug("resizeEvent")
         #Setup the scene that we use for the background of the AI
         sceneHeight = self.height() * 4.5
         sceneWidth = math.sqrt(self.width() * self.width() +
@@ -159,7 +158,6 @@ class AI(QGraphicsView):
         self.redraw()
 
     def redraw(self):
-        log.debug("redraw")
         self.resetTransform()
         if self.fdondb.value:
             self.fdtarget_widget.update (self.fdpitchdb.value, self.fdrolldb.value)
@@ -170,7 +168,6 @@ class AI(QGraphicsView):
 
 # We use the paintEvent to draw on the viewport the parts that aren't moving.
     def paintEvent(self, event):
-        log.debug("paint")
         super(AI, self).paintEvent(event)
         w = self.width()
         h = self.height()
