@@ -17,7 +17,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
+import sys, os
 
 import logging
 import logging.config
@@ -35,8 +35,20 @@ except:
     PYQT = 4
 import yaml
 
-import scheduler
-import fix
+if "pyAvTools" not in ''.join(sys.path):
+    neighbor_tools = os.path.join ('..', 'pyAvTools')
+    if os.path.isdir (neighbor_tools):
+        sys.path.append (neighbor_tools)
+    elif 'TOOLS_PATH' in os.environ:
+        sys.path.append (os.environ['TOOLS_PATH'])
+
+try:
+    import fix
+except:
+    print ("You need to have pyAvTools installed, or in an adjacent directory to pyEfis.")
+    print ("Or set the environment variable 'TOOLS_PATH' to point to the location of pyAvTools.")
+    sys.exit(-1)
+
 import hooks
 import hmi
 import gui
@@ -86,7 +98,6 @@ if __name__ == "__main__":
     log.info("Starting pyEFIS")
 
     log.debug("PyQT Version = %d" % PYQT)
-    scheduler.initialize()
 
     fix.initialize(config)
     hmi.initialize(config)
