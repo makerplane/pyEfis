@@ -49,7 +49,6 @@ except:
     print ("Or set the environment variable 'TOOLS_PATH' to point to the location of pyAvTools.")
     sys.exit(-1)
 
-import fix
 import hooks
 import hmi
 import gui
