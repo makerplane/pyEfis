@@ -35,6 +35,8 @@ class TurnCoordinator(QWidget):
         self._latAcc = 0.0
         item = fix.db.get_item("ALAT", True)
         item.valueChanged[float].connect(self.setLatAcc)
+        item = fix.db.get_item("YAW", True)
+        item.valueChanged[float].connect(self.setTurnRate)
 
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
@@ -71,9 +73,11 @@ class TurnCoordinator(QWidget):
         p.restore()
 
         # TC Box
-        self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
+        # self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
+        self.boxHalfWidth = 90
         self.boxTop = self.center.y() + (self.r - length) * (
                       math.sin(math.radians(30))) + thickness
+
         rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,
                             self.boxTop + length))
@@ -109,8 +113,11 @@ class TurnCoordinator(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (
-                     self._latAcc / 0.15)
+        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (-(
+                     self._latAcc / 32.185039370079) / 0.217)
+
+        # /accelerations/pilot/y-accel-fps_sec
+        # 32.185039370079 fps /sec = 1 G
         if centerball < 83.3 or centerball > 257.7:
             if centerball > 257.7:
                 centerball = 257.7
@@ -119,7 +126,6 @@ class TurnCoordinator(QWidget):
         center = QPointF(centerball,
                          self.boxTop + length / 2)
         p.drawEllipse(center, length / 2, length / 2)
-        print(length / 2)
 
         # the little airplane
         pen.setColor(QColor(Qt.white))

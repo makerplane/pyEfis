@@ -23,12 +23,13 @@ except:
     from PyQt4.QtCore import *
 
 from instruments import ai
-#from instruments import gauges
+# from instruments import gauges
 from instruments import hsi
 from instruments import airspeed
 from instruments import altimeter
 from instruments import vsi
 from instruments import tc
+
 
 class Screen(QWidget):
     def __init__(self, parent=None):
@@ -36,7 +37,7 @@ class Screen(QWidget):
         self.parent = parent
         p = self.parent.palette()
 
-        self.screenColor = (0,0,0)
+        self.screenColor = (0, 0, 0)
         if self.screenColor:
             p.setColor(self.backgroundRole(), QColor(*self.screenColor))
             self.setPalette(p)
@@ -52,30 +53,29 @@ class Screen(QWidget):
 
         self.tc = tc.TurnCoordinator(self)
 
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
+        self.hsi = hsi.HSI(self, font_size=25, fgcolor=Qt.white)
 
         self.vsi = vsi.VSI(self)
 
-
     def resizeEvent(self, event):
-        instWidth = self.width()/3
+        instWidth = self.width() / 3
         instHeight = instWidth
         menu_offset = 100
 
-        self.airspeed.move(0,menu_offset)
-        self.airspeed.resize(instWidth,instHeight)
+        self.airspeed.move(0, menu_offset)
+        self.airspeed.resize(instWidth, instHeight)
 
-        self.ai.move(instWidth,0 + menu_offset)
-        self.ai.resize(instWidth,instHeight)
+        self.ai.move(instWidth, 0 + menu_offset)
+        self.ai.resize(instWidth, instHeight)
 
-        self.altimeter.move(instWidth*2,0 + menu_offset)
-        self.altimeter.resize(instWidth,instHeight)
+        self.altimeter.move(instWidth * 2, 0 + menu_offset)
+        self.altimeter.resize(instWidth, instHeight)
 
-        self.tc.move(0,instHeight + menu_offset)
-        self.tc.resize(instWidth,instHeight)
+        self.tc.move(0, instHeight + menu_offset)
+        self.tc.resize(instWidth, instHeight)
 
-        self.hsi.move(instWidth,instHeight  + menu_offset)
-        self.hsi.resize(instWidth,instHeight)
+        self.hsi.move(instWidth, instHeight + menu_offset)
+        self.hsi.resize(instWidth, instHeight)
 
-        self.vsi.move(instWidth*2,instHeight + menu_offset)
-        self.vsi.resize(instWidth,instHeight)
+        self.vsi.move(instWidth * 2, instHeight + menu_offset)
+        self.vsi.resize(instWidth, instHeight)
