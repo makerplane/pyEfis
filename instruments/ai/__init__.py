@@ -42,15 +42,15 @@ class AI(QGraphicsView):
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
 
-        pitch = fix.db.get_item("PITCH", True)
+        pitch = fix.db.get_item("PITCH")
         pitch.valueChanged[float].connect(self.setPitchAngle)
         self._pitchAngle = pitch.value
-        roll = fix.db.get_item("ROLL", True)
+        roll = fix.db.get_item("ROLL")
         roll.valueChanged[float].connect(self.setRollAngle)
         self._rollAngle = roll.value
-        self.fdrolldb = fix.db.get_item("FDROLL", True)
-        self.fdpitchdb = fix.db.get_item("FDPITCH", True)
-        self.fdondb = fix.db.get_item("FDON", True)
+        self.fdrolldb = fix.db.get_item("FDROLL", wait=False, create=True)
+        self.fdpitchdb = fix.db.get_item("FDPITCH", wait=False, create=True)
+        self.fdondb = fix.db.get_item("FDON", wait=False, create=True)
         self.fdondb.valueChanged[bool].connect(self.fdon)
         self.fdtarget_widget = None
         self.fdt = None
@@ -69,7 +69,6 @@ class AI(QGraphicsView):
                 self.fdtarget_widget = None
 
     def resizeEvent(self, event):
-        log.debug("resizeEvent")
         #Setup the scene that we use for the background of the AI
         sceneHeight = self.height() * 4.5
         sceneWidth = math.sqrt(self.width() * self.width() +
@@ -159,7 +158,6 @@ class AI(QGraphicsView):
         self.redraw()
 
     def redraw(self):
-        log.debug("redraw")
         self.resetTransform()
         if self.fdondb.value:
             self.fdtarget_widget.update (self.fdpitchdb.value, self.fdrolldb.value)
@@ -170,7 +168,6 @@ class AI(QGraphicsView):
 
 # We use the paintEvent to draw on the viewport the parts that aren't moving.
     def paintEvent(self, event):
-        log.debug("paint")
         super(AI, self).paintEvent(event)
         w = self.width()
         h = self.height()
