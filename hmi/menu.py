@@ -45,6 +45,8 @@ class Menu(QWidget):
         self.focused_object = None
         self.focus_button = -1
         self.last_button_clicked = -1
+        # Dangerous. Don't set this to True unless you really know what you're doing
+        self.allow_evals = False if 'allow_evals' not in config else bool(config['allow_evals'])
         last_x = self.config['left_margin']
         for b in range(self.config['number_of_buttons']):
             self.buttons.append(QPushButton("", self))
@@ -54,13 +56,8 @@ class Menu(QWidget):
             self.buttons[-1].clicked.connect(button_function)
             self.buttons[-1].move (last_x, self.config['top_margin'])
             last_x += self.config['buttons_spacing']
-
-            #button_function = buttonFactory(b)
-            #button_function = eval("button" + str(b+1))
-            #fix.db.get_item("BTN" + str(b+1), True).valueChanged[bool].connect(buttonFactory(b))
         self.adjustSize()
         self.register_target("BARO", BaroProxy())
-        # TheMenuObject = self
         hmi.actions.activateMenuItem.connect(self.activateMenuItem)
         hmi.actions.setMenuFocus.connect(self.focus)
 
@@ -109,12 +106,14 @@ class Menu(QWidget):
             return
         if isinstance(actions,int):
             self.perform_action (self.button_actions[actions], self.button_args[actions])
-        # elif isinstance(actions,list):
-        #     for a in actions:
-        #         self.perform_action(a)
         elif isinstance(actions,str):
-            hmi.actions.trigger(actions, args)
-            #eval(actions)
+            try:
+                hmi.actions.trigger(actions, args)
+            except:
+                if self.allow_evals:
+                    eval(actions)
+                else:
+                    raise
         else:
             actions()
 
@@ -156,8 +155,8 @@ class Menu(QWidget):
 
 class BaroProxy:
     def __init__(self):
-        self.enc = fix.db.get_item("ENC1", True)
-        self.baro = fix.db.get_item("BARO", True)
+        self.enc = fix.db.get_item("ENC1")
+        self.baro = fix.db.get_item("BARO")
 
     def focus(self):
         self.last_value = self.enc.value
