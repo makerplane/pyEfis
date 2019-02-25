@@ -145,7 +145,7 @@ class Main(QMainWindow):
     def get_config_item(self, child, key):
         for s in screens:
             if s.object == child:
-                return s.config[key]
+                return s.config.get(key)
         else:
             return None
 
