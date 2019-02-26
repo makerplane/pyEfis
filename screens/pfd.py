@@ -53,6 +53,7 @@ class Screen(QWidget):
         self.asd_Box = airspeed.Airspeed_Mode(self)
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#0030FF")
         self.alt_setting = altimeter.Altimeter_Setting(self)
 
         self.map_g = gauges.ArcGauge(self)
@@ -132,9 +133,10 @@ class Screen(QWidget):
         self.asd_Box.move(0, instHeight + 100)
 
         hsi_diameter=instWidth/5
-        hsi_height=hsi_diameter+20
-        self.hsi.resize(hsi_diameter, hsi_height)
+        self.hsi.resize(hsi_diameter, hsi_diameter)
         self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter/2)
+        self.heading_disp.move((instWidth-self.heading_disp.width())/2,
+                    instHeight - hsi_diameter/2 - self.heading_disp.height())
 
         self.alt_setting.resize(90, 100)
         self.alt_setting.move(instWidth -100, instHeight + 100)
