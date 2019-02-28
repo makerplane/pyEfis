@@ -33,10 +33,14 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
+        self._rollAngle = 0.0
+        self._TAS = 0.1
         item = fix.db.get_item("ALAT", True)
         item.valueChanged[float].connect(self.setLatAcc)
-        item = fix.db.get_item("YAW", True)
-        item.valueChanged[float].connect(self.setTurnRate)
+        tas = fix.db.get_item("TAS", True)
+        tas.valueChanged[float].connect(self.setTAS)
+        roll = fix.db.get_item("ROLL", True)
+        roll.valueChanged[float].connect(self.setRollAngle)
 
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
@@ -133,6 +137,12 @@ class TurnCoordinator(QWidget):
         p.setPen(pen)
         p.setBrush(brush)
 
+        self._rate = math.tan(math.radians(self._rollAngle)) * 1091 / self._TAS
+        if self._rate > 5:
+            self._rate = 5
+        elif self._rate < -5:
+            self._rate = -5
+        print(self._rate, self._latAcc)
         x = self.r - length - thickness / 2
         poly = QPolygon([QPoint(0, -thickness / 3),
                          QPoint(-x, -thickness / 8),
@@ -148,15 +158,25 @@ class TurnCoordinator(QWidget):
         p.drawLine(-length / 2, -length / 2, length / 2, -length / 2)
         p.drawLine(0, 0, 0, -length)
 
-    def getTurnRate(self):
+    def getRollAngle(self):
         return self._rate
 
-    def setTurnRate(self, rate):
-        if rate != self._rate:
-            self._rate = rate
+    def setRollAngle(self, roll):
+        if roll != self._rollAngle:
+            self._rollAngle = roll
             self.update()
 
-    turnRate = property(getTurnRate, setTurnRate)
+    turnRate = property(getRollAngle, setRollAngle)
+
+    def getTAS(self):
+        return self._TAS
+
+    def setTAS(self, TAS):
+        if TAS != self._TAS:
+            self._TAS = TAS
+            self.update()
+
+    turnRate = property(getTAS, setTAS)
 
     def getLatAcc(self):
         return self._latAcc
