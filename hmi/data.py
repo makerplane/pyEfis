@@ -25,7 +25,7 @@ import operator
 import logging
 log = logging.getLogger(__name__)
 
-import fix
+import pyavtools.fix as fix
 import hmi
 
 __bindings = []

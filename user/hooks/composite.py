@@ -19,7 +19,7 @@
 
 # TODO This is not the cleanest mechanism.  It needs some love and thought
 
-import fix
+import pyavtools.fix as fix
 
 class CompositeFloatItem(object):
     def __init__(self, key, itemkeys):

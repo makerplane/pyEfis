@@ -9,7 +9,7 @@ main:
   screenHeight: 768
 
   # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: True
+  screenFullSize: False
 
   # Screen background color RGB
   screenColor: (0,0,0)
