@@ -93,6 +93,20 @@ class Screen(QWidget):
         self.fuelt.name = "Total"
         self.fuelt.decimalPlaces = 1
         self.fuelt.dbkey = "FUELQT"
+        self.fuelt.showUnits = False
+        self.fuelt.showName = False
+
+        self.volts = gauges.VerticalBar(self)
+        self.volts.name = "Volt"
+        self.volts.decimalPlaces = 1
+        self.volts.showUnits = False
+        self.volts.dbkey = "VOLT"
+
+        self.current = gauges.VerticalBar(self)
+        self.current.name = "Amp"
+        self.current.decimalPlaces = 1
+        self.current.showUnits = False
+        self.current.dbkey = "CURRNT"
 
         self.cht = misc.StaticText("CHT", parent=self)
         self.chts = []
@@ -182,8 +196,12 @@ class Screen(QWidget):
 
         self.fuelt.resize(90, 30)
         self.fuelt.move(self.width() - 195, 355)
-        self.fuelt.showUnits = False
-        self.fuelt.showName = False
+
+        self.volts.resize(50, 150)
+        self.volts.move(0, 200)
+
+        self.current.resize(50, 150)
+        self.current.move(50, 200)
 
         chtstartx = 380
         self.cht.resize(200, 30)
@@ -199,9 +217,9 @@ class Screen(QWidget):
         self.chtmax.move(chtstartx + 45, 355)
 
         self.egt.resize(200, 30)
-        self.egt.move(130, 170)
+        self.egt.move(150, 170)
         self.egtgroup.resize(200, 150)
-        self.egtgroup.move(130, 200)
+        self.egtgroup.move(150, 200)
 
         self.hobbslabel.resize(100,15)
         self.hobbslabel.move(self.width()-115, self.height()-85)
