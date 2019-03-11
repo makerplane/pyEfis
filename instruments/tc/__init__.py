@@ -119,7 +119,6 @@ class TurnCoordinator(QWidget):
         center = QPointF(centerball,
                          self.boxTop + length / 2)
         p.drawEllipse(center, length / 2, length / 2)
-        print(length / 2)
 
         # the little airplane
         pen.setColor(QColor(Qt.white))

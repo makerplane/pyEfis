@@ -24,13 +24,12 @@ except:
 
 import logging
 
-#import hooks
 import fix
 import hmi
 
 logger=logging.getLogger(__name__)
 
-# TheMenuObject=None
+TheMenuObject=None
 
 class Menu(QWidget):
     def __init__(self, parent, config):
@@ -60,6 +59,7 @@ class Menu(QWidget):
         self.register_target("BARO", BaroProxy())
         hmi.actions.activateMenuItem.connect(self.activateMenuItem)
         hmi.actions.setMenuFocus.connect(self.focus)
+        TheMenuObject = self
 
     def start(self):
         start_menu = self.config['start_menu']
@@ -170,3 +170,6 @@ class BaroProxy:
         diff = val - self.last_value
         self.baro.value += (diff * .01)
         self.last_value = val
+
+def activateMenu(arg):
+    TheMenuObject.activate_menu(arg)
