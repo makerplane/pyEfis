@@ -22,7 +22,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import fix
+import pyavtools.fix as fix
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRect(x - r, y - r, r * 2, r * 2)

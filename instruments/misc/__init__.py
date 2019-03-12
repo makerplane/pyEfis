@@ -22,7 +22,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import fix
+import pyavtools.fix as fix
 
 class StaticText(QWidget):
     """Represents a simple static text display.  This is very simple and is

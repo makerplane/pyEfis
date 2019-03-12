@@ -24,7 +24,7 @@ except:
     from PyQt4.QtCore import *
 
 import efis
-import fix
+import pyavtools.fix as fix
 from .abstract import AbstractGauge, drawCircle
 
 class ArcGauge(AbstractGauge):

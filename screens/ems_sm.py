@@ -24,7 +24,7 @@ except:
 
 from instruments import gauges
 from instruments import misc
-import fix
+import pyavtools.fix as fix
 
 class Screen(QWidget):
     def __init__(self, parent=None):
