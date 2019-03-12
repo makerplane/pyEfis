@@ -31,11 +31,11 @@ except:
 import efis
 import logging
 
-import fix
+import pyavtools.fix as fix
 
 from instruments.ai import AI
-import Spatial
-import CIFPObjects
+import pyavtools.Spatial as Spatial
+import pyavtools.CIFPObjects as CIFPObjects
 
 log = logging.getLogger(__name__)
 

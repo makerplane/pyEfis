@@ -24,7 +24,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 import efis
-import fix
+import pyavtools.fix as fix
 
 class HSI(QGraphicsView):
     def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
