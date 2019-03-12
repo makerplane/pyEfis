@@ -1,4 +1,4 @@
-#  Copyright (c) 2018 Garrett Herschleb
+#  Copyright (c) 2018-2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,14 +31,22 @@ except:
 import efis
 import logging
 
-import fix
+import pyavtools.fix as fix
 
 from instruments.ai import AI
-from instruments.ai import util
-from instruments.ai import Spatial
-from instruments.ai import CIFPObjects
+import pyavtools.Spatial as Spatial
+import pyavtools.CIFPObjects as CIFPObjects
 
 log = logging.getLogger(__name__)
+
+M_PI = math.pi
+RAD_DEG = M_PI / 180.0
+DEG_RAD = 180.0 / M_PI
+
+METERS_FOOT = 0.3048
+FEET_METER = 1.0 / METERS_FOOT
+EARTH_RADIUS_M=6356752.0
+EARTH_RADIUS=EARTH_RADIUS_M * FEET_METER
 
 class VirtualVfr(AI):
     CENTERLINE_WIDTH = 3
@@ -79,7 +87,8 @@ class VirtualVfr(AI):
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
         self.pov = PointOfView(self.myparent.get_config_item('dbpath'),
-                               self.myparent.get_config_item('indexpath'))
+                               self.myparent.get_config_item('indexpath'),
+                               self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
         self.pov.render(self)
@@ -177,12 +186,12 @@ class VirtualVfr(AI):
         clpoints = [((p11[0] + p12[0]) / 2.0, (p11[1] + p12[1]) / 2.0)
                    ,((p21[0] + p22[0]) / 2.0, (p21[1] + p22[1]) / 2.0)]
         centerline = None
-        centerline_function = util.get_line(clpoints, util.FOFY)
+        centerline_function = get_line(clpoints, FOFY)
         clkey = key + "_c"
         if dist1 > 3 * VirtualVfr.CENTERLINE_WIDTH and dist2 > 3*VirtualVfr.CENTERLINE_WIDTH and \
                 abs(clpoints[0][1]-clpoints[1][1]) > 5*VirtualVfr.CENTERLINE_WIDTH:
             # Runway polygon large enough to add a centerline
-            cline_function = util.get_line (clpoints, util.FOFY)
+            cline_function = get_line (clpoints, FOFY)
             if clpoints[0][1] > clpoints[1][1]:
                 bottomi = 0
                 topi = 1
@@ -190,9 +199,9 @@ class VirtualVfr(AI):
                 bottomi = 1
                 topi = 0
             bottomy = clpoints[bottomi][1]-2*VirtualVfr.CENTERLINE_WIDTH
-            clpoints[bottomi] = (util.F(bottomy, cline_function), bottomy)
+            clpoints[bottomi] = (F(bottomy, cline_function), bottomy)
             topy = clpoints[topi][1]+2*VirtualVfr.CENTERLINE_WIDTH
-            clpoints[topi] = (util.F(topy, cline_function), topy)
+            clpoints[topi] = (F(topy, cline_function), topy)
             cline = QLineF(QPoint(*clpoints[0]), QPoint(*clpoints[1]))
             if clkey in self.display_objects:
                  centerline = self.display_objects[clkey]
@@ -248,7 +257,7 @@ class VirtualVfr(AI):
 
 
         # Add an extended centerline, if appropriate
-        bottom_intercept = util.F(self.scene.height()/2, centerline_function)
+        bottom_intercept = F(self.scene.height()/2, centerline_function)
         elkey = key + "_e"
         pkey = key + "_p"
         if abs(bottom_intercept) < self.scene.width():
@@ -272,7 +281,7 @@ class VirtualVfr(AI):
 
             # Draw PAPI lights
             height_touchdown = self.altitude - elevation
-            approach_angle = math.atan(height_touchdown / touchdown_distance) * util.DEG_RAD
+            approach_angle = math.atan(height_touchdown / touchdown_distance) * DEG_RAD
             self.approach_low = 2.5
             self.approach_slightly_low = 2.8
             self.approach_slightly_high = 3.2
@@ -451,12 +460,11 @@ class VirtualVfr(AI):
         self.pov.update_heading (heading + md)
         self.pov.render(self)
 
-VIEWPORT_ANGLE100 = 35.0 / 2.0 * util.RAD_DEG
+VIEWPORT_ANGLE100 = 35.0 / 2.0 * RAD_DEG
 
 class PointOfView:
-    UPDATE_PERIOD = .1
     sorted_object_types = ["Airport", "Fix"]
-    def __init__(self, dbpath, index_path):
+    def __init__(self, dbpath, index_path, refresh_period):
         # Inputs
         self.altitude = 0
         self.gps_lat = 0
@@ -467,6 +475,7 @@ class PointOfView:
         self.display_width = 0
         self.index_path = index_path
         self.dbpath = dbpath
+        self.refresh_period = .1 if refresh_period is None else refresh_period
 
         # Computed State
         self.view_screen = None
@@ -510,13 +519,13 @@ class PointOfView:
         self.update_screen()
 
     def update_screen(self):
-        if self.last_time is not None and (time.time() - self.last_time < self.UPDATE_PERIOD):
+        if self.last_time is not None and (time.time() - self.last_time < self.refresh_period):
             return
-        earth_radius = util.EARTH_RADIUS + self.elevation
-        pov_radius = util.EARTH_RADIUS + self.altitude
+        earth_radius = EARTH_RADIUS + self.elevation
+        pov_radius = EARTH_RADIUS + self.altitude
         if pov_radius <= earth_radius:
             pov_radius = earth_radius + 10
-        pov_polar = Spatial.Polar (self.gps_lng * util.RAD_DEG, self.gps_lat * util.RAD_DEG, pov_radius)
+        pov_polar = Spatial.Polar (self.gps_lng * RAD_DEG, self.gps_lat * RAD_DEG, pov_radius)
         self.pov_position = pov_polar.to3()
         # pov_position: pilot's position
 
@@ -540,7 +549,7 @@ class PointOfView:
         # screen1 has the plane parallel to the earth's surface beneath the aircraft,
         #  with yvec pointing east and xvec pointing north
         screen1 = Spatial.Screen (plane1, self.pov_position, xvec=xvec1, yvec=yvec1)
-        hrad = self.true_heading * util.RAD_DEG
+        hrad = self.true_heading * RAD_DEG
         forward_point = screen1.point((math.cos(hrad), math.sin(hrad)))
         plane2 = Spatial.Plane(Spatial.Cartesian(), self.pov_position, forward_point)
         xvec2 = copy.copy(forward_point)
@@ -650,8 +659,8 @@ class PointOfView:
             for obj in object_list:
                 if isinstance(obj, CIFPObjects.Runway):
                     course = [curpos, (obj.lng,obj.lat)]
-                    heading, distance, rel_lng = \
-                            util.TrueHeadingAndDistance(course, rel_lng=rel_lng)
+                    distance, rel_lng = \
+                            Distance(course, rel_lng=rel_lng)
                     if distance < min_distance:
                         min_distance = distance
                         elevation = obj.elevation
@@ -660,23 +669,6 @@ class PointOfView:
     def render(self, display_object):
         if not self.do_render:
             return
-        """     To test runway rendering with artificial data:
-        r = CIFPObjects.Runway()
-        r.airport_id = 'test'
-        r.name = 'RW36'
-        r.lng,r.lat = util.AddPosition((self.gps_lng,self.gps_lat), .9, 0)
-        r.length = 5000
-        r.bearing = 0
-        r.elevation = 0
-        r.opposing_rw = CIFPObjects.Runway()
-        r.opposing_rw.airport_id = 'test'
-        r.opposing_rw.name = 'RW18'
-        r.opposing_rw.lng,r.opposing_rw.lat = util.AddPosition((r.lng,r.lat), .9, 0)
-        r.opposing_rw.length = 5000
-        r.opposing_rw.bearing = 0
-        r.opposing_rw.elevation = 0
-        r.render (self, display_object, self.display_width)
-        """
         sorted_objects = list()
         for oblist in self.object_cache.values():
             for ob in oblist:
@@ -686,9 +678,9 @@ class PointOfView:
                     else:
                         ob.render (self, display_object, self.display_width,
                                     (self.gps_lng, self.gps_lat))
-        sorted_objects = [(util.TrueHeadingAndDistance(
-                                            [(self.gps_lng, self.gps_lat), (so.lng,so.lat)]) [1],
-                           so) for so in sorted_objects]
+        rel_lng = GetRelLng(self.gps_lat)
+        sorted_objects = [(Distance( [(self.gps_lng, self.gps_lat), (so.lng,so.lat)],
+                                    rel_lng)[0], so) for so in sorted_objects]
         sorted_objects.sort()
         space_occupied = list()
         for d,so in sorted_objects:
@@ -703,8 +695,8 @@ class PointOfView:
         """ Find the projected point on the view screen given a latitude and longitude
             of the point.
         """
-        point_radius = util.EARTH_RADIUS + self.elevation
-        point_polar = Spatial.Polar (lng * util.RAD_DEG, lat * util.RAD_DEG, point_radius)
+        point_radius = EARTH_RADIUS + self.elevation
+        point_polar = Spatial.Polar (lng * RAD_DEG, lat * RAD_DEG, point_radius)
         point_position = point_polar.to3()
         r = Spatial.Ray(self.pov_position, pos2=point_position)
         try:
@@ -727,35 +719,94 @@ def yvec_points_east (yvec, pov_position, pov_polar):
         theta_diff += math.pi * 2
     return theta_diff > 0
 
+
+FOFY=1
+FOFX=0
+
+def get_line(points, fofwhat=FOFX):
+    if fofwhat==FOFX:
+        divi = 0
+        numi = 1
+    else:
+        divi = 1
+        numi = 0
+    div = (points[1][divi] - points[0][divi])
+    if div == 0:
+        slope = math.inf
+        intercept = 0
+    else:
+        slope = (points[1][numi] - points[0][numi]) / div
+        # f(x) = slope * x + intercept
+        # points[0][numi] = slope * points[0][divi] + intercept
+        # points[0][numi] - intercept = slope * points[0][divi]
+        #  - intercept = slope * points[0][divi] - points[0][numi]
+        #  intercept = -slope * points[0][divi] + points[0][numi]
+        intercept = points[0][numi] - slope*points[0][divi]
+    return (slope,intercept)
+
+def F(var, function):
+    slope,intercept = function
+    if slope == math.inf:
+        return math.inf
+    else:
+        return slope * var + intercept
+
+def get_polar_deltas(course):
+    lng1,lat1 = course[0]
+    lng2,lat2 = course[1]
+    dlng = lng2 - lng1
+    dlat = lat2 - lat1
+    return (dlng,dlat)
+
+def GetRelLng(lat1):
+    return math.cos(lat1)
+
+# Computes true heading from a given course
+def Distance(course, rel_lng=0):
+    dlng,dlat = get_polar_deltas(course)
+    lat1 = course[0][1] * M_PI / 180.0
+
+    # Determine how far is a longitude increment relative to latitude at this latitude
+    if rel_lng == 0:
+        relative_lng_length = GetRelLng(lat1)
+    else:
+        relative_lng_length = rel_lng
+    dlng *= relative_lng_length
+
+    distance = math.sqrt(dlng * dlng + dlat * dlat) * 60.0      # Multiply by 60 to convert from degrees to nautical miles.
+
+    return distance, relative_lng_length
+
+
 if __name__ == "__main__":
     # Unit testing for POV class
     pov = PointOfView()
     pov.initialize (0, 0, 1000, 0, [], 400)
     assert(pov.view_screen.x.dir.y > 0.99)
     assert(pov.view_screen.y.dir.x < -0.99)
-    assert(pov.view_screen.x.org.x > util.EARTH_RADIUS)
+    assert(pov.view_screen.x.org.x > EARTH_RADIUS)
     pov.initialize (0, 0, 1000, 180, [], 400)
     assert(pov.view_screen.x.dir.y < -0.99)
     assert(pov.view_screen.y.dir.x < -0.99)
-    assert(pov.view_screen.x.org.x > util.EARTH_RADIUS)
+    assert(pov.view_screen.x.org.x > EARTH_RADIUS)
     pov.initialize (0, 0, 1000, 90, [], 400)
     assert(pov.view_screen.x.dir.z < -0.99)
     assert(pov.view_screen.y.dir.x < -0.99)
-    assert(pov.view_screen.x.org.x > util.EARTH_RADIUS)
+    assert(pov.view_screen.x.org.x > EARTH_RADIUS)
     pov.initialize (0, 0, 1000, 270, [], 400)
     assert(pov.view_screen.x.dir.z > 0.99)
     assert(pov.view_screen.y.dir.x < -0.99)
-    assert(pov.view_screen.x.org.x > util.EARTH_RADIUS)
+    assert(pov.view_screen.x.org.x > EARTH_RADIUS)
 
     pov.initialize (0, 180, 1000, 0, [], 400)
     assert(pov.view_screen.x.dir.y < -0.99)
     assert(pov.view_screen.y.dir.x > 0.99)
-    assert(pov.view_screen.x.org.x < -util.EARTH_RADIUS)
+    assert(pov.view_screen.x.org.x < -EARTH_RADIUS)
 
     pov.initialize (0, 180, 1000, 180, [], 400)
     assert(pov.view_screen.x.dir.y > 0.99)
     assert(pov.view_screen.y.dir.x > 0.99)
-    assert(pov.view_screen.x.org.x < -util.EARTH_RADIUS)
+    assert(pov.view_screen.x.org.x < -EARTH_RADIUS)
 
     pov.initialize (45, 0,  1000,  0,  [],  400)
     assert(pov.view_screen.x.dir.y > 0.99)
