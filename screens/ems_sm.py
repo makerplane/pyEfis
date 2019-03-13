@@ -144,6 +144,19 @@ class Screen(QWidget):
         self.hobbs.showUnits = True
         self.hobbs.smallFontPercent = 0.6
 
+        self.oatlabel = misc.StaticText("OAT", parent=self)
+        self.oatlabel.alignment = Qt.AlignLeft | Qt.AlignVCenter
+
+        self.oat = gauges.NumericDisplay(self)
+        self.oat.name = "OAT"
+        self.oat.decimalPlaces = 1
+        self.oat.dbkey = "OAT"
+        self.oat.alignment = Qt.AlignLeft | Qt.AlignVCenter
+        self.oat.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.oat.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.oat.showUnits = True
+        self.oat.smallFontPercent = 0.6
+
         self.timez = misc.ValueDisplay(self)
         self.timez.dbkey = "TIMEZ"
 
@@ -228,3 +241,8 @@ class Screen(QWidget):
 
         self.timez.resize(100, 20)
         self.timez.move(self.width()-115, self.height()-40)
+
+        self.oatlabel.resize(100,15)
+        self.oatlabel.move(10, self.height()-85)
+        self.oat.resize(80,25)
+        self.oat.move(10, self.height()-70)
