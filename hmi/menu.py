@@ -24,7 +24,8 @@ except:
 
 import logging
 
-import fix
+
+import pyavtools.fix as fix
 import hmi
 
 logger=logging.getLogger(__name__)

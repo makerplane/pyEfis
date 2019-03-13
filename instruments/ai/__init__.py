@@ -25,7 +25,7 @@ import math
 import efis
 import logging
 
-import fix
+import pyavtools.fix as fix
 
 log = logging.getLogger(__name__)
 

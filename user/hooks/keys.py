@@ -25,7 +25,7 @@ except:
 import logging
 
 import gui
-import fix
+import pyavtools.fix as fix
 import hooks
 from hmi import actions
 

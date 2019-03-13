@@ -24,7 +24,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import fix
+import pyavtools.fix as fix
 import hmi
 from instruments.NumericalDisplay import NumericalDisplay
 
