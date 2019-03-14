@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #!/usr/bin/env python3
 
 #  Copyright (c) 2013 Phil Birkelbach
@@ -22,10 +21,6 @@ import sys, os
 import logging
 import logging.config
 import argparse
-# try:
-#     import ConfigParser
-# except:
-#     import configparser as ConfigParser
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtWidgets import *
@@ -35,19 +30,7 @@ except:
     PYQT = 4
 import yaml
 
-if "pyAvTools" not in ''.join(sys.path):
-    neighbor_tools = os.path.join ('..', 'pyAvTools')
-    if os.path.isdir (neighbor_tools):
-        sys.path.append (neighbor_tools)
-    elif 'TOOLS_PATH' in os.environ:
-        sys.path.append (os.environ['TOOLS_PATH'])
-
-try:
-    import fix
-except:
-    print ("You need to have pyAvTools installed, or in an adjacent directory to pyEfis.")
-    print ("Or set the environment variable 'TOOLS_PATH' to point to the location of pyAvTools.")
-    sys.exit(-1)
+import pyavtools.fix as fix
 
 import hooks
 import hmi
@@ -108,8 +91,8 @@ if __name__ == "__main__":
         fms.start(config["FMS"]["aircraft_config"])
 
     gui.initialize(config)
-    hmi.keys.initialize(gui.mainWindow, config["keybindings"])
-    #hmi.data.initialize(config["databindings"])
+    if "keybindings" in config:
+        hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
 
     # Main program loop

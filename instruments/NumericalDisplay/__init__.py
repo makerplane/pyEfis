@@ -1,4 +1,4 @@
-#  Copyright (c) 2018 Garrett Herschleb
+#  Copyright (c) 2018-2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@ class NumericalDisplay(QGraphicsView):
         self.font_size = font_size
         self._value = 0
         self.myparent = parent
+        self._bad = False
+        self._old = False
+        self._fail = False
 
     def resizeEvent(self, event):
         self.w = self.width()
@@ -63,6 +66,8 @@ class NumericalDisplay(QGraphicsView):
         sax = self.w-font_width*self.scroll_decimal-border_width
         self.scrolling_area.move(sax, 0)
         prest = '0' * (self.total_decimals - self.scroll_decimal)
+        if self._bad or self._old:
+            prest = ''
         self.pre_scroll_text = self.scene.addSimpleText (prest, self.f)
         self.pre_scroll_text.setPen(QPen(QColor(Qt.white)))
         self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
@@ -80,6 +85,37 @@ class NumericalDisplay(QGraphicsView):
         l = self.scene.addLine (x,self.h, self.w,self.h)
         l.setPen(rect_pen)
 
+        # Get a failure scene ready in case it's needed
+        self.fail_scene = QGraphicsScene(0, 0, self.w, self.h)
+        self.fail_scene.addRect(0,0, self.w, self.h, QPen(QColor(Qt.white)), QBrush(QColor(50,50,50)))
+        warn_font = QFont("FixedSys", 10, QFont.Bold)
+        t = self.fail_scene.addSimpleText("XXX", warn_font)
+        t.setPen (QPen(QColor(Qt.red)))
+        t.setBrush (QBrush(QColor(Qt.red)))
+        r = t.boundingRect()
+        t.setPos ((self.w-r.width())/2, (self.h-r.height())/2)
+
+        """ Not sure if this is needed:
+        self.bad_text = self.scene.addSimpleText("BAD", warn_font)
+        warn_pen = QPen(QColor(255, 150, 0))
+        warn_brush = QBrush(QColor(255, 150, 0))
+        self.bad_text.setPen (warn_pen)
+        self.bad_text.setBrush (warn_brush)
+        r = self.bad_text.boundingRect()
+        self.bad_text.setPos ((self.w-r.width())/2, (self.h-r.height())/2)
+        if not self._bad:
+            self.bad_text.hide()
+
+        self.old_text = self.scene.addSimpleText("OLD", warn_font)
+        self.old_text.setPen (warn_pen)
+        self.old_text.setBrush (warn_brush)
+        r = self.old_text.boundingRect()
+        self.old_text.setPos ((self.w-r.width())/2, (self.h-r.height())/2)
+        if not self._old:
+            self.old_text.hide()
+        """
+
+
     def redraw(self):
         prevalue = int(self._value / (10 ** self.scroll_decimal))
         scroll_value = self._value - (prevalue * (10 ** self.scroll_decimal))
@@ -92,8 +128,11 @@ class NumericalDisplay(QGraphicsView):
         prelen = self.total_decimals - self.scroll_decimal
         if len(prest) < prelen:
             prest = '0' * (prelen - len(prest)) + prest
+        if self._bad or self._old:
+            prest = ''
         self.pre_scroll_text.setText(prest)
-        self.scrolling_area.value = scroll_value
+        if not (self._bad or self._old or self._fail):
+            self.scrolling_area.value = scroll_value
 
     def getValue(self):
         return self._value
@@ -104,6 +143,50 @@ class NumericalDisplay(QGraphicsView):
             self.redraw()
 
     value = property(getValue, setValue)
+
+    def flagDisplay(self):
+        if (self._bad or self._old or self._fail):
+            self.pre_scroll_text.setText('')
+            self.scrolling_area.hide()
+        else:
+            self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
+            self.scrolling_area.show()
+
+    def getBad(self):
+        return self._bad
+    def setBad(self, b):
+        if self._bad != b:
+            self._bad = b
+            #if b:
+            #    self.bad_text.show()
+            #else:
+            #    self.bad_text.hide()
+            self.flagDisplay()
+    bad = property(getBad, setBad)
+
+    def getOld(self):
+        return self._old
+    def setOld(self, b):
+        if self._old != b:
+            self._old = b
+            #if b:
+            #    self.old_text.show()
+            #else:
+            #    self.old_text.hide()
+            self.flagDisplay()
+    old = property(getOld, setOld)
+
+    def getFail(self):
+        return self._fail
+    def setFail(self, b):
+        if self._fail != b:
+            self._fail = b
+            if b:
+                self.setScene(self.fail_scene)
+            else:
+                self.setScene(self.scene)
+                self.flagDisplay()
+    fail = property(getFail, setFail)
 
 class NumericalScrollDisplay(QGraphicsView):
     def __init__(self, parent=None, scroll_decimal=1, font_family="Sans", font_size=10):

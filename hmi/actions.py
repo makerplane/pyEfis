@@ -24,6 +24,7 @@ except:
     from PyQt4.QtGui import *
 
 import hmi.functions
+from hmi.menu import activateMenu
 
 class ActionClass(QWidget):
     setAirspeedMode = pyqtSignal(object)
@@ -46,6 +47,7 @@ class ActionClass(QWidget):
                           "set value":hmi.functions.setValue,
                           "toggle bit":hmi.functions.toggleBool,
                           "activate menu item":self.activateMenuItem,
+                          "activate menu":activateMenu,
                           "menu encoder":self.menuEncoder,
                           "set menu focus":self.setMenuFocus,
                           "evaluate":eval

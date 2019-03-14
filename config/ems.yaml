@@ -9,47 +9,43 @@ main:
   screenHeight: 480
 
   # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: False 
+  screenFullSize: False
 
   # Screen background color RGB
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: PFD
+  defaultScreen: EMS
 
-menu:
-  menus:
-      PFDMenu:
-          - ['ASD Mode', 'set airspeed mode','']
-          - ['Baro', 'set menu focus', 'BARO']
-  start_menu: PFDMenu
-  number_of_buttons: 6
-  buttons_spacing: 100
-  left_margin: 100
-  top_margin: 5
+# menu:
+#   menus:
+#       PFDMenu:
+#           - ['ASD Mode', 'self.myparent.change_asd_mode_event (QEvent(QEvent.ActionAdded))']
+#           - ['Baro', 'self.focus("BARO")']
+#   start_menu: PFDMenu
+#   number_of_buttons: 6
+#   buttons_spacing: 100
+#   left_margin: 100
+#   top_margin: 5
 
-# The keybindings are used to attach keystrokes to actions.  The key can be
-# a string that represents a key Sequence.  See the documentation for more
-# information about key sequences and actions.
 keybindings:
   - key: A
     action: Show Previous Screen
-
   - key: S
     action: Show Next Screen
-
+  - key: N
+    action: Set EGT Mode
+    args: Normalize
   - key: P
-    action: Show Screen
-    args: PFD
+    action: Set EGT Mode
+    args: Peak
+  - key: L
+    action: Set EGT Mode
+    args: Lean
+  - key: R
+    action: Set EGT Mode
+    args: Reset Peak
 
-  - key: Q
-    action: Set Value
-    args: BTN6, True
-    direction: DN
-  - key: Q
-    action: Set Value
-    args: BTN6, False
-    direction: UP
 
 # This section defines FIX IDs that we'll write out to the
 # FIX Gateway server.  Each can be defined as one of three
@@ -78,6 +74,10 @@ screens:
     module: screens.sixpack
     title: Standard Instrument Panel
 
+  EMS:
+    module: screens.ems_sm
+    title: Engine Management
+
   # Test:
   #   module: screens.test
   #   title: Test Screen
@@ -88,10 +88,10 @@ screens:
 # main window and default screen are shown.  We'll add more as the
 # need arises.
 hooks:
-  Keys:
-    module: user.hooks.keys
-#  Composite:
-#    module: user.hooks.composite
+  # Keys:
+  #   module: user.hooks.keys
+  # Composite:
+  #   module: user.hooks.composite
 
 
 # Logging configuration - See Python logging.config module documenation
