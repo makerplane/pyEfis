@@ -53,10 +53,12 @@ class HSI(QGraphicsView):
         self._showGSI = not self.gsidb.old
         self.cardinal = ["N", "E", "S", "W"]
 
-        item = fix.db.get_item("HEAD")
-        self._heading = item.value
-        item.valueChanged[float].connect(self.setHeading)
+        self.item = fix.db.get_item("HEAD")
+        self._heading = self.item.value
+        self.item.valueChanged[float].connect(self.setHeading)
         self.heading_bug = None
+        self.item.failChanged[bool].connect(self.setFail)
+        self._fail = False
 
 
     def resizeEvent(self, event):
@@ -90,6 +92,7 @@ class HSI(QGraphicsView):
                                 compassPen, nobrush)
 
         refsize = self.fontSize*.7
+        self.labels = list()
         for count in range(0, 360, 5):
             angle = (count) * math.pi / 180
             cosa = math.cos(angle)
@@ -112,6 +115,7 @@ class HSI(QGraphicsView):
                 x3 = (ix3*cosa - iy3*sina) + self.cx
                 y3 = (iy3*cosa + ix3*sina) + self.cy
                 t.setPos(x3, y3)
+                self.labels.append(t)
             elif count % 30 == 0:
                 text = str(int(count / 10))
                 t = self.scene.addSimpleText(text)
@@ -122,6 +126,7 @@ class HSI(QGraphicsView):
                 x3 = (ix3*cosa - iy3*sina) + self.cx
                 y3 = (iy3*cosa + ix3*sina) + self.cy
                 t.setPos(x3, y3)
+                self.labels.append(t)
 
         #Draw Heading Bug
         triangle = self.heading_bug_polygon()
@@ -129,6 +134,7 @@ class HSI(QGraphicsView):
 
         self.setScene(self.scene)
         self.rotate(-self._heading)
+        self.setFail(self.item.fail)
 
     def heading_bug_polygon(self):
         inc = int(self.fontSize / 2 * 0.8)
@@ -193,11 +199,27 @@ class HSI(QGraphicsView):
 
     def setHeading(self, heading):
         if heading != self._heading:
-            diff = heading - self._heading
-            self._heading = efis.bounds(0, 360, heading)
+            newheading = efis.bounds(0, 360, heading)
+            diff = newheading - self._heading
+            if diff > 180:
+                diff -= 360
+            elif diff < -180:
+                diff += 360
+            self._heading = newheading
             self.rotate(-diff)
 
     heading = property(getHeading, setHeading)
+
+    def setFail(self, fail):
+        if fail != self._fail:
+            self._fail = fail
+            if self.isVisible():
+                if fail:
+                    for l in self.labels:
+                        l.setOpacity(0)
+                else:
+                    for l in self.labels:
+                        l.setOpacity(1)
 
     def getHeadingBug(self):
         return self._headingSelect
@@ -239,9 +261,15 @@ class HeadingDisplay(QWidget):
         self.fg_color = fgcolor
         self.bg_color = bgcolor
 
-        item = fix.db.get_item("HEAD")
-        self._heading = item.value
-        item.valueChanged[float].connect(self.setHeading)
+        self.item = fix.db.get_item("HEAD")
+        self._heading = self.item.value
+        self.item.valueChanged[float].connect(self.setHeading)
+        self.item.failChanged[bool].connect(self.setFail)
+        self.item.badChanged[bool].connect(self.setBad)
+        self.item.oldChanged[bool].connect(self.setOld)
+        self._bad = self.item.bad
+        self._old = self.item.old
+        self._fail = self.item.fail
 
         self.font = QFont()
         self.font.setBold(True)
@@ -257,12 +285,25 @@ class HeadingDisplay(QWidget):
         compassPen = QPen(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
         c.setPen(compassPen)
-        c.setBrush(compassBrush)
         c.setFont(self.font)
         tr = QRect(0, 0, self.width(), self.height())
         c.drawRect(tr)
-        c.drawText(tr, Qt.AlignHCenter | Qt.AlignVCenter,
-                   str(int(self._heading)))
+        if self._fail:
+            heading_text = "XXX"
+            c.setBrush(QBrush(QColor(Qt.red)))
+            c.setPen(QPen(QColor(Qt.red)))
+        elif self._bad:
+            heading_text = ""
+            c.setBrush(QBrush(QColor(255, 150, 0)))
+            c.setPen(QPen(QColor(255, 150, 0)))
+        elif self._old:
+            heading_text = ""
+            c.setBrush(QBrush(QColor(255, 150, 0)))
+            c.setPen(QPen(QColor(255, 150, 0)))
+        else:
+            heading_text = str(int(self._heading))
+
+        c.drawText(tr, Qt.AlignHCenter | Qt.AlignVCenter, heading_text)
 
     def getHeading(self):
         return self._heading
@@ -273,6 +314,18 @@ class HeadingDisplay(QWidget):
             self.update()
 
     heading = property(getHeading, setHeading)
+
+    def setFail(self, fail):
+        self._fail = fail
+        self.repaint()
+
+    def setOld(self, old):
+        self._old = old
+        self.repaint()
+
+    def setBad(self, bad):
+        self._bad = bad
+        self.repaint()
 
 class DG_Tape(QGraphicsView):
     def __init__(self, parent=None):

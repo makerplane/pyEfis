@@ -61,23 +61,40 @@ class VirtualVfr(AI):
         super(VirtualVfr, self).__init__(parent)
         self.display_objects = dict()
         time.sleep(.4)      # Pause to let DB load
-        lng = fix.db.get_item("LONG")
-        lng.valueChanged[float].connect(self.setLongitude)
-        lat = fix.db.get_item("LAT")
-        lat.valueChanged[float].connect(self.setLatitude)
-        head = fix.db.get_item("HEAD")
-        head.valueChanged[float].connect(self.setHeading)
-        alt = fix.db.get_item("ALT")
-        alt.valueChanged[float].connect(self.setAltitude)
+        self.lng_item = fix.db.get_item("LONG")
+        self.lng_item.valueChanged[float].connect(self.setLongitude)
+        self.lng_item.badChanged[bool].connect(self.setBlank)
+        self.lng_item.oldChanged[bool].connect(self.setBlank)
+        self.lng_item.failChanged[bool].connect(self.setBlank)
+        self.lat_item = fix.db.get_item("LAT")
+        self.lat_item.valueChanged[float].connect(self.setLatitude)
+        self.lat_item.badChanged[bool].connect(self.setBlank)
+        self.lat_item.oldChanged[bool].connect(self.setBlank)
+        self.lat_item.failChanged[bool].connect(self.setBlank)
+        self.head_item = fix.db.get_item("HEAD")
+        self.head_item.valueChanged[float].connect(self.setHeading)
+        self.head_item.badChanged[bool].connect(self.setBlank)
+        self.head_item.oldChanged[bool].connect(self.setBlank)
+        self.head_item.failChanged[bool].connect(self.setBlank)
+        self.alt_item = fix.db.get_item("ALT")
+        self.alt_item.valueChanged[float].connect(self.setAltitude)
+        self.alt_item.badChanged[bool].connect(self.setBlank)
+        self.alt_item.oldChanged[bool].connect(self.setBlank)
+        self.alt_item.failChanged[bool].connect(self.setBlank)
         self.last_mag_update = 0
         self.magnetic_declination = None
         self.missing_lat = True
         self.missing_lng = True
-        self.lat = lat.value
-        self.lng = lng.value
-        self.altitude = alt.value
+        self.lat = self.lat_item.value
+        self.lng = self.lng_item.value
+        self.altitude = self.alt_item.value
+        self.rendering_prohibited = \
+            self.lng_item.fail or self.lng_item.bad or self.lng_item.old or \
+            self.lat_item.fail or self.lat_item.bad or self.lat_item.old or \
+            self.head_item.fail or self.head_item.bad or self.head_item.old or \
+            self.alt_item.fail or self.alt_item.bad or self.alt_item.old
         # BUG: convert magnetic heading
-        self.true_heading = head.value
+        self.true_heading = self.head_item.value
         self.myparent = parent
         minfont = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, VirtualVfr.MIN_FONT_SIZE, QFont.Bold)
         t = QGraphicsSimpleTextItem ("9 9")
@@ -91,7 +108,8 @@ class VirtualVfr(AI):
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
-        self.pov.render(self)
+        if not self.rendering_prohibited:
+            self.pov.render(self)
 
     def get_largest_font_size(self, width):
         max_size = 25
@@ -434,14 +452,16 @@ class VirtualVfr(AI):
         self.missing_lat = False
         #print ("New latitude %f"%self.lat)
         self.pov.update_position (self.lat, self.lng)
-        self.pov.render(self)
+        if not self.rendering_prohibited:
+            self.pov.render(self)
 
     def setLongitude(self, lng):
         self.lng = lng
         self.missing_lng = False
         #print ("New longitude %f"%self.lng)
         self.pov.update_position (self.lat, self.lng)
-        self.pov.render(self)
+        if not self.rendering_prohibited:
+            self.pov.render(self)
 
     def setAltitude(self, alt):
         self.altitude = alt
@@ -458,7 +478,19 @@ class VirtualVfr(AI):
         if md is None:
             md = 0
         self.pov.update_heading (heading + md)
-        self.pov.render(self)
+        if not self.rendering_prohibited:
+            self.pov.render(self)
+
+    def setBlank(self, b):
+        self.rendering_prohibited = \
+            self.lng_item.fail or self.lng_item.bad or self.lng_item.old or \
+            self.lat_item.fail or self.lat_item.bad or self.lat_item.old or \
+            self.head_item.fail or self.head_item.bad or self.head_item.old or \
+            self.alt_item.fail or self.alt_item.bad or self.alt_item.old
+        if self.rendering_prohibited and len(self.display_objects) > 0:
+            for key in self.display_objects.keys():
+                self.scene.removeItem(self.display_objects[key])
+            self.display_objects = dict()
 
 VIEWPORT_ANGLE100 = 35.0 / 2.0 * RAD_DEG
 
@@ -476,12 +508,14 @@ class PointOfView:
         self.index_path = index_path
         self.dbpath = dbpath
         self.refresh_period = .1 if refresh_period is None else refresh_period
+        self.cache_refresh_period = self.refresh_period * 100
 
         # Computed State
         self.view_screen = None
         self.object_cache = dict()
         self.elevation = 0
         self.last_time = None
+        self.last_cache_time = None
         self.do_render = False
 
     def initialize(self, show_what, display_width, lng, lat, alt, head):
@@ -519,7 +553,8 @@ class PointOfView:
         self.update_screen()
 
     def update_screen(self):
-        if self.last_time is not None and (time.time() - self.last_time < self.refresh_period):
+        if self.last_time is not None and \
+                (time.time() - self.last_time < self.refresh_period):
             return
         earth_radius = EARTH_RADIUS + self.elevation
         pov_radius = EARTH_RADIUS + self.altitude
@@ -586,6 +621,9 @@ class PointOfView:
         #print ("new view screen %s"%str(self.view_screen))
 
     def update_cache(self):
+        if self.last_cache_time is not None and \
+                (time.time() - self.last_cache_time < self.cache_refresh_period):
+            return
         center_lat = int(self.gps_lat)
         center_lng = int(self.gps_lng)
         for lat_inc in range(-1,2,1):
@@ -596,6 +634,7 @@ class PointOfView:
                                     self.dbpath, self.index_path, block[0], block[1])
                     #print ("New cache block has %d objects at %f,%f"%(len(self.object_cache[block]), self.gps_lat, self.gps_lng))
         # Match runways
+        self.last_cache_time = time.time()
         while True:
             rwsearch = None
             rwsearchblock = None
@@ -629,6 +668,7 @@ class PointOfView:
                 else:
                     log.debug ("Unable to find match for %s"%str(rwsearch))
                     del self.object_cache[rwsearchblock][rwsearchnum]
+        self.garbage_collect_cache()
 
 
     def garbage_collect_cache(self):

@@ -143,9 +143,9 @@ class Screen(QWidget):
 
         hsi_diameter=instWidth/5
         self.hsi.resize(hsi_diameter, hsi_diameter)
-        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter/2)
+        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter + 95)
         self.heading_disp.move((instWidth-self.heading_disp.width())/2,
-                    instHeight - hsi_diameter/2 - self.heading_disp.height())
+                    instHeight - hsi_diameter - self.heading_disp.height() + 95)
 
         self.alt_setting.resize(90, 100)
         self.alt_setting.move(instWidth -100, instHeight + 100)
