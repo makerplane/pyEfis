@@ -32,7 +32,7 @@ class EGTGroup(QWidget):
         super(EGTGroup, self).__init__(parent)
         self.setMinimumSize(50, 100)
         self.bars = []
-        self.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        #self.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
         self.normalizeMode = False
         self.peakMode = False
         for i in range(cylinders):
@@ -41,7 +41,12 @@ class EGTGroup(QWidget):
             bar.decimalPlaces = 0
             bar.showUnits = False
             bar.peakMode = False
-            bar.conversionFunction = self.conversionFunction
+            bar.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+            bar.conversionFunction2 = lambda x: x
+            bar.unitsOverride1 = u'\N{DEGREE SIGN}F'
+            bar.unitsOverride2 = u'\N{DEGREE SIGN}C'
+            bar.setUnitSwitching()
+            bar.unitGroup = "Temperature"
             bar.dbkey = dbkeys[i]
             bar.normalizeRange = 400
             self.bars.append(bar)

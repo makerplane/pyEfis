@@ -29,11 +29,14 @@ class ActionClass(QWidget):
     setAirspeedMode = pyqtSignal(object)
     setEgtMode = pyqtSignal(object)
     showScreen = pyqtSignal(object)
+    # arg = screen name
     showNextScreen = pyqtSignal(object)
     showPrevScreen = pyqtSignal(object)
     activateMenuItem = pyqtSignal(object)
     menuEncoder = pyqtSignal(object)
     setMenuFocus = pyqtSignal(object)
+    setInstUnits = pyqtSignal(object)
+    # arg = <inst name>,<inst name>,<inst name>,..:<Command>
 
 
     def __init__(self):
@@ -48,6 +51,7 @@ class ActionClass(QWidget):
                           "activate menu item":self.activateMenuItem,
                           "menu encoder":self.menuEncoder,
                           "set menu focus":self.setMenuFocus,
+                          "set instrument units":self.setInstUnits,
                           "evaluate":eval
                     }
 
