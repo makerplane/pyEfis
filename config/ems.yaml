@@ -45,6 +45,9 @@ keybindings:
   - key: R
     action: Set EGT Mode
     args: Reset Peak
+  - key: U
+    action: Set Instrument Units
+    args: OAT,OILT1,Temperature:Toggle
 
 
 # This section defines FIX IDs that we'll write out to the

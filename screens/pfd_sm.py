@@ -72,10 +72,12 @@ class Screen(QWidget):
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
         # Use a lambda to convert the values internally
-        self.ot.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.ot.unitsOverride = u'\N{DEGREE SIGN}F'
-        self.ot.decimalPlaces = 1
+        self.ot.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.ot.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.ot.setUnitSwitching()
         self.ot.dbkey = "OILT1"
 
 
@@ -92,17 +94,25 @@ class Screen(QWidget):
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         # Use a lambda to convert the values internally
-        self.cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.cht.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.cht.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.cht.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.cht.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.cht.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.cht.unitGroup = "Temperature"
+        self.cht.setUnitSwitching()
         self.cht.dbkey = "CHTMAX1"
 
         self.egt = gauges.HorizontalBar(self)
         self.egt.name = "Avg EGT"
         # Use a lambda to convert the values internally
-        self.egt.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.egt.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.egt.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.egt.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.egt.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.egt.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.egt.unitGroup = "Temperature"
+        self.egt.setUnitSwitching()
         self.egt.decimalPlaces = 0
         self.egt.dbkey = "EGTAVG1"
 

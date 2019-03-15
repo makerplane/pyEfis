@@ -57,9 +57,13 @@ class Screen(QWidget):
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
         # Use a lambda to convert the values internally
-        self.ot.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.ot.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.ot.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.ot.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.ot.setUnitSwitching()
+
         self.ot.decimalPlaces = 1
         self.ot.dbkey = "OILT1"
 
@@ -115,7 +119,12 @@ class Screen(QWidget):
 
             cht.name = str(x+1)
             cht.decimalPlaces = 0
-            cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+            cht.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+            cht.conversionFunction2 = lambda x: x
+            #cht.unitsOverride1 = u'\N{DEGREE SIGN}F'
+            #cht.unitsOverride2 = u'\N{DEGREE SIGN}C'
+            cht.unitGroup = "Temperature"
+            cht.setUnitSwitching()
             cht.showUnits = False
             cht.dbkey = "CHT1{}".format(x+1)
             self.chts.append(cht)
@@ -127,8 +136,12 @@ class Screen(QWidget):
         self.chtmax = gauges.NumericDisplay(self)
         self.chtmax.name = "CHT Max"
         self.chtmax.decimalPlaces = 0
-        self.chtmax.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
-        self.chtmax.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.chtmax.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.chtmax.conversionFunction2 = lambda x: x
+        self.chtmax.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.chtmax.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.chtmax.setUnitSwitching()
+        self.chtmax.unitGroup = "Temperature"
         self.chtmax.dbkey = "CHTMAX1"
 
         self.egt = misc.StaticText("EGT", parent=self)
@@ -152,9 +165,12 @@ class Screen(QWidget):
         self.oat.decimalPlaces = 1
         self.oat.dbkey = "OAT"
         self.oat.alignment = Qt.AlignLeft | Qt.AlignVCenter
-        self.oat.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
-        self.oat.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.oat.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.oat.conversionFunction2 = lambda x: x
+        self.oat.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.oat.unitsOverride2 = u'\N{DEGREE SIGN}C'
         self.oat.showUnits = True
+        self.oat.setUnitSwitching()
         self.oat.smallFontPercent = 0.6
 
         self.timez = misc.ValueDisplay(self)

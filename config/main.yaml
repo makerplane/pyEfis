@@ -53,6 +53,9 @@ keybindings:
     action: Set Value
     args: BTN6, False
     direction: UP
+  - key: U
+    action: Set Instrument Units
+    args: OAT,OILT1,Temperature:Toggle
 
   - key: F1
     action: Activate Menu Item
@@ -149,10 +152,10 @@ screens:
 # main window and default screen are shown.  We'll add more as the
 # need arises.
 hooks:
-  Keys:
-    module: user.hooks.keys
-  Composite:
-    module: user.hooks.composite
+  # Keys:
+  #   module: user.hooks.keys
+  # Composite:
+  #   module: user.hooks.composite
 
 
 # Logging configuration - See Python logging.config module documenation

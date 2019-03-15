@@ -62,7 +62,7 @@ if __name__ == "__main__":
         cf = args.config_file
     else: # otherwise use the default
         cf = open(config_file)
-    config = yaml.load(cf)
+    config = yaml.load(cf, Loader=yaml.SafeLoader)
 
     # Either load the config file given as a command line argument or
     # look in the configuration for the logging object
