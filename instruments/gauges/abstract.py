@@ -23,6 +23,8 @@ except:
     from PyQt4.QtCore import *
 
 import pyavtools.fix as fix
+import hmi
+
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRect(x - r, y - r, r * 2, r * 2)
@@ -40,6 +42,7 @@ class AbstractGauge(QWidget):
         self.lowRange = 0.0
         self._dbkey = None
         self._value = 0.0
+        self._rawValue = 0.0
         self.peakValue = 0.0
         self._units = ""
         self.fail = False
@@ -48,12 +51,16 @@ class AbstractGauge(QWidget):
         self.annunciate = False
         self.highlight = False
         self.peakMode = False
+        self.__unitSwitching = False
+        self.unitGroup = ""
 
 
         # These properties can be modified by the parent
         self.clipping = False
-        self.unitsOverride = None
-        self.conversionFunction = lambda x: x
+        self.unitsOverride1 = None
+        self.unitsOverride2 = None
+        self.conversionFunction1 = lambda x: x
+        self.conversionFunction2 = lambda x: x
         self.decimalPlaces = 1
         # All these colors can be modified by the parent
         self.outlineColor = QColor(Qt.darkGray)
@@ -80,8 +87,8 @@ class AbstractGauge(QWidget):
         self.textAnnunciateColor = QColor(Qt.red)
 
         # The following properties should not be changed by the user.
-        # These are the colors that are actually used
-        # for drawing gauge.
+        # These are set real time based on changes in different states
+        # like data quality, selected units or modes
         self.bgColor = self.bgGoodColor
         self.safeColor = self.safeGoodColor
         self.warnColor = self.warnGoodColor
@@ -90,6 +97,9 @@ class AbstractGauge(QWidget):
         self.valueColor = self.textGoodColor # The actual value text
         self.penColor = self.penGoodColor # The line on the gauge
         self.highlightColor = self.highlightGoodColor
+        self.unitsOverride = None
+        self.conversionFunction = lambda x: x
+
 
 
     def interpolate(self, value, range_):
@@ -102,6 +112,7 @@ class AbstractGauge(QWidget):
         return self._value
 
     def setValue(self, value):
+        self._rawValue = value
         if self.fail:
             self._value = 0.0
         else:
@@ -157,7 +168,7 @@ class AbstractGauge(QWidget):
     # This should get called when the gauge is created and then again
     # anytime a new report of the db item is recieved from the server
     def setupGauge(self):
-        item = fix.db.get_item(self.dbkey, True)
+        item = fix.db.get_item(self.dbkey)
         # min and max should always be set for FIX Gateway data.
         if item.min: self.lowRange = self.conversionFunction(item.min)
         if item.max: self.highRange = self.conversionFunction(item.max)
@@ -190,7 +201,6 @@ class AbstractGauge(QWidget):
 
 
     def setAuxData(self, auxdata):
-        #print("Setting Auxdata for {} = {}".format(self.name, auxdata))
         if "Min" in auxdata and auxdata["Min"] != None:
             self.lowRange = self.conversionFunction(auxdata["Min"])
         if "Max" in auxdata and auxdata["Max"] != None:
@@ -260,3 +270,29 @@ class AbstractGauge(QWidget):
     def resetPeak(self):
         self.peakValue = self.value
         self.update()
+
+    def setUnitSwitching(self):
+        """When this function is called the unit switching features are used"""
+        self.__currentUnits = 1
+        self.unitsOverride = self.unitsOverride1
+        self.conversionFunction = self.conversionFunction1
+        hmi.actions.setInstUnits.connect(self.setUnits)
+        self.update()
+
+    def setUnits(self, args):
+        x = args.split(':')
+        command = x[1].lower()
+        names = x[0].split(',')
+        if self.dbkey in names or '*' in names or self.unitGroup in names:
+            item = fix.db.get_item(self.dbkey)
+            if command == "toggle":
+                if self.__currentUnits == 1:
+                    self.unitsOverride = self.unitsOverride2
+                    self.conversionFunction = self.conversionFunction2
+                    self.__currentUnits = 2
+                else:
+                    self.unitsOverride = self.unitsOverride1
+                    self.conversionFunction = self.conversionFunction1
+                    self.__currentUnits = 1
+            self.setAuxData(item.aux) # Trigger conversion for aux data
+            self.value = item.value # Trigger the conversion for value
