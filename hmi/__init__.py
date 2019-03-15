@@ -1,4 +1,4 @@
-#  Copyright (c) 2016 Phil Birkelbach
+#  Copyright (c) 2018 Phil Birkelbach
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -14,27 +14,20 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-try:
-    from PyQt5.QtCore import *
-except:
-    from PyQt4.QtCore import *
-
 import logging
-import importlib
 
+from .actions import ActionClass
+from .menu import Menu
+from . import keys
+from . import data
 
-# Read through the configuration and load the hook modules
+actions = None
+
 def initialize(config):
+    global actions
     log = logging.getLogger(__name__)
+    log.info("Initializing Actions")
+    actions = ActionClass()
 
-    if config == None: return # None Configured
-    # Load the Hook Modules
-    for each in config:
-        module = config[each]["module"]
-        try:
-            name = each
-            importlib.import_module(module)
-            #load_screen(each[7:], module, config)
-        except Exception as e:
-            logging.critical("Unable to load module - " + module + ": " + str(e))
-            raise
+    if "databindings" in config:
+        data.initialize(config["databindings"])

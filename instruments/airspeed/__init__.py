@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik, 2018 Garrett Herschleb
+#  Copyright (c) 2013 Neil Domalik, 2018-2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,18 +24,23 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import fix
-
+import pyavtools.fix as fix
+import hmi
 from instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
-    def __init__(self, parent=None):
+    FULL_WIDTH = 400
+    def __init__(self, parent=None, fontsize=20):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontsize = 20
+        self.fontsize = fontsize
         self._airspeed = 0
-        fix.db.get_item("IAS", True).valueChanged[float].connect(self.setAirspeed)
+        self.item = fix.db.get_item("IAS")
+        self.item.valueChanged[float].connect(self.setAirspeed)
+        self.item.oldChanged[bool].connect(self.repaint)
+        self.item.badChanged[bool].connect(self.repaint)
+        self.item.failChanged[bool].connect(self.repaint)
 
 
     def paintEvent(self, event):
@@ -49,7 +54,8 @@ class Airspeed(QWidget):
 
         # Setup Pens
         f = QFont()
-        f.setPixelSize(self.fontsize)
+        fs = int(round(self.fontsize * w / self.FULL_WIDTH))
+        f.setPixelSize(fs)
         fontMetrics = QFontMetricsF(f)
 
         dialPen = QPen(QColor(Qt.white))
@@ -122,7 +128,23 @@ class Airspeed(QWidget):
             dial.rotate(0.5)
             count += 0.5
 
-        dial.setBrush(needleBrush)
+        if self.item.fail:
+            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(Qt.red)))
+            dial.setBrush (QBrush(QColor(Qt.red)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "XXX")
+            dial.restore()
+            return
+
+        if self.item.old or self.item.bad:
+            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            dial.setPen(QPen(QColor(Qt.gray)))
+            dial.setBrush(QBrush(QColor(Qt.gray)))
+        else:
+            dial.setPen(QPen(QColor(Qt.white)))
+            dial.setBrush(QBrush(QColor(Qt.white)))
         #Needle Movement
         needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
                             QPoint(0, -(h / 2 - 40))])
@@ -134,6 +156,21 @@ class Airspeed(QWidget):
 
         dial.rotate(needle_angle)
         dial.drawPolygon(needle)
+
+        """ Not sure if this is needed
+        if self.item.bad:
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(255, 150, 0)))
+            dial.setBrush (QBrush(QColor(255, 150, 0)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
+        elif self.item.old:
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(255, 150, 0)))
+            dial.setBrush (QBrush(QColor(255, 150, 0)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
+        """
 
         dial.restore()
 
@@ -147,6 +184,15 @@ class Airspeed(QWidget):
 
     airspeed = property(getAirspeed, setAirspeed)
 
+    def setAsOld(self,b):
+        pass
+
+    def setAsBad(self,b):
+        pass
+
+    def setAsFail(self,b):
+        pass
+
 
 class Airspeed_Tape(QGraphicsView):
     def __init__(self, parent=None):
@@ -156,9 +202,12 @@ class Airspeed_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        item = fix.db.get_item("IAS", True)
-        item.valueChanged[float].connect(self.setAirspeed)
-        self._airspeed = item.value
+        self.item = fix.db.get_item("IAS")
+        self.item.valueChanged[float].connect(self.setAirspeed)
+        self.item.oldChanged[bool].connect(self.setAsOld)
+        self.item.badChanged[bool].connect(self.setAsBad)
+        self.item.failChanged[bool].connect(self.setAsFail)
+        self._airspeed = self.item.value
 
         # V Speeds
         #Vs = 45
@@ -171,7 +220,6 @@ class Airspeed_Tape(QGraphicsView):
 
         self.pph = 10 # Pixels per unit
         self.fontsize = 20
-
 
     def resizeEvent(self, event):
         w = self.width()
@@ -236,6 +284,9 @@ class Airspeed_Tape(QGraphicsView):
         self.numeric_box_pos.setY(self.numeric_box_pos.y()+nbh/2)
         self.numerical_display.show()
         self.numerical_display.value = self._airspeed
+        self.setAsOld(self.item.old)
+        self.setAsBad(self.item.bad)
+        self.setAsFail(self.item.fail)
 
         self.setScene(self.scene)
         self.centerOn(self.scene.width() / 2,
@@ -276,6 +327,15 @@ class Airspeed_Tape(QGraphicsView):
 
     airspeed = property(getAirspeed, setAirspeed)
 
+    def setAsOld(self,b):
+        self.numerical_display.old = b
+
+    def setAsBad(self,b):
+        self.numerical_display.bad = b
+
+    def setAsFail(self,b):
+        self.numerical_display.fail = b
+
 
 class Airspeed_Mode(QGraphicsView):
     def __init__(self, parent=None):
@@ -288,6 +348,9 @@ class Airspeed_Mode(QGraphicsView):
         self._Mode_Indicator = 0
         self._AS_Data_Box = 0
         self._airspeed_mode = "IAS"
+        hmi.actions.setAirspeedMode.connect(self.setMode)
+        self.modes = ["IAS", "TAS", "GS"]
+
 
     def resizeEvent(self, event):
         self.w = self.width()
@@ -342,35 +405,35 @@ class Airspeed_Mode(QGraphicsView):
         return self._Mode_Indicator
 
     def setMode(self, Mode):
-        if Mode != self._Mode_Indicator:
-            if Mode == 0:
-                self._Mode_Indicator = 0
-                self._airspeed_mode = "IAS"
-            elif Mode == 1:
-                self._Mode_Indicator = 1
-                self._airspeed_mode = "TAS"
-            elif Mode == 2:
-                self._Mode_Indicator = 2
-                self._airspeed_mode = "GS"
-            elif Mode == 3:
-                self._Mode_Indicator = 0
-                self._airspeed_mode = "IAS"
-            self.redraw()
+        if Mode == "":
+            self._Mode_Indicator += 1
+            if self._Mode_Indicator == 3: self._Mode_Indicator = 0
+        else:
+            if Mode != self._Mode_Indicator:
+                if Mode == 0:
+                    self._Mode_Indicator = 0
+                elif Mode == 1:
+                    self._Mode_Indicator = 1
+                elif Mode == 2:
+                    self._Mode_Indicator = 2
 
-    def getAS_Data(self):
-        return self._Mode_Indicator
-
-    def setAS_Data(self, AS_Data, PA_Data, OAT):
-        if self._Mode_Indicator == 1:
-            self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
-        elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
-            if self._Mode_Indicator == 0:
-                self._AS_Data_Box = int(AS_Data)
-            elif self._Mode_Indicator == 2:
-                self._AS_Data_Box = int(AS_Data)
+        self._airspeed_mode = self.modes[self._Mode_Indicator]
         self.redraw()
 
-    def setIAS(self, IAS):
-        self.setAS_Data(IAS, 0, 0)
+    # def getAS_Data(self):
+    #     return self._Mode_Indicator
+    #
+    # def setAS_Data(self, AS_Data, PA_Data, OAT):
+    #     if self._Mode_Indicator == 1:
+    #         self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
+    #     elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
+    #         if self._Mode_Indicator == 0:
+    #             self._AS_Data_Box = int(AS_Data)
+    #         elif self._Mode_Indicator == 2:
+    #             self._AS_Data_Box = int(AS_Data)
+    #     self.redraw()
+    #
+    # def setIAS(self, IAS):
+    #     self.setAS_Data(IAS, 0, 0)
 
-    airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)
+    # airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)

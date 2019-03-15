@@ -73,17 +73,19 @@ class Screen(QWidget):
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
         # Use a lambda to convert the values internally
-        self.ot.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.ot.unitsOverride = u'\N{DEGREE SIGN}F'
-        self.ot.decimalPlaces = 1
+        self.ot.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.ot.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.ot.setUnitSwitching()
         self.ot.dbkey = "OILT1"
 
 
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
         self.fuel.decimalPlaces = 1
-        self.fuel.dbkey = "FUELQ"
+        self.fuel.dbkey = "FUELQT"
 
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
@@ -93,19 +95,27 @@ class Screen(QWidget):
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         # Use a lambda to convert the values internally
-        self.cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.cht.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.cht.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.cht.unitsOverride = u'\N{DEGREE SIGN}F'
-        self.cht.dbkey = "CHTMAX"
+        self.cht.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.cht.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.cht.unitGroup = "Temperature"
+        self.cht.setUnitSwitching()
+        self.cht.dbkey = "CHTMAX1"
 
         self.egt = gauges.HorizontalBar(self)
         self.egt.name = "Avg EGT"
         # Use a lambda to convert the values internally
-        self.egt.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.egt.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.egt.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.egt.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.egt.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.egt.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.egt.unitGroup = "Temperature"
+        self.egt.setUnitSwitching()
         self.egt.decimalPlaces = 0
-        self.egt.dbkey = "EGTAVG"
+        self.egt.dbkey = "EGTAVG1"
 
 
 
@@ -119,18 +129,9 @@ class Screen(QWidget):
         self.alt_tape.resize(60, instHeight)
         self.alt_tape.move(instWidth - 60, 0)
 
-        #self.alt_Trend.resize(10, instHeight)
-        #self.alt_Trend.move(instWidth , 100)
-
         self.as_tape.fontsize = 15
         self.as_tape.resize(60, instHeight)
         self.as_tape.move(0, 0)
-
-        #self.as_Trend.resize(10, instHeight)
-        #self.as_Trend.move(90, 100)
-
-        #self.asd_Box.resize(90, 100)
-        #self.asd_Box.move(0, instHeight + 100)
 
         self.head_tape.fontsize = 15
         self.head_tape.resize(instWidth, 60)

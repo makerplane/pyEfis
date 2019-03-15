@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik, 2018 Garrett Herschleb
+#  Copyright (c) 2013 Neil Domalik, 2018-2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,17 +23,22 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import fix
+import pyavtools.fix as fix
 
 from instruments.NumericalDisplay import NumericalDisplay
 
 class Altimeter(QWidget):
+    FULL_WIDTH = 300
     def __init__(self, parent=None):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
-        fix.db.get_item("ALT", True).valueChanged[float].connect(self.setAltimeter)
+        self.item = fix.db.get_item("ALT")
+        self.item.valueChanged[float].connect(self.setAltimeter)
+        self.item.oldChanged[bool].connect(self.repaint)
+        self.item.badChanged[bool].connect(self.repaint)
+        self.item.failChanged[bool].connect(self.repaint)
 
     # TODO We continuously draw things that don't change.  Should draw the
     # background save to pixmap or something and then blit it and draw arrows.
@@ -47,17 +52,25 @@ class Altimeter(QWidget):
         dial.fillRect(0, 0, w, h, Qt.black)
 
         # Setup Pens
-        f = QFont()
-        f.setPixelSize(30)
-
-        dialPen = QPen(QColor(Qt.white))
-        dialBrush = QBrush(QColor(Qt.white))
+        if self.item.old or self.item.bad:
+            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            dialPen = QPen(QColor(Qt.gray))
+            dialBrush = QBrush(QColor(Qt.gray))
+        else:
+            dialPen = QPen(QColor(Qt.white))
+            dialBrush = QBrush(QColor(Qt.white))
         dialPen.setWidth(2)
 
         # Dial Setup
         dial.setPen(dialPen)
-        dial.setFont(f)
         dial.drawEllipse(25, 25, w - 50, h - 50)
+
+        f = QFont()
+        fs = int(round(30 * w / self.FULL_WIDTH))
+        f.setPixelSize(fs)
+        dial.setFont(f)
+        dial.setPen(dialPen)
+        dial.setBrush(dialBrush)
 
         dial.translate(w / 2, h / 2)
         count = 0
@@ -81,6 +94,15 @@ class Altimeter(QWidget):
             dial.rotate(7.2)
             count += 7.2
 
+        if self.item.fail:
+            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(Qt.red)))
+            dial.setBrush (QBrush(QColor(Qt.red)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "XXX")
+            return
+
         dial.setBrush(dialBrush)
         # Needle Movement
         sm_dial = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
@@ -89,15 +111,37 @@ class Altimeter(QWidget):
                             QPoint(0, +5), QPoint(-5, 0),
                             QPoint(-10, -(h / 2 - 120)),
                             QPoint(0, -(h / 2 - 100))])
+        outside_dial = QPolygon([QPoint( 7.5, -(h / 2 - 25)), QPoint( -7.5 , -(h /2 - 25)),
+                                 QPoint(0, -(h / 2 - 35))])
 
-        sm_dial_angle = self._altimeter * .36
-        lg_dial_angle = self._altimeter / 10 * .36
+        sm_dial_angle = self._altimeter * .36 - 7.2
+        lg_dial_angle = self._altimeter / 10 * .36 - 7.2
+        outside_dial_angle = self._altimeter / 100 * .36 - 7.2
 
         dial.rotate(sm_dial_angle)
         dial.drawPolygon(sm_dial)
         dial.rotate(-sm_dial_angle)
         dial.rotate(lg_dial_angle)
         dial.drawPolygon(lg_dial)
+        dial.rotate(-lg_dial_angle)
+        dial.rotate(outside_dial_angle)
+        dial.drawPolygon(outside_dial)
+
+        """ Not sure if this is needed
+        if self.item.bad:
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(255, 150, 0)))
+            dial.setBrush (QBrush(QColor(255, 150, 0)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
+        elif self.item.old:
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(255, 150, 0)))
+            dial.setBrush (QBrush(QColor(255, 150, 0)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
+        """
+
 
     def getAltimeter(self):
         return self._altimeter
@@ -111,19 +155,22 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None, maxalt=50000):
+    def __init__(self, parent=None, maxalt=50000, fontsize=15):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontsize = 15
-        item = fix.db.get_item("ALT", True)
-        self._altimeter = item.value
+        self.fontsize = fontsize
+        self.item = fix.db.get_item("ALT")
+        self._altimeter = self.item.value
         self.maxalt = maxalt
         self.pph = 0.3
-        item.valueChanged[float].connect(self.setAltimeter)
+        self.item.valueChanged[float].connect(self.setAltimeter)
+        self.item.oldChanged[bool].connect(self.setAltOld)
+        self.item.badChanged[bool].connect(self.setAltBad)
+        self.item.failChanged[bool].connect(self.setAltFail)
 
 
     def resizeEvent(self, event):
@@ -165,6 +212,9 @@ class Altimeter_Tape(QGraphicsView):
         self.numerical_display.show()
         self.numerical_display.value = self._altimeter
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
+        self.setAltOld(self.item.old)
+        self.setAltBad(self.item.bad)
+        self.setAltFail(self.item.fail)
 
     def y_offset(self, alt):
         return self.height_pixel - (alt*self.pph) - self.height()/2
@@ -201,16 +251,14 @@ class Altimeter_Tape(QGraphicsView):
 
     altimeter = property(getAltimeter, setAltimeter)
 
-    def getAltimeter_Setting(self):
-        return self._altimeter_setting
+    def setAltOld(self,b):
+        self.numerical_display.old = b
 
-    def setAltimeter_Setting(self, altimeter_setting):
-        if altimeter_setting != self._altimeter_setting:
-            self._altimeter_setting = altimeter_setting
-            self._Alt_correction = (29.92 - self._altimeter_setting) * 1000
-            self.redraw()
+    def setAltBad(self,b):
+        self.numerical_display.bad = b
 
-    altimeter_setting = property(getAltimeter_Setting, setAltimeter_Setting)
+    def setAltFail(self,b):
+        self.numerical_display.fail = b
 
 class Altimeter_Setting(QGraphicsView):
     def __init__(self, parent=None):
@@ -220,8 +268,9 @@ class Altimeter_Setting(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self._altimeter_setting = 29.92
-        fix.db.get_item("BARO", True).valueChanged[float].connect(self.setAltimeter_Setting)
+        item1 = fix.db.get_item("BARO")
+        self._altimeter_setting = item1.value
+        item1.valueChanged[float].connect(self.setAltimeter_Setting)
 
 
     def resizeEvent(self, event):
@@ -264,3 +313,5 @@ class Altimeter_Setting(QGraphicsView):
         if altimeter_setting != self._altimeter_setting:
             self._altimeter_setting = altimeter_setting
             self.redraw()
+
+    altimeter_setting = property(getAltimeter_Setting, setAltimeter_Setting)

@@ -52,29 +52,37 @@ class Screen(QWidget):
 
         self.tc = tc.TurnCoordinator(self)
 
-        self.hsi = hsi.HSI(self)
+        self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fgcolor=Qt.white)
 
         self.vsi = vsi.VSI(self)
 
 
     def resizeEvent(self, event):
+        menu_offset = 100
         instWidth = self.width()/3
-        instHeight = instWidth
+        instHeight = (self.height()-menu_offset)/2
+        diameter=min(instWidth,instHeight)
 
-        self.airspeed.move(0,0)
-        self.airspeed.resize(instWidth,instHeight)
+        self.airspeed.move(0,menu_offset)
+        self.airspeed.resize(diameter,diameter)
 
-        self.ai.move(instWidth,0)
+        self.ai.move(instWidth,0 + menu_offset)
         self.ai.resize(instWidth,instHeight)
 
-        self.altimeter.move(instWidth*2,0)
-        self.altimeter.resize(instWidth,instHeight)
+        self.altimeter.move(instWidth*2,0 + menu_offset)
+        self.altimeter.resize(diameter,diameter)
 
-        self.tc.move(0,instHeight)
+        self.tc.move(0,instHeight + menu_offset)
         self.tc.resize(instWidth,instHeight)
 
-        self.hsi.move(instWidth,instHeight)
-        self.hsi.resize(instWidth,instHeight)
+        hdh = self.heading_disp.height()
+        hdw = self.heading_disp.width()
+        diameter -= (hdh+30)
+        offset = instHeight-diameter
+        self.hsi.move(instWidth+(instWidth-diameter)/2, instHeight + menu_offset + offset-20)
+        self.hsi.resize(diameter,diameter)
+        self.heading_disp.move(instWidth*1.5-hdw/2, instHeight + menu_offset+10)
 
-        self.vsi.move(instWidth*2,instHeight)
+        self.vsi.move(instWidth*2,instHeight + menu_offset)
         self.vsi.resize(instWidth,instHeight)

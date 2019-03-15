@@ -51,8 +51,9 @@ class Screen(QWidget):
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
-        self.parent.change_asd_mode.connect(self.change_asd_mode)
+        #self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#0030FF")
         self.alt_setting = altimeter.Altimeter_Setting(self)
 
         self.map_g = gauges.ArcGauge(self)
@@ -74,17 +75,19 @@ class Screen(QWidget):
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
         # Use a lambda to convert the values internally
-        self.ot.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.ot.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.ot.unitsOverride = u'\N{DEGREE SIGN}F'
-        self.ot.decimalPlaces = 1
+        self.ot.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.ot.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.ot.setUnitSwitching()
         self.ot.dbkey = "OILT1"
 
 
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
         self.fuel.decimalPlaces = 1
-        self.fuel.dbkey = "FUELQ"
+        self.fuel.dbkey = "FUELQT"
 
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
@@ -94,20 +97,27 @@ class Screen(QWidget):
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         # Use a lambda to convert the values internally
-        self.cht.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.cht.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.cht.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.cht.unitsOverride = u'\N{DEGREE SIGN}F'
-        self.cht.dbkey = "CHTMAX"
+        self.cht.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.cht.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.cht.unitGroup = "Temperature"
+        self.cht.setUnitSwitching()
+        self.cht.dbkey = "CHTMAX1"
 
         self.egt = gauges.HorizontalBar(self)
         self.egt.name = "Avg EGT"
         # Use a lambda to convert the values internally
-        self.egt.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
+        self.egt.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
+        self.egt.conversionFunction2 = lambda x: x
         # This causes the units sent from the server to be overridden
-        self.egt.unitsOverride = u'\N{DEGREE SIGN}F'
+        self.egt.unitsOverride1 = u'\N{DEGREE SIGN}F'
+        self.egt.unitsOverride2 = u'\N{DEGREE SIGN}C'
+        self.egt.unitGroup = "Temperature"
+        self.egt.setUnitSwitching()
         self.egt.decimalPlaces = 0
-        self.egt.dbkey = "EGTAVG"
-
+        self.egt.dbkey = "EGTAVG1"
 
 
     def resizeEvent(self, event):
@@ -132,9 +142,10 @@ class Screen(QWidget):
         self.asd_Box.move(0, instHeight + 100)
 
         hsi_diameter=instWidth/5
-        hsi_height=hsi_diameter+20
-        self.hsi.resize(hsi_diameter, hsi_height)
-        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter/2)
+        self.hsi.resize(hsi_diameter, hsi_diameter)
+        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter + 95)
+        self.heading_disp.move((instWidth-self.heading_disp.width())/2,
+                    instHeight - hsi_diameter - self.heading_disp.height() + 95)
 
         self.alt_setting.resize(90, 100)
         self.alt_setting.move(instWidth -100, instHeight + 100)
