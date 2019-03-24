@@ -33,14 +33,10 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
-        self._rollAngle = 0.0
-        self._TAS = 0.1
         item = fix.db.get_item("ALAT", True)
         item.valueChanged[float].connect(self.setLatAcc)
-        tas = fix.db.get_item("TAS", True)
-        tas.valueChanged[float].connect(self.setTAS)
-        roll = fix.db.get_item("ROLL", True)
-        roll.valueChanged[float].connect(self.setRollAngle)
+        item1 = fix.db.get_item("ROT", True)
+        item1.valueChanged[float].connect(self.setROT)
 
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
@@ -137,7 +133,6 @@ class TurnCoordinator(QWidget):
         p.setPen(pen)
         p.setBrush(brush)
 
-        self._rate = math.tan(math.radians(self._rollAngle)) * 1091 / self._TAS
         if self._rate > 5:
             self._rate = 5
         elif self._rate < -5:
@@ -158,25 +153,15 @@ class TurnCoordinator(QWidget):
         p.drawLine(-length / 2, -length / 2, length / 2, -length / 2)
         p.drawLine(0, 0, 0, -length)
 
-    def getRollAngle(self):
+    def getROT(self):
         return self._rate
 
-    def setRollAngle(self, roll):
-        if roll != self._rollAngle:
-            self._rollAngle = roll
+    def setROT(self, rot):
+        if rot != self._rate:
+            self._rate = rot
             self.update()
 
-    turnRate = property(getRollAngle, setRollAngle)
-
-    def getTAS(self):
-        return self._TAS
-
-    def setTAS(self, TAS):
-        if TAS != self._TAS:
-            self._TAS = TAS
-            self.update()
-
-    turnRate = property(getTAS, setTAS)
+    rate = property(getROT, setROT)
 
     def getLatAcc(self):
         return self._latAcc
