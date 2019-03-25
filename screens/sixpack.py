@@ -23,12 +23,13 @@ except:
     from PyQt4.QtCore import *
 
 from instruments import ai
-#from instruments import gauges
+# from instruments import gauges
 from instruments import hsi
 from instruments import airspeed
 from instruments import altimeter
 from instruments import vsi
 from instruments import tc
+
 
 class Screen(QWidget):
     def __init__(self, parent=None):
@@ -36,7 +37,7 @@ class Screen(QWidget):
         self.parent = parent
         p = self.parent.palette()
 
-        self.screenColor = (0,0,0)
+        self.screenColor = (0, 0, 0)
         if self.screenColor:
             p.setColor(self.backgroundRole(), QColor(*self.screenColor))
             self.setPalette(p)
@@ -57,7 +58,6 @@ class Screen(QWidget):
 
         self.vsi = vsi.VSI(self)
 
-
     def resizeEvent(self, event):
         menu_offset = 100
         instWidth = self.width()/3
@@ -67,14 +67,14 @@ class Screen(QWidget):
         self.airspeed.move(0,menu_offset)
         self.airspeed.resize(diameter,diameter)
 
-        self.ai.move(instWidth,0 + menu_offset)
-        self.ai.resize(instWidth,instHeight)
+        self.ai.move(instWidth, 0 + menu_offset)
+        self.ai.resize(instWidth, instHeight)
 
         self.altimeter.move(instWidth*2,0 + menu_offset)
         self.altimeter.resize(diameter,diameter)
 
-        self.tc.move(0,instHeight + menu_offset)
-        self.tc.resize(instWidth,instHeight)
+        self.tc.move(0, instHeight + menu_offset)
+        self.tc.resize(instWidth, instHeight)
 
         hdh = self.heading_disp.height()
         hdw = self.heading_disp.width()
@@ -84,5 +84,5 @@ class Screen(QWidget):
         self.hsi.resize(diameter,diameter)
         self.heading_disp.move(instWidth*1.5-hdw/2, instHeight + menu_offset+10)
 
-        self.vsi.move(instWidth*2,instHeight + menu_offset)
-        self.vsi.resize(instWidth,instHeight)
+        self.vsi.move(instWidth * 2, instHeight + menu_offset)
+        self.vsi.resize(instWidth, instHeight)

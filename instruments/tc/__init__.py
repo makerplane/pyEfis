@@ -35,6 +35,8 @@ class TurnCoordinator(QWidget):
         self._latAcc = 0.0
         item = fix.db.get_item("ALAT")
         item.valueChanged[float].connect(self.setLatAcc)
+        item1 = fix.db.get_item("ROT", True)
+        item1.valueChanged[float].connect(self.setROT)
 
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
@@ -71,9 +73,11 @@ class TurnCoordinator(QWidget):
         p.restore()
 
         # TC Box
-        self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
+        # self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
+        self.boxHalfWidth = 90
         self.boxTop = self.center.y() + (self.r - length) * (
                       math.sin(math.radians(30))) + thickness
+
         rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,
                             self.boxTop + length))
@@ -109,8 +113,11 @@ class TurnCoordinator(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (
-                     self._latAcc / 0.15)
+        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (-(
+                     self._latAcc / 32.185039370079) / 0.217)
+
+        # /accelerations/pilot/y-accel-fps_sec
+        # 32.185039370079 fps /sec = 1 G
         if centerball < 83.3 or centerball > 257.7:
             if centerball > 257.7:
                 centerball = 257.7
@@ -126,6 +133,11 @@ class TurnCoordinator(QWidget):
         p.setPen(pen)
         p.setBrush(brush)
 
+        if self._rate > 5:
+            self._rate = 5
+        elif self._rate < -5:
+            self._rate = -5
+        print(self._rate, self._latAcc)
         x = self.r - length - thickness / 2
         poly = QPolygon([QPoint(0, -thickness / 3),
                          QPoint(-x, -thickness / 8),
@@ -141,15 +153,15 @@ class TurnCoordinator(QWidget):
         p.drawLine(-length / 2, -length / 2, length / 2, -length / 2)
         p.drawLine(0, 0, 0, -length)
 
-    def getTurnRate(self):
+    def getROT(self):
         return self._rate
 
-    def setTurnRate(self, rate):
-        if rate != self._rate:
-            self._rate = rate
+    def setROT(self, rot):
+        if rot != self._rate:
+            self._rate = rot
             self.update()
 
-    turnRate = property(getTurnRate, setTurnRate)
+    rate = property(getROT, setROT)
 
     def getLatAcc(self):
         return self._latAcc
