@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #!/usr/bin/env python3
 
 #  Copyright (c) 2013 Phil Birkelbach
@@ -17,15 +16,11 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
+import sys, os
 
 import logging
 import logging.config
 import argparse
-# try:
-#     import ConfigParser
-# except:
-#     import configparser as ConfigParser
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtWidgets import *
@@ -35,9 +30,10 @@ except:
     PYQT = 4
 import yaml
 
-import scheduler
-import fix
+import pyavtools.fix as fix
+
 import hooks
+import hmi
 import gui
 import importlib
 
@@ -66,7 +62,7 @@ if __name__ == "__main__":
         cf = args.config_file
     else: # otherwise use the default
         cf = open(config_file)
-    config = yaml.load(cf)
+    config = yaml.load(cf, Loader=yaml.SafeLoader)
 
     # Either load the config file given as a command line argument or
     # look in the configuration for the logging object
@@ -85,16 +81,18 @@ if __name__ == "__main__":
     log.info("Starting pyEFIS")
 
     log.debug("PyQT Version = %d" % PYQT)
-    scheduler.initialize()
 
     fix.initialize(config)
+    hmi.initialize(config)
 
     if 'FMS' in config:
-        sys.path.insert(0, config.get("FMS", "module_dir"))
+        sys.path.insert(0, config["FMS"]["module_dir"])
         fms = importlib.import_module ("FixIntf")
-        fms.start(config.get("FMS", "aircraft_config"))
+        fms.start(config["FMS"]["aircraft_config"])
 
     gui.initialize(config)
+    if "keybindings" in config:
+        hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
 
     # Main program loop

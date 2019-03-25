@@ -23,7 +23,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 import math
-import fix
+import pyavtools.fix as fix
 
 
 class TurnCoordinator(QWidget):
@@ -33,7 +33,7 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
-        item = fix.db.get_item("ALAT", True)
+        item = fix.db.get_item("ALAT")
         item.valueChanged[float].connect(self.setLatAcc)
         item1 = fix.db.get_item("ROT", True)
         item1.valueChanged[float].connect(self.setROT)

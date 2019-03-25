@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik; 2018 Garrett Herschleb
+#  Copyright (c) 2013 Neil Domalik; 2018-2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import math
+
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
@@ -22,61 +24,50 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 import efis
-import fix
+import pyavtools.fix as fix
 
-class HSI(QWidget):
+class HSI(QGraphicsView):
     def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
         super(HSI, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = font_size
         self.fg_color = fgcolor
         self.bg_color = bgcolor
-        self._heading_key = None
-        item = fix.db.get_item("COURSE", True)
+        item = fix.db.get_item("COURSE")
         self._headingSelect = item.value
         item.valueChanged[float].connect(self.setHeadingBug)
         self._courseSelect = 1
 
-        self.cdidb = fix.db.get_item("CDI", True)
+        self.cdidb = fix.db.get_item("CDI")
         self._courseDeviation = self.cdidb.value
         self.cdidb.valueChanged[float].connect(self.setCdi)
         self._showCDI = not self.cdidb.old
 
-        self.gsidb = fix.db.get_item("GSI", True)
+        self.gsidb = fix.db.get_item("GSI")
         self._glideSlopeIndicator = self.gsidb.value
         self.gsidb.valueChanged[float].connect(self.setGsi)
         self._showGSI = not self.gsidb.old
         self.cardinal = ["N", "E", "S", "W"]
 
-        item = fix.db.get_item("HEAD", True)
-        self._heading = item.value
-        item.valueChanged[float].connect(self.setHeading)
-
-        #item.oldChanged.connect(self.oldFlag)
-        #item.badChanged.connect(self.badFlag)
-        #item.failChanged.connect(self.failFlag)
-
+        self.item = fix.db.get_item("HEAD")
+        self._heading = self.item.value
+        self.item.valueChanged[float].connect(self.setHeading)
+        self.heading_bug = None
+        self.item.failChanged[bool].connect(self.setFail)
+        self._fail = False
 
 
     def resizeEvent(self, event):
+        self.scene = QGraphicsScene(0, 0, self.width(), self.height())
         self.cx = self.width() / 2
-        self.cy = self.height() / 2 + self.fontSize / 2
-        self.r = self.height() / 2 - self.fontSize - 5
+        self.cy = self.height() / 2
+        self.r = self.height() / 2 - 5
         self.cdippw = self.r * .5
         self.gsipph = self.r * .5
-
-    def paintEvent(self, event):
-        c = QPainter(self)
-        c.setRenderHint(QPainter.Antialiasing)
-        f = QFont()
-        f.setBold(True)
-        f.setFamily ("Sans")
-        f.setPixelSize(self.fontSize)
-        c.setFont(f)
-
-        #Draw the Black Background
-        #c.fillRect(0, 0, self.width(), self.height(), Qt.black)
 
         # Setup Pens
         compassPen = QPen(QColor(self.fg_color))
@@ -90,56 +81,84 @@ class HSI(QWidget):
         cdiPen = QPen(QColor(Qt.yellow))
         cdiPen.setWidth(3)
 
-        # Compass Setup
-        c.setPen(compassPen)
-        c.setBrush(compassBrush)
-        c.drawPoint(self.cx, self.cy)
-        tr = QRect(self.cx - self.fontSize * 1.5, 3,
-                   self.fontSize * 3, self.fontSize + 5)
-        c.drawText(tr, Qt.AlignHCenter | Qt.AlignVCenter,
-                   str(int(self._heading)))
-        c.setBrush(nobrush)
-        c.drawRect(tr)
+        f = QFont()
+        f.setBold(True)
+        f.setFamily ("Sans")
+        f.setPixelSize(self.fontSize)
+        self.scene.setFont(f)
 
         # Compass Setup
-        center = QPointF(self.cx, self.cy)
-        c.drawEllipse(center, self.r, self.r)
-
-        c.save()
-        c.translate(self.cx, self.cy)
-        c.rotate(-(self._heading))
+        self.scene.addEllipse(self.cx-self.r, self.cy-self.r, self.r*2, self.r*2,
+                                compassPen, nobrush)
 
         refsize = self.fontSize*.7
-        longLine = QLine(0, -self.r, 0, -(self.r - refsize))
-        shortLine = QLine(0, -self.r, 0, -(self.r - refsize / 2))
-        textRect = QRect(-40, -self.r + refsize, 80, refsize + 10)
-        c.setBrush(compassBrush)
+        self.labels = list()
         for count in range(0, 360, 5):
-            if count % 10 == 0:
-                c.drawLine(longLine)
-                if count % 90 == 0:
-                    c.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
-                               self.cardinal[int(count / 90)])
-                elif count % 30 == 0:
-                    c.drawText(textRect, Qt.AlignHCenter | Qt.AlignVCenter,
-                               str(int(count / 10)))
-            else:
-                c.drawLine(shortLine)
-            c.rotate(5)
+            angle = (count) * math.pi / 180
+            cosa = math.cos(angle)
+            sina = math.sin(angle)
+            iy1 = -self.r
+            iy2 = -self.r + refsize
+            if count % 10 != 0:
+                iy2 -= refsize/2
+            x1 = (-iy1*sina) + self.cx # (ix*cosa - iy*sina) ix factor removed Since x is 0
+            y1 = iy1*cosa + self.cy # (iy*cosa + ix*sina)
+            x2 = (-iy2*sina) + self.cx
+            y2 = iy2*cosa + self.cy
+            self.scene.addLine(x1, y1, x2, y2, compassPen)
+            if count % 90 == 0:
+                t = self.scene.addSimpleText(self.cardinal[int(count / 90)])
+                t.setRotation(count)
+                t.setPen(compassPen)
+                iy3 = -self.r + refsize*1.1
+                ix3 = -refsize/2
+                x3 = (ix3*cosa - iy3*sina) + self.cx
+                y3 = (iy3*cosa + ix3*sina) + self.cy
+                t.setPos(x3, y3)
+                self.labels.append(t)
+            elif count % 30 == 0:
+                text = str(int(count / 10))
+                t = self.scene.addSimpleText(text)
+                t.setRotation(count)
+                t.setPen(compassPen)
+                iy3 = -self.r + refsize*1.1
+                ix3 = -refsize*len(text)/2
+                x3 = (ix3*cosa - iy3*sina) + self.cx
+                y3 = (iy3*cosa + ix3*sina) + self.cy
+                t.setPos(x3, y3)
+                self.labels.append(t)
 
         #Draw Heading Bug
-        c.setPen(headingPen)
-        c.setBrush(headingBrush)
-        delta = self._headingSelect
-        c.rotate(delta)
-        inc = int(self.fontSize / 2 * 0.8)
-        triangle = QPolygon([QPoint(inc, -self.r + 1),
-                             QPoint(-inc, -self.r + 1),
-                             QPoint(0, -(self.r - inc * 2))])
-        c.drawPolygon(triangle)
-        c.rotate(-delta)
+        triangle = self.heading_bug_polygon()
+        self.heading_bug = self.scene.addPolygon(triangle, headingPen, headingBrush)
 
-        c.restore()
+        self.setScene(self.scene)
+        self.rotate(-self._heading)
+        self.setFail(self.item.fail)
+
+    def heading_bug_polygon(self):
+        inc = int(self.fontSize / 2 * 0.8)
+        iyb = -self.r
+        points = [ (inc, -self.r - inc/2),
+                  (-inc, -self.r - inc/2),
+                  (0, -self.r + (inc/2))]
+        angle = (self._headingSelect) * math.pi / 180
+        cosa = math.cos(angle)
+        sina = math.sin(angle)
+
+        points = [((ix*cosa - iy*sina), (iy*cosa + ix*sina)) for ix,iy in points]
+        points = [QPointF((ix + self.cx), (iy + self.cy)) for ix,iy in points]
+        triangle = QPolygonF(points)
+        return triangle
+
+    def paintEvent(self, event):
+        super(HSI, self).paintEvent(event)
+        c = QPainter(self.viewport())
+        compassPen = QPen(QColor(self.fg_color))
+        compassBrush = QBrush(QColor(self.bg_color))
+        cdiPen = QPen(QColor(Qt.yellow))
+        cdiPen.setWidth(3)
+        c.setRenderHint(QPainter.Antialiasing)
 
         #Non-moving items
         c.setPen(cdiPen)
@@ -161,29 +180,46 @@ class HSI(QWidget):
             c.drawLine(self.cx + deviation*self.cdippw, self.cy - 5,
                        self.cx + deviation*self.cdippw, self.cy + 5)
             deviation += 1.0/3.0
+
         c.setPen(cdiPen)
         self._showCDI = not self.cdidb.old
         if self._showCDI:
             x = self.cx + self._courseDeviation * self.cdippw
             c.drawLine(x, self.cy + self.r - self.fontSize*2 - 6,
                    x, self.cy - self.r + self.fontSize*2 + 6)
-            
+
         self._showGSI = not self.gsidb.old
         if self._showGSI:
             y = self.cy - self._glideSlopeIndicator * self.gsipph
             c.drawLine(self.cx + self.r - self.fontSize*2 - 6, y,
                    self.cx - self.r + self.fontSize*2 + 6, y)
-            
 
     def getHeading(self):
         return self._heading
 
     def setHeading(self, heading):
         if heading != self._heading:
-            self._heading = efis.bounds(0, 360, heading)
-            self.update()
+            newheading = efis.bounds(0, 360, heading)
+            diff = newheading - self._heading
+            if diff > 180:
+                diff -= 360
+            elif diff < -180:
+                diff += 360
+            self._heading = newheading
+            self.rotate(-diff)
 
     heading = property(getHeading, setHeading)
+
+    def setFail(self, fail):
+        if fail != self._fail:
+            self._fail = fail
+            if self.isVisible():
+                if fail:
+                    for l in self.labels:
+                        l.setOpacity(0)
+                else:
+                    for l in self.labels:
+                        l.setOpacity(1)
 
     def getHeadingBug(self):
         return self._headingSelect
@@ -191,7 +227,9 @@ class HSI(QWidget):
     def setHeadingBug(self, headingBug):
         if headingBug != self._headingSelect:
             self._headingSelect = efis.bounds(0, 360, headingBug)
-            self.update()
+            if self.heading_bug is not None:
+                triangle = self.heading_bug_polygon()
+                self.heading_bug.setPolygon(triangle)
 
     headingBug = property(getHeadingBug, setHeadingBug)
 
@@ -215,6 +253,79 @@ class HSI(QWidget):
 
     gsi = property(getGsi, setGsi)
 
+class HeadingDisplay(QWidget):
+    def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
+        super(HeadingDisplay, self).__init__(parent)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.fontSize = font_size
+        self.fg_color = fgcolor
+        self.bg_color = bgcolor
+
+        self.item = fix.db.get_item("HEAD")
+        self._heading = self.item.value
+        self.item.valueChanged[float].connect(self.setHeading)
+        self.item.failChanged[bool].connect(self.setFail)
+        self.item.badChanged[bool].connect(self.setBad)
+        self.item.oldChanged[bool].connect(self.setOld)
+        self._bad = self.item.bad
+        self._old = self.item.old
+        self._fail = self.item.fail
+
+        self.font = QFont()
+        self.font.setBold(True)
+        self.font.setFamily ("Sans")
+        self.font.setPixelSize(self.fontSize)
+        t = QGraphicsSimpleTextItem ("999")
+        t.setFont (self.font)
+        br = t.boundingRect()
+        self.resize(br.width()*1.2, br.height()*1.2)
+
+    def paintEvent(self, event):
+        c = QPainter(self)
+        compassPen = QPen(QColor(self.fg_color))
+        compassBrush = QBrush(QColor(self.bg_color))
+        c.setPen(compassPen)
+        c.setFont(self.font)
+        tr = QRect(0, 0, self.width(), self.height())
+        c.drawRect(tr)
+        if self._fail:
+            heading_text = "XXX"
+            c.setBrush(QBrush(QColor(Qt.red)))
+            c.setPen(QPen(QColor(Qt.red)))
+        elif self._bad:
+            heading_text = ""
+            c.setBrush(QBrush(QColor(255, 150, 0)))
+            c.setPen(QPen(QColor(255, 150, 0)))
+        elif self._old:
+            heading_text = ""
+            c.setBrush(QBrush(QColor(255, 150, 0)))
+            c.setPen(QPen(QColor(255, 150, 0)))
+        else:
+            heading_text = str(int(self._heading))
+
+        c.drawText(tr, Qt.AlignHCenter | Qt.AlignVCenter, heading_text)
+
+    def getHeading(self):
+        return self._heading
+
+    def setHeading(self, heading):
+        if heading != self._heading:
+            self._heading = efis.bounds(0, 360, heading)
+            self.update()
+
+    heading = property(getHeading, setHeading)
+
+    def setFail(self, fail):
+        self._fail = fail
+        self.repaint()
+
+    def setOld(self, old):
+        self._old = old
+        self.repaint()
+
+    def setBad(self, bad):
+        self._bad = bad
+        self.repaint()
 
 class DG_Tape(QGraphicsView):
     def __init__(self, parent=None):
@@ -233,10 +344,6 @@ class DG_Tape(QGraphicsView):
 
         item = fix.db.get_item("HEAD", True)
         item.valueChanged[float].connect(self.setHeading)
-
-        #item.oldChanged.connect(self.oldFlag)
-        #item.badChanged.connect(self.badFlag)
-        #item.failChanged.connect(self.failFlag)
 
         #fix.db.get_item("COURSE", True).valueChanged[float].connect(self.setHeadingBug)
 

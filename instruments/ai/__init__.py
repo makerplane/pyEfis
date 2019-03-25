@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Phil Birkelbach; 2018 Garrett Herschleb
+#  Copyright (c) 2013 Phil Birkelbach; 2018-2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import math
 import efis
 import logging
 
-import fix
+import pyavtools.fix as fix
 
 log = logging.getLogger(__name__)
 
@@ -42,15 +42,24 @@ class AI(QGraphicsView):
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
 
-        pitch = fix.db.get_item("PITCH", True)
+        pitch = fix.db.get_item("PITCH")
         pitch.valueChanged[float].connect(self.setPitchAngle)
+        pitch.oldChanged[bool].connect(self.setAIOld)
+        pitch.badChanged[bool].connect(self.setAIBad)
+        pitch.failChanged[bool].connect(self.setAIFail)
         self._pitchAngle = pitch.value
-        roll = fix.db.get_item("ROLL", True)
+        roll = fix.db.get_item("ROLL")
         roll.valueChanged[float].connect(self.setRollAngle)
+        roll.oldChanged[bool].connect(self.setAIOld)
+        roll.badChanged[bool].connect(self.setAIBad)
+        roll.failChanged[bool].connect(self.setAIFail)
         self._rollAngle = roll.value
-        self.fdrolldb = fix.db.get_item("FDROLL", True)
-        self.fdpitchdb = fix.db.get_item("FDPITCH", True)
-        self.fdondb = fix.db.get_item("FDON", True)
+        self._AIOld = roll.old
+        self._AIBad = roll.bad
+        self._AIFail = roll.fail
+        self.fdrolldb = fix.db.get_item("FDROLL", wait=False, create=True)
+        self.fdpitchdb = fix.db.get_item("FDPITCH", wait=False, create=True)
+        self.fdondb = fix.db.get_item("FDON", wait=False, create=True)
         self.fdondb.valueChanged[bool].connect(self.fdon)
         self.fdtarget_widget = None
         self.fdt = None
@@ -69,31 +78,81 @@ class AI(QGraphicsView):
                 self.fdtarget_widget = None
 
     def resizeEvent(self, event):
-        log.debug("resizeEvent")
         #Setup the scene that we use for the background of the AI
         sceneHeight = self.height() * 4.5
         sceneWidth = math.sqrt(self.width() * self.width() +
                                self.height() * self.height())
         self.pixelsPerDeg = self.height() / self.pitchDegreesShown
         self.scene = QGraphicsScene(0, 0, sceneWidth, sceneHeight)
+
+        # Get a failure scene ready in case it's needed
+        self.fail_scene = QGraphicsScene(0, 0, sceneWidth, sceneHeight)
+        self.fail_scene.addRect(0,0, sceneWidth, sceneHeight, QPen(QColor(Qt.white)), QBrush(QColor(50,50,50)))
+        font = QFont("FixedSys", 80, QFont.Bold)
+        t = self.fail_scene.addSimpleText("XXX", font)
+        t.setPen (QPen(QColor(Qt.red)))
+        t.setBrush (QBrush(QColor(Qt.red)))
+        r = t.boundingRect()
+        t.setPos ((sceneWidth-r.width())/2, (sceneHeight-r.height())/2)
+
         #Draw the Blue and Brown rectangles
         gradientBlue = QLinearGradient(0, 0, 0, sceneHeight / 2)
         gradientBlue.setColorAt(0.7, QColor(0, 51, 102))
         gradientBlue.setColorAt(1.0, QColor(51, 153, 255))
         gradientBlue.setSpread(0)
-        pen = QPen(QColor(Qt.blue))
-        brush = QBrush(gradientBlue)
-        self.scene.addRect(0, 0, sceneWidth, sceneHeight / 2, pen, brush)
+        self.blue_pen = QPen(QColor(Qt.blue))
+        self.gblue_brush = QBrush(gradientBlue)
+        gradientLGray = QLinearGradient(0, 0, 0, sceneHeight / 2)
+        gradientLGray.setColorAt(0.7, QColor(100, 100, 100))
+        gradientLGray.setColorAt(1.0, QColor(153, 153, 153))
+        gradientLGray.setSpread(0)
+        self.gray_sky = QBrush(gradientLGray)
+        if self._AIOld or self._AIBad:
+            brush = self.gray_sky
+        else:
+            brush = self.gblue_brush
+        self.sky_rect = self.scene.addRect(0, 0, sceneWidth, sceneHeight / 2, self.blue_pen, brush)
         self.setScene(self.scene)
         gradientBrown = QLinearGradient(0, sceneHeight / 2, 0, sceneHeight)
         gradientBrown.setColorAt(0.0, QColor(105, 46, 1))
         gradientBrown.setColorAt(0.2, QColor(244, 164, 96))
         gradientBrown.setSpread(0)
-        pen = QPen(QColor(160, 82, 45))  # Brown Color
-        brush = QBrush(gradientBrown)
-        self.scene.addRect(0, sceneHeight / 2 + 1, sceneWidth, sceneHeight,
-                           pen, brush)
+        self.brown_pen = QPen(QColor(160, 82, 45))  # Brown Color
+        self.gbrown_brush = QBrush(gradientBrown)
+        gradientDGray = QLinearGradient(0, sceneHeight / 2, 0, sceneHeight)
+        gradientDGray.setColorAt(0.0, QColor(20, 20, 20))
+        gradientDGray.setColorAt(0.2, QColor(75, 75, 75))
+        gradientDGray.setSpread(0)
+        self.gray_land = QBrush(gradientDGray)
+        if self._AIOld or self._AIBad:
+            brush = self.gray_land
+        else:
+            brush = self.gbrown_brush
+        self.land_rect = self.scene.addRect(0, sceneHeight / 2 + 1, sceneWidth, sceneHeight,
+                           self.brown_pen, brush)
+
+        """ Not sure if this is needed or not:
+        self.bad_text = self.scene.addSimpleText("BAD", font)
+        warn_pen = QPen(QColor(255, 150, 0))
+        warn_brush = QBrush(QColor(255, 150, 0))
+        self.bad_text.setPen (warn_pen)
+        self.bad_text.setBrush (warn_brush)
+        r = self.bad_text.boundingRect()
+        self.bad_text.setPos ((sceneWidth-r.width())/2, (sceneHeight-r.height())/2)
+        if not self._AIBad:
+            self.bad_text.hide()
+
+        self.old_text = self.scene.addSimpleText("OLD", font)
+        self.old_text.setPen (warn_pen)
+        self.old_text.setBrush (warn_brush)
+        r = self.old_text.boundingRect()
+        self.old_text.setPos ((sceneWidth-r.width())/2, (sceneHeight-r.height())/2)
+        if not self._AIOld:
+            self.old_text.hide()
+            """
+
         self.setScene(self.scene)
+
         #Draw the main horizontal line
         pen = QPen(QColor(Qt.white))
         pen.setWidth(2)
@@ -159,7 +218,6 @@ class AI(QGraphicsView):
         self.redraw()
 
     def redraw(self):
-        log.debug("redraw")
         self.resetTransform()
         if self.fdondb.value:
             self.fdtarget_widget.update (self.fdpitchdb.value, self.fdrolldb.value)
@@ -170,7 +228,6 @@ class AI(QGraphicsView):
 
 # We use the paintEvent to draw on the viewport the parts that aren't moving.
     def paintEvent(self, event):
-        log.debug("paint")
         super(AI, self).paintEvent(event)
         w = self.width()
         h = self.height()
@@ -234,18 +291,59 @@ class AI(QGraphicsView):
 
     def setRollAngle(self, angle):
         log.debug("Set Roll")
-        if angle != self._rollAngle and self.isVisible():
+        if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
             self._rollAngle = efis.bounds(-180, 180, angle)
-            self.redraw()
 
     def getRollAngle(self):
         return self._rollAngle
 
     rollAngle = property(getRollAngle, setRollAngle)
 
+    def setAIFail(self, fail):
+        log.debug("Set AI Fail")
+        if fail != self._AIFail:
+            self._AIFail = fail
+            if hasattr(self, 'fail_scene'):
+                if fail:
+                    self.resetTransform()
+                    self.setScene (self.fail_scene)
+                else:
+                    self.setScene (self.scene)
+                    self.redraw()
+
+    def setAIOld(self, old):
+        log.debug("Set AI Old")
+        if old != self._AIOld:
+            self._AIOld = old
+            if hasattr(self, 'sky_rect'):
+                if old:
+                    self.sky_rect.setBrush (self.gray_sky)
+                    self.land_rect.setBrush (self.gray_land)
+                    #self.old_text.show()
+                else:
+                    self.sky_rect.setBrush (self.gblue_brush)
+                    self.land_rect.setBrush (self.gbrown_brush)
+                    #self.old_text.hide()
+                    self.redraw()
+
+    def setAIBad(self, bad):
+        log.debug("Set AI Bad")
+        if bad != self._AIBad:
+            self._AIBad = bad
+            if hasattr(self, 'sky_rect'):
+                if bad:
+                    self.sky_rect.setBrush (self.gray_sky)
+                    self.land_rect.setBrush (self.gray_land)
+                    #self.bad_text.show()
+                else:
+                    self.sky_rect.setBrush (self.gblue_brush)
+                    self.land_rect.setBrush (self.gbrown_brush)
+                    #self.bad_text.hide()
+                    self.redraw()
+
     def setPitchAngle(self, angle):
         log.debug("Set Pitch")
-        if angle != self._pitchAngle and self.isVisible():
+        if angle != self._pitchAngle and self.isVisible() and (not self._AIFail):
             self._pitchAngle = efis.bounds(-90, 90, angle)
             self.redraw()
 

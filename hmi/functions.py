@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-#  Copyright (c) 2018 Garrett Herschleb
+#  Copyright (c) 2018 Phil Birkelbach
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,15 +14,13 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import pyavtools.fix as fix
 
-import argparse
+# Set a value in the FIX database.  arg should be "key,value"
+def setValue(arg):
+    args = arg.split(',')
+    fix.db.set_value(args[0].strip(), args[1].strip())
 
-from instruments.ai.CIFPObjects import index_db
-
-if __name__ == "__main__":
-    opt = argparse.ArgumentParser(description='Create an index search file for an FAA CIFP Objects database')
-    opt.add_argument('CIFP_File', help='The path of the CIFP file')
-    opt.add_argument('-o', '--output', default='CIFP/index.bin', help='The path of the output file')
-    args = opt.parse_args()
-
-    index_db(args.CIFP_File, args.output)
+def toggleBool(arg):
+    bit = fix.db.get_item(arg)
+    bit.value = not bit.value

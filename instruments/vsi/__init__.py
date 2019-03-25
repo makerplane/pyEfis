@@ -23,25 +23,31 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import fix
+import pyavtools.fix as fix
 
 
 class VSI(QWidget):
-    def __init__(self, parent=None):
+    FULL_WIDTH = 300
+    def __init__(self, parent=None, fontsize=20):
         super(VSI, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontSize = 30
+        self.fontSize = fontsize
         self._roc = 0
         self.maxRange = 2000
         self.maxAngle = 170.0
-        item = fix.db.get_item("VS", True)
-        item.valueChanged[float].connect(self.setROC)
+        self.item = fix.db.get_item("VS")
+        self.item.valueChanged[float].connect(self.setROC)
+        self.item.oldChanged[bool].connect(self.repaint)
+        self.item.badChanged[bool].connect(self.repaint)
+        self.item.failChanged[bool].connect(self.repaint)
 
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
+        self.r = min(self.width(), self.height()) / 2 - 25
         f = QFont()
-        f.setPixelSize(self.fontSize)
+        fs = int(round(self.fontSize * self.width() / self.FULL_WIDTH))
+        f.setPixelSize(fs)
         fm = QFontMetrics(f)
         p = QPainter(self.background)
         p.setRenderHint(QPainter.Antialiasing)
@@ -50,7 +56,6 @@ class VSI(QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
-        self.r = min(self.width(), self.height()) / 2 - 25
 
         p.fillRect(0, 0, self.width(), self.height(), Qt.black)
         p.drawEllipse(self.center, self.r, self.r)
@@ -130,13 +135,26 @@ class VSI(QWidget):
         f = QFont()
         f.setPixelSize(self.fontSize)
 
-        dialPen = QPen(QColor(Qt.white))
-        dialBrush = QBrush(QColor(Qt.white))
+        if self.item.old or self.item.bad:
+            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            dialPen = QPen(QColor(Qt.gray))
+            dialBrush = QBrush(QColor(Qt.gray))
+        else:
+            dialPen = QPen(QColor(Qt.white))
+            dialBrush = QBrush(QColor(Qt.white))
         dialPen.setWidth(2)
-
         dial.setPen(dialPen)
         dial.setFont(f)
         dial.setBrush(dialBrush)
+
+        if self.item.fail:
+            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(Qt.red)))
+            dial.setBrush (QBrush(QColor(Qt.red)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "XXX")
+            return
 
         # Needle Movement
         needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
@@ -147,6 +165,22 @@ class VSI(QWidget):
         dial.translate(self.center)
         dial.rotate(dial_angle - 90)
         dial.drawPolygon(needle)
+
+        """ This might not be needed:
+        if self.item.bad:
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(255, 150, 0)))
+            dial.setBrush (QBrush(QColor(255, 150, 0)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
+        elif self.item.old:
+            dial.resetTransform()
+            dial.setPen (QPen(QColor(255, 150, 0)))
+            dial.setBrush (QBrush(QColor(255, 150, 0)))
+            dial.setFont (warn_font)
+            dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
+        """
+
 
     def getROC(self):
         return self._roc
@@ -240,12 +274,19 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
 
-        item = fix.db.get_item("VS", True)
-        item.valueChanged[float].connect(self.setVs)
-        self._vs = item.value
+        self.item = fix.db.get_item("VS")
+        self.item.valueChanged[float].connect(self.setVs)
+        self.item.oldChanged[bool].connect(self.setOld)
+        self.item.badChanged[bool].connect(self.setBad)
+        self.item.failChanged[bool].connect(self.setFail)
+        self._vs = self.item.value
         self.maxvs = 2500
         self.fontsize = 10
         self.indicator_line = None
+
+        self._bad = self.item.bad
+        self._old = self.item.old
+        self._fail = self.item.fail
 
     def resizeEvent(self, event):
         w = self.width() - self.RIGHT_MARGIN
@@ -274,6 +315,7 @@ class Alt_Trend_Tape(QGraphicsView):
         self.vstext.setDefaultTextColor(QColor(Qt.white))
         self.vstext.setX(0)
         self.vstext.setY(y)
+        self.setVsText()
         self.top_margin = y + self.vstext.boundingRect().height() * 1.2
         remaining_height = self.height() - self.top_margin
         self.zero_y = remaining_height / 2 + self.top_margin
@@ -310,13 +352,17 @@ class Alt_Trend_Tape(QGraphicsView):
             top = self.zero_y
             bottom = y
         height = bottom - top
-        if self.indicator_line is None:
+        if self._fail:
+            if self.indicator_line is not None:
+                self.scene.removeItem(self.indicator_line)
+                self.indicator_line = None
+        elif self.indicator_line is None:
             self.indicator_line = self.scene.addRect(x, top, width, height,
                                                      QPen(QColor(Qt.white)),
                                                      QBrush(QColor(Qt.white)))
         else:
             self.indicator_line.setRect(x, top, width, height)
-        self.vstext.setPlainText(str(int(self._vs)))
+        self.setVsText()
 
     def setVs(self, vs):
         if vs != self._vs:
@@ -324,3 +370,42 @@ class Alt_Trend_Tape(QGraphicsView):
             self.redraw()
 
     vs = property(setVs)
+
+    def setVsText(self):
+        if self._fail:
+            self.vstext.setPlainText("XXX")
+            self.vstext.setDefaultTextColor (QColor(Qt.red))
+        elif self._bad:
+            self.vstext.setPlainText("")
+            self.vstext.setDefaultTextColor (QColor(255, 150, 0))
+        elif self._old:
+            self.vstext.setPlainText("")
+            self.vstext.setDefaultTextColor (QColor(255, 150, 0))
+        else:
+            self.vstext.setPlainText(str(int(self._vs)))
+            self.vstext.setDefaultTextColor (QColor(Qt.white))
+
+    def getBad(self):
+        return self._bad
+    def setBad(self, b):
+        if self._bad != b:
+            self._bad = b
+            self.redraw()
+    bad = property(getBad, setBad)
+
+    def getOld(self):
+        return self._old
+    def setOld(self, b):
+        if self._old != b:
+            self._old = b
+            self.redraw()
+    old = property(getOld, setOld)
+
+    def getFail(self):
+        return self._fail
+    def setFail(self, b):
+        if self._fail != b:
+            self._fail = b
+            self.redraw()
+    fail = property(getFail, setFail)
+
