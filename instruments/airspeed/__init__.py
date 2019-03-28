@@ -15,6 +15,7 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
+import time
 
 try:
     from PyQt5.QtGui import *
@@ -197,6 +198,8 @@ class Airspeed(QWidget):
 class Airspeed_Tape(QGraphicsView):
     def __init__(self, parent=None):
         super(Airspeed_Tape, self).__init__(parent)
+        self.myparent = parent
+        self.update_period = None
         self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -222,6 +225,11 @@ class Airspeed_Tape(QGraphicsView):
         self.fontsize = 20
 
     def resizeEvent(self, event):
+        if self.update_period is None:
+            self.update_period = self.myparent.get_config_item('update_period')
+            if self.update_period is None:
+                self.update_period = .1
+            self.last_update_time = 0
         w = self.width()
         h = self.height()
         self.markWidth = w / 5
@@ -293,12 +301,15 @@ class Airspeed_Tape(QGraphicsView):
                       -self._airspeed * self.pph + tape_start)
 
     def redraw(self):
-        tape_start = self.max * self.pph + self.height()/2
+        now = time.time()
+        if now - self.last_update_time >= self.update_period:
+            tape_start = self.max * self.pph + self.height()/2
 
-        self.resetTransform()
-        self.centerOn(self.scene.width() / 2,
-                      -self._airspeed * self.pph + tape_start)
-        self.numerical_display.value = self._airspeed
+            self.resetTransform()
+            self.centerOn(self.scene.width() / 2,
+                          -self._airspeed * self.pph + tape_start)
+            self.numerical_display.value = self._airspeed
+            self.last_update_time = now
 
     #  Index Line that doesn't move to make it easy to read the airspeed.
     def paintEvent(self, event):
@@ -346,10 +357,13 @@ class Airspeed_Mode(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._Mode_Indicator = 0
-        self._AS_Data_Box = 0
-        self._airspeed_mode = "IAS"
         hmi.actions.setAirspeedMode.connect(self.setMode)
         self.modes = ["IAS", "TAS", "GS"]
+        self._airspeed_mode = self.modes
+        self.fix_items = [fix.db.get_item(mode) for mode in self.modes]
+        self.fix_item = self.fix_items[self._Mode_Indicator]
+        self._airspeed_mode = self.modes[self._Mode_Indicator]
+        self.fix_item.valueChanged[float].connect(self.setASData)
 
 
     def resizeEvent(self, event):
@@ -365,51 +379,37 @@ class Airspeed_Mode(QGraphicsView):
         self.scene.addRect(0, 0, self.w, self.h,
                            QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
 
-        t = self.scene.addText(self._airspeed_mode)
-        t.setFont(self.f)
+        self.mode_text = self.scene.addText(self._airspeed_mode)
+        self.mode_text.setFont(self.f)
         self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY((self.h - t.boundingRect().height()) / 2 - (
-                                    t.boundingRect().height() / 2))
-        t = self.scene.addText(str(self._AS_Data_Box))
-        t.setFont(self.f)
+        self.mode_text.setDefaultTextColor(QColor(Qt.white))
+        self.mode_text.setX(0)
+        self.mode_text.setY((self.h - self.mode_text.boundingRect().height()) / 2 - (
+                                    self.mode_text.boundingRect().height() / 2))
+        self.data_text = self.scene.addText("   ")
+        self.data_text.setFont(self.f)
         self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY(((self.h - t.boundingRect().height()) / 2) + (
-                                    t.boundingRect().height() / 2))
+        self.data_text.setDefaultTextColor(QColor(Qt.white))
+        self.data_text.setX(0)
+        self.data_text.setY(self.mode_text.boundingRect().height())
         self.setScene(self.scene)
+        self.setASData(self.fix_item.value)
 
     def redraw(self):
-        self.scene.clear()
-        self.scene.addRect(0, 0, self.w, self.h,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
-        t = self.scene.addText(self._airspeed_mode)
-        t.setFont(self.f)
-        self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY((self.h - t.boundingRect().height()) / 2 - (
-                                    t.boundingRect().height() / 2))
-        t = self.scene.addText(str(self._AS_Data_Box))
-        t.setFont(self.f)
-        self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY(((self.h - t.boundingRect().height()) / 2) + (
-                                    t.boundingRect().height() / 2))
-        self.setScene(self.scene)
+        self.mode_text.setPlainText(self._airspeed_mode)
+        self.data_text.setPlainText(self._AS_Data_Box)
 
     def getMode(self):
         return self._Mode_Indicator
 
     def setMode(self, Mode):
         if Mode == "":
+            self.fix_item.valueChanged[float].disconnect(self.setASData)
             self._Mode_Indicator += 1
             if self._Mode_Indicator == 3: self._Mode_Indicator = 0
         else:
             if Mode != self._Mode_Indicator:
+                self.fix_item.valueChanged[float].disconnect(self.setASData)
                 if Mode == 0:
                     self._Mode_Indicator = 0
                 elif Mode == 1:
@@ -418,22 +418,17 @@ class Airspeed_Mode(QGraphicsView):
                     self._Mode_Indicator = 2
 
         self._airspeed_mode = self.modes[self._Mode_Indicator]
+        self.fix_item = self.fix_items[self._Mode_Indicator]
+        self.fix_item.valueChanged[float].connect(self.setASData)
+        self.setASData(self.fix_item.value)
         self.redraw()
 
-    # def getAS_Data(self):
-    #     return self._Mode_Indicator
-    #
-    # def setAS_Data(self, AS_Data, PA_Data, OAT):
-    #     if self._Mode_Indicator == 1:
-    #         self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
-    #     elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
-    #         if self._Mode_Indicator == 0:
-    #             self._AS_Data_Box = int(AS_Data)
-    #         elif self._Mode_Indicator == 2:
-    #             self._AS_Data_Box = int(AS_Data)
-    #     self.redraw()
-    #
-    # def setIAS(self, IAS):
-    #     self.setAS_Data(IAS, 0, 0)
-
-    # airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)
+    def setASData(self, d):
+        if self.fix_item.fail:
+            self._AS_Data_Box = "XXX"
+        elif self.fix_item.bad or self.fix_item.old:
+            self._AS_Data_Box = ""
+        else:
+            self._AS_Data_Box = str(int(round(d)))
+        if self.isVisible():
+            self.redraw()

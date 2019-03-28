@@ -86,3 +86,6 @@ class Screen(QWidget):
 
         self.vsi.move(instWidth * 2, instHeight + menu_offset)
         self.vsi.resize(instWidth, instHeight)
+
+    def get_config_item(self, key):
+        return self.parent.get_config_item(self, key)

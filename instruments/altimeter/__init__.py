@@ -14,6 +14,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import time
 
 try:
     from PyQt5.QtGui import *
@@ -167,13 +168,20 @@ class Altimeter_Tape(QGraphicsView):
         self._altimeter = self.item.value
         self.maxalt = maxalt
         self.pph = 0.3
+        self.myparent = parent
+        self.update_period = None
+
+
+    def resizeEvent(self, event):
+        if self.update_period is None:
+            self.update_period = self.myparent.get_config_item('update_period')
+            if self.update_period is None:
+                self.update_period = .1
+            self.last_update_time = 0
         self.item.valueChanged[float].connect(self.setAltimeter)
         self.item.oldChanged[bool].connect(self.setAltOld)
         self.item.badChanged[bool].connect(self.setAltBad)
         self.item.failChanged[bool].connect(self.setAltFail)
-
-
-    def resizeEvent(self, event):
         w = self.width()
         w_2 = w/2
         h = self.height()
@@ -220,6 +228,10 @@ class Altimeter_Tape(QGraphicsView):
         return self.height_pixel - (alt*self.pph) - self.height()/2
 
     def redraw(self):
+        now = time.time()
+        if now - self.last_update_time < self.update_period:
+            return
+        self.last_update_time = now
         self.resetTransform()
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
         self.numerical_display.value = self._altimeter
