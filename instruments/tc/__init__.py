@@ -64,7 +64,7 @@ class TurnCoordinator(QWidget):
         brush = QBrush(QColor(Qt.white))
         p.setPen(pen)
         self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
-        self.r = min(self.width(), self.height()) / 2 - 25
+        self.r = min(self.width(), self.height()) * .45
 
         p.fillRect(0, 0, self.width(), self.height(), Qt.black)
         if self.render_as_dial:
@@ -91,10 +91,10 @@ class TurnCoordinator(QWidget):
             p.drawEllipse(self.center, thickness, thickness)
 
         # TC Box
-        self.boxHalfWidth = self.width() / 8
+        self.boxHalfWidth = self.r * .6
         self.boxTop = self.center.y() + (self.r - length) * (
                       math.sin(math.radians(40))) + thickness
-        self.boxHeight = self.boxHalfWidth * .27
+        self.boxHeight = self.boxHalfWidth * .25
 
         rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,

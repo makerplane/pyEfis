@@ -48,6 +48,10 @@ class Altimeter(QWidget):
         h = self.height()
         dial = QPainter(self)
         dial.setRenderHint(QPainter.Antialiasing)
+        radius = int(round(min(w,h)*.45))
+        diameter = radius * 2
+        center_x = w/2
+        center_y = h/2
 
         # Draw the Black Background
         dial.fillRect(0, 0, w, h, Qt.black)
@@ -64,11 +68,12 @@ class Altimeter(QWidget):
 
         # Dial Setup
         dial.setPen(dialPen)
-        dial.drawEllipse(25, 25, w - 50, h - 50)
+        dial.drawEllipse(center_x-radius, center_y-radius, diameter, diameter)
 
         f = QFont()
-        fs = int(round(30 * w / self.FULL_WIDTH))
+        fs = int(round(20 * w / self.FULL_WIDTH))
         f.setPixelSize(fs)
+        fontMetrics = QFontMetricsF(f)
         dial.setFont(f)
         dial.setPen(dialPen)
         dial.setBrush(dialBrush)
@@ -78,19 +83,20 @@ class Altimeter(QWidget):
         altimeter_numbers = 0
         while count < 360:
             if count % 36 == 0:
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
-
-                dial.drawText(-9.5, -(h / 2 - 67),
+                dial.drawLine(0, -(radius), 0, -(radius-15))
+                x = fontMetrics.width(str(altimeter_numbers)) / 2
+                y = f.pixelSize()
+                dial.drawText(-x, -(radius-15-y),
                               str(altimeter_numbers))
                 altimeter_numbers += 1
             else:
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
+                dial.drawLine(0, -(radius), 0, -(radius-10))
 
             dial.rotate(36)
             count += 36
         count = 0
         while count < 360:
-            dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
+            dial.drawLine(0, -(radius), 0, -(radius-10))
 
             dial.rotate(7.2)
             count += 7.2
@@ -107,13 +113,13 @@ class Altimeter(QWidget):
         dial.setBrush(dialBrush)
         # Needle Movement
         sm_dial = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(0, -(h / 2 - 40))])
-        lg_dial = QPolygon([QPoint(10, -(h / 2 - 120)), QPoint(5, 0),
+                            QPoint(0, -(radius-15))])
+        lg_dial = QPolygon([QPoint(10, -(radius/9)), QPoint(5, 0),
                             QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(-10, -(h / 2 - 120)),
-                            QPoint(0, -(h / 2 - 100))])
-        outside_dial = QPolygon([QPoint( 7.5, -(h / 2 - 25)), QPoint( -7.5 , -(h /2 - 25)),
-                                 QPoint(0, -(h / 2 - 35))])
+                            QPoint(-10, -(radius/9)),
+                            QPoint(0, -int(round((radius*.6))))])
+        outside_dial = QPolygon([QPoint( 7.5, -(radius)), QPoint( -7.5 , -(radius)),
+                                 QPoint(0, -(radius-10))])
 
         sm_dial_angle = self._altimeter * .36 - 7.2
         lg_dial_angle = self._altimeter / 10 * .36 - 7.2

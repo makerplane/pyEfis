@@ -65,23 +65,23 @@ class Screen(QWidget):
         diameter=min(instWidth,instHeight)
 
         self.airspeed.move(0,menu_offset)
-        self.airspeed.resize(diameter,diameter)
+        self.airspeed.resize(instWidth,instHeight)
 
         self.ai.move(instWidth, 0 + menu_offset)
         self.ai.resize(instWidth, instHeight)
 
         self.altimeter.move(instWidth*2,0 + menu_offset)
-        self.altimeter.resize(diameter,diameter)
+        self.altimeter.resize(instWidth,instHeight)
 
         self.tc.move(0, instHeight + menu_offset)
         self.tc.resize(instWidth, instHeight)
 
         hdh = self.heading_disp.height()
         hdw = self.heading_disp.width()
-        diameter -= (hdh+30)
-        offset = instHeight-diameter
-        self.hsi.move(instWidth+(instWidth-diameter)/2, instHeight + menu_offset + offset-20)
-        self.hsi.resize(diameter,diameter)
+        hsi_diameter = diameter - (hdh+30)
+        offset = instHeight-hsi_diameter
+        self.hsi.move(instWidth+(instWidth-hsi_diameter)/2, instHeight + menu_offset + offset-20)
+        self.hsi.resize(hsi_diameter,hsi_diameter)
         self.heading_disp.move(instWidth*1.5-hdw/2, instHeight + menu_offset+10)
 
         self.vsi.move(instWidth * 2, instHeight + menu_offset)

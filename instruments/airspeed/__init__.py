@@ -78,12 +78,13 @@ class Airspeed(QWidget):
 
         # Dial Setup
         # V Speeds
-        Vs = 45
-        Vs0 = 40
-        Vno = 125
-        Vne = 140
+
+        Vs = self.item.get_aux_value('Vs')
+        Vs0 = self.item.get_aux_value('Vs0')
+        Vno = self.item.get_aux_value('Vno')
+        Vne = self.item.get_aux_value('Vne')
         #Va = 120
-        Vfe = 70
+        Vfe = self.item.get_aux_value('Vfe')
 
         # VSpeed to angle for drawArc
         Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
@@ -92,28 +93,36 @@ class Airspeed(QWidget):
         Vno_angle = (-(((Vno - 30) * 2.5) + 25) + 90) * 16
         Vne_angle = (-(((Vne - 30) * 2.5) + 25) + 90) * 16
 
+        radius = int(round(min(w,h) * .45))
+        diameter = radius*2
+        inner_offset = 3
+        center_x = w/2
+        center_y = h/2
+
         # Vspeeds Arcs
         dial.setPen(vnoPen)
-        dial.drawArc(QRectF(25, 25, w - 50, h - 50), Vs_angle,
-                  -(Vs_angle - Vno_angle))
+        dial_rect = QRectF(center_x-radius, center_y-radius,
+                            diameter, diameter)
+        dial.drawArc(dial_rect, Vs_angle, -(Vs_angle - Vno_angle))
         dial.setPen(vsoPen)
-        dial.drawArc(QRectF(28, 28, w - 56, h - 56), Vs0_angle,
-                  -(Vs0_angle - Vfe_angle))
+        inner_rect = QRectF(center_x-radius+inner_offset, center_y-radius+inner_offset,
+                            diameter-inner_offset*2, diameter-inner_offset*2)
+        dial.drawArc(inner_rect,
+                            Vs0_angle, -(Vs0_angle - Vfe_angle))
         dial.setPen(yellowPen)
-        dial.drawArc(QRectF(25, 25, w - 50, h - 50), Vno_angle,
-                  -(Vno_angle - Vne_angle))
+        dial.drawArc(dial_rect, Vno_angle, -(Vno_angle - Vne_angle))
         dial.save()
         dial.setPen(dialPen)
         dial.setFont(f)
-        dial.translate(w / 2, h / 2)
+        dial.translate(center_x, center_y)
         count = 0
         a_s = 0
         while count < 360:
             if count % 25 == 0 and a_s <= 140:
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
+                dial.drawLine(0, -radius, 0, -(radius-15))
                 x = fontMetrics.width(str(a_s)) / 2
                 y = f.pixelSize()
-                dial.drawText(-x, -(h / 2 - 40 - y),
+                dial.drawText(-x, -(radius-15 - y),
                            str(a_s))
                 a_s += 10
                 if count == 0:
@@ -121,10 +130,10 @@ class Airspeed(QWidget):
                     count = count + 19
                     dial.rotate(19)
             elif count % 12.5 == 0 and a_s <= 140:
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
+                dial.drawLine(0, -(radius), 0, -(radius-10))
             if count == (-Vne_angle / 16) + 90:
                 dial.setPen(vnePen)
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
+                dial.drawLine(0, -(radius), 0, -(radius-15))
                 dial.setPen(dialPen)
             dial.rotate(0.5)
             count += 0.5
@@ -148,7 +157,7 @@ class Airspeed(QWidget):
             dial.setBrush(QBrush(QColor(Qt.white)))
         #Needle Movement
         needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(0, -(h / 2 - 40))])
+                            QPoint(0, -(radius-15))])
 
         if self.airspeed <= 30:  # Airspeeds Below 30 Knots
             needle_angle = self._airspeed * 0.83
@@ -213,13 +222,12 @@ class Airspeed_Tape(QGraphicsView):
         self._airspeed = self.item.value
 
         # V Speeds
-        #Vs = 45
-        self.Vs0 = 40
-        self.Vno = 125
-        self.Vne = 140
-        #Va = 120
-        self.Vfe = 70
-        self.max = 180
+        self.Vs = self.item.get_aux_value('Vs')
+        self.Vs0 = self.item.get_aux_value('Vs0')
+        self.Vno = self.item.get_aux_value('Vno')
+        self.Vne = self.item.get_aux_value('Vne')
+        self.Vfe = self.item.get_aux_value('Vfe')
+        self.max = int(round(self.Vne*1.25))
 
         self.pph = 10 # Pixels per unit
         self.fontsize = 20
@@ -301,6 +309,8 @@ class Airspeed_Tape(QGraphicsView):
                       -self._airspeed * self.pph + tape_start)
 
     def redraw(self):
+        if not self.isVisible():
+            return
         now = time.time()
         if now - self.last_update_time >= self.update_period:
             tape_start = self.max * self.pph + self.height()/2

@@ -45,7 +45,7 @@ class VSI(QWidget):
 
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
-        self.r = min(self.width(), self.height()) / 2 - 25
+        self.r = int(round(min(self.width(), self.height()) *.45))
         f = QFont()
         fs = int(round(self.fontSize * self.width() / self.FULL_WIDTH))
         f.setPixelSize(fs)
@@ -159,7 +159,7 @@ class VSI(QWidget):
 
         # Needle Movement
         needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                          QPoint(0, -(h / 2 - 60))])
+                          QPoint(0, -(self.r-35))])
 
         # dial_angle = self._roc * -0.0338 # 135deg / 4000 fpm
         dial_angle = self._roc * (self.maxAngle / self.maxRange)
