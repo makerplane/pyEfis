@@ -76,6 +76,13 @@ keybindings:
     action: Activate Menu Item
     args: 6
 
+  - key: ']'
+    action: Change Value
+    args: BARO,0.01
+  - key: '['
+    action: Change Value
+    args: BARO,-0.01
+
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
 databindings:
