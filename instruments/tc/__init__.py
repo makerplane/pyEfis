@@ -24,11 +24,12 @@ except:
     from PyQt4.QtCore import *
 import math
 import pyavtools.fix as fix
-
+import pyavtools.filters as filters
 
 class TurnCoordinator(QWidget):
-    def __init__(self, parent=None, dial=True, ss_only=False):
+    def __init__(self, parent=None, dial=True, ss_only=False, filter_depth=0):
         super(TurnCoordinator, self).__init__(parent)
+        self.myparent = parent
         self.slip_skid_only = ss_only
         self.render_as_dial = dial
         if dial:
@@ -39,6 +40,10 @@ class TurnCoordinator(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
+        if filter_depth:
+            self.filter = filters.AvgFilter(filter_depth)
+        else:
+            self.filter = None
         self.alat_item = fix.db.get_item("ALAT")
         self.alat_item.valueChanged[float].connect(self.setLatAcc)
         self.alat_item.badChanged.connect(self.quality_change)
@@ -49,7 +54,7 @@ class TurnCoordinator(QWidget):
         self.rot_item.badChanged.connect(self.quality_change)
         self.rot_item.oldChanged.connect(self.quality_change)
         self.rot_item.failChanged.connect(self.quality_change)
-        self.alat_multiplier = 1.0 / (0.217 * 32.185039370079)
+        self.alat_multiplier = 1.0 / (0.217)
         self.max_tc_displacement = 1.0 / self.alat_multiplier
 
     def resizeEvent(self, event):
@@ -109,6 +114,14 @@ class TurnCoordinator(QWidget):
                    self.center.x() - ball_rad - 1.8, self.boxTop + self.boxHeight+1)
         p.drawLine(self.center.x() + ball_rad + 2.8, self.boxTop,
                    self.center.x() + ball_rad + 2.8, self.boxTop + self.boxHeight+1)
+
+        filter_depth = self.myparent.get_config_item('alat_filter_depth')
+        if filter_depth is not None and filter_depth > 0:
+            self.filter = filters.AvgFilter(filter_depth)
+        alat_multiplier = self.myparent.get_config_item('alat_multiplier')
+        if alat_multiplier is not None and alat_multiplier > 0:
+            self.alat_multiplier = alat_multiplier
+            self.max_tc_displacement = 1.0 / self.alat_multiplier
 
     def paintEvent(self, event):
 
@@ -212,8 +225,12 @@ class TurnCoordinator(QWidget):
         return self._latAcc
 
     def setLatAcc(self, acc):
-        if acc != self._latAcc:
+        last_acc = self._latAcc
+        if self.filter is not None:
+            self._latAcc = self.filter.setValue(acc)
+        else:
             self._latAcc = acc
+        if last_acc != self._latAcc:
             self.update()
 
     latAcc = property(getLatAcc, setLatAcc)
