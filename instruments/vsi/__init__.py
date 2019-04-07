@@ -14,6 +14,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import time
 
 try:
     from PyQt5.QtGui import *
@@ -44,7 +45,7 @@ class VSI(QWidget):
 
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
-        self.r = min(self.width(), self.height()) / 2 - 25
+        self.r = int(round(min(self.width(), self.height()) *.45))
         f = QFont()
         fs = int(round(self.fontSize * self.width() / self.FULL_WIDTH))
         f.setPixelSize(fs)
@@ -158,7 +159,7 @@ class VSI(QWidget):
 
         # Needle Movement
         needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                          QPoint(0, -(h / 2 - 60))])
+                          QPoint(0, -(self.r-35))])
 
         # dial_angle = self._roc * -0.0338 # 135deg / 4000 fpm
         dial_angle = self._roc * (self.maxAngle / self.maxRange)
@@ -287,8 +288,15 @@ class Alt_Trend_Tape(QGraphicsView):
         self._bad = self.item.bad
         self._old = self.item.old
         self._fail = self.item.fail
+        self.myparent = parent
+        self.update_period = None
 
     def resizeEvent(self, event):
+        if self.update_period is None:
+            self.update_period = self.myparent.get_config_item('update_period')
+            if self.update_period is None:
+                self.update_period = .1
+            self.last_update_time = 0
         w = self.width() - self.RIGHT_MARGIN
         w_2 = w / 2
         h = self.height()
@@ -341,6 +349,12 @@ class Alt_Trend_Tape(QGraphicsView):
         return self.zero_y - vs * self.pph
 
     def redraw(self):
+        if not self.isVisible():
+            return
+        now = time.time()
+        if now - self.last_update_time < self.update_period:
+            return
+        self.last_update_time = now
         y = self.y_offset(self._vs)
         w = self.width() - self.RIGHT_MARGIN
         x = w * 6 / 7

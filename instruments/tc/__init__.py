@@ -1,4 +1,4 @@
-#  Copyright (c) 2013 Neil Domalik, Phil Birkelbach
+#  Copyright (c) 2013 Neil Domalik, Phil Birkelbach; 2019 Garrett Herschleb
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,19 +24,38 @@ except:
     from PyQt4.QtCore import *
 import math
 import pyavtools.fix as fix
-
+import pyavtools.filters as filters
 
 class TurnCoordinator(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, dial=True, ss_only=False, filter_depth=0):
         super(TurnCoordinator, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        self.myparent = parent
+        self.slip_skid_only = ss_only
+        self.render_as_dial = dial
+        if dial:
+            self.setStyleSheet("border: 0px")
+        else:
+            pass
+            #self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
-        item = fix.db.get_item("ALAT")
-        item.valueChanged[float].connect(self.setLatAcc)
-        item1 = fix.db.get_item("ROT", True)
-        item1.valueChanged[float].connect(self.setROT)
+        if filter_depth:
+            self.filter = filters.AvgFilter(filter_depth)
+        else:
+            self.filter = None
+        self.alat_item = fix.db.get_item("ALAT")
+        self.alat_item.valueChanged[float].connect(self.setLatAcc)
+        self.alat_item.badChanged.connect(self.quality_change)
+        self.alat_item.oldChanged.connect(self.quality_change)
+        self.alat_item.failChanged.connect(self.quality_change)
+        self.rot_item = fix.db.get_item("ROT")
+        self.rot_item.valueChanged[float].connect(self.setROT)
+        self.rot_item.badChanged.connect(self.quality_change)
+        self.rot_item.oldChanged.connect(self.quality_change)
+        self.rot_item.failChanged.connect(self.quality_change)
+        self.alat_multiplier = 1.0 / (0.217)
+        self.max_tc_displacement = 1.0 / self.alat_multiplier
 
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
@@ -50,86 +69,118 @@ class TurnCoordinator(QWidget):
         brush = QBrush(QColor(Qt.white))
         p.setPen(pen)
         self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
-        self.r = min(self.width(), self.height()) / 2 - 25
+        self.r = min(self.width(), self.height()) * .45
 
         p.fillRect(0, 0, self.width(), self.height(), Qt.black)
-        p.drawEllipse(self.center, self.r, self.r)
+        if self.render_as_dial:
+            p.drawEllipse(self.center, self.r, self.r)
 
-        # this draws the tick boxes
         thickness = self.tick_thickness
         length = self.tick_length
-        rect = QRect(-(self.r), 0 - thickness / 2,
-                     length, thickness)
         p.setBrush(brush)
-        p.save()
-        p.translate(self.center)
-        p.drawRect(rect)
-        p.rotate(-30)
-        p.drawRect(rect)
-        p.rotate(210)
-        p.drawRect(rect)
-        p.rotate(30)
-        p.drawRect(rect)
-        p.restore()
+        if not self.slip_skid_only:
+            # this draws the tick boxes
+            rect = QRect(-(self.r), 0 - thickness / 2,
+                         length, thickness)
+            p.save()
+            p.translate(self.center)
+            p.drawRect(rect)
+            p.rotate(-30)
+            p.drawRect(rect)
+            p.rotate(210)
+            p.drawRect(rect)
+            p.rotate(30)
+            p.drawRect(rect)
+            p.restore()
+            # Draw the little airplane center
+            p.drawEllipse(self.center, thickness, thickness)
 
         # TC Box
-        # self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
-        self.boxHalfWidth = 90
+        self.boxHalfWidth = self.r * .6
         self.boxTop = self.center.y() + (self.r - length) * (
-                      math.sin(math.radians(30))) + thickness
+                      math.sin(math.radians(40))) + thickness
+        self.boxHeight = self.boxHalfWidth * .25
 
         rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,
-                            self.boxTop + length))
+                            self.boxTop + self.boxHeight))
         p.drawRect(rect)
-        # Draw the little airplane center
-        p.drawEllipse(self.center, thickness, thickness)
         # vertical black lines on TC
         pen.setColor(QColor(Qt.black))
         pen.setWidth(3)
         p.setPen(pen)
-        p.drawLine(self.center.x() - length / 2 - 1.8, self.boxTop,
-                   self.center.x() - length / 2 - 1.8, self.boxTop +
-                   length + 2)
-        p.drawLine(self.center.x() + length / 2 + 2.8, self.boxTop,
-                   self.center.x() + length / 2 + 2.8, self.boxTop +
-                   length + 2)
+        ball_rad = self.boxHeight / 2
+        p.drawLine(self.center.x() - ball_rad - 1.8, self.boxTop,
+                   self.center.x() - ball_rad - 1.8, self.boxTop + self.boxHeight+1)
+        p.drawLine(self.center.x() + ball_rad + 2.8, self.boxTop,
+                   self.center.x() + ball_rad + 2.8, self.boxTop + self.boxHeight+1)
+
+        filter_depth = self.myparent.get_config_item('alat_filter_depth')
+        if filter_depth is not None and filter_depth > 0:
+            self.filter = filters.AvgFilter(filter_depth)
+        alat_multiplier = self.myparent.get_config_item('alat_multiplier')
+        if alat_multiplier is not None and alat_multiplier > 0:
+            self.alat_multiplier = alat_multiplier
+            self.max_tc_displacement = 1.0 / self.alat_multiplier
 
     def paintEvent(self, event):
 
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        #p.setRenderHint(QPainter.Antialiasing)
 
         # Just to make it a bit easier
         thickness = self.tick_thickness
         length = self.tick_length
 
         # Insert Background
+        if not self.render_as_dial:
+            p.setCompositionMode(QPainter.CompositionMode_ColorDodge)
         p.drawPixmap(0, 0, self.background)
 
         # Draw TC Ball
-        pen = QPen(QColor(Qt.black))
-        brush = QBrush(QColor(Qt.black))
+        p.setCompositionMode(QPainter.CompositionMode_SourceOver)
+        p.setRenderHint(QPainter.Antialiasing)
+        ball_rad = self.boxHeight / 2
+        if self.alat_item.bad or self.alat_item.old:
+            pen = QPen(QColor(Qt.gray))
+            brush = QBrush(QColor(Qt.gray))
+        else:
+            pen = QPen(QColor(Qt.black))
+            brush = QBrush(QColor(Qt.black))
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
-        centerball = self.center.x() + (self.boxHalfWidth - length / 2) * (-(
-                     self._latAcc / 32.185039370079) / 0.217)
+        acc_displacement = self._latAcc
+        if acc_displacement > self.max_tc_displacement:
+            acc_displacement = self.max_tc_displacement
+        if acc_displacement < -self.max_tc_displacement:
+            acc_displacement = -self.max_tc_displacement
+        centerball = self.center.x() + (self.boxHalfWidth - ball_rad) * (-(
+                     acc_displacement * self.alat_multiplier))
 
         # /accelerations/pilot/y-accel-fps_sec
         # 32.185039370079 fps /sec = 1 G
-        if centerball < 83.3 or centerball > 257.7:
-            if centerball > 257.7:
-                centerball = 257.7
-            else:
-                centerball = 83.3
         center = QPointF(centerball,
-                         self.boxTop + length / 2)
-        p.drawEllipse(center, length / 2, length / 2)
+                         self.boxTop + ball_rad)
+        if self.alat_item.fail:
+            warn_font = QFont("FixedSys", self.boxHeight, QFont.Bold)
+            p.setPen (QPen(QColor(Qt.red)))
+            p.setBrush (QBrush(QColor(Qt.red)))
+            p.setFont (warn_font)
+            p.drawText (self.center.x()-self.boxHalfWidth,self.boxTop,self.boxHalfWidth*2,self.boxHeight,
+                    Qt.AlignCenter, "XXX")
+        else:
+            p.drawEllipse(center, ball_rad, ball_rad)
 
+        if self.slip_skid_only:
+            return
         # the little airplane
-        pen.setColor(QColor(Qt.white))
-        brush.setColor(QColor(Qt.white))
+        if self.rot_item.bad or self.rot_item.old:
+            pen.setColor(QColor(Qt.gray))
+            brush.setColor(QColor(Qt.gray))
+        else:
+            pen.setColor(QColor(Qt.white))
+            brush.setColor(QColor(Qt.white))
         p.setPen(pen)
         p.setBrush(brush)
 
@@ -137,21 +188,28 @@ class TurnCoordinator(QWidget):
             self._rate = 5
         elif self._rate < -5:
             self._rate = -5
-        print(self._rate, self._latAcc)
         x = self.r - length - thickness / 2
-        poly = QPolygon([QPoint(0, -thickness / 3),
-                         QPoint(-x, -thickness / 8),
-                         QPoint(-x, thickness / 8),
-                         QPoint(0, thickness / 3),
-                         QPoint(x, thickness / 8),
-                         QPoint(x, -thickness / 8)])
-        p.translate(self.center)
-        p.rotate(self._rate * 10)
-        p.drawPolygon(poly)
-        pen.setWidth(2)
-        p.setPen(pen)
-        p.drawLine(-length / 2, -length / 2, length / 2, -length / 2)
-        p.drawLine(0, 0, 0, -length)
+        if self.rot_item.fail:
+            warn_font = QFont("FixedSys", 20, QFont.Bold)
+            p.setPen (QPen(QColor(Qt.red)))
+            p.setBrush (QBrush(QColor(Qt.red)))
+            p.setFont (warn_font)
+            p.drawText (0,0,self.width(),self.height(),
+                    Qt.AlignCenter, "XXX")
+        else:
+            poly = QPolygon([QPoint(0, -thickness / 3),
+                             QPoint(-x, -thickness / 8),
+                             QPoint(-x, thickness / 8),
+                             QPoint(0, thickness / 3),
+                             QPoint(x, thickness / 8),
+                             QPoint(x, -thickness / 8)])
+            p.translate(self.center)
+            p.rotate(self._rate * 10)
+            p.drawPolygon(poly)
+            pen.setWidth(2)
+            p.setPen(pen)
+            p.drawLine(-length / 2, -length / 2, length / 2, -length / 2)
+            p.drawLine(0, 0, 0, -length)
 
     def getROT(self):
         return self._rate
@@ -167,12 +225,18 @@ class TurnCoordinator(QWidget):
         return self._latAcc
 
     def setLatAcc(self, acc):
-        if acc != self._latAcc:
+        last_acc = self._latAcc
+        if self.filter is not None:
+            self._latAcc = self.filter.setValue(acc)
+        else:
             self._latAcc = acc
+        if last_acc != self._latAcc:
             self.update()
 
     latAcc = property(getLatAcc, setLatAcc)
 
+    def quality_change(self, x):
+        self.update()
 
 class TurnCoordinator_Tape(QWidget):
     def __init__(self, parent=None):
