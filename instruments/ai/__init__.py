@@ -233,7 +233,7 @@ class AI(QGraphicsView):
             return
         self.last_update_time = now
         self.resetTransform()
-        if self.fdondb.value:
+        if self.fdondb.value and self.fdtarget_widget is not None:
             self.fdtarget_widget.update (self.fdpitchdb.value, self.fdrolldb.value)
         self.centerOn(self.scene.width() / 2,
                       self.scene.height() / 2 +
