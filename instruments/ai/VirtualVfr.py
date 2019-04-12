@@ -62,25 +62,9 @@ class VirtualVfr(AI):
         self.display_objects = dict()
         time.sleep(.4)      # Pause to let DB load
         self.lng_item = fix.db.get_item("LONG")
-        self.lng_item.valueChanged[float].connect(self.setLongitude)
-        self.lng_item.badChanged[bool].connect(self.setBlank)
-        self.lng_item.oldChanged[bool].connect(self.setBlank)
-        self.lng_item.failChanged[bool].connect(self.setBlank)
         self.lat_item = fix.db.get_item("LAT")
-        self.lat_item.valueChanged[float].connect(self.setLatitude)
-        self.lat_item.badChanged[bool].connect(self.setBlank)
-        self.lat_item.oldChanged[bool].connect(self.setBlank)
-        self.lat_item.failChanged[bool].connect(self.setBlank)
         self.head_item = fix.db.get_item("HEAD")
-        self.head_item.valueChanged[float].connect(self.setHeading)
-        self.head_item.badChanged[bool].connect(self.setBlank)
-        self.head_item.oldChanged[bool].connect(self.setBlank)
-        self.head_item.failChanged[bool].connect(self.setBlank)
         self.alt_item = fix.db.get_item("ALT")
-        self.alt_item.valueChanged[float].connect(self.setAltitude)
-        self.alt_item.badChanged[bool].connect(self.setBlank)
-        self.alt_item.oldChanged[bool].connect(self.setBlank)
-        self.alt_item.failChanged[bool].connect(self.setBlank)
         self.last_mag_update = 0
         self.magnetic_declination = None
         self.missing_lat = True
@@ -108,6 +92,22 @@ class VirtualVfr(AI):
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
+        self.lng_item.valueChanged[float].connect(self.setLongitude)
+        self.lng_item.badChanged[bool].connect(self.setBlank)
+        self.lng_item.oldChanged[bool].connect(self.setBlank)
+        self.lng_item.failChanged[bool].connect(self.setBlank)
+        self.lat_item.valueChanged[float].connect(self.setLatitude)
+        self.lat_item.badChanged[bool].connect(self.setBlank)
+        self.lat_item.oldChanged[bool].connect(self.setBlank)
+        self.lat_item.failChanged[bool].connect(self.setBlank)
+        self.head_item.valueChanged[float].connect(self.setHeading)
+        self.head_item.badChanged[bool].connect(self.setBlank)
+        self.head_item.oldChanged[bool].connect(self.setBlank)
+        self.head_item.failChanged[bool].connect(self.setBlank)
+        self.alt_item.valueChanged[float].connect(self.setAltitude)
+        self.alt_item.badChanged[bool].connect(self.setBlank)
+        self.alt_item.oldChanged[bool].connect(self.setBlank)
+        self.alt_item.failChanged[bool].connect(self.setBlank)
         if not self.rendering_prohibited:
             self.pov.render(self)
 

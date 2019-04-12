@@ -15,6 +15,7 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import math
+import time
 
 try:
     from PyQt5.QtGui import *
@@ -59,9 +60,14 @@ class HSI(QGraphicsView):
         self.heading_bug = None
         self.item.failChanged[bool].connect(self.setFail)
         self._fail = False
-
+        self.myparent = parent
+        self.update_period = None
 
     def resizeEvent(self, event):
+        self.update_period = self.myparent.get_config_item('update_period')
+        if self.update_period is None:
+            self.update_period = .1
+        self.last_update_time = 0
         self.scene = QGraphicsScene(0, 0, self.width(), self.height())
         self.cx = self.width() / 2
         self.cy = self.height() / 2
@@ -198,15 +204,20 @@ class HSI(QGraphicsView):
         return self._heading
 
     def setHeading(self, heading):
+        if not self.isVisible():
+            return
         if heading != self._heading:
-            newheading = efis.bounds(0, 360, heading)
-            diff = newheading - self._heading
-            if diff > 180:
-                diff -= 360
-            elif diff < -180:
-                diff += 360
-            self._heading = newheading
-            self.rotate(-diff)
+            now = time.time()
+            if now - self.last_update_time >= self.update_period:
+                newheading = efis.bounds(0, 360, heading)
+                diff = newheading - self._heading
+                if diff > 180:
+                    diff -= 360
+                elif diff < -180:
+                    diff += 360
+                self._heading = newheading
+                self.rotate(-diff)
+                self.last_update_time = now
 
     heading = property(getHeading, setHeading)
 
