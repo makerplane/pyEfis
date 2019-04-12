@@ -48,6 +48,7 @@ class Screen(QWidget):
         self.ai = ai.AI(self)
         self.ai.fontSize = 20
         self.ai.pitchDegreesShown = 60
+        self.ai.overlayColor = Qt.white
 
         self.altimeter = altimeter.Altimeter(self)
 
