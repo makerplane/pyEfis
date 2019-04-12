@@ -3,10 +3,10 @@ main:
   FixServer: 127.0.0.1
   FixPort: 3490
   # Screen Geometry
-  #screenWidth = 1000
-  #screenHeight = 700
-  screenWidth: 1024
-  screenHeight: 768
+  #screenWidth: 1024
+  #screenHeight: 768
+  screenWidth: 800
+  screenHeight: 480
 
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: False
@@ -76,6 +76,13 @@ keybindings:
     action: Activate Menu Item
     args: 6
 
+  - key: ']'
+    action: Change Value
+    args: BARO,0.01
+  - key: '['
+    action: Change Value
+    args: BARO,-0.01
+
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
 databindings:
@@ -120,7 +127,7 @@ databindings:
 # do both.
 outputs:
   #TAS = Interval
-  BARO: OnChange
+  BARO: Interval
   BTN16: OnChange
 
 
@@ -131,11 +138,24 @@ outputs:
 # the screen
 
 screens:
+  EPFD:
+    module: screens.epfd
+    title: Primary Flight Display
+    dbpath: CIFP/FAACIFP18
+    indexpath: CIFP/index.bin
+    check_engine: [MAP1, TACH1, OILP1, OILT1, FUELQT, FUELF1, CHTMAX1, EGTAVG1]
+    update_period: .1
+
   PFD:
     module: screens.pfd
     title: Primary Flight Display
     dbpath: CIFP/FAACIFP18
     indexpath: CIFP/index.bin
+    update_period: .1
+
+  EMS:
+    module: screens.ems_sm
+    title: Engine Management
 
 
   SixPack:

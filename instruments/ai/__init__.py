@@ -22,6 +22,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 import math
+import time
 import efis
 import logging
 
@@ -32,6 +33,7 @@ log = logging.getLogger(__name__)
 class AI(QGraphicsView):
     def __init__(self, parent=None):
         super(AI, self).__init__(parent)
+        self.myparent = parent
         self.setStyleSheet("border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -41,6 +43,7 @@ class AI(QGraphicsView):
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
         self.overlayColor = QColor(Qt.green)
+        self.srTurnColor = QColor(Qt.yellow)
 
         pitch = fix.db.get_item("PITCH")
         pitch.valueChanged[float].connect(self.setPitchAngle)
@@ -63,6 +66,7 @@ class AI(QGraphicsView):
         self.fdondb.valueChanged[bool].connect(self.fdon)
         self.fdtarget_widget = None
         self.fdt = None
+        self.fix_tas = fix.db.get_item("TAS")
 
     def fdon(self, v):
         if v and self.isVisible():
@@ -215,9 +219,19 @@ class AI(QGraphicsView):
             t.setX(left - (t.boundingRect().width() + 5))
             t.setY(y - t.boundingRect().height() / 2)
             t.setZValue(1)
+        self.update_period = self.myparent.get_config_item('update_period')
+        if self.update_period is None:
+            self.update_period = .1
+        self.last_update_time = 0
+        self.show_standard_turn = self.myparent.get_config_item('show_standard_turn')
+        if self.show_standard_turn is None: self.show_standard_turn = True
         self.redraw()
 
     def redraw(self):
+        now = time.time()
+        if now - self.last_update_time < self.update_period:
+            return
+        self.last_update_time = now
         self.resetTransform()
         if self.fdondb.value:
             self.fdtarget_widget.update (self.fdpitchdb.value, self.fdrolldb.value)
@@ -261,6 +275,22 @@ class AI(QGraphicsView):
             p.rotate(- 2 * angle)
             p.drawLine(longLine)
             p.rotate(angle)
+        if self.show_standard_turn and (not(self.fix_tas.fail)) and self.fix_tas.value > 30:
+            srpen = QPen(self.srTurnColor)
+            srpen.setWidth(3)
+            p.setPen(srpen)
+            #math.tan(_bank_angle_) = (rate_of_turn * tas_knots * 493/900) / 9.8(m/s)
+            # standard rate of turn = 3 degrees per second
+            rate_of_turn = math.radians(3)
+            tas_knots = self.fix_tas.value
+            #_bank_angle_ = math.atan((rate_of_turn * tas_knots * 493/900) / 9.8(m/s))
+            srbank = math.atan((rate_of_turn * tas_knots * 493/900) / 9.8)
+            srbank = math.degrees(srbank)
+            p.rotate(srbank)
+            p.drawLine(longLine)
+            p.rotate(- 2 * srbank)
+            p.drawLine(longLine)
+            p.rotate(srbank)
 
         pen = QPen(self.overlayColor)
         pen.setWidth(1)
@@ -293,6 +323,7 @@ class AI(QGraphicsView):
         log.debug("Set Roll")
         if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
             self._rollAngle = efis.bounds(-180, 180, angle)
+            self.redraw()
 
     def getRollAngle(self):
         return self._rollAngle
