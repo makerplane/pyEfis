@@ -323,6 +323,7 @@ class AI(QGraphicsView):
         log.debug("Set Roll")
         if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
             self._rollAngle = efis.bounds(-180, 180, angle)
+            self.redraw()
 
     def getRollAngle(self):
         return self._rollAngle
