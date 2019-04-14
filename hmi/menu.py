@@ -14,6 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import time
+import threading
+
 try:
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
@@ -42,16 +45,21 @@ class Menu(QWidget):
         self.buttons = list()
         self.button_actions = list()
         self.button_args = list()
+        self.button_show_menu = list()
+        self.button_blind_performance = list()
         self.focused_object = None
         self.focus_button = -1
         self.last_button_clicked = -1
         # Dangerous. Don't set this to True unless you really know what you're doing
         self.allow_evals = False if 'allow_evals' not in config else bool(config['allow_evals'])
+        self.show_time = None if 'show_time' not in config else config['show_time']
         last_x = self.config['left_margin']
         for b in range(self.config['number_of_buttons']):
             self.buttons.append(QPushButton("", self))
             self.button_actions.append(None)
             self.button_args.append(None)
+            self.button_show_menu.append(True)
+            self.button_blind_performance.append(False)
             button_function = eval("self.button_clicked" + str(b+1))
             self.buttons[-1].clicked.connect(button_function)
             self.buttons[-1].move (last_x, self.config['top_margin'])
@@ -69,14 +77,44 @@ class Menu(QWidget):
     def activate_menu(self, menu_name):
         logger.debug ("Menu.activate_menu (%s)", menu_name)
         self.current_menu = self.config['menus'][menu_name]
-        for i,(label,actions,args) in enumerate(self.current_menu):
-            self.set_button (i, label, actions, args)
+        for i,button in enumerate(self.current_menu):
+            show_menu = True
+            blind_perf = False
+            if len(button) == 3:
+                label,actions,args = button
+            elif len(button) == 4:
+                label,actions,args,show_menu = button
+                if not show_menu:
+                    blind_perf = True
+            elif len(button) == 5:
+                label,actions,args,show_menu,blind_perf = button
+            else:
+                raise RuntimeError ("Menu: unknown button configuration for menu %s, button %d"%(
+                        menu_name, i))
+            self.set_button (i, label, actions, args, show_menu, blind_perf)
             self.buttons[i].show()
             last_i = i
         last_i += 1
         while last_i < len(self.buttons):
             self.buttons[last_i].hide()
             last_i += 1
+        self.show_begin_time = time.time()
+        self.hiding_menu = False
+        if self.show_time is not None:
+            t = threading.Thread(target=self.hide_menu)
+            t.start()
+
+    def hide_menu(self):
+        time.sleep(self.show_time + .1)
+        if time.time() - self.show_begin_time >= self.show_time:
+            for b in self.buttons:
+                b.hide()
+            self.hiding_menu = True
+
+    def show_menu(self):
+        for i,button in enumerate(self.current_menu):
+            self.buttons[i].show()
+        self.hiding_menu = False
 
     def register_target(self, key, obj):
         self.registered_targets[key] = obj
@@ -96,10 +134,12 @@ class Menu(QWidget):
         else:
             self.focused_object = None
 
-    def set_button(self, i, label, actions, args):
+    def set_button(self, i, label, actions, args, show_menu, blind_performance):
         self.buttons[i].setText(label)
         self.button_actions[i] = actions
         self.button_args[i] = args
+        self.button_show_menu[i] = show_menu
+        self.button_blind_performance[i] = blind_performance
 
     def perform_action(self, actions, args):
         logger.debug ("perform_action: %s", str(actions))
@@ -129,8 +169,20 @@ class Menu(QWidget):
 
     def button_clicked(self, btn_num):
         if btn_num >= 0:
-            self.last_button_clicked = btn_num
-            self.perform_action(self.button_actions[btn_num], self.button_args[btn_num])
+            perform = True
+            if self.hiding_menu:
+                if self.button_show_menu[btn_num]:
+                    self.show_menu()
+                perform = False
+                if self.button_blind_performance[btn_num]:
+                    perform = True
+            self.show_begin_time = time.time()
+            if self.show_time is not None:
+                t = threading.Thread(target=self.hide_menu)
+                t.start()
+            if perform:
+                self.last_button_clicked = btn_num
+                self.perform_action(self.button_actions[btn_num], self.button_args[btn_num])
 
     def button_clicked1(self, _):
         self.button_clicked(0)

@@ -30,6 +30,20 @@ except:
     PYQT = 4
 import yaml
 
+if "pyAvTools" not in ''.join(sys.path):
+    neighbor_tools = os.path.join('..', 'pyAvTools')
+    if os.path.isdir(neighbor_tools):
+        sys.path.append(neighbor_tools)
+    elif 'TOOLS_PATH' in os.environ:
+        sys.path.append(os.environ['TOOLS_PATH'])
+
+if "pyAvMap" not in ''.join(sys.path):
+    neighbor_map = os.path.join('..', 'pyAvMap')
+    if os.path.isdir(neighbor_map):
+        sys.path.append(neighbor_map)
+    elif 'MAP_PATH' in os.environ:
+        sys.path.append(os.environ['MAP_PATH'])
+
 import pyavtools.fix as fix
 
 import hooks
