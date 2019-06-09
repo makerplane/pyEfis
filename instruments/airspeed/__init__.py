@@ -15,6 +15,7 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
+import time
 
 try:
     from PyQt5.QtGui import *
@@ -77,12 +78,13 @@ class Airspeed(QWidget):
 
         # Dial Setup
         # V Speeds
-        Vs = 45
-        Vs0 = 40
-        Vno = 125
-        Vne = 140
+
+        Vs = self.item.get_aux_value('Vs')
+        Vs0 = self.item.get_aux_value('Vs0')
+        Vno = self.item.get_aux_value('Vno')
+        Vne = self.item.get_aux_value('Vne')
         #Va = 120
-        Vfe = 70
+        Vfe = self.item.get_aux_value('Vfe')
 
         # VSpeed to angle for drawArc
         Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
@@ -91,28 +93,36 @@ class Airspeed(QWidget):
         Vno_angle = (-(((Vno - 30) * 2.5) + 25) + 90) * 16
         Vne_angle = (-(((Vne - 30) * 2.5) + 25) + 90) * 16
 
+        radius = int(round(min(w,h) * .45))
+        diameter = radius*2
+        inner_offset = 3
+        center_x = w/2
+        center_y = h/2
+
         # Vspeeds Arcs
         dial.setPen(vnoPen)
-        dial.drawArc(QRectF(25, 25, w - 50, h - 50), Vs_angle,
-                  -(Vs_angle - Vno_angle))
+        dial_rect = QRectF(center_x-radius, center_y-radius,
+                            diameter, diameter)
+        dial.drawArc(dial_rect, Vs_angle, -(Vs_angle - Vno_angle))
         dial.setPen(vsoPen)
-        dial.drawArc(QRectF(28, 28, w - 56, h - 56), Vs0_angle,
-                  -(Vs0_angle - Vfe_angle))
+        inner_rect = QRectF(center_x-radius+inner_offset, center_y-radius+inner_offset,
+                            diameter-inner_offset*2, diameter-inner_offset*2)
+        dial.drawArc(inner_rect,
+                            Vs0_angle, -(Vs0_angle - Vfe_angle))
         dial.setPen(yellowPen)
-        dial.drawArc(QRectF(25, 25, w - 50, h - 50), Vno_angle,
-                  -(Vno_angle - Vne_angle))
+        dial.drawArc(dial_rect, Vno_angle, -(Vno_angle - Vne_angle))
         dial.save()
         dial.setPen(dialPen)
         dial.setFont(f)
-        dial.translate(w / 2, h / 2)
+        dial.translate(center_x, center_y)
         count = 0
         a_s = 0
         while count < 360:
             if count % 25 == 0 and a_s <= 140:
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
+                dial.drawLine(0, -radius, 0, -(radius-15))
                 x = fontMetrics.width(str(a_s)) / 2
                 y = f.pixelSize()
-                dial.drawText(-x, -(h / 2 - 40 - y),
+                dial.drawText(-x, -(radius-15 - y),
                            str(a_s))
                 a_s += 10
                 if count == 0:
@@ -120,10 +130,10 @@ class Airspeed(QWidget):
                     count = count + 19
                     dial.rotate(19)
             elif count % 12.5 == 0 and a_s <= 140:
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 35))
+                dial.drawLine(0, -(radius), 0, -(radius-10))
             if count == (-Vne_angle / 16) + 90:
                 dial.setPen(vnePen)
-                dial.drawLine(0, -(h / 2 - 25), 0, -(h / 2 - 40))
+                dial.drawLine(0, -(radius), 0, -(radius-15))
                 dial.setPen(dialPen)
             dial.rotate(0.5)
             count += 0.5
@@ -147,7 +157,7 @@ class Airspeed(QWidget):
             dial.setBrush(QBrush(QColor(Qt.white)))
         #Needle Movement
         needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(0, -(h / 2 - 40))])
+                            QPoint(0, -(radius-15))])
 
         if self.airspeed <= 30:  # Airspeeds Below 30 Knots
             needle_angle = self._airspeed * 0.83
@@ -197,6 +207,8 @@ class Airspeed(QWidget):
 class Airspeed_Tape(QGraphicsView):
     def __init__(self, parent=None):
         super(Airspeed_Tape, self).__init__(parent)
+        self.myparent = parent
+        self.update_period = None
         self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -206,18 +218,22 @@ class Airspeed_Tape(QGraphicsView):
         self._airspeed = self.item.value
 
         # V Speeds
-        #Vs = 45
-        self.Vs0 = 40
-        self.Vno = 125
-        self.Vne = 140
-        #Va = 120
-        self.Vfe = 70
-        self.max = 180
+        self.Vs = self.item.get_aux_value('Vs')
+        self.Vs0 = self.item.get_aux_value('Vs0')
+        self.Vno = self.item.get_aux_value('Vno')
+        self.Vne = self.item.get_aux_value('Vne')
+        self.Vfe = self.item.get_aux_value('Vfe')
+        self.max = int(round(self.Vne*1.25))
 
         self.pph = 10 # Pixels per unit
         self.fontsize = 20
 
     def resizeEvent(self, event):
+        if self.update_period is None:
+            self.update_period = self.myparent.get_config_item('update_period')
+            if self.update_period is None:
+                self.update_period = .1
+            self.last_update_time = 0
         w = self.width()
         h = self.height()
         self.markWidth = w / 5
@@ -293,12 +309,17 @@ class Airspeed_Tape(QGraphicsView):
         self.item.failChanged[bool].connect(self.setAsFail)
 
     def redraw(self):
-        tape_start = self.max * self.pph + self.height()/2
+        if not self.isVisible():
+            return
+        now = time.time()
+        if now - self.last_update_time >= self.update_period:
+            tape_start = self.max * self.pph + self.height()/2
 
-        self.resetTransform()
-        self.centerOn(self.scene.width() / 2,
-                      -self._airspeed * self.pph + tape_start)
-        self.numerical_display.value = self._airspeed
+            self.resetTransform()
+            self.centerOn(self.scene.width() / 2,
+                          -self._airspeed * self.pph + tape_start)
+            self.numerical_display.value = self._airspeed
+            self.last_update_time = now
 
     #  Index Line that doesn't move to make it easy to read the airspeed.
     def paintEvent(self, event):
@@ -346,10 +367,13 @@ class Airspeed_Mode(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self._Mode_Indicator = 0
-        self._AS_Data_Box = 0
-        self._airspeed_mode = "IAS"
         hmi.actions.setAirspeedMode.connect(self.setMode)
         self.modes = ["IAS", "TAS", "GS"]
+        self._airspeed_mode = self.modes
+        self.fix_items = [fix.db.get_item(mode) for mode in self.modes]
+        self.fix_item = self.fix_items[self._Mode_Indicator]
+        self._airspeed_mode = self.modes[self._Mode_Indicator]
+        self.fix_item.valueChanged[float].connect(self.setASData)
 
 
     def resizeEvent(self, event):
@@ -365,51 +389,37 @@ class Airspeed_Mode(QGraphicsView):
         self.scene.addRect(0, 0, self.w, self.h,
                            QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
 
-        t = self.scene.addText(self._airspeed_mode)
-        t.setFont(self.f)
+        self.mode_text = self.scene.addText(self._airspeed_mode)
+        self.mode_text.setFont(self.f)
         self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY((self.h - t.boundingRect().height()) / 2 - (
-                                    t.boundingRect().height() / 2))
-        t = self.scene.addText(str(self._AS_Data_Box))
-        t.setFont(self.f)
+        self.mode_text.setDefaultTextColor(QColor(Qt.white))
+        self.mode_text.setX(0)
+        self.mode_text.setY((self.h - self.mode_text.boundingRect().height()) / 2 - (
+                                    self.mode_text.boundingRect().height() / 2))
+        self.data_text = self.scene.addText("   ")
+        self.data_text.setFont(self.f)
         self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY(((self.h - t.boundingRect().height()) / 2) + (
-                                    t.boundingRect().height() / 2))
+        self.data_text.setDefaultTextColor(QColor(Qt.white))
+        self.data_text.setX(0)
+        self.data_text.setY(self.mode_text.boundingRect().height())
         self.setScene(self.scene)
+        self.setASData(self.fix_item.value)
 
     def redraw(self):
-        self.scene.clear()
-        self.scene.addRect(0, 0, self.w, self.h,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
-        t = self.scene.addText(self._airspeed_mode)
-        t.setFont(self.f)
-        self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY((self.h - t.boundingRect().height()) / 2 - (
-                                    t.boundingRect().height() / 2))
-        t = self.scene.addText(str(self._AS_Data_Box))
-        t.setFont(self.f)
-        self.scene.setFont(self.f)
-        t.setDefaultTextColor(QColor(Qt.white))
-        t.setX((self.w - t.boundingRect().width()) / 2)
-        t.setY(((self.h - t.boundingRect().height()) / 2) + (
-                                    t.boundingRect().height() / 2))
-        self.setScene(self.scene)
+        self.mode_text.setPlainText(self._airspeed_mode)
+        self.data_text.setPlainText(self._AS_Data_Box)
 
     def getMode(self):
         return self._Mode_Indicator
 
     def setMode(self, Mode):
         if Mode == "":
+            self.fix_item.valueChanged[float].disconnect(self.setASData)
             self._Mode_Indicator += 1
             if self._Mode_Indicator == 3: self._Mode_Indicator = 0
         else:
             if Mode != self._Mode_Indicator:
+                self.fix_item.valueChanged[float].disconnect(self.setASData)
                 if Mode == 0:
                     self._Mode_Indicator = 0
                 elif Mode == 1:
@@ -418,22 +428,17 @@ class Airspeed_Mode(QGraphicsView):
                     self._Mode_Indicator = 2
 
         self._airspeed_mode = self.modes[self._Mode_Indicator]
+        self.fix_item = self.fix_items[self._Mode_Indicator]
+        self.fix_item.valueChanged[float].connect(self.setASData)
+        self.setASData(self.fix_item.value)
         self.redraw()
 
-    # def getAS_Data(self):
-    #     return self._Mode_Indicator
-    #
-    # def setAS_Data(self, AS_Data, PA_Data, OAT):
-    #     if self._Mode_Indicator == 1:
-    #         self._AS_Data_Box = int(airspeed.cas2tas(AS_Data, PA_Data, OAT))
-    #     elif AS_Data != self._AS_Data_Box and self._Mode_Indicator != 1:
-    #         if self._Mode_Indicator == 0:
-    #             self._AS_Data_Box = int(AS_Data)
-    #         elif self._Mode_Indicator == 2:
-    #             self._AS_Data_Box = int(AS_Data)
-    #     self.redraw()
-    #
-    # def setIAS(self, IAS):
-    #     self.setAS_Data(IAS, 0, 0)
-
-    # airspeed_mode = property(getMode, setMode, getAS_Data, setAS_Data)
+    def setASData(self, d):
+        if self.fix_item.fail:
+            self._AS_Data_Box = "XXX"
+        elif self.fix_item.bad or self.fix_item.old:
+            self._AS_Data_Box = ""
+        else:
+            self._AS_Data_Box = str(int(round(d)))
+        if self.isVisible():
+            self.redraw()

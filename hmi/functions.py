@@ -21,6 +21,12 @@ def setValue(arg):
     args = arg.split(',')
     fix.db.set_value(args[0].strip(), args[1].strip())
 
+# Change a value in the FIX database by a certain value.  arg should be "key,value"
+def changeValue(arg):
+    args = arg.split(',')
+    i = fix.db.get_item(args[0])
+    i.value += i.dtype(args[1])
+
 def toggleBool(arg):
     bit = fix.db.get_item(arg)
     bit.value = not bit.value
