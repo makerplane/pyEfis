@@ -290,7 +290,6 @@ class AI(QGraphicsView):
         pass
 
     def setRollAngle(self, angle):
-        log.debug("Set Roll")
         if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
             self._rollAngle = efis.bounds(-180, 180, angle)
 
@@ -342,7 +341,6 @@ class AI(QGraphicsView):
                     self.redraw()
 
     def setPitchAngle(self, angle):
-        log.debug("Set Pitch")
         if angle != self._pitchAngle and self.isVisible() and (not self._AIFail):
             self._pitchAngle = efis.bounds(-90, 90, angle)
             self.redraw()

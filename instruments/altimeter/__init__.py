@@ -167,10 +167,6 @@ class Altimeter_Tape(QGraphicsView):
         self._altimeter = self.item.value
         self.maxalt = maxalt
         self.pph = 0.3
-        self.item.valueChanged[float].connect(self.setAltimeter)
-        self.item.oldChanged[bool].connect(self.setAltOld)
-        self.item.badChanged[bool].connect(self.setAltBad)
-        self.item.failChanged[bool].connect(self.setAltFail)
 
 
     def resizeEvent(self, event):
@@ -215,6 +211,10 @@ class Altimeter_Tape(QGraphicsView):
         self.setAltOld(self.item.old)
         self.setAltBad(self.item.bad)
         self.setAltFail(self.item.fail)
+        self.item.valueChanged[float].connect(self.setAltimeter)
+        self.item.oldChanged[bool].connect(self.setAltOld)
+        self.item.badChanged[bool].connect(self.setAltBad)
+        self.item.failChanged[bool].connect(self.setAltFail)
 
     def y_offset(self, alt):
         return self.height_pixel - (alt*self.pph) - self.height()/2
