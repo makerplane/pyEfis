@@ -164,3 +164,9 @@ class Screen(QWidget):
 
         self.egt.resize(150, 50)
         self.egt.move(self.width() - 150, 430)
+
+    def change_asd_mode(self, event):
+        self.asd_Box.setMode(self.asd_Box.getMode() + 1)
+
+    def get_config_item(self, key):
+        return self.parent.get_config_item(self, key)
