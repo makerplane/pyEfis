@@ -227,7 +227,10 @@ class Airspeed_Tape(QGraphicsView):
         self.Vno = self.item.get_aux_value('Vno')
         self.Vne = self.item.get_aux_value('Vne')
         self.Vfe = self.item.get_aux_value('Vfe')
-        self.max = int(round(self.Vne*1.25))
+        if self.Vne is not None:
+            self.max = int(round(self.Vne*1.25))
+        else:
+            self.max = 200
 
         self.pph = 10 # Pixels per unit
         self.fontsize = 20
