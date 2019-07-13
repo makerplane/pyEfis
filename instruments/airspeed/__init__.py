@@ -78,7 +78,6 @@ class Airspeed(QWidget):
 
         # Dial Setup
         # V Speeds
-
         Vs = self.item.get_aux_value('Vs')
         Vs0 = self.item.get_aux_value('Vs0')
         Vno = self.item.get_aux_value('Vno')
@@ -223,14 +222,17 @@ class Airspeed_Tape(QGraphicsView):
 
         # V Speeds
         self.Vs = self.item.get_aux_value('Vs')
+        if self.Vs is None: self.Vs = 0
         self.Vs0 = self.item.get_aux_value('Vs0')
+        if self.Vs0 is None: self.Vs0 = 0
         self.Vno = self.item.get_aux_value('Vno')
+        if self.Vno is None: self.Vno = 0
         self.Vne = self.item.get_aux_value('Vne')
+        if self.Vne is None: self.Vne = 200
         self.Vfe = self.item.get_aux_value('Vfe')
-        if self.Vne is not None:
-            self.max = int(round(self.Vne*1.25))
-        else:
-            self.max = 200
+        if self.Vfe is None: self.Vfe = 0
+
+        self.max = int(round(self.Vne*1.25))
 
         self.pph = 10 # Pixels per unit
         self.fontsize = 20
@@ -262,8 +264,8 @@ class Airspeed_Tape(QGraphicsView):
         self.scene.addRect(r, QPen(QColor(0,155,0)), QBrush(QColor(0,155,0)))
 
         # White Bar
-        r = QRectF(QPoint(self.markWidth / 2,              -self.Vs0 * self.pph + tape_start),
-                   QPoint(self.markWidth, -self.Vfe * self.pph + tape_start))
+        r = QRectF(QPoint(self.markWidth / 2, -self.Vs0 * self.pph + tape_start),
+                   QPoint(self.markWidth,     -self.Vfe * self.pph + tape_start))
         self.scene.addRect(r, QPen(Qt.white), QBrush(Qt.white))
 
         # Yellow Bar
