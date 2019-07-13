@@ -62,8 +62,7 @@ keybindings:
 # OnChange will send when the value is changed and Both will
 # do both.
 outputs:
-  #TAS = Interval
-  BARO: OnChange
+  BARO: Interval
   BTN16: OnChange
 
 
