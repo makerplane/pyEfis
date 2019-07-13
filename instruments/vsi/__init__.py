@@ -276,10 +276,6 @@ class Alt_Trend_Tape(QGraphicsView):
         self.setFocusPolicy(Qt.NoFocus)
 
         self.item = fix.db.get_item("VS")
-        self.item.valueChanged[float].connect(self.setVs)
-        self.item.oldChanged[bool].connect(self.setOld)
-        self.item.badChanged[bool].connect(self.setBad)
-        self.item.failChanged[bool].connect(self.setFail)
         self._vs = self.item.value
         self.maxvs = 2500
         self.fontsize = 10
@@ -343,6 +339,10 @@ class Alt_Trend_Tape(QGraphicsView):
             else:
                 self.scene.addLine(w_2 + 10, y, w, y, tapePen)
         self.setScene(self.scene)
+        self.item.valueChanged[float].connect(self.setVs)
+        self.item.oldChanged[bool].connect(self.setOld)
+        self.item.badChanged[bool].connect(self.setBad)
+        self.item.failChanged[bool].connect(self.setFail)
         self.redraw()
 
     def y_offset(self, vs):

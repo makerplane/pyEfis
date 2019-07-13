@@ -84,6 +84,7 @@ class VirtualVfr(AI):
         t = QGraphicsSimpleTextItem ("9 9")
         t.setFont (minfont)
         self.min_font_width = t.boundingRect().width()
+        self.pov = None
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)

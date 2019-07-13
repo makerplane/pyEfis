@@ -214,10 +214,6 @@ class Airspeed_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self.item = fix.db.get_item("IAS")
-        self.item.valueChanged[float].connect(self.setAirspeed)
-        self.item.oldChanged[bool].connect(self.setAsOld)
-        self.item.badChanged[bool].connect(self.setAsBad)
-        self.item.failChanged[bool].connect(self.setAsFail)
         self._airspeed = self.item.value
 
         # V Speeds
@@ -312,6 +308,10 @@ class Airspeed_Tape(QGraphicsView):
         self.setScene(self.scene)
         self.centerOn(self.scene.width() / 2,
                       -self._airspeed * self.pph + tape_start)
+        self.item.valueChanged[float].connect(self.setAirspeed)
+        self.item.oldChanged[bool].connect(self.setAsOld)
+        self.item.badChanged[bool].connect(self.setAsBad)
+        self.item.failChanged[bool].connect(self.setAsFail)
 
     def redraw(self):
         if not self.isVisible():

@@ -207,7 +207,10 @@ def initialize(config):
         sys.path.insert(0, config["FMS"]["module_dir"])
         ui = importlib.import_module ("qtui")
         uiwidget = ui.FMSUI(config["FMS"]["flight_plan_dir"], mainWindow)
-        uiwidget.resize (700, 65)
+        ui_width = 1000
+        if 'ui_width' in config['FMS']:
+            ui_width = config['FMS']['ui_width']
+        uiwidget.resize (ui_width, 65)
         uiwidget.move (30, 32)
         menu.register_target ("FMS", uiwidget)
 
