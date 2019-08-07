@@ -22,8 +22,8 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-from instruments import gauges
-from instruments import misc
+from pyefis.instruments import gauges
+from pyefis.instruments import misc
 import pyavtools.fix as fix
 
 class Screen(QWidget):

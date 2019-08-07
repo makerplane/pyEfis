@@ -25,9 +25,8 @@ except:
 import importlib
 import logging
 import sys
-import hooks
-import hmi
-from hmi import Menu
+from pyefis import hooks
+from pyefis import hmi
 
 screens = []
 
@@ -199,7 +198,7 @@ def initialize(config):
     hmi.actions.showScreen.connect(mainWindow.showScreen)
 
     if 'menu' in config:
-        menu = Menu(mainWindow, config["menu"])
+        menu = hmi.menu.Menu(mainWindow, config["menu"])
         menu.start()
 
 

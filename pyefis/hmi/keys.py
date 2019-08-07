@@ -24,8 +24,7 @@ except:
 import logging
 log = logging.getLogger(__name__)
 
-
-import hmi
+from pyefis import hmi
 
 __keypress = []
 __keyrelease = []

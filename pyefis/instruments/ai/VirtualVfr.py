@@ -28,12 +28,11 @@ try:
 except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
-import efis
 import logging
 
 import pyavtools.fix as fix
 
-from instruments.ai import AI
+from pyefis.instruments.ai import AI
 import pyavtools.Spatial as Spatial
 import pyavtools.CIFPObjects as CIFPObjects
 

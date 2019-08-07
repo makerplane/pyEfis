@@ -26,7 +26,7 @@ import logging
 log = logging.getLogger(__name__)
 
 import pyavtools.fix as fix
-import hmi
+from pyefis import hmi
 
 __bindings = []
 

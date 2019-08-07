@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
+import logging
 try:
     from PyQt5.QtCore import *
     from PyQt5.QtGui import *
@@ -23,8 +23,9 @@ except:
     from PyQt4.QtCore import *
     from PyQt4.QtGui import *
 
-import hmi.functions
-from hmi.menu import activateMenu
+from pyefis.hmi import functions
+from .menu import activateMenu
+
 
 class ActionClass(QWidget):
     setAirspeedMode = pyqtSignal(object)
@@ -47,9 +48,9 @@ class ActionClass(QWidget):
                           "show screen":self.showScreen,
                           "show next screen":self.showNextScreen,
                           "show previous screen":self.showPrevScreen,
-                          "set value":hmi.functions.setValue,
-                          "change value":hmi.functions.changeValue,
-                          "toggle bit":hmi.functions.toggleBool,
+                          "set value":functions.setValue,
+                          "change value":functions.changeValue,
+                          "toggle bit":functions.toggleBool,
                           "activate menu item":self.activateMenuItem,
                           "activate menu":activateMenu,
                           "menu encoder":self.menuEncoder,
@@ -65,7 +66,6 @@ class ActionClass(QWidget):
             a.emit(argument)
         else: # It's not a signal so assume it's a function
             a(argument)
-
 
     def findAction(self, action):
         a = action.lower()

@@ -26,7 +26,7 @@ except:
 
 import pyavtools.fix as fix
 
-from instruments.NumericalDisplay import NumericalDisplay
+from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300

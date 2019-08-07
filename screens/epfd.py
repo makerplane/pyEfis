@@ -24,13 +24,13 @@ except:
 
 import pyavtools.fix as fix
 
-from instruments import ai
-from instruments.ai.VirtualVfr import VirtualVfr
-from instruments import hsi
-from instruments import airspeed
-from instruments import altimeter
-from instruments import vsi
-from instruments import tc
+from pyefis.instruments import ai
+from pyefis.instruments.ai.VirtualVfr import VirtualVfr
+from pyefis.instruments import hsi
+from pyefis.instruments import airspeed
+from pyefis.instruments import altimeter
+from pyefis.instruments import vsi
+from pyefis.instruments import tc
 
 class Screen(QWidget):
     def __init__(self, parent=None):

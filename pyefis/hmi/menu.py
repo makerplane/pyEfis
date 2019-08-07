@@ -27,9 +27,8 @@ except:
 
 import logging
 
-
 import pyavtools.fix as fix
-import hmi
+from pyefis import hmi
 
 logger=logging.getLogger(__name__)
 

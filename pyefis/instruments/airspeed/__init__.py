@@ -26,8 +26,8 @@ except:
     from PyQt4.QtCore import *
 
 import pyavtools.fix as fix
-import hmi
-from instruments.NumericalDisplay import NumericalDisplay
+import pyefis.hmi as hmi
+from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
     FULL_WIDTH = 400

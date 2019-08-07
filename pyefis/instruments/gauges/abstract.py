@@ -23,7 +23,7 @@ except:
     from PyQt4.QtCore import *
 
 import pyavtools.fix as fix
-import hmi
+import pyefis.hmi as hmi
 
 
 def drawCircle(p, x, y, r, start, end):

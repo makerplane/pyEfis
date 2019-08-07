@@ -23,10 +23,10 @@ except:
     from PyQt4.QtCore import *
 import math
 import time
-import efis
 import logging
 
 import pyavtools.fix as fix
+from pyefis import common
 
 log = logging.getLogger(__name__)
 
@@ -321,7 +321,7 @@ class AI(QGraphicsView):
 
     def setRollAngle(self, angle):
         if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
-            self._rollAngle = efis.bounds(-180, 180, angle)
+            self._rollAngle = common.bounds(-180, 180, angle)
             self.redraw()
 
     def getRollAngle(self):

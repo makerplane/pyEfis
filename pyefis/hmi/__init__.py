@@ -16,18 +16,19 @@
 
 import logging
 
-from .actions import ActionClass
-from .menu import Menu
+from . import actionclass
+from pyefis.hmi import functions
 from . import keys
 from . import data
 
 actions = None
+from . import menu
 
 def initialize(config):
     global actions
     log = logging.getLogger(__name__)
     log.info("Initializing Actions")
-    actions = ActionClass()
+    actions = actionclass.ActionClass()
 
     if "databindings" in config:
         data.initialize(config["databindings"])
