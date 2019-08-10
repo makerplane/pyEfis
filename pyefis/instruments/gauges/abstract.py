@@ -119,7 +119,7 @@ class AbstractGauge(QWidget):
             cvalue = self.conversionFunction(value)
             if cvalue != self._value:
                 if self.clipping:
-                    self._value = efis.bounds(self.lowRange, self.highRange, cvalue)
+                    self._value = common.bounds(self.lowRange, self.highRange, cvalue)
                 else:
                     self._value = cvalue
                 self.setColors()

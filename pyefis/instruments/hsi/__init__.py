@@ -208,7 +208,7 @@ class HSI(QGraphicsView):
         if heading != self._heading:
             now = time.time()
             if now - self.last_update_time >= self.update_period:
-                newheading = efis.bounds(0, 360, heading)
+                newheading = common.bounds(0, 360, heading)
                 diff = newheading - self._heading
                 if diff > 180:
                     diff -= 360
@@ -236,7 +236,7 @@ class HSI(QGraphicsView):
 
     def setHeadingBug(self, headingBug):
         if headingBug != self._headingSelect:
-            self._headingSelect = efis.bounds(0, 360, headingBug)
+            self._headingSelect = common.bounds(0, 360, headingBug)
             if self.heading_bug is not None:
                 triangle = self.heading_bug_polygon()
                 self.heading_bug.setPolygon(triangle)
@@ -320,7 +320,7 @@ class HeadingDisplay(QWidget):
 
     def setHeading(self, heading):
         if heading != self._heading:
-            self._heading = efis.bounds(0, 360, heading)
+            self._heading = common.bounds(0, 360, heading)
             self.update()
 
     heading = property(getHeading, setHeading)

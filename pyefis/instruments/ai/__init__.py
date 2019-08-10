@@ -373,7 +373,7 @@ class AI(QGraphicsView):
 
     def setPitchAngle(self, angle):
         if angle != self._pitchAngle and self.isVisible() and (not self._AIFail):
-            self._pitchAngle = efis.bounds(-90, 90, angle)
+            self._pitchAngle = common.bounds(-90, 90, angle)
             self.redraw()
 
     def getPitchAngle(self):
