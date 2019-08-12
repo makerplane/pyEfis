@@ -68,7 +68,7 @@ def main():
 
     args = parser.parse_args()
 
-    config_file = args.config_file if args.config_file else 'config/main.yaml'
+    config_file = args.config_file if args.config_file else 'pyefis/config/main.yaml'
     log_config_file = args.log_config if args.log_config else config_file
 
     # if we passed in a configuration file on the command line...

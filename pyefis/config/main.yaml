@@ -3,8 +3,8 @@ main:
   FixServer: 127.0.0.1
   FixPort: 3490
   # Screen Geometry
-  #screenWidth = 1000
-  #screenHeight = 700
+  #screenWidth: 1024
+  #screenHeight: 768
   screenWidth: 800
   screenHeight: 480
 
@@ -15,39 +15,108 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: EMS
+  defaultScreen: PFD
 
-# menu:
-#   menus:
-#       PFDMenu:
-#           - ['ASD Mode', 'self.myparent.change_asd_mode_event (QEvent(QEvent.ActionAdded))']
-#           - ['Baro', 'self.focus("BARO")']
-#   start_menu: PFDMenu
-#   number_of_buttons: 6
-#   buttons_spacing: 100
-#   left_margin: 100
-#   top_margin: 5
+menu:
+  menus:
+      PFDMenu:
+          - ['ASD Mode', 'set airspeed mode','']
+          - ['Baro', 'set menu focus', BARO]
+  start_menu: PFDMenu
+  number_of_buttons: 6
+  buttons_spacing: 100
+  left_margin: 100
+  top_margin: 5
 
+# The keybindings are used to attach keystrokes to actions.  The key can be
+# a string that represents a key Sequence.  See the documentation for more
+# information about key sequences and actions.
 keybindings:
   - key: A
     action: Show Previous Screen
+
   - key: S
     action: Show Next Screen
-  - key: N
-    action: Set EGT Mode
-    args: Normalize
+
   - key: P
-    action: Set EGT Mode
-    args: Peak
-  - key: L
-    action: Set EGT Mode
-    args: Lean
-  - key: R
-    action: Set EGT Mode
-    args: Reset Peak
+    action: Show Screen
+    args: PFD
+
+  - key: M
+    action: Set Airspeed Mode
+
+  - key: Q
+    action: Set Value
+    args: BTN6, True
+    direction: DN
+  - key: Q
+    action: Set Value
+    args: BTN6, False
+    direction: UP
   - key: U
     action: Set Instrument Units
     args: OAT,OILT1,Temperature:Toggle
+
+  - key: F1
+    action: Activate Menu Item
+    args: 1
+  - key: F2
+    action: Activate Menu Item
+    args: 2
+  - key: F3
+    action: Activate Menu Item
+    args: 3
+  - key: F4
+    action: Activate Menu Item
+    args: 4
+  - key: F5
+    action: Activate Menu Item
+    args: 5
+  - key: F6
+    action: Activate Menu Item
+    args: 6
+
+  - key: ']'
+    action: Change Value
+    args: BARO,0.01
+  - key: '['
+    action: Change Value
+    args: BARO,-0.01
+
+# Data bindings tie actions to values in teh database
+# key is the database key and should match the FIX Gateway key
+databindings:
+  - key: BTN1
+    condition: True
+    action: Activate Menu Item
+    args: 1
+  - key: BTN2
+    condition: True
+    action: Activate Menu Item
+    args: 2
+  - key: BTN3
+    condition: True
+    action: Activate Menu Item
+    args: 3
+  - key: BTN4
+    condition: True
+    action: Activate Menu Item
+    args: 4
+  - key: BTN5
+    condition: True
+    action: Activate Menu Item
+    args: 5
+  - key: BTN6
+    condition: True
+    action: Activate Menu Item
+    args: 6
+  - key: ENC1
+    action: Menu Encoder
+    args: <VALUE>   # This sends the data value to the action
+  - key: OILP1
+    condition: < 25
+    action: Show Screen
+    args: SixPack
 
 
 # This section defines FIX IDs that we'll write out to the
@@ -58,7 +127,7 @@ keybindings:
 # do both.
 outputs:
   #TAS = Interval
-  BARO: OnChange
+  BARO: Interval
   BTN16: OnChange
 
 
@@ -69,17 +138,29 @@ outputs:
 # the screen
 
 screens:
-  PFD:
-    module: screens.pfd_sm
+  EPFD:
+    module: pyefis.screens.epfd
     title: Primary Flight Display
+    dbpath: CIFP/FAACIFP18
+    indexpath: CIFP/index.bin
+    check_engine: [MAP1, TACH1, OILP1, OILT1, FUELQT, FUELF1, CHTMAX1, EGTAVG1]
+    update_period: .1
 
-  SixPack:
-    module: screens.sixpack
-    title: Standard Instrument Panel
+  PFD:
+    module: pyefis.screens.pfd
+    title: Primary Flight Display
+    dbpath: CIFP/FAACIFP18
+    indexpath: CIFP/index.bin
+    update_period: .1
 
   EMS:
-    module: screens.ems_sm
+    module: pyefis.screens.ems_sm
     title: Engine Management
+
+
+  SixPack:
+    module: pyefis.screens.sixpack
+    title: Standard Instrument Panel
 
   # Test:
   #   module: screens.test
@@ -106,8 +187,8 @@ logging:
     '':
       # messages with levels below the one given will not be logged
       #level: DEBUG
-      #level: INFO
-      level: WARNING
+      level: INFO
+      #level: WARNING
       #level: ERROR
       #level: CRITICAL
 

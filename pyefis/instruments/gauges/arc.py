@@ -23,8 +23,6 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-#import pyefis.efis as efis
-import pyavtools.fix as fix
 from .abstract import AbstractGauge, drawCircle
 
 class ArcGauge(AbstractGauge):

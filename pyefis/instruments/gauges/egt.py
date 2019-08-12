@@ -22,7 +22,6 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-import pyavtools.fix as fix
 import pyefis.hmi as hmi
 from .abstract import AbstractGauge
 from .verticalBar import VerticalBar
