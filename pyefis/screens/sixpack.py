@@ -22,7 +22,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-from pyefis.instruments import ai
+from pyefis.instruments import ai2
 # from pyefis.instruments import gauges
 from pyefis.instruments import hsi
 from pyefis.instruments import airspeed
@@ -45,7 +45,7 @@ class Screen(QWidget):
 
         self.airspeed = airspeed.Airspeed(self)
 
-        self.ai = ai.AI(self)
+        self.ai = ai2.AI(self)
         self.ai.fontSize = 20
         self.ai.pitchDegreesShown = 60
         self.ai.overlayColor = Qt.white

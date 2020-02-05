@@ -22,7 +22,7 @@ except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
 
-from pyefis.instruments import ai
+from pyefis.instruments import ai2
 from pyefis.instruments import gauges
 from pyefis.instruments import hsi
 from pyefis.instruments import airspeed
@@ -41,10 +41,10 @@ class Screen(QWidget):
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
-        self.ai = ai.AI(self)
-        self.ai.fontSize = 20
+        self.ai = ai2.AI(self)
+        self.ai.fontSize = 19
         self.ai.pitchDegreesShown = 60
-        self.ai.overlayColor = QColor(Qt.white)
+        self.ai.bankAngleRadius = 150
 
         self.alt_tape = altimeter.Altimeter_Tape(self)
         #self.alt_Trend = vsi.Alt_Trend_Tape(self)
