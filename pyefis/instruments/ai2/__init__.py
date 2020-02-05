@@ -31,7 +31,6 @@ from pyefis import common
 log = logging.getLogger(__name__)
 
 # TODO:
-#   Bank angle markers don't update when the TAS changes if the Roll angle is zero
 #   Check TAS quality and revert to turn rate indication
 #   Fix quality indications
 #   Remove
@@ -308,7 +307,6 @@ class AI(QGraphicsView):
         # Draw standard rate turn markers
         if self.drawBankMarkers:
             a = math.degrees(math.atan(self._tas/364.0))
-            print("Got Here {}".format(a))
             if a > self.bankAngleMaximum:
                 a = self.bankAngleMaximum
             diamond = QPolygon([QPoint(0, -r),
@@ -342,12 +340,12 @@ class AI(QGraphicsView):
     def setLateralAcceleration(self, value):
         if value != self._latAccel and self.isVisible():
             self._latAccel = common.bounds(-0.3, 0.3, value)
-            self.redraw()
+            self.update()
 
     def setTrueAirspeed(self, value):
         if value != self._tas and self.isVisible():
             self._tas = value
-            self.redraw()
+            self.update()
 
 
     def setAIFail(self, fail):
