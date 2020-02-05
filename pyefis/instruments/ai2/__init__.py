@@ -30,6 +30,12 @@ from pyefis import common
 
 log = logging.getLogger(__name__)
 
+# TODO:
+#   Bank angle markers don't update when the TAS changes if the Roll angle is zero
+#   Check TAS quality and revert to turn rate indication
+#   Fix quality indications
+#   Remove
+
 class AI(QGraphicsView):
     def __init__(self, parent=None):
         super(AI, self).__init__(parent)
@@ -49,6 +55,8 @@ class AI(QGraphicsView):
         self.visiblePitchAngle = 15 # Amount of visible pitch angle marks
         self.pitchOpacity = 0.6
         self.bankAngleRadius = None # Radius of the bank angle markings
+        self.drawBankMarkers = True
+        self.bankAngleMaximum = 25
 
         self.setStyleSheet("border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -71,6 +79,12 @@ class AI(QGraphicsView):
         self._AIOld = roll.old
         self._AIBad = roll.bad
         self._AIFail = roll.fail
+        alat = fix.db.get_item("ALAT")
+        alat.valueChanged[float].connect(self.setLateralAcceleration)
+        self._latAccel = alat.value
+        tas = fix.db.get_item("TAS")
+        tas.valueChanged[float].connect(self.setTrueAirspeed)
+        self._tas = tas.value
         # We store all the pitch tick marks and text in a list so that
         # we can adjust the opacity of the items.
         self.pitchItems = []
@@ -254,24 +268,6 @@ class AI(QGraphicsView):
         # Put the static overlay image on the view
         p.drawImage(self.rect(), self.overlay)
 
-
-        # if self.show_standard_turn and (not(self.tas.fail)) and self.tas.value > 30:
-        #     srpen = QPen(self.srTurnColor)
-        #     srpen.setWidth(3)
-        #     p.setPen(srpen)
-        #     #math.tan(_bank_angle_) = (rate_of_turn * tas_knots * 493/900) / 9.8(m/s)
-        #     # standard rate of turn = 3 degrees per second
-        #     rate_of_turn = math.radians(3)
-        #     tas_knots = self.fix_tas.value
-        #     #_bank_angle_ = math.atan((rate_of_turn * tas_knots * 493/900) / 9.8(m/s))
-        #     srbank = math.atan((rate_of_turn * tas_knots * 493/900) / 9.8)
-        #     srbank = math.degrees(srbank)
-        #     p.rotate(srbank)
-        #     p.drawLine(longLine)
-        #     p.rotate(- 2 * srbank)
-        #     p.drawLine(longLine)
-        #     p.rotate(srbank)
-
         pen = QPen(Qt.white)
         pen.setWidth(1)
         p.setPen(pen)
@@ -279,10 +275,11 @@ class AI(QGraphicsView):
         marks = QPen(Qt.white)
 
         p.translate(w / 2, h / 2)
+
         # Slip / Skid ball
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.white))
-        p.drawEllipse(QPoint(0, -r + 30), 5, 5)
+        p.drawEllipse(QPoint(self._latAccel * 120, -r + 32), 6, 6)
 
         p.rotate(self._rollAngle * -1.0)
         # Add moving Bank Angle Markers
@@ -290,8 +287,8 @@ class AI(QGraphicsView):
         p.setPen(marks)
         smallMarks = [10, 20, 45]
         largeMarks = [30, 60]
-        shortLine = QLine(0, - r, 0, - (r - 10))
-        longLine = QLine(0, - (r + 10), 0, - (r - 10))
+        shortLine = QLine(0, -r, 0, -(r-10))
+        longLine = QLine(0, -(r+10), 0, -(r-10))
         for angle in smallMarks:
             p.rotate(angle)
             p.drawLine(shortLine)
@@ -304,13 +301,25 @@ class AI(QGraphicsView):
             p.rotate(- 2 * angle)
             p.drawLine(longLine)
             p.rotate(angle)
-        triangle = QPolygon([QPoint(0 + 5, - r),
-                             QPoint(0 - 5, - r),
-                             QPoint(0, - (r - 10))])
+        triangle = QPolygon([QPoint(5, -r),
+                             QPoint(-5, -r),
+                             QPoint(0, -(r - 10))])
         p.drawPolygon(triangle)
-
-
-
+        # Draw standard rate turn markers
+        if self.drawBankMarkers:
+            a = math.degrees(math.atan(self._tas/364.0))
+            print("Got Here {}".format(a))
+            if a > self.bankAngleMaximum:
+                a = self.bankAngleMaximum
+            diamond = QPolygon([QPoint(0, -r),
+                                QPoint(-7, -r - 7),
+                                QPoint(-0, -r - 14),
+                                QPoint(7, -r - 7)])
+            p.setBrush(Qt.transparent)
+            p.rotate(a)
+            p.drawPolygon(diamond)
+            p.rotate(-2 * a)
+            p.drawPolygon(diamond)
 
     # We don't want this responding to keystrokes
     def keyPressEvent(self, event):
@@ -329,6 +338,17 @@ class AI(QGraphicsView):
         return self._rollAngle
 
     rollAngle = property(getRollAngle, setRollAngle)
+
+    def setLateralAcceleration(self, value):
+        if value != self._latAccel and self.isVisible():
+            self._latAccel = common.bounds(-0.3, 0.3, value)
+            self.redraw()
+
+    def setTrueAirspeed(self, value):
+        if value != self._tas and self.isVisible():
+            self._tas = value
+            self.redraw()
+
 
     def setAIFail(self, fail):
         log.debug("Set AI Fail")
