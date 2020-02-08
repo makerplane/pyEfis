@@ -24,6 +24,8 @@ try:
 except:
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
+
+from pyefis import common
 import pyavtools.fix as fix
 
 class HSI(QGraphicsView):

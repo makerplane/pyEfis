@@ -33,7 +33,10 @@ log = logging.getLogger(__name__)
 # TODO:
 #   Check TAS quality and revert to turn rate indication
 #   Fix quality indications
-#   Remove
+#   Add quality flags to indicate the actual failures
+#   Remove internal assignments of database items.  Should be a normal
+#      Qt widget and these things done externally.
+#   Add configuration for bank angle tick sizes
 
 class AI(QGraphicsView):
     def __init__(self, parent=None):
@@ -45,17 +48,20 @@ class AI(QGraphicsView):
         self.fontSize = 30
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
+        # Pitch tick mark configurations
         self.minorDiv = 1   # Degrees between minor divisions
-        self.majorDiv = 5  # Degrees between major devisions
-        self.numberedDiv = 10
+        self.majorDiv = 5  # Degrees between major divisions
+        self.numberedDiv = 10 # Degrees between numbered divisions
+        # Line widths of the pitch tick marks
         self.minorDivWidth = 10
         self.majorDivWidth = 40
         self.numberedDivWidth = 50
         self.visiblePitchAngle = 15 # Amount of visible pitch angle marks
         self.pitchOpacity = 0.6
-        self.bankAngleRadius = None # Radius of the bank angle markings
+        # Standard rate turn bank angle indicators.
         self.drawBankMarkers = True
-        self.bankAngleMaximum = 25
+        self.bankAngleRadius = None # Radius of the bank angle markings
+        self.bankAngleMaximum = 25  # Largest bank angle that will be indicated
 
         self.setStyleSheet("border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -246,10 +252,6 @@ class AI(QGraphicsView):
                 each[1].setOpacity(0)
 
     def redraw(self):
-        now = time.time()
-        # if now - self.last_update_time < self.update_period:
-        #     return
-        # self.last_update_time = now
         self.resetTransform()
         self.centerOn(self.scene.width() / 2,
                       self.scene.height() / 2 +
@@ -278,7 +280,7 @@ class AI(QGraphicsView):
         # Slip / Skid ball
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.white))
-        p.drawEllipse(QPoint(self._latAccel * 120, -r + 32), 6, 6)
+        p.drawEllipse(QPoint(self._latAccel * -120, -r + 32), 6, 6)
 
         p.rotate(self._rollAngle * -1.0)
         # Add moving Bank Angle Markers
