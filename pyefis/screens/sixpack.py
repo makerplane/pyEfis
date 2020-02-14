@@ -46,9 +46,9 @@ class Screen(QWidget):
         self.airspeed = airspeed.Airspeed(self)
 
         self.ai = ai.AI(self)
-        self.ai.fontSize = 20
+        self.ai.fontSize = 12
+        self.ai.bankMarkSize = 7
         self.ai.pitchDegreesShown = 60
-        self.ai.overlayColor = Qt.white
 
         self.altimeter = altimeter.Altimeter(self)
 

@@ -43,6 +43,7 @@ class Screen(QWidget):
 
         self.ai = ai.AI(self)
         self.ai.fontSize = 19
+        self.ai.bankMarkSize = 10
         self.ai.pitchDegreesShown = 60
         self.ai.bankAngleRadius = 150
 

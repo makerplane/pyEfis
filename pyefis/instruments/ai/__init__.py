@@ -58,6 +58,8 @@ class AI(QGraphicsView):
         self.numberedDivWidth = 50
         self.visiblePitchAngle = 15 # Amount of visible pitch angle marks
         self.pitchOpacity = 0.6
+        # Bank angle tick indicators
+        self.bankMarkSize = 10
         # Standard rate turn bank angle indicators.
         self.drawBankMarkers = True
         self.bankAngleRadius = None # Radius of the bank angle markings
@@ -156,8 +158,7 @@ class AI(QGraphicsView):
         pen = QPen(QColor(Qt.white))
         pen.setWidth(2)
         self.scene.addLine(0, sceneHeight / 2, sceneWidth, sceneHeight / 2, pen)
-        #draw the degree hash marks
-        pen.setWidth(2)
+        # draw the degree hash marks
         pen.setColor(Qt.white)
         w = self.scene.width()
         h = self.scene.height()
@@ -224,15 +225,16 @@ class AI(QGraphicsView):
         p.setBrush(QColor(Qt.yellow))
         p.drawRect(w / 4, h / 2 - 3, w / 6, 6)
         p.drawRect(w - w / 4 - w / 6, h / 2 - 3, w / 6, 6)
-        p.drawRect(w / 2 - 3, h / 2 - 3, 8, 8)
+        p.drawEllipse(w / 2 - 3, h / 2 - 3, 9, 9)
+        # p.setPen(QColor(Qt.black))
+        # p.setBrush(QColor(Qt.white))
 
-        p.setPen(QColor(Qt.black))
+        m = self.bankMarkSize
         p.setBrush(QColor(Qt.white))
-
-        p.translate(w / 2, h / 2)
-        triangle = QPolygon([QPoint(7, - r + 25),
-                             QPoint(-7, -r + 25),
-                             QPoint(0, - (r - 10))])
+        p.translate(w / 2, h/2 - r)
+        triangle = QPolygon([QPoint(m,  m*2),
+                             QPoint(-m, m*2),
+                             QPoint(0,  m/2)])
         p.drawPolygon(triangle)
 
 
@@ -264,6 +266,7 @@ class AI(QGraphicsView):
         w = self.width()
         h = self.height()
         r = self.bankAngleRadius
+        m = self.bankMarkSize
         p = QPainter(self.viewport())
         p.setRenderHint(QPainter.Antialiasing)
         # Put the static overlay image on the view
@@ -280,16 +283,17 @@ class AI(QGraphicsView):
         # Slip / Skid ball
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.white))
-        p.drawEllipse(QPoint(self._latAccel * -120, -r + 32), 6, 6)
+        p.drawEllipse(QPoint(self._latAccel * -m*12, -r + m*3), m*0.8, m*0.8)
 
         p.rotate(self._rollAngle * -1.0)
         # Add moving Bank Angle Markers
-        marks.setWidth(3)
+        marks.setWidth(2)
         p.setPen(marks)
+        p.setBrush(QColor(Qt.white))
         smallMarks = [10, 20, 45]
         largeMarks = [30, 60]
-        shortLine = QLine(0, -r, 0, -(r-10))
-        longLine = QLine(0, -(r+10), 0, -(r-10))
+        shortLine = QLine(0, -r, 0, -(r-m))
+        longLine = QLine(0, -(r+m), 0, -(r-m))
         for angle in smallMarks:
             p.rotate(angle)
             p.drawLine(shortLine)
@@ -302,9 +306,9 @@ class AI(QGraphicsView):
             p.rotate(- 2 * angle)
             p.drawLine(longLine)
             p.rotate(angle)
-        triangle = QPolygon([QPoint(5, -r),
-                             QPoint(-5, -r),
-                             QPoint(0, -(r - 10))])
+        triangle = QPolygon([QPoint(m/2, -(r+m/2)),
+                             QPoint(-m/2, -(r+m/2)),
+                             QPoint(0, -(r - m/2))])
         p.drawPolygon(triangle)
         # Draw standard rate turn markers
         if self.drawBankMarkers:
@@ -312,9 +316,9 @@ class AI(QGraphicsView):
             if a > self.bankAngleMaximum:
                 a = self.bankAngleMaximum
             diamond = QPolygon([QPoint(0, -r),
-                                QPoint(-7, -r - 7),
-                                QPoint(-0, -r - 14),
-                                QPoint(7, -r - 7)])
+                                QPoint(-m*0.8, -(r+m*0.8)),
+                                QPoint(-0, -r - m*1.6),
+                                QPoint(m*0.8, -(r+m*0.8))])
             p.setBrush(Qt.transparent)
             p.rotate(a)
             p.drawPolygon(diamond)
