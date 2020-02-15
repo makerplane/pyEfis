@@ -164,7 +164,7 @@ class Altimeter(QWidget):
 class Altimeter_Tape(QGraphicsView):
     def __init__(self, parent=None, maxalt=50000, fontsize=15):
         super(Altimeter_Tape, self).__init__(parent)
-        self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
+        self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -172,18 +172,18 @@ class Altimeter_Tape(QGraphicsView):
         self.fontsize = fontsize
         self.item = fix.db.get_item("ALT")
         self._altimeter = self.item.value
-        self.maxalt = maxalt
+        self.backgroundOpacity = 0.3
+        self.foregroundOpacity = 0.6
         self.pph = 0.3
+        self.majorDiv = 200
+        self.minorDiv = 100
+
+
+        self.maxalt = maxalt
         self.myparent = parent
-        self.update_period = None
 
 
     def resizeEvent(self, event):
-        if self.update_period is None:
-            self.update_period = self.myparent.get_config_item('update_period')
-            if self.update_period is None:
-                self.update_period = .1
-            self.last_update_time = 0
         w = self.width()
         w_2 = w/2
         h = self.height()
@@ -195,21 +195,26 @@ class Altimeter_Tape(QGraphicsView):
         dialPen.setWidth(2)
 
         self.scene = QGraphicsScene(0, 0, w, self.height_pixel)
-        self.scene.addRect(0, 0, w, self.height_pixel,
-                           QPen(QColor(32, 32, 32, 10)), QBrush(QColor(32, 32, 32, 10)))
+        x = self.scene.addRect(0, 0, w, self.height_pixel,
+                           QPen(QColor(32, 32, 32)), QBrush(QColor(32, 32, 32)))
+        x.setOpacity(self.backgroundOpacity)
 
-        for i in range(self.maxalt, -1, -100):
+        for i in range(self.maxalt, -1, -self.minorDiv):
             y = self.y_offset(i)
-            if i % 200 == 0:
-                self.scene.addLine(w_2 + 15, y, w, y, dialPen)
+            if i % self.majorDiv == 0:
+                l = self.scene.addLine(w_2 + 15, y, w, y, dialPen)
+                l.setOpacity(self.foregroundOpacity)
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
                 t.setX(0)
                 t.setY(y - t.boundingRect().height() / 2)
+                t.setOpacity(self.foregroundOpacity)
+
             else:
-                self.scene.addLine(w_2 + 30, y, w, y, dialPen)
+                l = self.scene.addLine(w_2 + 30, y, w, y, dialPen)
+                l.setOpacity(self.foregroundOpacity)
         self.setScene(self.scene)
 
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
@@ -234,10 +239,6 @@ class Altimeter_Tape(QGraphicsView):
         return self.height_pixel - (alt*self.pph) - self.height()/2
 
     def redraw(self):
-        now = time.time()
-        if now - self.last_update_time < self.update_period:
-            return
-        self.last_update_time = now
         self.resetTransform()
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
         self.numerical_display.value = self._altimeter

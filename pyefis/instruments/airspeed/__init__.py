@@ -208,7 +208,8 @@ class Airspeed_Tape(QGraphicsView):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
         self.update_period = None
-        self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
+        # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
+        self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -230,15 +231,14 @@ class Airspeed_Tape(QGraphicsView):
 
         self.max = int(round(self.Vne*1.25))
 
+        self.backgroundOpacity = 0.3
+        self.foregroundOpacity = 0.6
         self.pph = 10 # Pixels per unit
-        self.fontsize = 20
+        self.fontsize = 15
+        self.majorDiv = 10
+        self.minorDiv = 5
 
     def resizeEvent(self, event):
-        if self.update_period is None:
-            self.update_period = self.myparent.get_config_item('update_period')
-            if self.update_period is None:
-                self.update_period = .1
-            self.last_update_time = 0
         w = self.width()
         h = self.height()
         self.markWidth = w / 5
@@ -250,30 +250,36 @@ class Airspeed_Tape(QGraphicsView):
         dialPen = QPen(QColor(Qt.white))
 
         self.scene = QGraphicsScene(0, 0, w, tape_height)
-        self.scene.addRect(0, 0, w, tape_height,
-                           QPen(QColor(32, 32, 32, 10)), QBrush(QColor(32, 32, 32, 10)))
+        x = self.scene.addRect(0, 0, w, tape_height,
+                            QPen(QColor(32, 32, 32)), QBrush(QColor(32, 32, 32)))
+        x.setOpacity(self.backgroundOpacity)
 
         # Add Markings
         # Green Bar
         r = QRectF(QPoint(0,              -self.Vno * self.pph + tape_start),
                    QPoint(self.markWidth, -self.Vs0 * self.pph + tape_start))
-        self.scene.addRect(r, QPen(QColor(0,155,0)), QBrush(QColor(0,155,0)))
+        x = self.scene.addRect(r, QPen(QColor(0,155,0)), QBrush(QColor(0,155,0)))
+        x.setOpacity(self.foregroundOpacity)
 
         # White Bar
-        r = QRectF(QPoint(self.markWidth / 2, -self.Vs0 * self.pph + tape_start),
-                   QPoint(self.markWidth,     -self.Vfe * self.pph + tape_start))
-        self.scene.addRect(r, QPen(Qt.white), QBrush(Qt.white))
+        r = QRectF(QPoint(self.markWidth / 2, -self.Vfe * self.pph + tape_start),
+                   QPoint(self.markWidth,     -self.Vs0 * self.pph + tape_start))
+        x = self.scene.addRect(r, QPen(Qt.white), QBrush(Qt.white))
+        x.setOpacity(self.foregroundOpacity)
+
 
         # Yellow Bar
         r = QRectF(QPoint(0,              -self.Vno * self.pph + tape_start),
                    QPoint(self.markWidth, -self.Vne * self.pph + tape_start))
-        self.scene.addRect(r, QPen(Qt.yellow), QBrush(Qt.yellow))
+        x = self.scene.addRect(r, QPen(Qt.yellow), QBrush(Qt.yellow))
+        x.setOpacity(self.foregroundOpacity)
 
         # Draw the little white lines and the text
-        for i in range(self.max, -1, -5):
-            if i % 10 == 0:
-                self.scene.addLine(0, (- i * self.pph) + tape_start, w / 2,
-                                   (- i * self.pph) + tape_start, dialPen)
+        for i in range(self.max, -1, -1):
+            if i % self.majorDiv == 0:
+                l = self.scene.addLine(0, (- i * self.pph) + tape_start, w / 2,
+                                      (- i * self.pph) + tape_start, dialPen)
+                l.setOpacity(self.foregroundOpacity)
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
@@ -281,17 +287,17 @@ class Airspeed_Tape(QGraphicsView):
                 t.setX(w - t.boundingRect().width())
                 t.setY(((- i * self.pph) + tape_start)
                        - t.boundingRect().height() / 2)
-            else:
-                self.scene.addLine(0, (- i * self.pph) + tape_start,
-                                   w / 2 - 20, (- i * self.pph) + tape_start,
-                                   dialPen)
-
+                t.setOpacity(self.foregroundOpacity)
+            elif i % self.minorDiv ==0:
+                l = self.scene.addLine(0, (- i * self.pph) + tape_start,
+                                   w / 3, (- i * self.pph) + tape_start, dialPen)
+                l.setOpacity(self.foregroundOpacity)
         # Red Line
         vnePen = QPen(QColor(Qt.red))
         vnePen.setWidth(4)
-        self.scene.addLine(0, -self.Vne * self.pph + tape_start,
-                           30, -self.Vne * self.pph + tape_start,
-                           vnePen)
+        l = self.scene.addLine(0, -self.Vne * self.pph + tape_start,
+                               30, -self.Vne * self.pph + tape_start, vnePen)
+        l.setOpacity(self.foregroundOpacity)
 
         self.numerical_display = NumericalDisplay(self)
         nbh = 50
@@ -316,15 +322,12 @@ class Airspeed_Tape(QGraphicsView):
     def redraw(self):
         if not self.isVisible():
             return
-        now = time.time()
-        if now - self.last_update_time >= self.update_period:
-            tape_start = self.max * self.pph + self.height()/2
+        tape_start = self.max * self.pph + self.height()/2
 
-            self.resetTransform()
-            self.centerOn(self.scene.width() / 2,
-                          -self._airspeed * self.pph + tape_start)
-            self.numerical_display.value = self._airspeed
-            self.last_update_time = now
+        self.resetTransform()
+        self.centerOn(self.scene.width() / 2,
+                      -self._airspeed * self.pph + tape_start)
+        self.numerical_display.value = self._airspeed
 
     #  Index Line that doesn't move to make it easy to read the airspeed.
     def paintEvent(self, event):
