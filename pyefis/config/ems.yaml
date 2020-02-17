@@ -1,0 +1,138 @@
+main:
+  # IP information for network adapter
+  FixServer: 127.0.0.1
+  FixPort: 3490
+  # Screen Geometry
+  #screenWidth = 1000
+  #screenHeight = 700
+  screenWidth: 800
+  screenHeight: 480
+
+  # Set EFIS to occupy the entire screen without system border / menu
+  screenFullSize: False
+
+  # Screen background color RGB
+  screenColor: (0,0,0)
+
+  # If left out the first defined screen will be default
+  defaultScreen: EMS
+
+# menu:
+#   menus:
+#       PFDMenu:
+#           - ['ASD Mode', 'self.myparent.change_asd_mode_event (QEvent(QEvent.ActionAdded))']
+#           - ['Baro', 'self.focus("BARO")']
+#   start_menu: PFDMenu
+#   number_of_buttons: 6
+#   buttons_spacing: 100
+#   left_margin: 100
+#   top_margin: 5
+
+keybindings:
+  - key: A
+    action: Show Previous Screen
+  - key: S
+    action: Show Next Screen
+  - key: N
+    action: Set EGT Mode
+    args: Normalize
+  - key: P
+    action: Set EGT Mode
+    args: Peak
+  - key: L
+    action: Set EGT Mode
+    args: Lean
+  - key: R
+    action: Set EGT Mode
+    args: Reset Peak
+  - key: U
+    action: Set Instrument Units
+    args: OAT,OILT1,Temperature:Toggle
+
+
+# This section defines FIX IDs that we'll write out to the
+# FIX Gateway server.  Each can be defined as one of three
+# methods.  Interval will look at the time out lifetime (TOL)
+# of the point and send the data at half that interval.
+# OnChange will send when the value is changed and Both will
+# do both.
+outputs:
+  #TAS = Interval
+  BARO: OnChange
+  BTN16: OnChange
+
+
+# Screen definitions describe the screens that will be loaded
+# and ready for use.  Each section should start with "Screen."
+# followed by the name.  The only required configuration is
+# module, which is the module that will be loaded to render
+# the screen
+
+screens:
+  PFD:
+    module: pyefis.screens.pfd_sm
+    title: Primary Flight Display
+
+  SixPack:
+    module: pyefis.screens.sixpack
+    title: Standard Instrument Panel
+
+  EMS:
+    module: pyefis.screens.ems_sm
+    title: Engine Management
+
+  # Test:
+  #   module: screens.test
+  #   title: Test Screen
+
+# Hooks are user defined modules that are loaded at specific points
+# in the programs execution.  Right now their is only one place and
+# it is right after all of the initialization and just before the
+# main window and default screen are shown.  We'll add more as the
+# need arises.
+hooks:
+  # Keys:
+  #   module: user.hooks.keys
+  # Composite:
+  #   module: user.hooks.composite
+
+
+# Logging configuration - See Python logging.config module documenation
+# Logging configuration - See Python logging.config module documenation
+logging:
+  version: 1
+  disable_existing_loggers: False
+  loggers:
+    '':
+      # messages with levels below the one given will not be logged
+      #level: DEBUG
+      #level: INFO
+      level: WARNING
+      #level: ERROR
+      #level: CRITICAL
+
+      handlers: [stderr, file]
+      propagate: True
+
+  formatters:
+    standard:
+      format: "%(levelname)s:%(asctime)s:%(name)s - %(message)s"
+      datefmt: "%Y%m%d-%H:%M:%S"
+      class: logging.Formatter
+
+  handlers:
+    stderr:
+      class: logging.StreamHandler
+      formatter: standard
+      stream: ext://sys.stderr
+
+    file:
+      class: logging.FileHandler
+      formatter: standard
+      filename: fixgw.log
+      mode: w
+      #mode: a
+
+    syslog:
+      class: logging.handlers.SysLogHandler
+      formatter: standard

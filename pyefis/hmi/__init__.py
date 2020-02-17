@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-#  Copyright (c) 2013 Phil Birkelbach
+#  Copyright (c) 2018 Phil Birkelbach
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,6 +14,21 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import pyefis.main as main
+import logging
 
-main.main()
+from . import actionclass
+from pyefis.hmi import functions
+from . import keys
+from . import data
+
+actions = None
+from . import menu
+
+def initialize(config):
+    global actions
+    log = logging.getLogger(__name__)
+    log.info("Initializing Actions")
+    actions = actionclass.ActionClass()
+
+    if "databindings" in config:
+        data.initialize(config["databindings"])
