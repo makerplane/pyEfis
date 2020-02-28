@@ -23,7 +23,7 @@ except:
     from PyQt4.QtCore import *
 
 class NumericalDisplay(QGraphicsView):
-    def __init__(self, parent=None, total_decimals=3, scroll_decimal=1, font_family="Sans", font_size=10):
+    def __init__(self, parent=None, total_decimals=3, scroll_decimal=1, font_family="Sans", font_size=15):
         super(NumericalDisplay, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -51,7 +51,7 @@ class NumericalDisplay(QGraphicsView):
         font_height = t.boundingRect().height()
 
         self.scene = QGraphicsScene(0, 0, self.w, self.h)
-        border_width = 3
+        border_width = 1
         top = (self.h - font_height) / 2
         rect_pen = QPen(QColor(Qt.white))
         rect_pen.setWidth (border_width)
@@ -61,7 +61,7 @@ class NumericalDisplay(QGraphicsView):
         self.scrolling_area = NumericalScrollDisplay(self, self.scroll_decimal,
                                             self.font_family, self.font_size)
         self.scene.addWidget (self.scrolling_area)
-        self.digit_vertical_spacing = font_height * 0.8
+        self.digit_vertical_spacing = font_height
         self.scrolling_area.resize(font_width*self.scroll_decimal+border_width, self.h)
         sax = self.w-font_width*self.scroll_decimal-border_width
         self.scrolling_area.move(sax, 0)
@@ -244,7 +244,7 @@ class NumericalScrollDisplay(QGraphicsView):
 
     def y_offset(self, sv):
         return ((10.0 - (sv)) * self.digit_vertical_spacing + self.h/2)
-        
+
     def redraw(self):
         scroll_value = self._value
         self.resetTransform()
