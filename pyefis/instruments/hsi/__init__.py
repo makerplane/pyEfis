@@ -70,14 +70,14 @@ class HSI(QGraphicsView):
             self.update_period = .1
         self.last_update_time = 0
         self.scene = QGraphicsScene(0, 0, self.width(), self.height())
-        self.cx = self.width() / 2
-        self.cy = self.height() / 2
-        self.r = self.height() / 2 - 5
-        self.cdippw = self.r * .5
-        self.gsipph = self.r * .5
+        self.cx = self.width() / 2.0
+        self.cy = self.height() / 2.0
+        self.r = self.height() / 2.0 - 5.0
+        self.cdippw = self.r * 0.5
+        self.gsipph = self.r * 0.5
 
         # Setup Pens
-        compassPen = QPen(QColor(self.fg_color))
+        compassPen = QPen(QColor(self.fg_color), 1.5)
         compassBrush = QBrush(QColor(self.bg_color))
         nobrush = QBrush()
 
@@ -95,13 +95,13 @@ class HSI(QGraphicsView):
         self.scene.setFont(f)
 
         # Compass Setup
-        self.scene.addEllipse(self.cx-self.r, self.cy-self.r, self.r*2, self.r*2,
+        self.scene.addEllipse(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0,
                                 compassPen, nobrush)
 
         refsize = self.fontSize*.7
         self.labels = list()
         for count in range(0, 360, 5):
-            angle = (count) * math.pi / 180
+            angle = (count) * math.pi / 180.0
             cosa = math.cos(angle)
             sina = math.sin(angle)
             iy1 = -self.r
@@ -264,6 +264,16 @@ class HSI(QGraphicsView):
             self.update()
 
     gsi = property(getGsi, setGsi)
+
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass
+
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+
+
 
 class HeadingDisplay(QWidget):
     def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):

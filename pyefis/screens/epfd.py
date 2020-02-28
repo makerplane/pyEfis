@@ -49,54 +49,54 @@ class Screen(QWidget):
         self.ai.pitchDegreesShown = 90
 
         self.alt_tape = altimeter.Altimeter_Tape(self)
-        self.alt_Trend = vsi.Alt_Trend_Tape(self)
+        # self.alt_Trend = vsi.Alt_Trend_Tape(self)
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#0030FF")
+        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#ffffff")
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#ffffff")
         self.alt_setting = altimeter.Altimeter_Setting(self)
         self.check_engine = CheckEngine(self)
-        self.tc = tc.TurnCoordinator(self, dial=False)
+        #self.tc = tc.TurnCoordinator(self, dial=False)
 
     def resizeEvent(self, event):
-        instWidth = self.width()- 80
-        instHeight = self.height() - 130
-        self.ai.move(0, 40)
+        instWidth = self.width()
+        instHeight = self.height()
+        self.ai.move(0,0)
         self.ai.resize(instWidth, instHeight)
 
         self.alt_tape.resize(90, instHeight)
-        self.alt_tape.move(instWidth -90, 40)
+        self.alt_tape.move(instWidth -90, 0)
 
-        self.alt_Trend.resize(40, instHeight)
-        self.alt_Trend.move(instWidth , 40)
+        # self.alt_Trend.resize(40, instHeight)
+        # self.alt_Trend.move(instWidth , 0)
 
         self.as_tape.resize(90, instHeight)
-        self.as_tape.move(0, 40)
+        self.as_tape.move(0, 0)
 
         #self.as_Trend.resize(10, instHeight)
         #self.as_Trend.move(90, 100)
 
-        self.asd_Box.resize(90, 60)
-        self.asd_Box.move(0, instHeight + 50)
+        self.asd_Box.resize(90, 50)
+        self.asd_Box.move(90, instHeight - 90)
 
-        hsi_diameter=instWidth/5
+        hsi_diameter=instWidth/4
         self.hsi.resize(hsi_diameter, hsi_diameter)
         self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter + 65)
         self.heading_disp.move((instWidth-self.heading_disp.width())/2,
                     instHeight - hsi_diameter - self.heading_disp.height() + 65)
 
         self.alt_setting.resize(90, 60)
-        self.alt_setting.move(instWidth -100, instHeight + 50)
+        self.alt_setting.move(instWidth -190, instHeight - 90)
         self.check_engine.move (instWidth - self.check_engine.width()-100, 45)
         engine_items = self.get_config_item("check_engine")
         if engine_items is not None and len(engine_items) > 0:
             self.check_engine.init_fix_items(engine_items)
 
-        tc_width = instWidth * .23
-        self.tc.resize (tc_width, tc_width)
-        self.tc.move ((instWidth-tc_width)/2, instHeight-tc_width*.10)
+        # tc_width = instWidth * .23
+        # self.tc.resize (tc_width, tc_width)
+        # self.tc.move ((instWidth-tc_width)/2, instHeight-tc_width*.10)
 
     def change_asd_mode(self, event):
         self.asd_Box.setMode(self.asd_Box.getMode() + 1)
