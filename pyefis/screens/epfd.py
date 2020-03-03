@@ -25,7 +25,7 @@ except:
 import pyavtools.fix as fix
 
 from pyefis.instruments import ai
-from pyefis.instruments.ai.VirtualVfr import VirtualVfr
+#from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 from pyefis.instruments import hsi
 from pyefis.instruments import airspeed
 from pyefis.instruments import altimeter
@@ -44,18 +44,22 @@ class Screen(QWidget):
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
-        self.ai = VirtualVfr(self)
+        #self.ai = VirtualVfr(self)
+        self.ai = ai.AI(self)
         self.ai.fontSize = 20
         self.ai.pitchDegreesShown = 90
+        self.ai.visiblePitchAngle = 22 # Amount of visible pitch angle marks
+
 
         self.alt_tape = altimeter.Altimeter_Tape(self)
-        # self.alt_Trend = vsi.Alt_Trend_Tape(self)
+        self.alt_Trend = vsi.Alt_Trend_Tape(self)
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
         self.asd_Box = airspeed.Airspeed_Mode(self)
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#ffffff")
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#ffffff")
+        self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bgcolor="#aaaaaa")
+        self.hsi.tickSize = 12
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=20, fgcolor="#ffffff")
         self.alt_setting = altimeter.Altimeter_Setting(self)
         self.check_engine = CheckEngine(self)
         #self.tc = tc.TurnCoordinator(self, dial=False)
@@ -69,23 +73,24 @@ class Screen(QWidget):
         self.alt_tape.resize(90, instHeight)
         self.alt_tape.move(instWidth -90, 0)
 
-        # self.alt_Trend.resize(40, instHeight)
-        # self.alt_Trend.move(instWidth , 0)
+        self.alt_Trend.resize(40, instHeight)
+        self.alt_Trend.move(instWidth , 0)
 
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 0)
 
-        #self.as_Trend.resize(10, instHeight)
-        #self.as_Trend.move(90, 100)
+        # self.as_Trend.resize(10, instHeight)
+        # self.as_Trend.move(90, 100)
 
         self.asd_Box.resize(90, 50)
         self.asd_Box.move(90, instHeight - 90)
 
-        hsi_diameter=instWidth/4
+        hsi_diameter = instHeight
         self.hsi.resize(hsi_diameter, hsi_diameter)
-        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter + 65)
-        self.heading_disp.move((instWidth-self.heading_disp.width())/2,
-                    instHeight - hsi_diameter - self.heading_disp.height() + 65)
+        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter)
+        # self.heading_disp.move((instWidth-self.heading_disp.width())/2,
+        #             instHeight - hsi_diameter - self.heading_disp.height())
+        self.heading_disp.move((instWidth-self.heading_disp.width())/2, 20)
 
         self.alt_setting.resize(90, 60)
         self.alt_setting.move(instWidth -190, instHeight - 90)

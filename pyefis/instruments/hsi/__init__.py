@@ -28,8 +28,12 @@ except:
 from pyefis import common
 import pyavtools.fix as fix
 
+# TODO: Add CDI and Glide Slope indicators and tick marks but make them
+#       configurable.
+
+
 class HSI(QGraphicsView):
-    def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
+    def __init__(self, parent=None, font_size=15, fgcolor=Qt.white, bgcolor=Qt.black):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -37,8 +41,11 @@ class HSI(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = font_size
+        self.tickSize = self.fontSize * 0.7
         self.fg_color = fgcolor
         self.bg_color = bgcolor
+        self.visiblePointers = True
+
         item = fix.db.get_item("COURSE")
         self._headingSelect = item.value
         item.valueChanged[float].connect(self.setHeadingBug)
@@ -65,10 +72,6 @@ class HSI(QGraphicsView):
         self.update_period = None
 
     def resizeEvent(self, event):
-        self.update_period = self.myparent.get_config_item('update_period')
-        if self.update_period is None:
-            self.update_period = .1
-        self.last_update_time = 0
         self.scene = QGraphicsScene(0, 0, self.width(), self.height())
         self.cx = self.width() / 2.0
         self.cy = self.height() / 2.0
@@ -81,55 +84,50 @@ class HSI(QGraphicsView):
         compassBrush = QBrush(QColor(self.bg_color))
         nobrush = QBrush()
 
-        headingPen = QPen(QColor(Qt.red))
-        headingBrush = QBrush(QColor(Qt.red))
-        headingPen.setWidth(2)
+        headingPen = QPen(QColor(Qt.magenta))
+        headingBrush = QBrush(QColor(Qt.magenta))
+        headingPen.setWidth(1)
 
-        cdiPen = QPen(QColor(Qt.yellow))
-        cdiPen.setWidth(3)
 
         f = QFont()
-        f.setBold(True)
         f.setFamily ("Sans")
         f.setPixelSize(self.fontSize)
-        self.scene.setFont(f)
 
-        # Compass Setup
-        self.scene.addEllipse(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0,
-                                compassPen, nobrush)
-
-        refsize = self.fontSize*.7
         self.labels = list()
         for count in range(0, 360, 5):
             angle = (count) * math.pi / 180.0
             cosa = math.cos(angle)
             sina = math.sin(angle)
             iy1 = -self.r
-            iy2 = -self.r + refsize
+            iy2 = -self.r + self.tickSize
             if count % 10 != 0:
-                iy2 -= refsize/2
+                iy2 -= self.tickSize/2
             x1 = (-iy1*sina) + self.cx # (ix*cosa - iy*sina) ix factor removed Since x is 0
             y1 = iy1*cosa + self.cy # (iy*cosa + ix*sina)
             x2 = (-iy2*sina) + self.cx
             y2 = iy2*cosa + self.cy
             self.scene.addLine(x1, y1, x2, y2, compassPen)
             if count % 90 == 0:
-                t = self.scene.addSimpleText(self.cardinal[int(count / 90)])
+                t = self.scene.addSimpleText(self.cardinal[int(count / 90)], f)
+                br = t.sceneBoundingRect()
                 t.setRotation(count)
                 t.setPen(compassPen)
-                iy3 = -self.r + refsize*1.1
-                ix3 = -refsize/2
+                t.setBrush(compassBrush)
+                iy3 = -self.r + self.tickSize*1.1
+                ix3 = -br.width()/2
                 x3 = (ix3*cosa - iy3*sina) + self.cx
                 y3 = (iy3*cosa + ix3*sina) + self.cy
                 t.setPos(x3, y3)
                 self.labels.append(t)
             elif count % 30 == 0:
                 text = str(int(count / 10))
-                t = self.scene.addSimpleText(text)
+                t = self.scene.addSimpleText(text, f)
+                br = t.sceneBoundingRect()
                 t.setRotation(count)
                 t.setPen(compassPen)
-                iy3 = -self.r + refsize*1.1
-                ix3 = -refsize*len(text)/2
+                t.setBrush(compassBrush)
+                iy3 = -self.r + self.tickSize*1.1
+                ix3 = -br.width()/2
                 x3 = (ix3*cosa - iy3*sina) + self.cx
                 y3 = (iy3*cosa + ix3*sina) + self.cy
                 t.setPos(x3, y3)
@@ -141,14 +139,43 @@ class HSI(QGraphicsView):
 
         self.setScene(self.scene)
         self.rotate(-self._heading)
+
+        # Draws the static overlay stuff to a pixmap
+        self.map = QPixmap(self.width(), self.height())
+        self.map.fill(Qt.transparent)
+        p = QPainter(self.map)
+        p.setRenderHint(QPainter.Antialiasing)
+        # set the width and height for conveinience
+        # w = self.width()
+        # h = self.height()
+
+        p.setPen(QPen(QColor(self.fg_color),2))
+        p.setBrush(QColor(Qt.transparent))
+        # Outer ring
+        p.drawEllipse(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0)
+        if self.visiblePointers:
+            p.setPen(QPen(QColor(Qt.yellow), 3))
+            p.drawLine(self.cx, self.cy - self.r - 5,
+                       self.cx, self.cy - self.r + self.fontSize*2)
+            p.drawLine(self.cx, self.cy + self.r - self.fontSize,
+                       self.cx, self.cy + self.r - self.fontSize*2)
+            p.drawLine(self.cx + self.r - self.fontSize, self.cy,
+                       self.cx + self.r - self.fontSize*2, self.cy)
+            p.drawLine(self.cx - self.r + self.fontSize, self.cy,
+                       self.cx - self.r + self.fontSize*2, self.cy)
+
+        self.overlay = self.map.toImage()
+
         self.setFail(self.item.fail)
 
+
+
     def heading_bug_polygon(self):
-        inc = int(self.fontSize / 2 * 0.8)
+        inc = int(self.tickSize)
         iyb = -self.r
-        points = [ (inc, -self.r - inc/2),
-                  (-inc, -self.r - inc/2),
-                  (0, -self.r + (inc/2))]
+        points = [ (inc, -self.r),
+                  (-inc, -self.r),
+                  (0, -self.r + inc)]
         angle = (self._headingSelect) * math.pi / 180
         cosa = math.cos(angle)
         sina = math.sin(angle)
@@ -160,46 +187,43 @@ class HSI(QGraphicsView):
 
     def paintEvent(self, event):
         super(HSI, self).paintEvent(event)
+
+
         c = QPainter(self.viewport())
+
+        # Put the static overlay image on the view
+        c.drawImage(self.rect(), self.overlay)
+
+
         compassPen = QPen(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
         cdiPen = QPen(QColor(Qt.yellow))
         cdiPen.setWidth(3)
         c.setRenderHint(QPainter.Antialiasing)
 
-        #Non-moving items
-        c.setPen(cdiPen)
-        c.drawLine(self.cx, self.cy - self.r - 5,
-                   self.cx, self.cy - self.r + self.fontSize*2)
-        c.drawLine(self.cx, self.cy + self.r - self.fontSize,
-                   self.cx, self.cy + self.r - self.fontSize*2)
-        c.drawLine(self.cx + self.r - self.fontSize, self.cy,
-                   self.cx + self.r - self.fontSize*2, self.cy)
-        c.drawLine(self.cx - self.r + self.fontSize, self.cy,
-                   self.cx - self.r + self.fontSize*2, self.cy)
 
         # GSI index tics
-        c.setPen(compassPen)
-        deviation = -1.0
-        while deviation <= 1.0:
-            c.drawLine(self.cx - 5, self.cy + deviation*self.gsipph,
-                       self.cx + 5, self.cy + deviation*self.gsipph)
-            c.drawLine(self.cx + deviation*self.cdippw, self.cy - 5,
-                       self.cx + deviation*self.cdippw, self.cy + 5)
-            deviation += 1.0/3.0
+        # c.setPen(compassPen)
+        # deviation = -1.0
+        # while deviation <= 1.0:
+        #     c.drawLine(self.cx - 5, self.cy + deviation*self.gsipph,
+        #                self.cx + 5, self.cy + deviation*self.gsipph)
+        #     c.drawLine(self.cx + deviation*self.cdippw, self.cy - 5,
+        #                self.cx + deviation*self.cdippw, self.cy + 5)
+        #     deviation += 1.0/3.0
 
-        c.setPen(cdiPen)
-        self._showCDI = not self.cdidb.old
-        if self._showCDI:
-            x = self.cx + self._courseDeviation * self.cdippw
-            c.drawLine(x, self.cy + self.r - self.fontSize*2 - 6,
-                   x, self.cy - self.r + self.fontSize*2 + 6)
-
-        self._showGSI = not self.gsidb.old
-        if self._showGSI:
-            y = self.cy - self._glideSlopeIndicator * self.gsipph
-            c.drawLine(self.cx + self.r - self.fontSize*2 - 6, y,
-                   self.cx - self.r + self.fontSize*2 + 6, y)
+        # c.setPen(cdiPen)
+        # self._showCDI = not self.cdidb.old
+        # if self._showCDI:
+        #     x = self.cx + self._courseDeviation * self.cdippw
+        #     c.drawLine(x, self.cy + self.r - self.fontSize*2 - 6,
+        #            x, self.cy - self.r + self.fontSize*2 + 6)
+        #
+        # self._showGSI = not self.gsidb.old
+        # if self._showGSI:
+        #     y = self.cy - self._glideSlopeIndicator * self.gsipph
+        #     c.drawLine(self.cx + self.r - self.fontSize*2 - 6, y,
+        #            self.cx - self.r + self.fontSize*2 + 6, y)
 
     def getHeading(self):
         return self._heading
@@ -209,16 +233,15 @@ class HSI(QGraphicsView):
             return
         if heading != self._heading:
             now = time.time()
-            if now - self.last_update_time >= self.update_period:
-                newheading = common.bounds(0, 360, heading)
-                diff = newheading - self._heading
-                if diff > 180:
-                    diff -= 360
-                elif diff < -180:
-                    diff += 360
-                self._heading = newheading
-                self.rotate(-diff)
-                self.last_update_time = now
+            newheading = common.bounds(0, 360, heading)
+            diff = newheading - self._heading
+            if diff > 180:
+                diff -= 360
+            elif diff < -180:
+                diff += 360
+            self._heading = newheading
+            self.rotate(-diff)
+            self.last_update_time = now
 
     heading = property(getHeading, setHeading)
 
@@ -276,7 +299,7 @@ class HSI(QGraphicsView):
 
 
 class HeadingDisplay(QWidget):
-    def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
+    def __init__(self, parent=None, font_size=15, fgcolor=Qt.gray, bgcolor=Qt.black):
         super(HeadingDisplay, self).__init__(parent)
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = font_size
@@ -307,8 +330,9 @@ class HeadingDisplay(QWidget):
         compassPen = QPen(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
         c.setPen(compassPen)
+        c.setBrush(compassBrush)
         c.setFont(self.font)
-        tr = QRect(0, 0, self.width(), self.height())
+        tr = QRect(0, 0, self.width()-1, self.height()-1)
         c.drawRect(tr)
         if self._fail:
             heading_text = "XXX"
