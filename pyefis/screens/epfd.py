@@ -52,10 +52,10 @@ class Screen(QWidget):
 
 
         self.alt_tape = altimeter.Altimeter_Tape(self)
-        self.alt_Trend = vsi.Alt_Trend_Tape(self)
+        self.vsi = vsi.VSI_PFD(self)
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
-        self.asd_Box = airspeed.Airspeed_Mode(self)
+        #self.asd_Box = airspeed.Airspeed_Mode(self)
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bgcolor="#aaaaaa")
         self.hsi.tickSize = 12
@@ -73,8 +73,8 @@ class Screen(QWidget):
         self.alt_tape.resize(90, instHeight)
         self.alt_tape.move(instWidth -90, 0)
 
-        self.alt_Trend.resize(40, instHeight)
-        self.alt_Trend.move(instWidth , 0)
+        self.vsi.resize(30, instHeight/2)
+        self.vsi.move(instWidth-130 , 0)
 
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 0)
@@ -82,8 +82,8 @@ class Screen(QWidget):
         # self.as_Trend.resize(10, instHeight)
         # self.as_Trend.move(90, 100)
 
-        self.asd_Box.resize(90, 50)
-        self.asd_Box.move(90, instHeight - 90)
+        # self.asd_Box.resize(90, 50)
+        # self.asd_Box.move(90, instHeight - 90)
 
         hsi_diameter = instHeight
         self.hsi.resize(hsi_diameter, hsi_diameter)
@@ -94,7 +94,8 @@ class Screen(QWidget):
 
         self.alt_setting.resize(90, 60)
         self.alt_setting.move(instWidth -190, instHeight - 90)
-        self.check_engine.move (instWidth - self.check_engine.width()-100, 45)
+        self.check_engine.move (200, 45)
+        # self.check_engine.move (instWidth - self.check_engine.width()-100, 45)
         engine_items = self.get_config_item("check_engine")
         if engine_items is not None and len(engine_items) > 0:
             self.check_engine.init_fix_items(engine_items)

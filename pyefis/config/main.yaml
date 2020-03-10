@@ -17,16 +17,16 @@ main:
   # If left out the first defined screen will be default
   defaultScreen: PFD
 
-menu:
-  menus:
-      PFDMenu:
-          - ['ASD Mode', 'set airspeed mode','']
-          - ['Baro', 'set menu focus', BARO]
-  start_menu: PFDMenu
-  number_of_buttons: 6
-  buttons_spacing: 100
-  left_margin: 100
-  top_margin: 5
+# menu:
+#   menus:
+#       PFDMenu:
+#           - ['ASD Mode', 'set airspeed mode','']
+#           - ['Baro', 'set menu focus', BARO]
+#   start_menu: PFDMenu
+#   number_of_buttons: 6
+#   buttons_spacing: 100
+#   left_margin: 100
+#   top_margin: 5
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more
