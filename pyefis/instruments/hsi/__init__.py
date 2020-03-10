@@ -44,7 +44,8 @@ class HSI(QGraphicsView):
         self.tickSize = self.fontSize * 0.7
         self.fg_color = fgcolor
         self.bg_color = bgcolor
-        self.visiblePointers = True
+        # List for tick mark visibility, Top, Bottom, Right, Left
+        self.visiblePointers = [True, True, True, True]
 
         item = fix.db.get_item("COURSE")
         self._headingSelect = item.value
@@ -153,15 +154,23 @@ class HSI(QGraphicsView):
         p.setBrush(QColor(Qt.transparent))
         # Outer ring
         p.drawEllipse(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0)
-        if self.visiblePointers:
-            p.setPen(QPen(QColor(Qt.yellow), 3))
+        # Draw the pointer marks
+        p.setPen(QPen(QColor(Qt.yellow), 3))
+        if self.visiblePointers[0]:
+            # Top Pointer
             p.drawLine(self.cx, self.cy - self.r - 5,
                        self.cx, self.cy - self.r + self.fontSize*2)
-            p.drawLine(self.cx, self.cy + self.r - self.fontSize,
+        if self.visiblePointers[1]:
+            # Bottom Pointer
+            p.drawLine(self.cx, self.cy + self.r + 5,
                        self.cx, self.cy + self.r - self.fontSize*2)
-            p.drawLine(self.cx + self.r - self.fontSize, self.cy,
+        if self.visiblePointers[2]:
+            # Right Pointer
+            p.drawLine(self.cx + self.r + 5, self.cy,
                        self.cx + self.r - self.fontSize*2, self.cy)
-            p.drawLine(self.cx - self.r + self.fontSize, self.cy,
+        if self.visiblePointers[3]:
+            # Left Pointer
+            p.drawLine(self.cx - self.r - 5, self.cy,
                        self.cx - self.r + self.fontSize*2, self.cy)
 
         self.overlay = self.map.toImage()

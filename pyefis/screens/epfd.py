@@ -59,6 +59,8 @@ class Screen(QWidget):
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bgcolor="#aaaaaa")
         self.hsi.tickSize = 12
+        # Pointer Visibility [Top, Bottom, Right, Left]
+        self.hsi.visiblePointers = [True, True, False, False]
         self.heading_disp = hsi.HeadingDisplay(self, font_size=20, fgcolor="#ffffff")
         self.alt_setting = altimeter.Altimeter_Setting(self)
         self.check_engine = CheckEngine(self)
