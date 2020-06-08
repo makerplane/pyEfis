@@ -14,13 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
-except:
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from pyefis.instruments import gauges
 from pyefis.instruments import misc
@@ -30,11 +26,8 @@ funcTempF = lambda x: x * (9.0/5.0) + 32.0
 funcTempC = lambda x: x
 
 ENGINE_NUMBER = "1"
-#ENGINE_NUMBER = "2"
 
 CYLINDER_COUNT = 2
-#CYLINDER_COUNT = 6
-
 
 def gauge_list(width, height):
     il = [
@@ -103,11 +96,6 @@ def gauge_list(width, height):
 
     ]
     return il
-
-        # self.egt.resize(200, 30)
-        # self.egt.move(150, 170)
-        # self.egtgroup.resize(200, 150)
-        # self.egtgroup.move(150, 200)
 
 class Screen(QWidget):
     def __init__(self, parent=None):
@@ -183,38 +171,6 @@ class Screen(QWidget):
         self.chtmax.setUnitSwitching()
         self.chtmax.unitGroup = "Temperature"
         self.chtmax.dbkey = "CHTMAX1"
-        #
-        # self.egt = misc.StaticText("EGT", parent=self)
-        # self.egtgroup = gauges.EGTGroup(self, self.cylCount, ["EGT11", "EGT12", "EGT13", "EGT14"])
-        #
-        # self.hobbslabel = misc.StaticText("Engine Time", parent=self)
-        #
-        # self.hobbs = gauges.NumericDisplay(self)
-        # self.hobbs.name = "Hobbs"
-        # self.hobbs.decimalPlaces = 1
-        # self.hobbs.dbkey = "HOBBS1"
-        # self.hobbs.alignment = Qt.AlignRight | Qt.AlignVCenter
-        # self.hobbs.showUnits = True
-        # self.hobbs.smallFontPercent = 0.6
-        #
-        # self.oatlabel = misc.StaticText("OAT", parent=self)
-        # self.oatlabel.alignment = Qt.AlignLeft | Qt.AlignVCenter
-        #
-        # self.oat = gauges.NumericDisplay(self)
-        # self.oat.name = "OAT"
-        # self.oat.decimalPlaces = 1
-        # self.oat.dbkey = "OAT"
-        # self.oat.alignment = Qt.AlignLeft | Qt.AlignVCenter
-        # self.oat.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
-        # self.oat.conversionFunction2 = lambda x: x
-        # self.oat.unitsOverride1 = u'\N{DEGREE SIGN}F'
-        # self.oat.unitsOverride2 = u'\N{DEGREE SIGN}C'
-        # self.oat.showUnits = True
-        # self.oat.setUnitSwitching()
-        # self.oat.smallFontPercent = 0.6
-        #
-        # self.timez = misc.ValueDisplay(self)
-        # self.timez.dbkey = "TIMEZ"
 
     # Find the hightest CHT and highlight it
     # TODO: This could probably be optimized a little better
@@ -233,8 +189,6 @@ class Screen(QWidget):
 
 
     def resizeEvent(self, event):
-        # instWidth = self.width() - 150
-        # instHeight = self.height() - 60
 
         inst_list = gauge_list(self.width(), self.height())
 
@@ -254,17 +208,3 @@ class Screen(QWidget):
         self.chtmaxlabel.move(chtstartx + 10, 400)
         self.chtmax.resize(75, 30)
         self.chtmax.move(chtstartx + 45, 395)
-        #
-        #
-        # self.hobbslabel.resize(100,15)
-        # self.hobbslabel.move(self.width()-115, self.height()-85)
-        # self.hobbs.resize(110,20)
-        # self.hobbs.move(self.width()-115, self.height()-70)
-        #
-        # self.timez.resize(100, 20)
-        # self.timez.move(self.width()-115, self.height()-40)
-        #
-        # self.oatlabel.resize(100,15)
-        # self.oatlabel.move(10, self.height()-85)
-        # self.oat.resize(80,25)
-        # self.oat.move(10, self.height()-70)
