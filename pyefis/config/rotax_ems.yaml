@@ -1,0 +1,89 @@
+main:
+  # IP information for network adapter
+  FixServer: 127.0.0.1
+  FixPort: 3490
+  # Screen Geometry
+  screenWidth: 800
+  screenHeight: 480
+
+  # Set EFIS to occupy the entire screen without system border / menu
+  screenFullSize: False
+
+  # Screen background color RGB
+  screenColor: (0,0,0)
+
+  # If left out the first defined screen will be default
+  defaultScreen: EMS
+
+# The keybindings are used to attach keystrokes to actions.  The key can be
+# a string that represents a key Sequence.  See the documentation for more
+# information about key sequences and actions.
+keybindings:
+  - key: A
+    action: Show Previous Screen
+
+# This section defines FIX IDs that we'll write out to the
+# FIX Gateway server.  Each can be defined as one of three
+# methods.  Interval will look at the time out lifetime (TOL)
+# of the point and send the data at half that interval.
+# OnChange will send when the value is changed and Both will
+# do both.
+outputs:
+  BARO: Interval
+
+# Screen definitions describe the screens that will be loaded
+# and ready for use.  Each section should start with "Screen."
+# followed by the name.  The only required configuration is
+# module, which is the module that will be loaded to render
+# the screen
+screens:
+  EMS:
+    module: pyefis.screens.r582_sm
+    title: Engine Management
+
+# Hooks are user defined modules that are loaded at specific points
+# in the programs execution.  Right now their is only one place and
+# it is right after all of the initialization and just before the
+# main window and default screen are shown.  We'll add more as the
+# need arises.
+hooks:
+
+# Logging configuration - See Python logging.config module documenation
+# Logging configuration - See Python logging.config module documenation
+logging:
+  version: 1
+  disable_existing_loggers: False
+  loggers:
+    '':
+      # messages with levels below the one given will not be logged
+      #level: DEBUG
+      #level: INFO
+      level: WARNING
+      #level: ERROR
+      #level: CRITICAL
+
+      handlers: [stderr, file]
+      propagate: True
+
+  formatters:
+    standard:
+      format: "%(levelname)s:%(asctime)s:%(name)s - %(message)s"
+      datefmt: "%Y%m%d-%H:%M:%S"
+      class: logging.Formatter
+
+  handlers:
+    stderr:
+      class: logging.StreamHandler
+      formatter: standard
+      stream: ext://sys.stderr
+
+    file:
+      class: logging.FileHandler
+      formatter: standard
+      filename: fixgw.log
+      mode: w
+      #mode: a
+
+    syslog:
+      class: logging.handlers.SysLogHandler
+      formatter: standard
