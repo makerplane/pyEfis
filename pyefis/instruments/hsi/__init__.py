@@ -27,6 +27,7 @@ except:
 
 from pyefis import common
 import pyavtools.fix as fix
+from pyefis import common
 
 class HSI(QGraphicsView):
     def __init__(self, parent=None, font_size=15, fgcolor=Qt.black, bgcolor=Qt.white):
