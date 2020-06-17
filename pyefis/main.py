@@ -21,13 +21,9 @@ import sys, os
 import logging
 import logging.config
 import argparse
-try:
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-    PYQT = 5
-except:
-    from PyQt4.QtGui import *
-    PYQT = 4
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 import yaml
 import importlib
 
@@ -93,8 +89,6 @@ def main():
     if args.debug:
         log.setLevel(logging.DEBUG)
     log.info("Starting pyEFIS")
-
-    log.debug("PyQT Version = %d" % PYQT)
 
     fix.initialize(config)
     hmi.initialize(config)
