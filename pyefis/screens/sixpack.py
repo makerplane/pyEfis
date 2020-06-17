@@ -57,7 +57,7 @@ class Screen(QWidget):
         self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
         self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fgcolor=Qt.white)
 
-        self.vsi = vsi.VSI(self)
+        self.vsi = vsi.VSI_Dial(self)
 
     def resizeEvent(self, event):
         menu_offset = 100

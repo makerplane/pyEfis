@@ -27,10 +27,10 @@ except:
 import pyavtools.fix as fix
 
 
-class VSI(QWidget):
+class VSI_Dial(QWidget):
     FULL_WIDTH = 300
     def __init__(self, parent=None, fontsize=20):
-        super(VSI, self).__init__(parent)
+        super(VSI_Dial, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = fontsize
@@ -192,6 +192,108 @@ class VSI(QWidget):
             self.update()
 
     roc = property(getROC, setROC)
+
+
+class VSI_PFD(QWidget):
+    def __init__(self, parent=None, fontsize=15):
+        super(VSI_PFD, self).__init__(parent)
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
+        self.setFocusPolicy(Qt.NoFocus)
+        self.fontSize = fontsize
+        self.marks = [(500,""),(1000,"1"),(1500,""),(2000,"2")]
+        self.scaleRoot = 0.7
+        self._value = 0
+        self.item = fix.db.get_item("VS")
+        self.item.valueChanged[float].connect(self.setValue)
+        self.item.oldChanged[bool].connect(self.repaint)
+        self.item.badChanged[bool].connect(self.repaint)
+        self.item.failChanged[bool].connect(self.repaint)
+
+    def resizeEvent(self, event):
+        # Just for convenience
+        w = self.width()
+        h = self.height()
+        # We use a pixmap for the static background
+        self.background = QPixmap(self.width(), self.height())
+        self.background.fill(Qt.transparent)
+        f = QFont()
+        f.setPixelSize(self.fontSize)
+        fm = QFontMetrics(f)
+        p = QPainter(self.background)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setFont(f)
+        pen = QPen(QColor(Qt.white))
+        pen.setWidth(1)
+        p.setPen(pen)
+        p.setBrush(QColor(Qt.white))
+        pixelsWidth = fm.width("0")
+        pixelsHigh = fm.height()
+
+        # find max
+        self.max = 0
+        for mark in self.marks:
+            if mark[0] > self.max: self.max = mark[0]
+        # This is the vertical range in pixels
+        self.dy = h/2 - pixelsHigh/2
+
+        def drawMark(y, s):
+            p.drawLine(0, y, w-pixelsWidth*1.5, y)
+            p.drawText(0, y - pixelsHigh/2, w-2, y + pixelsHigh/2, Qt.AlignRight, s)
+
+        drawMark(h/2, "0")
+        for mark in self.marks:
+            y = h/2 - (mark[0]**self.scaleRoot / self.max**self.scaleRoot) * self.dy
+            drawMark(y, mark[1])
+            y = h/2 + (mark[0]**self.scaleRoot / self.max**self.scaleRoot) * self.dy
+            drawMark(y, mark[1])
+
+
+    def paintEvent(self, event):
+        w = self.width()
+        h = self.height()
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+
+        # Draw the Black Background
+        p.fillRect(0, 0, w, h, QColor(0,0,0,40))
+
+        # Insert Background
+        p.drawPixmap(0, 0, self.background)
+
+        #p.drawEllipse(QPointF(w+4, h/2), 4.0, 4.0)
+        try:
+            if self._value >= 0:
+                y = h/2 - (self._value**self.scaleRoot / self.max**self.scaleRoot) * self.dy
+                if y < 0: y = 0
+            else:
+                y = h/2 + (abs(self._value)**self.scaleRoot / self.max**self.scaleRoot) * self.dy
+                if y > h: y = h
+            p.setPen(Qt.magenta)
+            p.setBrush(Qt.magenta)
+            p.drawEllipse(QRect(2,y-5,10,10))
+        except ZeroDivisionError:
+            p.setPen(Qt.gray)
+            p.setBrush(Qt.gray)
+            p.drawEllipse(QRect(2,h/2,10,10))
+
+    def getValue(self):
+        return self._value
+
+    def setValue(self, value):
+        self._value = value
+        self.update()
+
+    value = property(getValue, setValue)
+
+
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass
+
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+
 
 
 class AS_Trend_Tape(QGraphicsView):
@@ -422,4 +524,3 @@ class Alt_Trend_Tape(QGraphicsView):
             self._fail = b
             self.redraw()
     fail = property(getFail, setFail)
-
