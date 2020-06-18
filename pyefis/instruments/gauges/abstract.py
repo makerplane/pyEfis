@@ -18,10 +18,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
-
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRect(x - r, y - r, r * 2, r * 2)
@@ -96,8 +94,6 @@ class AbstractGauge(QWidget):
         self.highlightColor = self.highlightGoodColor
         self.unitsOverride = None
         self.conversionFunction = lambda x: x
-
-
 
     def interpolate(self, value, range_):
         h = float(range_)

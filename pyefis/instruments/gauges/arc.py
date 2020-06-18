@@ -19,7 +19,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-
 from .abstract import AbstractGauge, drawCircle
 
 class ArcGauge(AbstractGauge):
@@ -46,14 +45,27 @@ class ArcGauge(AbstractGauge):
         start = self.startAngle
         sweep = self.sweepAngle
         r = self.arcRadius
+        if self.lowWarn:
+            lowWarnAngle = self.interpolate(self.lowWarn, sweep)
+            if lowWarnAngle < 0: lowWarnAngle = 0
+        else:
+            lowWarnAngle = 0
+        if self.lowAlarm:
+            lowAlarmAngle = self.interpolate(self.lowAlarm, sweep)
+            if lowAlarmAngle < 0: lowAlarmAngle = 0
+        else:
+            lowAlarmAngle = 0
+
         if self.highWarn:
-            warnAngle = sweep - self.interpolate(self.highWarn, sweep)
+            highWarnAngle = self.interpolate(self.highWarn, sweep)
+            if highWarnAngle > sweep: highWarnAngle = sweep
         else:
-            warnAngle = 0
+            highWarnAngle = sweep
         if self.highAlarm:
-            alarmAngle = sweep - self.interpolate(self.highAlarm, sweep)
+            highAlarmAngle = self.interpolate(self.highAlarm, sweep)
+            if highAlarmAngle > sweep: highAlarmAngle = sweep
         else:
-            alarmAngle = 0
+            highAlarmAngle = sweep
         centerX = self.arcCenter.x()
         centerY = self.arcCenter.y()
         p = QPainter(self)
@@ -61,18 +73,28 @@ class ArcGauge(AbstractGauge):
         pen = QPen()
         pen.setWidth(10)
         pen.setCapStyle(Qt.FlatCap)
+
+        # Red Arcs
         pen.setColor(self.alarmColor)
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
-                   start, alarmAngle)
+                   start, sweep - highAlarmAngle)
+        drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
+                   start+sweep, -lowAlarmAngle)
+
+        # Yellow Arcs
         pen.setColor(self.warnColor)
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
-                   start + alarmAngle, warnAngle - alarmAngle)
+        start + (sweep-highAlarmAngle), -(highWarnAngle - highAlarmAngle))
+        drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
+        start+sweep-lowAlarmAngle, -(lowWarnAngle-lowAlarmAngle))
+
+        # Green Arc
         pen.setColor(self.safeColor)
         p.setPen(pen)
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
-                   start + warnAngle, sweep - warnAngle)
+        start + (sweep - highWarnAngle), highWarnAngle-lowWarnAngle)
 
         # Now we draw the line pointer
         brush = QBrush(self.penColor)
@@ -86,7 +108,6 @@ class ArcGauge(AbstractGauge):
         t.rotate(valAngle)
         arrow = t.map(self.arrow)
         p.drawPolygon(arrow)
-
 
         # Draw Text
         pen.setColor(self.textColor)

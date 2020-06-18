@@ -162,9 +162,9 @@ screens:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
 
-  # Test:
-  #   module: screens.test
-  #   title: Test Screen
+  Test:
+    module: pyefis.screens.test
+    title: Test Screen
 
 # Hooks are user defined modules that are loaded at specific points
 # in the programs execution.  Right now their is only one place and

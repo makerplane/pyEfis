@@ -19,9 +19,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 #from instruments import ai
-#from instruments import gauges
+from pyefis.instruments import gauges
 #from instruments import hsi
-from instruments import airspeed
+#from instruments import airspeed
 #from instruments import altimeter
 #from instruments import vsi
 
@@ -31,18 +31,18 @@ class Screen(QWidget):
         self.parent = parent
         p = self.parent.palette()
 
-        self.screenColor = (0, 0, 0)
+        self.screenColor = (0,0,0)
         if self.screenColor:
-            self.setPalette(p)
             p.setColor(self.backgroundRole(), QColor(*self.screenColor))
+            self.setPalette(p)
             self.setAutoFillBackground(True)
 
-        self.airspeed = airspeed.Airspeed(self)
+
+        self.test = gauges.ArcGauge(self)
+        self.test.name = "OILP"
+        self.test.decimalPlaces = 1
+        self.test.dbkey = "OILP1"
 
     def resizeEvent(self, event):
-
-        instWidth = self.width() - 210
-        instHeight = self.height() - 200
-
-        self.airspeed.move(0,0)
-        self.airspeed.resize(200,200)
+        self.test.resize(200, 100)
+        self.test.move(self.width() - 200, 100)
