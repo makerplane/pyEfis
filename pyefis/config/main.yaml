@@ -15,7 +15,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: PFD
+  defaultScreen: EPFD
 
 # menu:
 #   menus:
@@ -116,7 +116,7 @@ databindings:
   - key: OILP1
     condition: < 25
     action: Show Screen
-    args: SixPack
+    args: EMS
 
 
 # This section defines FIX IDs that we'll write out to the
@@ -156,7 +156,6 @@ screens:
   EMS:
     module: pyefis.screens.ems_sm
     title: Engine Management
-
 
   SixPack:
     module: pyefis.screens.sixpack

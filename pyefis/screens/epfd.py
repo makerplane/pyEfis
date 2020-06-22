@@ -27,6 +27,7 @@ from pyefis.instruments import airspeed
 from pyefis.instruments import altimeter
 from pyefis.instruments import vsi
 from pyefis.instruments import tc
+from pyefis.instruments import gauges
 
 class Screen(QWidget):
     def __init__(self, parent=None):
@@ -46,19 +47,20 @@ class Screen(QWidget):
         self.ai.pitchDegreesShown = 90
         self.ai.visiblePitchAngle = 22 # Amount of visible pitch angle marks
 
-
         self.alt_tape = altimeter.Altimeter_Tape(self)
         self.vsi = vsi.VSI_PFD(self)
         self.as_tape = airspeed.Airspeed_Tape(self)
-        #self.as_Trend = vsi.AS_Trend_Tape(self)
-        #self.asd_Box = airspeed.Airspeed_Mode(self)
-        #self.parent.change_asd_mode.connect(self.change_asd_mode)
+
         self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bgcolor="#aaaaaa")
         self.hsi.tickSize = 12
         # Pointer Visibility [Top, Bottom, Right, Left]
         self.hsi.visiblePointers = [True, True, False, False]
         self.heading_disp = hsi.HeadingDisplay(self, font_size=20, fgcolor="#ffffff")
-        self.alt_setting = altimeter.Altimeter_Setting(self)
+        # self.alt_setting = altimeter.Altimeter_Setting(self)
+        self.alt_setting = gauges.NumericDisplay(self)
+        self.alt_setting.dbkey = "BARO"
+        self.alt_setting.decimalPlaces = 2
+
         self.check_engine = CheckEngine(self)
         #self.tc = tc.TurnCoordinator(self, dial=False)
 
@@ -77,30 +79,20 @@ class Screen(QWidget):
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 0)
 
-        # self.as_Trend.resize(10, instHeight)
-        # self.as_Trend.move(90, 100)
-
-        # self.asd_Box.resize(90, 50)
-        # self.asd_Box.move(90, instHeight - 90)
-
         hsi_diameter = instHeight
         self.hsi.resize(hsi_diameter, hsi_diameter)
         self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter)
-        # self.heading_disp.move((instWidth-self.heading_disp.width())/2,
-        #             instHeight - hsi_diameter - self.heading_disp.height())
+
         self.heading_disp.move((instWidth-self.heading_disp.width())/2, 20)
 
-        self.alt_setting.resize(90, 60)
-        self.alt_setting.move(instWidth -190, instHeight - 90)
+        self.alt_setting.resize(60, 20)
+        self.alt_setting.move(instWidth -150, instHeight/2 + 25)
+
         self.check_engine.move (200, 45)
         # self.check_engine.move (instWidth - self.check_engine.width()-100, 45)
         engine_items = self.get_config_item("check_engine")
         if engine_items is not None and len(engine_items) > 0:
             self.check_engine.init_fix_items(engine_items)
-
-        # tc_width = instWidth * .23
-        # self.tc.resize (tc_width, tc_width)
-        # self.tc.move ((instWidth-tc_width)/2, instHeight-tc_width*.10)
 
     def change_asd_mode(self, event):
         self.asd_Box.setMode(self.asd_Box.getMode() + 1)

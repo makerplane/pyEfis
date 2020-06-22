@@ -51,7 +51,9 @@ class Screen(QWidget):
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
         self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
         self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#0030FF")
-        self.alt_setting = altimeter.Altimeter_Setting(self)
+        self.alt_setting = gauges.NumericDisplay(self)
+        self.alt_setting.dbkey = "BARO"
+        self.alt_setting.decimalPlaces = 2
         self.tc = tc.TurnCoordinator(self, dial=False)
 
         self.map_g = gauges.ArcGauge(self)
