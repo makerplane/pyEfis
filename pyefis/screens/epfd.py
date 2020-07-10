@@ -88,7 +88,7 @@ class Screen(QWidget):
         self.alt_setting.resize(60, 20)
         self.alt_setting.move(instWidth -150, instHeight/2 + 25)
 
-        self.check_engine.move (200, 45)
+        self.check_engine.move (100, 45)
         # self.check_engine.move (instWidth - self.check_engine.width()-100, 45)
         engine_items = self.get_config_item("check_engine")
         if engine_items is not None and len(engine_items) > 0:
