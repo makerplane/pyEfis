@@ -136,7 +136,9 @@ class Menu(QWidget):
         self.button_args[i] = args
         self.button_show_menu[i] = show_menu
         self.button_blind_performance[i] = blind_performance
-
+# button look and feel can be changed with this stylesheet. Location of the buttons on the screen is affected in main.yaml
+        self.buttons[i].setStyleSheet("Text-align:top;font:bold;background-color:white;font-size:25px;height:100px;width:100px")
+    
     def perform_action(self, actions, args):
         logger.debug ("perform_action: %s", str(actions))
         if actions is None:
