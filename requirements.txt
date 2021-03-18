@@ -1,2 +1,3 @@
-PyQt5
 geomag
+PyYAML
+-e git://github.com/makerplane/pyAvTools#egg=pyAvTools

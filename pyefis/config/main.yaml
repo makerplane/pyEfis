@@ -17,16 +17,34 @@ main:
   # If left out the first defined screen will be default
   defaultScreen: EPFD
 
-# menu:
-#   menus:
-#       PFDMenu:
-#           - ['ASD Mode', 'set airspeed mode','']
-#           - ['Baro', 'set menu focus', BARO]
-#   start_menu: PFDMenu
-#   number_of_buttons: 6
-#   buttons_spacing: 100
-#   left_margin: 100
-#   top_margin: 5
+menu:
+  menus:
+  # The button configuration is ['button text', 'action', 'argument']
+  # Currently limited to 6 buttons.  Comment out this entire section to hide menus if you are using real buttons.
+      PFDMenu:
+          - ['Hide', 'activate menu', 'ShowMenu']
+          - ['Back', 'Show Previous Screen','']
+          - ['Next', 'Show Next Screen','']
+          - ['EMS', 'Show Screen','EMS']
+          - ['Units', 'Set Instrument Units', 'OAT,OILT1,Temperature:Toggle']
+          - ['Basic', 'activate menu','BasicMenu']
+      BasicMenu:
+          - ['Hide', 'activate menu', 'ShowMenu2']
+          - ['PFD', 'Show Screen','PFD']
+          - ['EPFD', 'Show Screen','EPFD']
+          - ['EMS', 'Show Screen','EMS']
+          - ['Six', 'Show Screen','SixPack']
+          - ['Main', 'activate menu','PFDMenu']
+      ShowMenu:
+          - ['Show', 'activate menu','PFDMenu']
+      ShowMenu2:
+          - ['Show', 'activate menu','BasicMenu']
+  start_menu: ShowMenu
+#  show_time: 3  # hides the menu after 3 seconds.  However cannot show again.  Don't use.  Here for reference only.
+  number_of_buttons: 6
+  buttons_spacing: 120
+  left_margin: 50
+  top_margin: 420
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more

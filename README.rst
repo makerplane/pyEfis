@@ -1,6 +1,18 @@
 pyEfis
 ==================
 
+Getting Started
+---------------
+
+For more detailed documentation see: https://github.com/makerplane/Documentation
+
+1. `sudo apt install python3-pyqt5`
+2. Install this package dependencies: `sudo python3 -m pip install -r requirements.txt`
+3. Install `FIX-Gateway <https://github.com/makerplane/FIX-Gateway>`_  and run.
+
+Controls
+--------
+
 This is an Electronic Flight Information System written in Python.
 
 It was created for use in the MakerPlane Open Source Aircraft Project.
