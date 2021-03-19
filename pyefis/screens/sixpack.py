@@ -56,7 +56,7 @@ class Screen(QWidget):
         self.vsi = vsi.VSI_Dial(self)
 
     def resizeEvent(self, event):
-        menu_offset = 100
+        menu_offset = 30
         instWidth = self.width()/3
         instHeight = (self.height()-menu_offset)/2
         diameter=min(instWidth,instHeight)
