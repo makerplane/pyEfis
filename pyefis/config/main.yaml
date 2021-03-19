@@ -9,7 +9,7 @@ main:
   screenHeight: 480
 
   # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: False
+  screenFullSize: True
 
   # Screen background color RGB
   screenColor: (0,0,0)
@@ -179,9 +179,13 @@ screens:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
 
-  Test:
-    module: pyefis.screens.test
-    title: Test Screen
+  PFDSM:
+    module: pyefis.screens.pfd_sm
+    title: PFD Small
+
+  #Test:
+  #  module: pyefis.screens.test
+  #  title: Test Screen
 
 # Hooks are user defined modules that are loaded at specific points
 # in the programs execution.  Right now their is only one place and

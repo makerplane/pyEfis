@@ -39,39 +39,54 @@ class Screen(QWidget):
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
+        # attitude indicator
         self.ai = VirtualVfr(self)
         self.ai.fontSize = 20
         self.ai.pitchDegreesShown = 90
 
+	# altimeter tape
         self.alt_tape = altimeter.Altimeter_Tape(self)
         self.alt_Trend = vsi.Alt_Trend_Tape(self)
+        
+        # airspeed tape
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
+
+        # airspeed tape numeral display box   
         self.asd_Box = airspeed.Airspeed_Mode(self)
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#0030FF")
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=12, fgcolor="#0030FF")
+
+        # HSI
+        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#00C911")
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=10, fgcolor="#00C911")
+
+        # barometric pressure numeric display
         self.alt_setting = gauges.NumericDisplay(self)
         self.alt_setting.dbkey = "BARO"
         self.alt_setting.decimalPlaces = 2
+
+        # turn coordinator dial on/off
         self.tc = tc.TurnCoordinator(self, dial=False)
 
+        # manifold pressure gauge
         self.map_g = gauges.ArcGauge(self)
         self.map_g.name = "MAP"
         self.map_g.decimalPlaces = 1
         self.map_g.dbkey = "MAP1"
 
+        # RPM gauge
         self.rpm = gauges.ArcGauge(self)
         self.rpm.name = "RPM"
         self.rpm.decimalPlaces = 0
         self.rpm.dbkey = "TACH1"
 
+        # oil pressure gauge
         self.op = gauges.HorizontalBar(self)
         self.op.name = "Oil Press"
         self.op.decimalPlaces = 1
         self.op.dbkey = "OILP1"
 
-
+        # oil temperature gauge
         self.ot = gauges.HorizontalBar(self)
         self.ot.name = "Oil Temp"
         # Use a lambda to convert the values internally
@@ -83,17 +98,19 @@ class Screen(QWidget):
         self.ot.setUnitSwitching()
         self.ot.dbkey = "OILT1"
 
-
+        # fuel quantity gauge
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
         self.fuel.decimalPlaces = 1
         self.fuel.dbkey = "FUELQT"
 
+        # fuel flow gauge
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
         self.ff.decimalPlaces = 1
         self.ff.dbkey = "FUELF1"
 
+        # cht gauge
         self.cht = gauges.HorizontalBar(self)
         self.cht.name = "Max CHT"
         # Use a lambda to convert the values internally
@@ -106,6 +123,7 @@ class Screen(QWidget):
         self.cht.setUnitSwitching()
         self.cht.dbkey = "CHTMAX1"
 
+        # egt gauge
         self.egt = gauges.HorizontalBar(self)
         self.egt.name = "Avg EGT"
         # Use a lambda to convert the values internally
@@ -121,62 +139,83 @@ class Screen(QWidget):
 
 
     def resizeEvent(self, event):
-        instWidth = self.width() - 240
-        instHeight = self.height() - 200
-        self.ai.move(0, 100)
+        instWidth = self.width() - 200
+        instHeight = self.height() - 150
+
+        # AI position and size
+        self.ai.move(0, 5)
         self.ai.resize(instWidth, instHeight)
 
+        # altitude tape position and size
         self.alt_tape.resize(90, instHeight)
-        self.alt_tape.move(instWidth -90, 100)
+        self.alt_tape.move(instWidth -90, 5)
 
+        # altitude trend tape position and size
         self.alt_Trend.resize(40, instHeight)
-        self.alt_Trend.move(instWidth , 100)
+        self.alt_Trend.move(instWidth , 5)
 
+        # airspeed tape position and size
         self.as_tape.resize(90, instHeight)
-        self.as_tape.move(0, 100)
+        self.as_tape.move(0, 5)
 
+        # airspeed trend position and size
         #self.as_Trend.resize(10, instHeight)
-        #self.as_Trend.move(90, 100)
-
-        self.asd_Box.resize(90, 100)
-        self.asd_Box.move(0, instHeight + 100)
-
-        hsi_diameter=instWidth/5
+        #self.as_Trend.move(90, 5)
+        
+        #airspeed numeric display size and position
+        self.asd_Box.resize(100, 100)
+        self.asd_Box.move(5, instHeight + 50)
+        
+        #HSI size and position
+        hsi_diameter=instWidth/1.85
         self.hsi.resize(hsi_diameter, hsi_diameter)
-        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter + 95)
+        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter+5)
+
+        #HSI text box
         self.heading_disp.move((instWidth-self.heading_disp.width())/2,
-                    instHeight - hsi_diameter - self.heading_disp.height() + 95)
+                    instHeight - hsi_diameter - self.heading_disp.height()+250)
 
-        self.alt_setting.resize(90, 100)
-        self.alt_setting.move(instWidth -100, instHeight + 100)
+        # baro pressure font size and placement
+        self.alt_setting.resize(110, 20)
+        self.alt_setting.move(instWidth -40, instHeight + 70)
 
-        tc_width = instWidth * .23
+        #turn coordinator size and position
+        tc_width = instWidth * .3
         self.tc.resize (tc_width, tc_width)
-        self.tc.move ((instWidth-tc_width)/2, instHeight+100-tc_width/3)
+        self.tc.move ((instWidth-tc_width)/2, instHeight+20-tc_width/3)
 
-        self.map_g.resize(200, 100)
-        self.map_g.move(self.width() - 200, 100)
+        # RPM gauge position and size
+        self.rpm.resize(150, 70)
+        self.rpm.move(self.width() - 150, 0)        
 
-        self.rpm.resize(200, 100)
-        self.rpm.move(self.width() - 200, 0)
+        # manifold pressure gauge position and size
+        self.map_g.resize(150, 70)
+        self.map_g.move(self.width() - 150, 1100)
 
-        self.op.resize(190, 75)
-        self.op.move(self.width() - 200, 220)
+        # oil pressure gauge position and size
+        self.op.resize(100, 70)
+        self.op.move(self.width() - 125, 75)
 
-        self.ot.resize(190, 75)
-        self.ot.move(self.width() - 200, 300)
+        # oil temperature gauge position and size
+        self.ot.resize(100, 70)
+        self.ot.move(self.width() - 125, 140)
 
-        self.fuel.resize(190, 75)
-        self.fuel.move(self.width() - 200, 380)
+        # fuel flow gauge position and size
+        self.ff.resize(100, 70)
+        self.ff.move(self.width() - 125, 1340)
 
-        self.ff.resize(190, 75)
-        self.ff.move(self.width() - 200, 460)
+        # cht gauge position and size
+        self.cht.resize(100, 70)
+        self.cht.move(self.width() - 125, 220)
 
-        self.cht.resize(190, 75)
-        self.cht.move(self.width() - 200, 540)
+        # egt gauge position and size
+        self.egt.resize(100, 70)
+        self.egt.move(self.width() - 125, 285)
 
-        self.egt.resize(190, 75)
-        self.egt.move(self.width() - 200, 620)
+        # fuel quantity gauge position and size
+        self.fuel.resize(100, 70)
+        self.fuel.move(self.width() - 125, 350)
+
 
     def change_asd_mode(self, event):
         self.asd_Box.setMode(self.asd_Box.getMode() + 1)
