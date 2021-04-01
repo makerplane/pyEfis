@@ -224,7 +224,6 @@ class Screen(QWidget):
             else:
                 i = item["type"](self)
             i.name = item["name"]
-            if "key" in item: i.dbkey = item["key"]
             if "decPlaces" in item: i.decimalPlaces = item["decPlaces"]
             if "showUnits" in item: i.showUnits = item["showUnits"]
             if "showName" in item: i.showName = item["showName"]
@@ -232,6 +231,8 @@ class Screen(QWidget):
             if "units2" in item: i.unitsOverride2 = item["units2"]
             if "unitFunction1" in item: i.conversionFunction1 = item["unitFunction1"]
             if "unitFunction2" in item: i.conversionFunction2 = item["unitFunction2"]
+            if "units1" in item: i.setUnitSwitching()
+            if "key" in item: i.dbkey = item["key"]
 
             self.widget_list.append(i)
 
