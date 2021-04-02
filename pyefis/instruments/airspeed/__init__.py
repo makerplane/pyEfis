@@ -362,87 +362,85 @@ class Airspeed_Tape(QGraphicsView):
         self.numerical_display.fail = b
 
 
-class Airspeed_Mode(QGraphicsView):
+class Airspeed_Box(QWidget):
+    """Represents a simple numeric display type gauge.  The benefit of using this
+       over a normal text display is that this will change colors properly when
+       limits are reached or when failures occur"""
     def __init__(self, parent=None):
-        super(Airspeed_Mode, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
-        self._Mode_Indicator = 0
-        hmi.actions.setAirspeedMode.connect(self.setMode)
-        self.modes = ["IAS", "TAS", "GS"]
-        self._airspeed_mode = self.modes
+        super(Airspeed_Box, self).__init__(parent)
+        self.modes = ["TAS", "GS", "IAS"]
+        self._modeIndicator = 0
         self.fix_items = [fix.db.get_item(mode) for mode in self.modes]
-        self.fix_item = self.fix_items[self._Mode_Indicator]
-        self._airspeed_mode = self.modes[self._Mode_Indicator]
+        self.fix_item = self.fix_items[self._modeIndicator]
+        self.valueText = str(int(self.fix_item.value))
         self.fix_item.valueChanged[float].connect(self.setASData)
 
+        self.alignment = Qt.AlignLeft | Qt.AlignVCenter
+        self.valueAlignment = Qt.AlignRight  | Qt.AlignVCenter
+        self.smallFontPercent = 0.4
+        self.color = Qt.white
+        self.modeText = self.modes[self._modeIndicator]
+        hmi.actions.setAirspeedMode.connect(self.setMode)
 
     def resizeEvent(self, event):
-        self.w = self.width()
-        self.h = self.height()
-        self.f = QFont()
-        self.f.setPixelSize(20)
+        self.bigFont = QFont()
+        self.bigFont.setPixelSize(self.height() * self.smallFontPercent)
+        self.smallFont = QFont()
+        self.smallFont.setPixelSize(self.height() * self.smallFontPercent)
+        qm = QFontMetrics(self.smallFont)
 
-        dialPen = QPen(QColor(Qt.white))
-        dialPen.setWidth(2)
+        self.modeTextRect = QRectF(0, 0, self.width()-5, self.height()*0.4)
+        self.valueTextRect = QRectF(0, self.height()*0.5,
+                                        self.width()-5, self.height()*0.4)
 
-        self.scene = QGraphicsScene(0, 0, self.w, self.h)
-        self.scene.addRect(0, 0, self.w, self.h,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+    def paintEvent(self, event):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
 
-        self.mode_text = self.scene.addText(self._airspeed_mode)
-        self.mode_text.setFont(self.f)
-        self.scene.setFont(self.f)
-        self.mode_text.setDefaultTextColor(QColor(Qt.white))
-        self.mode_text.setX(0)
-        self.mode_text.setY((self.h - self.mode_text.boundingRect().height()) / 2 - (
-                                    self.mode_text.boundingRect().height() / 2))
-        self.data_text = self.scene.addText("   ")
-        self.data_text.setFont(self.f)
-        self.scene.setFont(self.f)
-        self.data_text.setDefaultTextColor(QColor(Qt.white))
-        self.data_text.setX(0)
-        self.data_text.setY(self.mode_text.boundingRect().height())
-        self.setScene(self.scene)
-        self.setASData(self.fix_item.value)
+        pen = QPen()
+        pen.setWidth(1)
+        pen.setCapStyle(Qt.FlatCap)
+        p.setPen(pen)
 
-    def redraw(self):
-        self.mode_text.setPlainText(self._airspeed_mode)
-        self.data_text.setPlainText(self._AS_Data_Box)
+        # Draw Mode
+        pen.setColor(self.color)
+        p.setPen(pen)
+        p.setFont(self.bigFont)
+        opt = QTextOption(self.alignment)
+        p.drawText(self.modeTextRect, self.modeText, opt)
 
-    def getMode(self):
-        return self._Mode_Indicator
+        #Draw Value
+        p.setFont(self.smallFont)
+        opt = QTextOption(self.valueAlignment)
+        p.drawText(self.valueTextRect, self.valueText, opt)
 
     def setMode(self, Mode):
         if Mode == "":
             self.fix_item.valueChanged[float].disconnect(self.setASData)
-            self._Mode_Indicator += 1
-            if self._Mode_Indicator == 3: self._Mode_Indicator = 0
+            self._modeIndicator += 1
+            if self._modeIndicator == 3: self._modeIndicator = 0
         else:
-            if Mode != self._Mode_Indicator:
+            if Mode != self._modeIndicator:
                 self.fix_item.valueChanged[float].disconnect(self.setASData)
                 if Mode == 0:
-                    self._Mode_Indicator = 0
+                    self._modeIndicator = 0
                 elif Mode == 1:
-                    self._Mode_Indicator = 1
+                    self._modeIndicator = 1
                 elif Mode == 2:
-                    self._Mode_Indicator = 2
+                    self._modeIndicator = 2
 
-        self._airspeed_mode = self.modes[self._Mode_Indicator]
-        self.fix_item = self.fix_items[self._Mode_Indicator]
+        self.modeText = self.modes[self._modeIndicator]
+        self.fix_item = self.fix_items[self._modeIndicator]
         self.fix_item.valueChanged[float].connect(self.setASData)
         self.setASData(self.fix_item.value)
-        self.redraw()
+        self.update()
 
     def setASData(self, d):
         if self.fix_item.fail:
-            self._AS_Data_Box = "XXX"
+            self.valueText = "XXX"
         elif self.fix_item.bad or self.fix_item.old:
-            self._AS_Data_Box = ""
+            self.valueText = ""
         else:
-            self._AS_Data_Box = str(int(round(d)))
+            self.valueText = str(int(round(d)))
         if self.isVisible():
-            self.redraw()
+            self.update()

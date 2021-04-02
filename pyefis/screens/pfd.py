@@ -47,13 +47,13 @@ class Screen(QWidget):
 	# altimeter tape
         self.alt_tape = altimeter.Altimeter_Tape(self)
         self.alt_Trend = vsi.Alt_Trend_Tape(self)
-        
+
         # airspeed tape
         self.as_tape = airspeed.Airspeed_Tape(self)
         #self.as_Trend = vsi.AS_Trend_Tape(self)
 
-        # airspeed tape numeral display box   
-        self.asd_Box = airspeed.Airspeed_Mode(self)
+        # airspeed tape numeral display box
+        self.asd_Box = airspeed.Airspeed_Box(self)
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
 
         # HSI
@@ -161,11 +161,11 @@ class Screen(QWidget):
         # airspeed trend position and size
         #self.as_Trend.resize(10, instHeight)
         #self.as_Trend.move(90, 5)
-        
+
         #airspeed numeric display size and position
         self.asd_Box.resize(100, 100)
         self.asd_Box.move(5, instHeight + 50)
-        
+
         #HSI size and position
         hsi_diameter=instWidth/1.85
         self.hsi.resize(hsi_diameter, hsi_diameter)
@@ -186,7 +186,7 @@ class Screen(QWidget):
 
         # RPM gauge position and size
         self.rpm.resize(150, 70)
-        self.rpm.move(self.width() - 150, 0)        
+        self.rpm.move(self.width() - 150, 0)
 
         # manifold pressure gauge position and size
         self.map_g.resize(150, 70)

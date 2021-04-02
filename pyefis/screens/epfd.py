@@ -50,6 +50,8 @@ class Screen(QWidget):
         self.alt_tape = altimeter.Altimeter_Tape(self)
         self.vsi = vsi.VSI_PFD(self)
         self.as_tape = airspeed.Airspeed_Tape(self)
+        # airspeed tape numeral display box
+        self.asd_Box = airspeed.Airspeed_Box(self)
 
         self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bgcolor="#aaaaaa")
         self.hsi.tickSize = 12
@@ -78,6 +80,9 @@ class Screen(QWidget):
 
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 0)
+
+        self.asd_Box.resize(40,40)
+        self.asd_Box.move(100, instHeight / 2 + 20)
 
         hsi_diameter = instHeight
         self.hsi.resize(hsi_diameter, hsi_diameter)
