@@ -67,3 +67,9 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# Python virtual env
+venv/
+
+# Makefile markers
+*.marker
