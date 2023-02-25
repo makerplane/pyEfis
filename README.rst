@@ -6,9 +6,28 @@ Getting Started
 
 For more detailed documentation see: https://github.com/makerplane/Documentation
 
-1. `sudo apt install python3-pyqt5`
-2. Install this package dependencies: `sudo python3 -m pip install -r requirements.txt`
-3. Install `FIX-Gateway <https://github.com/makerplane/FIX-Gateway>`_  and run.
+It is recommende that you work in a virtual environment. To use the global interpreter, skip the below step.
+
+::
+
+    make venv
+    source venv/bin/activate
+
+The second command, the activation of the virtual environment, needs to be performed every time you start a new console session.
+
+Next, you install all dependencies.
+
+::
+
+    make init
+
+Install `FIX-Gateway <https://github.com/makerplane/FIX-Gateway>`_  as documented in its readme.
+
+Now, you can run pyEfis:
+
+::
+
+    python pyEfis.py
 
 Controls
 --------
@@ -51,3 +70,39 @@ This creates an index.bin file in CIFP directory
 
 Update the config file [Screen.PFD] section dbpath and indexpath
 with the path names of the FAACIFP18 and index.bin files respectively.
+
+Distribution
+------------
+
+To create a Python wheel for distribution, there is a make target. The wheel will be created in the ``dist/`` directory.
+
+::
+
+    $ make wheel
+
+After installing the wheel via pip, the user can run pyEfis from the command line. Please mind that the FIX-Gateway server needs to be up and running.
+
+::
+
+    $ pyefis
+
+All CLI options work as defined.
+
+::
+    
+    $ pyefis -h
+    usage: pyefis [-h] [-m {test,normal}] [--debug] [--verbose] [--config-file CONFIG_FILE] [--log-config LOG_CONFIG]
+
+    pyEfis
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -m {test,normal}, --mode {test,normal}
+                              Run pyEFIS in specific mode
+      --debug               Run in debug mode
+      --verbose, -v         Run in verbose mode
+      --config-file CONFIG_FILE
+                              Alternate configuration file
+      --log-config LOG_CONFIG
+                              Alternate logger configuration file
+
