@@ -9,8 +9,8 @@ venv:
 	python3 -m venv venv
 .PHONY: venv
 
-init.marker: requirements.txt
-	pip install -r requirements.txt
+init.marker: setup.py
+	pip install -e .[install]
 	touch init.marker
 init: init.marker
 .PHONY: init
