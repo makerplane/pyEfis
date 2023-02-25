@@ -10,8 +10,8 @@ It is recommende that you work in a virtual environment. To use the global inter
 
 ::
 
-    make venv
-    source venv/bin/activate
+    $ make venv
+    $ source venv/bin/activate
 
 The second command, the activation of the virtual environment, needs to be performed every time you start a new console session.
 
@@ -19,7 +19,7 @@ Next, you install all dependencies.
 
 ::
 
-    make init
+    $ make init
 
 Install `FIX-Gateway <https://github.com/makerplane/FIX-Gateway>`_  as documented in its readme.
 
@@ -27,7 +27,7 @@ Now, you can run pyEfis:
 
 ::
 
-    python pyEfis.py
+    $ python pyEfis.py
 
 Controls
 --------
