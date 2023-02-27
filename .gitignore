@@ -8,6 +8,9 @@ doc/_*
 .ropeproject/*
 .directory
 
+# IDE artifacts
+.vscode/
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
