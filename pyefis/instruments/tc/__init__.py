@@ -160,11 +160,11 @@ class TurnCoordinator(QWidget):
         center = QPointF(centerball,
                          self.boxTop + ball_rad)
         if self.alat_item.fail:
-            warn_font = QFont("FixedSys", self.boxHeight, QFont.Bold)
+            warn_font = QFont("FixedSys", qRound(self.boxHeight), QFont.Bold)
             p.setPen (QPen(QColor(Qt.red)))
             p.setBrush (QBrush(QColor(Qt.red)))
             p.setFont (warn_font)
-            p.drawText (self.center.x()-self.boxHalfWidth,self.boxTop,self.boxHalfWidth*2,self.boxHeight,
+            p.drawText (QRectF(self.center.x()-self.boxHalfWidth,self.boxTop,self.boxHalfWidth*2,self.boxHeight),
                     Qt.AlignCenter, "XXX")
         else:
             p.drawEllipse(center, ball_rad, ball_rad)
