@@ -62,10 +62,10 @@ class VSI_Dial(QWidget):
         # ##### This should be condensed#########
         tickCount = self.maxRange // 100
         tickAngle = self.maxAngle / float(tickCount)
-        longLine = QLine(0, -self.r, 0, -(self.r - self.fontSize))
-        shortLine = QLine(0, -self.r, 0, -(self.r - self.fontSize / 2))
-        textRect = QRect(-40, -self.r + self.fontSize, 80, self.fontSize + 10)
-        textRInv = QRect(40, self.r - self.fontSize, -80, -self.fontSize - 10)
+        longLine = QLineF(0, -self.r, 0, -(self.r - self.fontSize))
+        shortLine = QLineF(0, -self.r, 0, -(self.r - self.fontSize / 2))
+        textRect = QRectF(-40, -self.r + self.fontSize, 80, self.fontSize + 10)
+        textRInv = QRectF(40, self.r - self.fontSize, -80, -self.fontSize - 10)
 
         pixelsWide = fm.width("0")
         pixelsHigh = fm.height()
@@ -234,8 +234,8 @@ class VSI_PFD(QWidget):
         self.dy = h/2 - pixelsHigh/2
 
         def drawMark(y, s):
-            p.drawLine(0, y, w-pixelsWidth*1.5, y)
-            p.drawText(0, y - pixelsHigh/2, w-2, y + pixelsHigh/2, Qt.AlignRight, s)
+            p.drawLine(0, qRound(y), qRound(w-pixelsWidth*1.5), qRound(y))
+            p.drawText(0, qRound(y - pixelsHigh/2), qRound(w-2), qRound(y + pixelsHigh/2), Qt.AlignRight, s)
 
         drawMark(h/2, "0")
         for mark in self.marks:
@@ -267,11 +267,11 @@ class VSI_PFD(QWidget):
                 if y > h: y = h
             p.setPen(Qt.magenta)
             p.setBrush(Qt.magenta)
-            p.drawEllipse(QRect(2,y-5,10,10))
+            p.drawEllipse(QRectF(2,y-5,10,10))
         except ZeroDivisionError:
             p.setPen(Qt.gray)
             p.setBrush(Qt.gray)
-            p.drawEllipse(QRect(2,h/2,10,10))
+            p.drawEllipse(QRectF(2,h/2,10,10))
 
     def getValue(self):
         return self._value

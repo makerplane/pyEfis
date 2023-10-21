@@ -77,7 +77,7 @@ class TurnCoordinator(QWidget):
         p.setBrush(brush)
         if not self.slip_skid_only:
             # this draws the tick boxes
-            rect = QRect(-(self.r), 0 - thickness / 2,
+            rect = QRectF(-(self.r), 0 - thickness / 2,
                          length, thickness)
             p.save()
             p.translate(self.center)
@@ -98,19 +98,19 @@ class TurnCoordinator(QWidget):
                       math.sin(math.radians(40))) + thickness
         self.boxHeight = self.boxHalfWidth * .25
 
-        rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
-                     QPoint(self.center.x() + self.boxHalfWidth,
-                            self.boxTop + self.boxHeight))
+        rect = QRectF(QPointF(self.center.x() - self.boxHalfWidth, self.boxTop),
+                      QPointF(self.center.x() + self.boxHalfWidth,
+                      qRound(self.boxTop + self.boxHeight)))
         p.drawRect(rect)
         # vertical black lines on TC
         pen.setColor(QColor(Qt.black))
         pen.setWidth(3)
         p.setPen(pen)
         ball_rad = self.boxHeight / 2
-        p.drawLine(self.center.x() - ball_rad - 1.8, self.boxTop,
-                   self.center.x() - ball_rad - 1.8, self.boxTop + self.boxHeight+1)
-        p.drawLine(self.center.x() + ball_rad + 2.8, self.boxTop,
-                   self.center.x() + ball_rad + 2.8, self.boxTop + self.boxHeight+1)
+        p.drawLine(QPointF(self.center.x() - ball_rad - 1.8, self.boxTop),
+                   QPointF(self.center.x() - ball_rad - 1.8, self.boxTop + self.boxHeight+1))
+        p.drawLine(QPointF(self.center.x() + ball_rad + 2.8, self.boxTop),
+                   QPointF(self.center.x() + ball_rad + 2.8, self.boxTop + self.boxHeight+1))
 
         filter_depth = self.myparent.get_config_item('alat_filter_depth')
         if filter_depth is not None and filter_depth > 0:
@@ -194,19 +194,19 @@ class TurnCoordinator(QWidget):
             p.drawText (0,0,self.width(),self.height(),
                     Qt.AlignCenter, "XXX")
         else:
-            poly = QPolygon([QPoint(0, -thickness / 3),
-                             QPoint(-x, -thickness / 8),
-                             QPoint(-x, thickness / 8),
-                             QPoint(0, thickness / 3),
-                             QPoint(x, thickness / 8),
-                             QPoint(x, -thickness / 8)])
+            poly = QPolygonF([QPointF(0, -thickness / 3),
+                             QPointF(-x, -thickness / 8),
+                             QPointF(-x, thickness / 8),
+                             QPointF(0, thickness / 3),
+                             QPointF(x, thickness / 8),
+                             QPointF(x, -thickness / 8)])
             p.translate(self.center)
             p.rotate(self._rate * 10)
             p.drawPolygon(poly)
             pen.setWidth(2)
             p.setPen(pen)
-            p.drawLine(-length / 2, -length / 2, length / 2, -length / 2)
-            p.drawLine(0, 0, 0, -length)
+            p.drawLine(QLineF(-length / 2, -length / 2, length / 2, -length / 2))
+            p.drawLine(QLineF(0, 0, 0, -length))
 
     def getROT(self):
         return self._rate
@@ -260,7 +260,7 @@ class TurnCoordinator_Tape(QWidget):
         # this draws the tick boxes
         thickness = self.tick_thickness
         length = self.tick_length
-        rect = QRect(-(self.r), 0 - thickness / 2,
+        rect = QRectF(-(self.r), 0 - thickness / 2,
                      length, thickness)
         p.setBrush(brush)
         p.save()
@@ -271,7 +271,7 @@ class TurnCoordinator_Tape(QWidget):
         self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
         self.boxTop = self.center.y() + (self.r - length) * math.sin(
                       math.radians(30)) + thickness
-        rect = QRect(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
+        rect = QRectF(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
                      QPoint(self.center.x() + self.boxHalfWidth,
                             self.boxTop + length))
         p.drawRect(rect)

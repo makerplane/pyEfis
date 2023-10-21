@@ -75,23 +75,24 @@ class Screen(QWidget):
         self.alt_tape.resize(90, instHeight)
         self.alt_tape.move(instWidth -90, 0)
 
-        self.vsi.resize(30, instHeight/2)
+        self.vsi.resize(30, qRound(instHeight/2))
         self.vsi.move(instWidth-130 , 0)
 
         self.as_tape.resize(90, instHeight)
         self.as_tape.move(0, 0)
 
         self.asd_Box.resize(40,40)
-        self.asd_Box.move(100, instHeight / 2 + 20)
+        self.asd_Box.move(100, qRound(instHeight / 2 + 20))
 
         hsi_diameter = instHeight
         self.hsi.resize(hsi_diameter, hsi_diameter)
-        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter)
+        self.hsi.move(qRound((instWidth-hsi_diameter)/2), qRound(instHeight - hsi_diameter))
 
-        self.heading_disp.move((instWidth-self.heading_disp.width())/2, 20)
+        self.heading_disp.move(qRound((instWidth-self.heading_disp.width())/2), 20)
 
         self.alt_setting.resize(60, 20)
-        self.alt_setting.move(instWidth -150, instHeight/2 + 25)
+        self.alt_setting.move(instWidth -150, qRound(instHeight/2 + 25)
+)
 
         self.check_engine.move (100, 45)
         # self.check_engine.move (instWidth - self.check_engine.width()-100, 45)
@@ -120,7 +121,7 @@ class CheckEngine(QGraphicsView):
         t.setFont (font)
         self.w = t.boundingRect().width()
         self.h = t.boundingRect().height()
-        self.resize(self.w, self.h)
+        self.resize(qRound(self.w), qRound(self.h))
         self.scene = QGraphicsScene(0, 0, self.w, self.h)
         t = self.scene.addSimpleText (self.text, font)
         t.setPen(QPen(QColor(Qt.red)))

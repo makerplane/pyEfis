@@ -90,6 +90,6 @@ class EGTGroup(QWidget):
         barheight = self.height()
         x = 0
         for bar in self.bars:
-            bar.resize(barwidth, barheight)
-            bar.move(barwidth * x, 0)
+            bar.resize(qRound(barwidth), qRound(barheight))
+            bar.move(qRound(barwidth * x), 0)
             x += 1

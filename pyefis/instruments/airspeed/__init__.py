@@ -98,14 +98,14 @@ class Airspeed(QWidget):
         dial.setPen(vnoPen)
         dial_rect = QRectF(center_x-radius, center_y-radius,
                             diameter, diameter)
-        dial.drawArc(dial_rect, Vs_angle, -(Vs_angle - Vno_angle))
+        dial.drawArc(dial_rect, qRound(Vs_angle), qRound(-(Vs_angle - Vno_angle)))
         dial.setPen(vsoPen)
         inner_rect = QRectF(center_x-radius+inner_offset, center_y-radius+inner_offset,
                             diameter-inner_offset*2, diameter-inner_offset*2)
         dial.drawArc(inner_rect,
-                            Vs0_angle, -(Vs0_angle - Vfe_angle))
+                            qRound(Vs0_angle), qRound(-(Vs0_angle - Vfe_angle)))
         dial.setPen(yellowPen)
-        dial.drawArc(dial_rect, Vno_angle, -(Vno_angle - Vne_angle))
+        dial.drawArc(dial_rect, qRound(Vno_angle), qRound(-(Vno_angle - Vne_angle)))
         dial.save()
         dial.setPen(dialPen)
         dial.setFont(f)
@@ -117,7 +117,7 @@ class Airspeed(QWidget):
                 dial.drawLine(0, -radius, 0, -(radius-15))
                 x = fontMetrics.width(str(a_s)) / 2
                 y = f.pixelSize()
-                dial.drawText(-x, -(radius-15 - y),
+                dial.drawText(qRound(-x), qRound(-(radius-15 - y)),
                            str(a_s))
                 a_s += 10
                 if count == 0:
@@ -252,21 +252,21 @@ class Airspeed_Tape(QGraphicsView):
 
         # Add Markings
         # Green Bar
-        r = QRectF(QPoint(0,              -self.Vno * self.pph + tape_start),
-                   QPoint(self.markWidth, -self.Vs0 * self.pph + tape_start))
+        r = QRectF(QPointF(0,              -self.Vno * self.pph + tape_start),
+                   QPointF(self.markWidth, -self.Vs0 * self.pph + tape_start))
         x = self.scene.addRect(r, QPen(QColor(0,155,0)), QBrush(QColor(0,155,0)))
         x.setOpacity(self.foregroundOpacity)
 
         # White Bar
-        r = QRectF(QPoint(self.markWidth / 2, -self.Vfe * self.pph + tape_start),
-                   QPoint(self.markWidth,     -self.Vs0 * self.pph + tape_start))
+        r = QRectF(QPointF(self.markWidth / 2, -self.Vfe * self.pph + tape_start),
+                   QPointF(self.markWidth,     -self.Vs0 * self.pph + tape_start))
         x = self.scene.addRect(r, QPen(Qt.white), QBrush(Qt.white))
         x.setOpacity(self.foregroundOpacity)
 
 
         # Yellow Bar
-        r = QRectF(QPoint(0,              -self.Vno * self.pph + tape_start),
-                   QPoint(self.markWidth, -self.Vne * self.pph + tape_start))
+        r = QRectF(QPointF(0,              -self.Vno * self.pph + tape_start),
+                   QPointF(self.markWidth, -self.Vne * self.pph + tape_start))
         x = self.scene.addRect(r, QPen(Qt.yellow), QBrush(Qt.yellow))
         x.setOpacity(self.foregroundOpacity)
 
@@ -298,9 +298,9 @@ class Airspeed_Tape(QGraphicsView):
         self.numerical_display = NumericalDisplay(self)
         nbh = 50
         self.numerical_display.resize (47, nbh)
-        self.numeric_box_pos = QPoint(w-48, h/2-nbh/2)
+        self.numeric_box_pos = QPoint(qRound(w-48), qRound(h/2-nbh/2))
         self.numerical_display.move(self.numeric_box_pos)
-        self.numeric_box_pos.setY(self.numeric_box_pos.y()+nbh/2)
+        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
         self.numerical_display.show()
         self.numerical_display.value = self._airspeed
         self.setAsOld(self.item.old)
@@ -384,9 +384,9 @@ class Airspeed_Box(QWidget):
 
     def resizeEvent(self, event):
         self.bigFont = QFont()
-        self.bigFont.setPixelSize(self.height() * self.smallFontPercent)
+        self.bigFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
         self.smallFont = QFont()
-        self.smallFont.setPixelSize(self.height() * self.smallFontPercent)
+        self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
         qm = QFontMetrics(self.smallFont)
 
         self.modeTextRect = QRectF(0, 0, self.width()-5, self.height()*0.4)

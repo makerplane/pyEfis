@@ -57,8 +57,8 @@ class Screen(QWidget):
 
     def resizeEvent(self, event):
         menu_offset = 30
-        instWidth = self.width()/3
-        instHeight = (self.height()-menu_offset)/2
+        instWidth = qRound(self.width()/3)
+        instHeight = qRound((self.height()-menu_offset)/2)
         diameter=min(instWidth,instHeight)
 
         self.airspeed.move(0,menu_offset)
@@ -67,7 +67,7 @@ class Screen(QWidget):
         self.ai.move(instWidth, 0 + menu_offset)
         self.ai.resize(instWidth, instHeight)
 
-        self.altimeter.move(instWidth*2,0 + menu_offset)
+        self.altimeter.move(instWidth*2, 0 + menu_offset)
         self.altimeter.resize(instWidth,instHeight)
 
         self.tc.move(0, instHeight + menu_offset)
@@ -77,9 +77,9 @@ class Screen(QWidget):
         hdw = self.heading_disp.width()
         hsi_diameter = diameter - (hdh+30)
         offset = instHeight-hsi_diameter
-        self.hsi.move(instWidth+(instWidth-hsi_diameter)/2, instHeight + menu_offset + offset-20)
+        self.hsi.move(qRound(instWidth+(instWidth-hsi_diameter)/2), qRound(instHeight + menu_offset + offset-20))
         self.hsi.resize(hsi_diameter,hsi_diameter)
-        self.heading_disp.move(instWidth*1.5-hdw/2, instHeight + menu_offset+10)
+        self.heading_disp.move(qRound(instWidth*1.5-hdw/2), qRound(instHeight + menu_offset+10))
 
         self.vsi.move(instWidth * 2, instHeight + menu_offset)
         self.vsi.resize(instWidth, instHeight)

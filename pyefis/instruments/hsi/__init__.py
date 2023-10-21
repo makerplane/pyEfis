@@ -151,25 +151,25 @@ class HSI(QGraphicsView):
         p.setPen(QPen(QColor(self.fg_color),2))
         p.setBrush(QColor(Qt.transparent))
         # Outer ring
-        p.drawEllipse(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0)
+        p.drawEllipse(QRectF(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0))
         # Draw the pointer marks
         p.setPen(QPen(QColor(Qt.yellow), 3))
         if self.visiblePointers[0]:
             # Top Pointer
-            p.drawLine(self.cx, self.cy - self.r - 5,
-                       self.cx, self.cy - self.r + self.fontSize*2)
+            p.drawLine(QLineF(self.cx, self.cy - self.r - 5,
+                              self.cx, self.cy - self.r + self.fontSize*2))
         if self.visiblePointers[1]:
             # Bottom Pointer
-            p.drawLine(self.cx, self.cy + self.r + 5,
-                       self.cx, self.cy + self.r - self.fontSize*2)
+            p.drawLine(QLineF(self.cx, self.cy + self.r + 5,
+                              self.cx, self.cy + self.r - self.fontSize*2))
         if self.visiblePointers[2]:
             # Right Pointer
-            p.drawLine(self.cx + self.r + 5, self.cy,
-                       self.cx + self.r - self.fontSize*2, self.cy)
+            p.drawLine(QLineF(self.cx + self.r + 5, self.cy,
+                              self.cx + self.r - self.fontSize*2, self.cy))
         if self.visiblePointers[3]:
             # Left Pointer
-            p.drawLine(self.cx - self.r - 5, self.cy,
-                       self.cx - self.r + self.fontSize*2, self.cy)
+            p.drawLine(QLineF(self.cx - self.r - 5, self.cy,
+                              self.cx - self.r + self.fontSize*2, self.cy))
 
         self.overlay = self.map.toImage()
 
@@ -330,7 +330,7 @@ class HeadingDisplay(QWidget):
         t = QGraphicsSimpleTextItem ("999")
         t.setFont (self.font)
         br = t.boundingRect()
-        self.resize(br.width()*1.2, br.height()*1.2)
+        self.resize(qRound(br.width()*1.2), qRound(br.height()*1.2))
 
     def paintEvent(self, event):
         c = QPainter(self)
@@ -339,7 +339,7 @@ class HeadingDisplay(QWidget):
         c.setPen(compassPen)
         c.setBrush(compassBrush)
         c.setFont(self.font)
-        tr = QRect(0, 0, self.width()-1, self.height()-1)
+        tr = QRectF(0, 0, self.width()-1, self.height()-1)
         c.drawRect(tr)
         if self._fail:
             heading_text = "XXX"
