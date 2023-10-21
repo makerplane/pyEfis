@@ -399,12 +399,11 @@ class DG_Tape(QGraphicsView):
         item.valueChanged[float].connect(self.setHeading)
 
         #fix.db.get_item("COURSE", True).valueChanged[float].connect(self.setHeadingBug)
-
+        self.dpp = 10
     def resizeEvent(self, event):
         w = self.width()
         h = self.height()
 
-        self.dpp = 10
         compassPen = QPen(QColor(Qt.white))
         compassPen.setWidth(2)
 
@@ -461,7 +460,7 @@ class DG_Tape(QGraphicsView):
     def redraw(self):
         self.resetTransform()
         self.centerOn(self._heading * self.dpp + self.width() / 2,
-                      self.scene.height() / 2)
+                      self.height() / 2)
 
     def getHeading(self):
         return self._heading
