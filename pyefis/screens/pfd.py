@@ -168,12 +168,12 @@ class Screen(QWidget):
 
         #HSI size and position
         hsi_diameter=instWidth/1.85
-        self.hsi.resize(hsi_diameter, hsi_diameter)
-        self.hsi.move((instWidth-hsi_diameter)/2, instHeight - hsi_diameter+5)
+        self.hsi.resize(qRound(hsi_diameter), qRound(hsi_diameter))
+        self.hsi.move(qRound((instWidth-hsi_diameter)/2), qRound(instHeight - hsi_diameter+5))
 
         #HSI text box
-        self.heading_disp.move((instWidth-self.heading_disp.width())/2,
-                    instHeight - hsi_diameter - self.heading_disp.height()+250)
+        self.heading_disp.move(qRound((instWidth-self.heading_disp.width())/2),
+                    qRound(instHeight - hsi_diameter - self.heading_disp.height()+250))
 
         # baro pressure font size and placement
         self.alt_setting.resize(110, 20)
@@ -181,8 +181,8 @@ class Screen(QWidget):
 
         #turn coordinator size and position
         tc_width = instWidth * .3
-        self.tc.resize (tc_width, tc_width)
-        self.tc.move ((instWidth-tc_width)/2, instHeight+20-tc_width/3)
+        self.tc.resize (qRound(tc_width), qRound(tc_width))
+        self.tc.move (qRound((instWidth-tc_width)/2), qRound(instHeight+20-tc_width/3))
 
         # RPM gauge position and size
         self.rpm.resize(150, 70)

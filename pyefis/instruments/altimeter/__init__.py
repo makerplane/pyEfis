@@ -64,7 +64,7 @@ class Altimeter(QWidget):
 
         # Dial Setup
         dial.setPen(dialPen)
-        dial.drawEllipse(center_x-radius, center_y-radius, diameter, diameter)
+        dial.drawEllipse(QRectF(center_x-radius, center_y-radius, diameter, diameter))
 
         f = QFont()
         fs = int(round(20 * w / self.FULL_WIDTH))
@@ -82,7 +82,7 @@ class Altimeter(QWidget):
                 dial.drawLine(0, -(radius), 0, -(radius-15))
                 x = fontMetrics.width(str(altimeter_numbers)) / 2
                 y = f.pixelSize()
-                dial.drawText(-x, -(radius-15-y),
+                dial.drawText(qRound(-x), qRound(-(radius-15-y)),
                               str(altimeter_numbers))
                 altimeter_numbers += 1
             else:
@@ -108,14 +108,14 @@ class Altimeter(QWidget):
 
         dial.setBrush(dialBrush)
         # Needle Movement
-        sm_dial = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(0, -(radius-15))])
-        lg_dial = QPolygon([QPoint(10, -(radius/9)), QPoint(5, 0),
-                            QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(-10, -(radius/9)),
-                            QPoint(0, -int(round((radius*.6))))])
-        outside_dial = QPolygon([QPoint( 7.5, -(radius)), QPoint( -7.5 , -(radius)),
-                                 QPoint(0, -(radius-10))])
+        sm_dial = QPolygonF([QPointF(5, 0), QPointF(0, +5), QPointF(-5, 0),
+                            QPointF(0, -(radius-15))])
+        lg_dial = QPolygonF([QPointF(10, -(radius/9)), QPointF(5, 0),
+                            QPointF(0, +5), QPointF(-5, 0),
+                            QPointF(-10, -(radius/9)),
+                            QPointF(0, -int(round((radius*.6))))])
+        outside_dial = QPolygonF([QPointF( 7.5, -(radius)), QPointF( -7.5 , -(radius)),
+                                 QPointF(0, -(radius-10))])
 
         sm_dial_angle = self._altimeter * .36 - 7.2
         lg_dial_angle = self._altimeter / 10 * .36 - 7.2
@@ -216,10 +216,10 @@ class Altimeter_Tape(QGraphicsView):
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
         nbh=50
         self.numerical_display.resize (70, nbh)
-        self.numeric_box_pos = QPoint(2, h/2-nbh/2)
+        self.numeric_box_pos = QPoint(2, qRound(h/2-nbh/2))
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setX(self.numeric_box_pos.x()+self.numerical_display.width())
-        self.numeric_box_pos.setY(self.numeric_box_pos.y()+nbh/2)
+        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
         self.numerical_display.show()
         self.numerical_display.value = self._altimeter
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
@@ -252,9 +252,9 @@ class Altimeter_Tape(QGraphicsView):
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
         triangle_size = 11
-        p.drawConvexPolygon(QPolygon([QPoint(0, -triangle_size),
-                             QPoint(0, triangle_size),
-                             QPoint(triangle_size, 0)]))
+        p.drawConvexPolygon(QPolygonF([QPointF(0, -triangle_size),
+                             QPointF(0, triangle_size),
+                             QPointF(triangle_size, 0)]))
 
     def getAltimeter(self):
         return self._altimeter

@@ -76,9 +76,9 @@ class VerticalBar(AbstractGauge):
         self.barWidth = self.width() * self.barWidthPercent
         self.lineWidth = self.width() * self.lineWidthPercent
         self.bigFont = QFont()
-        self.bigFont.setPixelSize(self.height() * self.bigFontPercent)
+        self.bigFont.setPixelSize(qRound(self.height() * self.bigFontPercent))
         self.smallFont = QFont()
-        self.smallFont.setPixelSize(self.height() * self.smallFontPercent)
+        self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
         #self.barHeight = self.height() / 6
         if self.showName:
             self.barTop = self.smallFont.pixelSize() + self.textGap
@@ -148,7 +148,7 @@ class VerticalBar(AbstractGauge):
         brush = self.safeColor
         p.setPen(pen)
         p.setBrush(brush)
-        p.drawRect(self.barLeft, self.barTop, self.barWidth, self.barHeight)
+        p.drawRect(QRectF(self.barLeft, self.barTop, self.barWidth, self.barHeight))
 
         # Draw Warning Bands
         pen.setColor(self.warnColor)
@@ -157,13 +157,13 @@ class VerticalBar(AbstractGauge):
         p.setBrush(brush)
         if(self.lowWarn and self.lowWarn >= self.lowRange):
             x = self.interpolate(self.lowWarn, self.barHeight)
-            p.drawRect(self.barLeft, self.barBottom - x,
-                       self.barWidth,
-                       x + 1)
+            p.drawRect(QRectF(self.barLeft, self.barBottom - x,
+                              self.barWidth,
+                              x + 1))
         if(self.highWarn and self.highWarn <= self.highRange):
-            p.drawRect(self.barLeft, self.barTop,
-                       self.barWidth,
-                       self.barHeight - self.interpolate(self.highWarn, self.barHeight))
+            p.drawRect(QRectF(self.barLeft, self.barTop,
+                              self.barWidth,
+                              self.barHeight - self.interpolate(self.highWarn, self.barHeight)))
 
         pen.setColor(self.alarmColor)
         brush = self.alarmColor
@@ -171,13 +171,13 @@ class VerticalBar(AbstractGauge):
         p.setBrush(brush)
         if(self.lowAlarm and self.lowAlarm >= self.lowRange):
             x = self.interpolate(self.lowAlarm, self.barHeight)
-            p.drawRect(self.barLeft, self.barBottom - x,
-                       self.barWidth,
-                       x + 1)
+            p.drawRect(QRectF(self.barLeft, self.barBottom - x,
+                              self.barWidth,
+                              x + 1))
         if(self.highAlarm and self.highAlarm <= self.highRange):
-            p.drawRect(self.barLeft, self.barTop,
-                       self.barWidth,
-                       self.barHeight - self.interpolate(self.highAlarm, self.barHeight))
+            p.drawRect(QRectF(self.barLeft, self.barTop,
+                              self.barWidth,
+                              self.barHeight - self.interpolate(self.highAlarm, self.barHeight)))
 
         # Highlight Ball
         if self.highlight:
@@ -221,4 +221,4 @@ class VerticalBar(AbstractGauge):
             x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
         if x < self.barTop: x = self.barTop
         if x > self.barBottom: x = self.barBottom
-        p.drawRect(self.lineLeft, x-2,self.lineWidth, 4)
+        p.drawRect(QRectF(self.lineLeft, x-2,self.lineWidth, 4))
