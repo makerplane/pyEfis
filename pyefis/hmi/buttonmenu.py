@@ -191,6 +191,10 @@ class Menu(QWidget):
                     logger.debug("toggle hide")
                     self.change_button_visibility()
                     self.update_button_style(name)
+                elif self.button_current_action[name]['internal'] == 'toggle_airspeed_mode'
+                    logger.debug("toggle_airspeed_mode")
+                    hmi.actions.trigger("set airspeed mode")
+
             if 'goto' in self.button_current_action[name]:
                 cur_screen = self.myparent.getRunningScreen()
                 if type(self.button_current_action[name]['goto']) is dict:
