@@ -23,6 +23,7 @@ from . import data
 
 actions = None
 from . import menu
+from . import buttonmenu
 
 def initialize(config):
     global actions

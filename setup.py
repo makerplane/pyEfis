@@ -41,6 +41,7 @@ setup(
         "PyYAML==6.0",
         "pyavtools==0.1.0",
         "PyQt5==5.15.9",
+        "pycond==20230212"
     ],
     extras_require={
         "build": ["build==0.10.0"],

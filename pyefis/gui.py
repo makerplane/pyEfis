@@ -119,6 +119,11 @@ class Main(QMainWindow):
         else:
             self.showScreen(self.running_screen-1)
 
+    def getRunningScreen(self, s=""):
+        return screens[self.running_screen].name
+
+    def doExit(self, s=""):
+        QCoreApplication.quit()
 
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
@@ -192,11 +197,14 @@ def initialize(config):
     hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)
     hmi.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
     hmi.actions.showScreen.connect(mainWindow.showScreen)
+    hmi.actions.doExit.connect(mainWindow.doExit)
 
     if 'menu' in config:
         menu = hmi.menu.Menu(mainWindow, config["menu"])
         menu.start()
 
+    if 'buttonmenu' in config:
+       buttonmenu = hmi.buttonmenu.Menu(mainWindow, config["buttonmenu"])
 
     if 'FMS' in config:
         sys.path.insert(0, config["FMS"]["module_dir"])
