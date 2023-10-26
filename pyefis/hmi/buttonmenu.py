@@ -66,7 +66,7 @@ class Menu(QWidget):
         bg_color=self.config['defaults']['bg_color']
         font_size=self.config['defaults']['font_size']
         corner_radius=self.config['defaults']['corner_radius']
-
+        button_order = dict()
         for c in self.config['colors']:
             self.colors[c] = self.config['colors'][c]
         # Create each button
@@ -85,8 +85,13 @@ class Menu(QWidget):
                 self.button_screen_titles[b_name]['default'] = b['title']
             if 'menubutton' in b:
                 self.menu_buttons.append(b_name)
-            if 'order' in b and b['order'] >= 2:
-                self.menu_buttons.append(b_name) 
+            if 'order' in b:
+                if b['order'] in button_order:
+                   raise Exception(f"Button '{b_name}' and '{button_order[b['order']]}' share the same order '{b['order']}', please correct!")
+                else:
+                   button_order[b['order']] = b_name
+                if b['order'] >= 2:
+                    self.menu_buttons.append(b_name) 
             if 'hide_on' in b:
                 # Build dict of what screens a button hides on
                 # _ALL_ will be recognized to hide it on all screens
