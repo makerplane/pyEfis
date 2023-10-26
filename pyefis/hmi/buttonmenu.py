@@ -67,6 +67,7 @@ class Menu(QWidget):
         font_size=self.config['defaults']['font_size']
         corner_radius=self.config['defaults']['corner_radius']
         button_order = dict()
+        shortcuts = dict()
         for c in self.config['colors']:
             self.colors[c] = self.config['colors'][c]
         # Create each button
@@ -76,7 +77,10 @@ class Menu(QWidget):
             self.buttons[b_name] = QPushButton(b_name, self)
             self.buttons[b_name].clicked.connect(lambda checked, name=b_name: self.button_clicked(name))
             if 'shortcut' in b:
+              if b['shortcut'] in shortcuts:
+                  raise Exception(f"Button '{b_name}' and '{shortcuts[b['shortcut']]}' share the same shortcut '{b['shortcut']}', please correct!")
               self.buttons[b_name].addAction(QAction(b['shortcut'], self, shortcut=QKeySequence(b['shortcut']), triggered=(lambda checked, name=b_name: self.button_clicked(name))))
+              shortcuts[b['shortcut']] = b_name
             if 'titles' in b:
                 self.button_screen_titles[b_name] = b['titles']
                 self.button_screen_titles[b_name]['default'] = b['title']
@@ -191,7 +195,7 @@ class Menu(QWidget):
                     logger.debug("toggle hide")
                     self.change_button_visibility()
                     self.update_button_style(name)
-                elif self.button_current_action[name]['internal'] == 'toggle_airspeed_mode'
+                elif self.button_current_action[name]['internal'] == 'toggle_airspeed_mode':
                     logger.debug("toggle_airspeed_mode")
                     hmi.actions.trigger("set airspeed mode")
 
