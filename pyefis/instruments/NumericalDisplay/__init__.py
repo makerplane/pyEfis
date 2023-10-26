@@ -146,6 +146,7 @@ class NumericalDisplay(QGraphicsView):
             self.scrolling_area.hide()
         else:
             self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
+            self.redraw()
             self.scrolling_area.show()
 
     def getBad(self):
