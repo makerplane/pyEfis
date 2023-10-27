@@ -191,6 +191,14 @@ screens:
         db_items: IAS
         row: 1
         column: 1
+      - type: atitude_indicator
+        db_items:
+          - PITCH
+          - ROLL
+          - ALAT
+          - TAS
+        row: 1
+        column: 2
       -
         type: altimeter_dial
         db_items: ALT

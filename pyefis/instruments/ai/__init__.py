@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 #   Add configuration for bank angle tick sizes
 
 class AI(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,data=None):
         super(AI, self).__init__(parent)
         self.myparent = parent
 
@@ -68,27 +68,41 @@ class AI(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
 
-        pitch = fix.db.get_item("PITCH")
-        pitch.valueChanged[float].connect(self.setPitchAngle)
-        pitch.oldChanged[bool].connect(self.setAIOld)
-        pitch.badChanged[bool].connect(self.setAIBad)
-        pitch.failChanged[bool].connect(self.setAIFail)
-        self._pitchAngle = pitch.value
-        roll = fix.db.get_item("ROLL")
-        roll.valueChanged[float].connect(self.setRollAngle)
-        roll.oldChanged[bool].connect(self.setAIOld)
-        roll.badChanged[bool].connect(self.setAIBad)
-        roll.failChanged[bool].connect(self.setAIFail)
-        self._rollAngle = roll.value
-        self._AIOld = roll.old
-        self._AIBad = roll.bad
-        self._AIFail = roll.fail
-        alat = fix.db.get_item("ALAT")
-        alat.valueChanged[float].connect(self.setLateralAcceleration)
-        self._latAccel = alat.value
-        tas = fix.db.get_item("TAS")
-        tas.valueChanged[float].connect(self.setTrueAirspeed)
-        self._tas = tas.value
+        if data:
+            pitch = data['PITCH']
+            roll = data["ROLL"]
+            alat = data["ALAT"]
+            tas = data["TAS"]
+            self._pitchAngle = pitch.value
+            self._rollAngle = roll.value
+            self._AIOld = roll.old
+            self._AIBad = roll.bad
+            self._AIFail = roll.fail
+            self._latAccel = alat.value
+            self._tas = tas.value
+
+        else:
+            pitch = fix.db.get_item("PITCH")
+            pitch.valueChanged[float].connect(self.setPitchAngle)
+            pitch.oldChanged[bool].connect(self.setAIOld)
+            pitch.badChanged[bool].connect(self.setAIBad)
+            pitch.failChanged[bool].connect(self.setAIFail)
+            self._pitchAngle = pitch.value
+            roll = fix.db.get_item("ROLL")
+            roll.valueChanged[float].connect(self.setRollAngle)
+            roll.oldChanged[bool].connect(self.setAIOld)
+            roll.badChanged[bool].connect(self.setAIBad)
+            roll.failChanged[bool].connect(self.setAIFail)
+            self._rollAngle = roll.value
+            self._AIOld = roll.old
+            self._AIBad = roll.bad
+            self._AIFail = roll.fail
+            alat = fix.db.get_item("ALAT")
+            alat.valueChanged[float].connect(self.setLateralAcceleration)
+            self._latAccel = alat.value
+            tas = fix.db.get_item("TAS")
+            tas.valueChanged[float].connect(self.setTrueAirspeed)
+            self._tas = tas.value
         # We store all the pitch tick marks and text in a list so that
         # we can adjust the opacity of the items.
         self.pitchItems = []

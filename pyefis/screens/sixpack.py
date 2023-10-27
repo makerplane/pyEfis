@@ -42,10 +42,10 @@ class Screen(QWidget):
 
         #self.airspeed = airspeed.Airspeed(self)
 
-        self.ai = ai.AI(self)
-        self.ai.fontSize = 12
-        self.ai.bankMarkSize = 7
-        self.ai.pitchDegreesShown = 60
+        #self.ai = ai.AI(self)
+        #self.ai.fontSize = 12
+        #self.ai.bankMarkSize = 7
+        #self.ai.pitchDegreesShown = 60
 
         #self.altimeter = altimeter.Altimeter(self)
 
@@ -55,7 +55,8 @@ class Screen(QWidget):
         self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fgcolor=Qt.white)
 
         self.init= False
-        
+        self.ai_mapping = dict()
+
     def init_screen(self):
         self.layout = self.parent.get_config_item(self,'layout')
         self.data_items = dict()
@@ -80,6 +81,23 @@ class Screen(QWidget):
                 self.insturments[count] = altimeter.Altimeter(self,data=self.data_items[self.lookup_mapping('ALT',i.get('mapping',dict()))])
             elif i['type'] == 'airspeed_dial':
                 self.insturments[count] = airspeed.Airspeed(self,data=self.data_items[self.lookup_mapping('IAS',i.get('mapping',dict()))])
+            elif i['type'] == 'atitude_indicator':
+                self.ai_mapping['PITCH'] = self.lookup_mapping('PITCH',i.get('mapping',dict()))
+                self.ai_mapping['ROLL'] = self.lookup_mapping('ROLL',i.get('mapping',dict()))
+                self.ai_mapping['ALAT'] = self.lookup_mapping('ALAT',i.get('mapping',dict()))
+                self.ai_mapping['TAS'] = self.lookup_mapping('TAS',i.get('mapping',dict()))
+
+                self.insturments[count] = ai.AI(self,data = {
+                    'PITCH': self.data_items[self.ai_mapping['PITCH']],
+                    'ROLL':  self.data_items[self.ai_mapping['ROLL']],
+                    'ALAT':  self.data_items[self.ai_mapping['ALAT']],
+                    'TAS':   self.data_items[self.ai_mapping['TAS']]
+                    }
+                )
+
+                self.insturments[count].fontSize = i.get('options',{"fontSize": 12}).get('fontSize', 12)
+                self.insturments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
+                self.insturments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
 
             count += 1
 
@@ -112,6 +130,12 @@ class Screen(QWidget):
                 self.insturments[inst].setAltimeter(self.data_items[db_item].value)
             elif self.insturment_config[inst]['type'] == 'airspeed_dial':
                 self.insturments[inst].setAirspeed(self.data_items[db_item].value)
+            elif self.insturment_config[inst]['type'] == 'atitude_indicator':
+                self.insturments[inst].setPitchAngle(self.data_items[self.ai_mapping['PITCH']].value)
+                self.insturments[inst].setRollAngle(self.data_items[self.ai_mapping['ROLL']].value)
+                self.insturments[inst].setLateralAcceleration(self.data_items[self.ai_mapping['ALAT']].value)
+                self.insturments[inst].setTrueAirspeed(self.data_items[self.ai_mapping['TAS']].value)
+
 
 
     def data_redraw(self,db_item):
@@ -161,8 +185,8 @@ class Screen(QWidget):
         #self.airspeed.move(0,menu_offset)
         #self.airspeed.resize(instWidth,instHeight)
 
-        self.ai.move(instWidth, 0 + menu_offset)
-        self.ai.resize(instWidth, instHeight)
+        #self.ai.move(instWidth, 0 + menu_offset)
+        #self.ai.resize(instWidth, instHeight)
 
         #self.altimeter.move(instWidth*2, 0 + menu_offset)
         #self.altimeter.resize(instWidth,instHeight)
