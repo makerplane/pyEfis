@@ -134,9 +134,6 @@ class NumericalDisplay(QGraphicsView):
         scroll_value = self._value - (prevalue * (10 ** self.scroll_decimal))
         if self.scroll_decimal > 1:
             scroll_value = (scroll_value / (10 ** (self.scroll_decimal-1)))
-        # Handle special case where prevalue is about to roll over
-        if scroll_value >= 9.6:
-            prevalue += 1
         prest = str(prevalue)
         prelen = self.total_decimals - self.scroll_decimal
         if len(prest) < prelen:
