@@ -92,8 +92,11 @@ class Menu(QWidget):
             if 'order' in b:
                 if b['order'] in button_order:
                    raise Exception(f"Button '{b_name}' and '{button_order[b['order']]}' share the same order '{b['order']}', please correct!")
-                else:
-                   button_order[b['order']] = b_name
+                if b['order'] <= 0:
+                   raise Exception(f"Button '{b_name}' order value must be a positive integer greater than 0")
+                if b['order'] > 20:
+                   raise Exception(f"Button '{b_name}' order value must be less than 21")
+                button_order[b['order']] = b_name
                 if b['order'] >= 2:
                     self.menu_buttons.append(b_name) 
             if 'hide_on' in b:
