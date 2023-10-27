@@ -49,13 +49,14 @@ class Screen(QWidget):
 
         #self.altimeter = altimeter.Altimeter(self)
 
-        self.tc = tc.TurnCoordinator(self)
+        #self.tc = tc.TurnCoordinator(self)
 
         self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
         self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fgcolor=Qt.white)
 
         self.init= False
         self.ai_mapping = dict()
+        self.tc_mapping = dict()
 
     def init_screen(self):
         self.layout = self.parent.get_config_item(self,'layout')
@@ -98,9 +99,17 @@ class Screen(QWidget):
                 self.insturments[count].fontSize = i.get('options',{"fontSize": 12}).get('fontSize', 12)
                 self.insturments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
                 self.insturments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
+            elif i['type'] == 'turn_coordinator':
+                self.tc_mapping['ALAT'] = self.lookup_mapping('ALAT',i.get('mapping',dict()))
+                self.tc_mapping['ROT'] = self.lookup_mapping('ROT',i.get('mapping',dict()))
+
+                self.insturments[count] = tc.TurnCoordinator(self,data ={
+                    'ALAT': self.data_items[self.tc_mapping['ALAT']],
+                    'ROT': self.data_items[self.tc_mapping['ROT']],
+                    }
+                )
 
             count += 1
-
         #Place insturments:
         if self.layout['type'] == 'grid':
             self.grid_layout()
@@ -135,6 +144,10 @@ class Screen(QWidget):
                 self.insturments[inst].setRollAngle(self.data_items[self.ai_mapping['ROLL']].value)
                 self.insturments[inst].setLateralAcceleration(self.data_items[self.ai_mapping['ALAT']].value)
                 self.insturments[inst].setTrueAirspeed(self.data_items[self.ai_mapping['TAS']].value)
+            elif self.insturment_config[inst]['type'] == 'turn_coordinator':
+                self.insturments[inst].setLatAcc(self.data_items[self.tc_mapping['ALAT']].value)
+                self.insturments[inst].setROT(self.data_items[self.tc_mapping['ROT']].value)
+
 
 
 
@@ -191,8 +204,8 @@ class Screen(QWidget):
         #self.altimeter.move(instWidth*2, 0 + menu_offset)
         #self.altimeter.resize(instWidth,instHeight)
 
-        self.tc.move(0, instHeight + menu_offset)
-        self.tc.resize(instWidth, instHeight)
+        #self.tc.move(0, instHeight + menu_offset)
+        #self.tc.resize(instWidth, instHeight)
 
         hdh = self.heading_disp.height()
         hdw = self.heading_disp.width()

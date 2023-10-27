@@ -205,6 +205,13 @@ screens:
         row: 1
         column: 3
       -
+        type: turn_coordinator
+        db_items:
+          - ROT
+          - ALAT
+        row: 2
+        column: 1
+      -
         type: vsi_dial
         db_items: VS
         row: 2

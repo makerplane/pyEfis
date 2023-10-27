@@ -24,7 +24,7 @@ import pyavtools.fix as fix
 import pyavtools.filters as filters
 
 class TurnCoordinator(QWidget):
-    def __init__(self, parent=None, dial=True, ss_only=False, filter_depth=0):
+    def __init__(self, parent=None, dial=True, ss_only=False, filter_depth=0, data=None):
         super(TurnCoordinator, self).__init__(parent)
         self.myparent = parent
         self.slip_skid_only = ss_only
@@ -41,16 +41,22 @@ class TurnCoordinator(QWidget):
             self.filter = filters.AvgFilter(filter_depth)
         else:
             self.filter = None
-        self.alat_item = fix.db.get_item("ALAT")
-        self.alat_item.valueChanged[float].connect(self.setLatAcc)
-        self.alat_item.badChanged.connect(self.quality_change)
-        self.alat_item.oldChanged.connect(self.quality_change)
-        self.alat_item.failChanged.connect(self.quality_change)
-        self.rot_item = fix.db.get_item("ROT")
-        self.rot_item.valueChanged[float].connect(self.setROT)
-        self.rot_item.badChanged.connect(self.quality_change)
-        self.rot_item.oldChanged.connect(self.quality_change)
-        self.rot_item.failChanged.connect(self.quality_change)
+
+        if data:
+            self.alat_item = data["ALAT"]
+            self.rot_item = data['ROT']
+        else:
+            self.alat_item = fix.db.get_item("ALAT")
+            self.alat_item.valueChanged[float].connect(self.setLatAcc)
+            self.alat_item.badChanged.connect(self.quality_change)
+            self.alat_item.oldChanged.connect(self.quality_change)
+            self.alat_item.failChanged.connect(self.quality_change)
+            self.rot_item = fix.db.get_item("ROT")
+            self.rot_item.valueChanged[float].connect(self.setROT)
+            self.rot_item.badChanged.connect(self.quality_change)
+            self.rot_item.oldChanged.connect(self.quality_change)
+            self.rot_item.failChanged.connect(self.quality_change)
+
         self.alat_multiplier = 1.0 / (0.217)
         self.max_tc_displacement = 1.0 / self.alat_multiplier
 
