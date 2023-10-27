@@ -36,6 +36,8 @@ class NumericalDisplay(QGraphicsView):
         self._bad = False
         self._old = False
         self._fail = False
+        # Ensure all vars are init so paint events do not cause crash 
+        self.resizeEvent(None)
 
     def resizeEvent(self, event):
         self.w = self.width()
