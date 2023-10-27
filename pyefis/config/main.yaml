@@ -15,7 +15,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: EPFD
+  defaultScreen: SixPack
 
 menu:
   menus:
@@ -178,7 +178,21 @@ screens:
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
-
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 2
+      columns: 3
+    insturments:
+      -
+        type: altimeter_dial
+        db_items: ALT
+        row: 1
+        column: 3
+      -
+        type: vsi_dial
+        db_items: VS
+        row: 2
+        column: 3
   PFDSM:
     module: pyefis.screens.pfd_sm
     title: PFD Small

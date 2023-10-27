@@ -26,16 +26,19 @@ from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, data=None):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
-        self.item = fix.db.get_item("ALT")
-        self.item.valueChanged[float].connect(self.setAltimeter)
-        self.item.oldChanged[bool].connect(self.repaint)
-        self.item.badChanged[bool].connect(self.repaint)
-        self.item.failChanged[bool].connect(self.repaint)
+        if data:
+            self.item=data
+        else:
+            self.item = fix.db.get_item("ALT")
+            self.item.valueChanged[float].connect(self.setAltimeter)
+            self.item.oldChanged[bool].connect(self.repaint)
+            self.item.badChanged[bool].connect(self.repaint)
+            self.item.failChanged[bool].connect(self.repaint)
 
     # TODO We continuously draw things that don't change.  Should draw the
     # background save to pixmap or something and then blit it and draw arrows.
@@ -158,7 +161,7 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None, maxalt=50000, fontsize=15):
+    def __init__(self, parent=None, maxalt=50000, fontsize=15, data=None):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -166,8 +169,18 @@ class Altimeter_Tape(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = fontsize
-        self.item = fix.db.get_item("ALT")
-        self._altimeter = self.item.value
+
+        print("tape init")
+        if data:
+            self.item=data
+        else:
+            self.item = fix.db.get_item("ALT")
+            self._altimeter = self.item.value
+            self.item.valueChanged[float].connect(self.setAltimeter)       
+            self.item.oldChanged[bool].connect(self.setAltOld)             
+            self.item.badChanged[bool].connect(self.setAltBad)             
+            self.item.failChanged[bool].connect(self.setAltFail)           
+
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
         self.pph = 0.3
@@ -178,6 +191,9 @@ class Altimeter_Tape(QGraphicsView):
         self.maxalt = maxalt
         self.myparent = parent
 
+        self._altimeter = 0
+        self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
+        self.numerical_display.value = self._altimeter
 
     def resizeEvent(self, event):
         w = self.width()
@@ -213,7 +229,6 @@ class Altimeter_Tape(QGraphicsView):
                 l.setOpacity(self.foregroundOpacity)
         self.setScene(self.scene)
 
-        self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
         nbh=50
         self.numerical_display.resize (70, nbh)
         self.numeric_box_pos = QPoint(2, qRound(h/2-nbh/2))
@@ -226,10 +241,6 @@ class Altimeter_Tape(QGraphicsView):
         self.setAltOld(self.item.old)
         self.setAltBad(self.item.bad)
         self.setAltFail(self.item.fail)
-        self.item.valueChanged[float].connect(self.setAltimeter)
-        self.item.oldChanged[bool].connect(self.setAltOld)
-        self.item.badChanged[bool].connect(self.setAltBad)
-        self.item.failChanged[bool].connect(self.setAltFail)
 
     def y_offset(self, alt):
         return self.height_pixel - (alt*self.pph) - self.height()/2
