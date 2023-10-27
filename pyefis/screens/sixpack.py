@@ -40,7 +40,7 @@ class Screen(QWidget):
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
-        self.airspeed = airspeed.Airspeed(self)
+        #self.airspeed = airspeed.Airspeed(self)
 
         self.ai = ai.AI(self)
         self.ai.fontSize = 12
@@ -78,6 +78,8 @@ class Screen(QWidget):
                 self.insturments[count] = vsi.VSI_Dial(self,data=self.data_items[self.lookup_mapping('VS',i.get('mapping',dict()))])
             elif i['type'] == 'altimeter_dial':
                 self.insturments[count] = altimeter.Altimeter(self,data=self.data_items[self.lookup_mapping('ALT',i.get('mapping',dict()))])
+            elif i['type'] == 'airspeed_dial':
+                self.insturments[count] = airspeed.Airspeed(self,data=self.data_items[self.lookup_mapping('IAS',i.get('mapping',dict()))])
 
             count += 1
 
@@ -106,9 +108,11 @@ class Screen(QWidget):
         for inst in self.data_distribution[db_item]:
             if self.insturment_config[inst]['type'] == 'vsi_dial':
                 self.insturments[inst].setROC(self.data_items[db_item].value)
-            if self.insturment_config[inst]['type'] == 'altimeter_dial':
-                print("modified")
+            elif self.insturment_config[inst]['type'] == 'altimeter_dial':
                 self.insturments[inst].setAltimeter(self.data_items[db_item].value)
+            elif self.insturment_config[inst]['type'] == 'airspeed_dial':
+                self.insturments[inst].setAirspeed(self.data_items[db_item].value)
+
 
     def data_redraw(self,db_item):
         print(f"redraw: {db_item}")
@@ -119,6 +123,10 @@ class Screen(QWidget):
             elif self.insturment_config[inst]['type'] == 'altimeter_dial':
                 self.insturments[inst].setAltimeter(self.data_items[db_item].value)
                 self.insturments[inst].update()
+            elif self.insturment_config[inst]['type'] == 'airspeed_dial':
+                self.insturments[inst].setAirspeed(self.data_items[db_item].value)
+                self.insturments[inst].update()
+
 
     def grid_layout(self):
         count = 1
@@ -150,8 +158,8 @@ class Screen(QWidget):
         instHeight = qRound((self.height()-menu_offset)/2)
         diameter=min(instWidth,instHeight)
 
-        self.airspeed.move(0,menu_offset)
-        self.airspeed.resize(instWidth,instHeight)
+        #self.airspeed.move(0,menu_offset)
+        #self.airspeed.resize(instWidth,instHeight)
 
         self.ai.move(instWidth, 0 + menu_offset)
         self.ai.resize(instWidth, instHeight)

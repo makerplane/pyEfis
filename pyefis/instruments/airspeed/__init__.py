@@ -27,17 +27,20 @@ from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
     FULL_WIDTH = 400
-    def __init__(self, parent=None, fontsize=20):
+    def __init__(self, parent=None, fontsize=20, data=None):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = fontsize
         self._airspeed = 0
-        self.item = fix.db.get_item("IAS")
-        self.item.valueChanged[float].connect(self.setAirspeed)
-        self.item.oldChanged[bool].connect(self.repaint)
-        self.item.badChanged[bool].connect(self.repaint)
-        self.item.failChanged[bool].connect(self.repaint)
+        if data:
+            self.item = data
+        else:
+            self.item = fix.db.get_item("IAS")
+            self.item.valueChanged[float].connect(self.setAirspeed)
+            self.item.oldChanged[bool].connect(self.repaint)
+            self.item.badChanged[bool].connect(self.repaint)
+            self.item.failChanged[bool].connect(self.repaint)
 
 
     def paintEvent(self, event):
@@ -200,7 +203,7 @@ class Airspeed(QWidget):
 
 
 class Airspeed_Tape(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, data=None):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
         self.update_period = None
@@ -210,7 +213,16 @@ class Airspeed_Tape(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self.item = fix.db.get_item("IAS")
+      
+        if data:
+            self.item = data
+        else:
+            self.item = fix.db.get_item("IAS")
+            self.item.valueChanged[float].connect(self.setAirspeed)
+            self.item.oldChanged[bool].connect(self.setAsOld)
+            self.item.badChanged[bool].connect(self.setAsBad)
+            self.item.failChanged[bool].connect(self.setAsFail)
+ 
         self._airspeed = self.item.value
 
         # V Speeds
@@ -233,6 +245,8 @@ class Airspeed_Tape(QGraphicsView):
         self.fontsize = 15
         self.majorDiv = 10
         self.minorDiv = 5
+
+        self.numerical_display = NumericalDisplay(self)
 
     def resizeEvent(self, event):
         w = self.width()
@@ -295,7 +309,6 @@ class Airspeed_Tape(QGraphicsView):
                                30, -self.Vne * self.pph + tape_start, vnePen)
         l.setOpacity(self.foregroundOpacity)
 
-        self.numerical_display = NumericalDisplay(self)
         nbh = 50
         self.numerical_display.resize (47, nbh)
         self.numeric_box_pos = QPoint(qRound(w-48), qRound(h/2-nbh/2))
@@ -310,10 +323,6 @@ class Airspeed_Tape(QGraphicsView):
         self.setScene(self.scene)
         self.centerOn(self.scene.width() / 2,
                       -self._airspeed * self.pph + tape_start)
-        self.item.valueChanged[float].connect(self.setAirspeed)
-        self.item.oldChanged[bool].connect(self.setAsOld)
-        self.item.badChanged[bool].connect(self.setAsBad)
-        self.item.failChanged[bool].connect(self.setAsFail)
 
     def redraw(self):
         if not self.isVisible():
@@ -366,10 +375,15 @@ class Airspeed_Box(QWidget):
     """Represents a simple numeric display type gauge.  The benefit of using this
        over a normal text display is that this will change colors properly when
        limits are reached or when failures occur"""
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, data=None):
         super(Airspeed_Box, self).__init__(parent)
         self.modes = ["TAS", "GS", "IAS"]
         self._modeIndicator = 0
+
+        # Undecided how to handle decoupling the data here.
+        # I think, when used the new way maybe we just disable mode
+        # changing and handle that within the layer feeding data
+
         self.fix_items = [fix.db.get_item(mode) for mode in self.modes]
         self.fix_item = self.fix_items[self._modeIndicator]
         self.valueText = str(int(self.fix_item.value))
