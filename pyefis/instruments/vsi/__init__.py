@@ -26,7 +26,7 @@ import pyavtools.fix as fix
 
 class VSI_Dial(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None, fontsize=20):
+    def __init__(self, parent=None, fontsize=20,data=None):
         super(VSI_Dial, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
@@ -34,11 +34,14 @@ class VSI_Dial(QWidget):
         self._roc = 0
         self.maxRange = 2000
         self.maxAngle = 170.0
-        self.item = fix.db.get_item("VS")
-        self.item.valueChanged[float].connect(self.setROC)
-        self.item.oldChanged[bool].connect(self.repaint)
-        self.item.badChanged[bool].connect(self.repaint)
-        self.item.failChanged[bool].connect(self.repaint)
+        if data:
+            self.item=data
+        else:
+            self.item = fix.db.get_item("VS")
+            self.item.valueChanged[float].connect(self.setROC)
+            self.item.oldChanged[bool].connect(self.repaint)
+            self.item.badChanged[bool].connect(self.repaint)
+            self.item.failChanged[bool].connect(self.repaint)
 
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
@@ -179,7 +182,6 @@ class VSI_Dial(QWidget):
             dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
         """
 
-
     def getROC(self):
         return self._roc
 
@@ -192,7 +194,7 @@ class VSI_Dial(QWidget):
 
 
 class VSI_PFD(QWidget):
-    def __init__(self, parent=None, fontsize=15):
+    def __init__(self, parent=None, fontsize=15, data=None):
         super(VSI_PFD, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
@@ -200,11 +202,14 @@ class VSI_PFD(QWidget):
         self.marks = [(500,""),(1000,"1"),(1500,""),(2000,"2")]
         self.scaleRoot = 0.7
         self._value = 0
-        self.item = fix.db.get_item("VS")
-        self.item.valueChanged[float].connect(self.setValue)
-        self.item.oldChanged[bool].connect(self.repaint)
-        self.item.badChanged[bool].connect(self.repaint)
-        self.item.failChanged[bool].connect(self.repaint)
+        if data:
+            self.item=data
+        else:
+            self.item = fix.db.get_item("VS")
+            self.item.valueChanged[float].connect(self.setValue)
+            self.item.oldChanged[bool].connect(self.repaint)
+            self.item.badChanged[bool].connect(self.repaint)
+            self.item.failChanged[bool].connect(self.repaint)
 
     def resizeEvent(self, event):
         # Just for convenience
