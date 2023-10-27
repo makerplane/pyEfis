@@ -51,8 +51,6 @@ class NumericalDisplay(QGraphicsView):
                 t.setFont (self.f)
                 font_width = t.boundingRect().width()
                 font_height = t.boundingRect().height()
-        self.font_size = qRound(self.font_size)
-        self.f = QFont(self.font_family, self.font_size)
 
         while font_width * (self.total_decimals) <= self.w - 0.1:
                 self.font_size += 0.1
