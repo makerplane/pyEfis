@@ -41,31 +41,32 @@ class Screen(QWidget):
             self.setAutoFillBackground(True)
 
         self.init= False
-        self.inst_name_map = {
-            # This allows us to easily change the name used in the config
-            # Figured once all gauges were done a common naming scheme 
-            # might be more obvious
-            # Code_Name: Config_Name
-            "ASID":  "airspeed_dial",
-            "ALTD":  "altimeter_dial",
-            "AG":    "arc_gauge",
-            "AI":    "atitude_indicator",
-            "HEADD": "heading_display",
-            "HSI":   "horizontal_situation_indicator",
-            "TC":    "turn_coordinator",
-            "VSID":  "vsi_dial"
 
-        }
+        # list of dial types supported so far:
+        # airspeed_dial
+        # airspeed_trend_tape # Testing to do
+        # altimeter_dial
+        # altimeter_trend_tape # Testing to do
+        # arc_gauge
+        # atitude_indicator
+        # heading_display
+        # horizontal_situation_indicator
+        # turn_coordinator
+        # vsi_dial
+        # vsi_pfd  # Testing to do
+
 
 
     def init_screen(self):
         self.mapping = defaultdict(lambda: defaultdict())
 
         self.layout = self.parent.get_config_item(self,'layout')
-        self.data_items = dict()
-        self.data_distribution = defaultdict(list)
-        self.instruments = dict()
-        self.insturment_config = dict ()
+        self.data_items = dict() # Each data item
+        self.data_distribution = defaultdict(list) # Keeps track of what instruments need sent what pieces of data
+        self.instruments = dict() # Each instrument
+        self.insturment_config = dict () # configuration for the instruments
+        self.data_signal_routing = defaultdict(lambda: defaultdict())  # Keeps track of the reverse maping for each instrument
+        self.data_item_signals_defined = defaultdict(lambda: defaultdict())  # Keeps track of the signals that have been setup for a given data item
         # Setup instruments:
         count = 1
         for i in self.get_config_item('instruments'):
@@ -88,10 +89,13 @@ class Screen(QWidget):
                 # Mapping is specified and is only valid for instrument that have multiple items
                 for d in default_items:
                     self.mapping[i['type']][d] = self.lookup_mapping(d,i.get('mapping',dict()))
+                    self.data_item_signals_defined[count][self.lookup_mapping(d,i.get('mapping',dict()))] = d
+            else:
+                self.data_item_signals_defined[count][db_items[0]] = 'None'
 
             # keep track of what instruments use what data items 
             for item in db_items:
-                    self.define_data(count,item)
+                    self.define_data(count,item,i['type'])
                     self.data_distribution[item].append(count)
             # Process the type of gauge this is and create them
             if i['type'] == 'airspeed_dial':
@@ -112,7 +116,7 @@ class Screen(QWidget):
                 self.instruments[count].cdi_enabled = i.get('options',{"cdi_enabled": True}).get('cdi_enabled', True)
             elif i['type'] == 'turn_coordinator':
                 self.instruments[count] = tc.TurnCoordinator(self,data=self.get_data_dict(i['type']))
-            elif i['type'] == self.inst_name_map['VSID']:
+            elif i['type'] == 'vsi_dial':
                 self.instruments[count] = vsi.VSI_Dial(self,data=self.data_items[self.lookup_mapping('VS',i.get('mapping',dict()))])
 
 
@@ -132,6 +136,10 @@ class Screen(QWidget):
     def lookup_mapping(self,item,mapping=dict()):
           return mapping.get(item,item)
 
+    def signal_mapping(self, inst):
+        # returns what signals an instrument needs 
+        pass        
+
     def get_instrument_defaults(self, inst):
         # Always return an array for simplicity
         # a value of boolean false indicates that no default value exists and db_item must be provided
@@ -147,7 +155,7 @@ class Screen(QWidget):
             return ['COURSE','CDI','GSI','HEAD']
         elif 'turn_coordinator' == inst:
             return ['ROT','ALAT']
-        elif self.inst_name_map['VSID'] == inst:
+        elif 'vsi_dial' == inst:
             return ['VS']
 
     def get_instrument_default_options(self, inst):
@@ -156,57 +164,56 @@ class Screen(QWidget):
         
         return false
 
-    def define_data(self,count,item):
+    def define_data(self, count, item, item_type):
         if not item in self.data_items:
             print(f"db item: {item}")
             self.data_items[item] = fix.db.get_item(item)
-            self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item: self.data_modified(db_item=key) )
-            self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
-            self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
-            self.data_items[item].oldChanged[bool].connect(lambda valueChanged, key=item: self.data_redraw(db_item=key))
-            self.data_items[item].badChanged[bool].connect(lambda valueChanged, key=item: self.data_redraw(db_item=key))
-            self.data_items[item].failChanged[bool].connect(lambda valueChanged, key=item: self.data_redraw(db_item=key))
+            if self.data_items[item].dtype == float:
+                self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item: self.data_modified(db_item=key) )
+            if self.data_items[item].dtype == str:
+                self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
+            if self.data_items[item].dtype == bool:
+                self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
+            if self.data_items[item].dtype == int:
+                self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
 
+        # Not All gauges need all of the signals
+        # We will only subscribe to the ones we need that have not already been subscripbed
+        if 'old' in self.what_signals(item_type):
+            self.data_items[item].oldChanged[bool].connect(lambda oldChanged, key=item: self.data_redraw(db_item=key))
+            self.data_item_signals_defined[item][count] = 'old'
+        if 'bad' in self.what_signals(item_type):
+            self.data_items[item].badChanged[bool].connect(lambda badChanged, key=item: self.data_redraw(db_item=key))
+            self.data_item_signals_defined[item][count] = 'bad'
+        if 'fail' in self.what_signals(item_type):
+            self.data_items[item].failChanged[bool].connect(lambda failChanged, key=item: self.data_redraw(db_item=key))
+            self.data_item_signals_defined[item][count] = 'fail'
+        if 'aux' in self.what_signals(item_type):
+            self.data_items[item].auxChanged[bool].connect(lambda failChanged, key=item: self.data_redraw(db_item=key))
+            self.data_item_signals_defined[item][count] = 'aux'
+        if 'ann' in self.what_signals(item_type):
+            self.data_items[item].annunciateChanged[bool].connect(lambda failChanged, key=item: self.data_redraw(db_item=key))
+            self.data_item_signals_defined[item][count] = 'ann'
+        if 'report' in self.what_signals(item_type):
+            self.data_items[item].reportReceived[bool].connect(lambda failChanged, key=item: self.data_redraw(db_item=key))
+            self.data_item_signals_defined[item][count] = 'report'
+
+    def what_signals(self, it):
+        # Returns what signals are used for the instrument type
+        if 'static' in it:
+            return []
+        elif 'gauge' in it:
+            return ['old', 'bad', 'fail', 'aux', 'ann', 'report' ]
+        return ['old', 'bad', 'fail']
 
     def data_modified(self,db_item):
         print(f"modified: {db_item}")
         for inst in self.data_distribution[db_item]:
-            if   self.insturment_config[inst]['type'] == 'airspeed_dial':
-                self.instruments[inst].setAirspeed(self.data_items[db_item].value)
-            elif self.insturment_config[inst]['type'] == 'altimeter_dial':
-                self.instruments[inst].setAltimeter(self.data_items[db_item].value)
-            elif self.insturment_config[inst]['type'] == 'atitude_indicator':
-                # Should verify each and only update if for example db_item = 'PITCH'
-                self.instruments[inst].setPitchAngle(self.data_items[self.mapping[self.inst_name_map['AI']]['PITCH']].value)
-                self.instruments[inst].setRollAngle(self.data_items[self.mapping[self.inst_name_map['AI']]['ROLL']].value)
-                self.instruments[inst].setLateralAcceleration(self.data_items[self.mapping[self.inst_name_map['AI']]['ALAT']].value)
-                self.instruments[inst].setTrueAirspeed(self.data_items[self.mapping[self.inst_name_map['AI']]['TAS']].value)
-            elif self.insturment_config[inst]['type'] == 'heading_display':
-                self.instruments[inst].setHeading(self.data_items[db_item].value)
-            elif self.insturment_config[inst]['type'] == 'horizontal_situation_indicator':
-                self.instruments[inst].setHeadingBug(self.data_items[self.mapping[self.inst_name_map['HSI']]['COURSE']].value)
-                self.instruments[inst].setCdi(self.data_items[self.mapping[self.inst_name_map['HSI']]['CDI']].value)
-                self.instruments[inst].setGsi(self.data_items[self.mapping[self.inst_name_map['HSI']]['GSI']].value)
-                self.instruments[inst].setHeading(self.data_items[self.mapping[self.inst_name_map['HSI']]['HEAD']].value)
-            elif self.insturment_config[inst]['type'] == 'turn_coordinator':
-                self.instruments[inst].setLatAcc(self.data_items[self.mapping[self.inst_name_map['TC']]['ALAT']].value)
-                self.instruments[inst].setROT(self.data_items[self.mapping[self.inst_name_map['TC']]['ROT']].value)
-            elif self.insturment_config[inst]['type'] == self.inst_name_map['VSID']:
-                self.instruments[inst].setROC(self.data_items[db_item].value)
-
-
-
+            self.instruments[inst].setData(self.data_item_signals_defined[inst][db_item], self.data_items[db_item].value)
 
     def data_redraw(self,db_item):
         print(f"redraw: {db_item}")
         for inst in self.data_distribution[db_item]:
-            if self.insturment_config[inst]['type'] == 'airspeed_dial':
-                self.instruments[inst].setAirspeed(self.data_items[db_item].value)
-            elif self.insturment_config[inst]['type'] == 'altimeter_dial':
-                self.instruments[inst].setAltimeter(self.data_items[db_item].value)
-            elif self.insturment_config[inst]['type'] == self.inst_name_map['VSID']:
-                self.instruments[inst].setROC(self.data_items[db_item].value)
-
             self.instruments[inst].update()
             
 
