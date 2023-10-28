@@ -183,15 +183,28 @@ class Screen(QWidget):
     def grid_layout(self):
         count = 1
         for i,c in self.insturment_config.items():
-            grid_width = self.width() / self.layout['columns']
-            grid_height = self.height() / self.layout['rows']
-            grid_x = grid_width * (c['column'] - 1) 
-            grid_y = grid_height * (c['row'] - 1) 
+            grid_width = self.width() / int(self.layout['columns'])
+            grid_height = self.height() / int(self.layout['rows'])
+            grid_x = grid_width * (int(c['column']) - 1) 
+            grid_y = grid_height * (int(c['row']) - 1) 
+
+            # Span columns to the right and rows down
+            if 'span' in c:
+                if 'rows' in c['span']:
+                    # spanning rows
+                    if c['span']['rows'] >= 2:
+                        grid_height = grid_height * int(c['span']['rows'])
+                if 'columns' in c['span']:
+                    #spanning columns
+                    if c['span']['columns'] >= 2:
+                        grid_width = grid_width * int(c['span']['columns'])
+
 
             width = grid_width
             height = grid_height
             x = grid_x
             y = grid_y
+
             if 'move' in c:
                 if 'shrink' in c['move']:
                     if (c['move'].get('shrink',0) < 99 ) and (c['move'].get('shrink',0) >= 0):
@@ -222,6 +235,7 @@ class Screen(QWidget):
                         x = grid_x + (( grid_width - width) / 2)
                     if not justified_vertical:
                         y = grid_y + (( grid_height - height) / 2) 
+            print(f"{x} {y} {width} {height}")
             self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))
             
     def move_resize_inst(self,inst,x,y,width,height):
