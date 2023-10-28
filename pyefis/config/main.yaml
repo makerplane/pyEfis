@@ -225,11 +225,39 @@ screens:
           - CDI
           - GSI
           - HEAD
-        row: 2
-        column: 2
+        row: 2             # Row where this grid starts vertical, 1 is top
+        column: 2          # Column where this grid starts horizontal, 1 is left
+                           # Span is not yet implemented
+        #span:             # Defines if this grid should span multiple columns or rows making it larger
+          #rows: 2         # This grid will occupuy row 2 and 3, 2 rows
+          #columns: 2      # This grid will occupy columns 2 and 3, 2 columns
+        move:              # Everything maintains aspect ratio of the grid you defined, 
+                           # with row, column and span but you can make things smaller by percentages
+                           # The default is for the object to occupy the whole space
+          shrink: 21       # This will reduce the size by 10 percent
+                           # When shrinking the default is for the object to be centered horizontal and vertically
+          justify:         # If you want to move it you can use 'top', 'bottom', 'left' or 'right'
+            - bottom       # If you decide to configure top and bottom or right and left
+                           # Only one of the mutually exclusive options will be used
+                           # While this might seem limiting, keep in mind that you can make a high number of initial grids
+                           # Then use span along with shrink and justify to get items precisely placed.
+                           # Hopefully one day all the widgets will be updated to scale fonts and such based on the size of the space they occupy
+                           # This would make it very simple to resize, just change the size of the window and all items will be proportionally 
+                           # moved and sized to fit. If you go wider gauges might have more space between them horizontally
+                           # However, the screen would still be usable without having to change any other setting.
         options:
           gsi_enabled: true
           cdi_enabled: true
+      -
+        type: heading_display
+        db_items: HEAD
+        column: 2
+        row: 2
+        move:
+          shrink: 80
+          justify:
+            - top
+
       -
         type: vsi_dial
         db_items: VS

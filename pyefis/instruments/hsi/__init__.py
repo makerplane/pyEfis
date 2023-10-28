@@ -78,7 +78,6 @@ class HSI(QGraphicsView):
         self._showGSI = not self.gsidb.old
         self.cardinal = ["N", "E", "S", "W"]
         self.heading_bug = None
-        self._fail = False
         self.myparent = parent
         self.update_period = None
 
@@ -266,8 +265,7 @@ class HSI(QGraphicsView):
     heading = property(getHeading, setHeading)
 
     def setFail(self, fail):
-        if fail != self._fail:
-            self._fail = fail
+        if fail != self.item.fail:
             if self.isVisible():
                 if fail:
                     for l in self.labels:
@@ -336,9 +334,6 @@ class HeadingDisplay(QWidget):
             self.item.oldChanged[bool].connect(self.setOld)
 
         self._heading = self.item.value
-        self._bad = self.item.bad
-        self._old = self.item.old
-        self._fail = self.item.fail
 
         self.font = QFont()
         self.font.setBold(True)
@@ -358,15 +353,15 @@ class HeadingDisplay(QWidget):
         c.setFont(self.font)
         tr = QRectF(0, 0, self.width()-1, self.height()-1)
         c.drawRect(tr)
-        if self._fail:
+        if self.item.fail:
             heading_text = "XXX"
             c.setBrush(QBrush(QColor(Qt.red)))
             c.setPen(QPen(QColor(Qt.red)))
-        elif self._bad:
+        elif self.item.bad:
             heading_text = ""
             c.setBrush(QBrush(QColor(255, 150, 0)))
             c.setPen(QPen(QColor(255, 150, 0)))
-        elif self._old:
+        elif self.item.old:
             heading_text = ""
             c.setBrush(QBrush(QColor(255, 150, 0)))
             c.setPen(QPen(QColor(255, 150, 0)))
@@ -386,15 +381,12 @@ class HeadingDisplay(QWidget):
     heading = property(getHeading, setHeading)
 
     def setFail(self, fail):
-        self._fail = fail
         self.repaint()
 
     def setOld(self, old):
-        self._old = old
         self.repaint()
 
     def setBad(self, bad):
-        self._bad = bad
         self.repaint()
 
 class DG_Tape(QGraphicsView):

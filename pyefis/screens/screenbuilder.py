@@ -40,20 +40,6 @@ class Screen(QWidget):
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
-        #self.airspeed = airspeed.Airspeed(self)
-
-        #self.ai = ai.AI(self)
-        #self.ai.fontSize = 12
-        #self.ai.bankMarkSize = 7
-        #self.ai.pitchDegreesShown = 60
-
-        #self.altimeter = altimeter.Altimeter(self)
-
-        #self.tc = tc.TurnCoordinator(self)
-
-        #self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fgcolor=Qt.white)
-
         self.init= False
         self.ai_mapping = dict()
         self.tc_mapping = dict()
@@ -97,7 +83,7 @@ class Screen(QWidget):
                     }
                 )
 
-                self.insturments[count].fontSize = i.get('options',{"fontSize": 12}).get('fontSize', 12)
+                self.insturments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
                 self.insturments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
                 self.insturments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
             elif i['type'] == 'turn_coordinator':
@@ -125,6 +111,9 @@ class Screen(QWidget):
                 )
                 self.insturments[count].gsi_enabled = i.get('options',{"gsi_enabled": True}).get('gsi_enabled', True)
                 self.insturments[count].cdi_enabled = i.get('options',{"cdi_enabled": True}).get('cdi_enabled', True)
+            elif i['type'] == 'heading_display':
+                self.insturments[count] = hsi.HeadingDisplay(self,data=self.data_items[self.lookup_mapping('HEAD',i.get('mapping',dict()))])
+                self.insturments[count].font_size = self.insturments[count].font_size = i.get('options',{"font_size": 17}).get('font_size', 17)  
 
 
             count += 1
@@ -158,6 +147,7 @@ class Screen(QWidget):
             elif self.insturment_config[inst]['type'] == 'airspeed_dial':
                 self.insturments[inst].setAirspeed(self.data_items[db_item].value)
             elif self.insturment_config[inst]['type'] == 'atitude_indicator':
+                # Should verify each and only update if for example db_item = 'PITCH'
                 self.insturments[inst].setPitchAngle(self.data_items[self.ai_mapping['PITCH']].value)
                 self.insturments[inst].setRollAngle(self.data_items[self.ai_mapping['ROLL']].value)
                 self.insturments[inst].setLateralAcceleration(self.data_items[self.ai_mapping['ALAT']].value)
@@ -170,8 +160,8 @@ class Screen(QWidget):
                 self.insturments[inst].setCdi(self.data_items[self.hsi_mapping['CDI']].value)
                 self.insturments[inst].setGsi(self.data_items[self.hsi_mapping['GSI']].value)
                 self.insturments[inst].setHeading(self.data_items[self.hsi_mapping['HEAD']].value)
-
-
+            elif self.insturment_config[inst]['type'] == 'heading_display':
+                self.insturments[inst].setHeading(self.data_items[db_item].value)
 
 
 
@@ -184,6 +174,8 @@ class Screen(QWidget):
                 self.insturments[inst].setAltimeter(self.data_items[db_item].value)
             elif self.insturment_config[inst]['type'] == 'airspeed_dial':
                 self.insturments[inst].setAirspeed(self.data_items[db_item].value)
+            elif self.insturment_config[inst]['type'] == 'turn_coordinator':
+                self.insturments[inst].setHeading(self.data_items[db_item].value)
 
             self.insturments[inst].update()
             
@@ -191,55 +183,56 @@ class Screen(QWidget):
     def grid_layout(self):
         count = 1
         for i,c in self.insturment_config.items():
-            width = qRound(self.width() / self.layout['columns'])
-            height = qRound(self.height() / self.layout['rows'])
-            x = qRound(width * (c['column'] - 1) )
-            y = qRound(height * (c['row'] - 1) )
-            print(f"width={width} height={height} x={x} y={y}")
-            self.move_resize_inst(i,x,y,width,height)
+            grid_width = self.width() / self.layout['columns']
+            grid_height = self.height() / self.layout['rows']
+            grid_x = grid_width * (c['column'] - 1) 
+            grid_y = grid_height * (c['row'] - 1) 
+
+            width = grid_width
+            height = grid_height
+            x = grid_x
+            y = grid_y
+            if 'move' in c:
+                if 'shrink' in c['move']:
+                    if (c['move'].get('shrink',0) < 99 ) and (c['move'].get('shrink',0) >= 0):
+                        # Valid shrink percentage
+                        width = grid_width - (grid_width * c['move'].get('shrink',0)/ 100)
+                        height = grid_height - (grid_height * c['move'].get('shrink',0)/ 100)
+                    else:
+                        raise Exception("shrink must be a valid number between 1 and 99")
+                    justified_horizontal = False
+                    justified_vertical = False 
+                    if 'justify' in c['move']:
+                        for j in c['move']['justify']:
+                            if j == 'left':
+                                x = grid_x
+                                justified_horizontal = True
+                            elif j == 'right':
+                                x = grid_x + ( grid_width - width)
+                                justified_horizontal = True
+                            if j == 'top':
+                                y = grid_y
+                                justified_vertical = True
+                            elif j == 'bottom':
+                                y = grid_y + ( grid_height - height)
+                                justified_vertical = True
+                    
+                    # Default is to center
+                    if not justified_horizontal:
+                        x = grid_x + (( grid_width - width) / 2)
+                    if not justified_vertical:
+                        y = grid_y + (( grid_height - height) / 2) 
+            self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))
             
     def move_resize_inst(self,inst,x,y,width,height):
         self.insturments[inst].move(x,y)
         self.insturments[inst].resize(width,height)
-        #self.insturments[inst].show()
 
-    def vsi_dial(self,count=None,db=None):
-        self.insturments[count] = vsi.VSI_Dial(self,data=db)
-        #self.db.valueChanged[float].connect(self.insturments[count].setROC)
-        #self.db.oldChanged[bool].connect(self.insturments[count].repaint)
-        #self.db.badChanged[bool].connect(self.insturments[count].repaint)
-        #self.db.failChanged[bool].connect(self.insturments[count].repaint)
 
     def resizeEvent(self, event):
         if not self.init:
             self.init_screen()
-        menu_offset = 30
-        instWidth = qRound(self.width()/3)
-        instHeight = qRound((self.height()-menu_offset)/2)
-        diameter=min(instWidth,instHeight)
 
-        #self.airspeed.move(0,menu_offset)
-        #self.airspeed.resize(instWidth,instHeight)
-
-        #self.ai.move(instWidth, 0 + menu_offset)
-        #self.ai.resize(instWidth, instHeight)
-
-        #self.altimeter.move(instWidth*2, 0 + menu_offset)
-        #self.altimeter.resize(instWidth,instHeight)
-
-        #self.tc.move(0, instHeight + menu_offset)
-        #self.tc.resize(instWidth, instHeight)
-
-        hdh = self.heading_disp.height()
-        hdw = self.heading_disp.width()
-        hsi_diameter = diameter - (hdh+30)
-        offset = instHeight-hsi_diameter
-        #self.hsi.move(qRound(instWidth+(instWidth-hsi_diameter)/2), qRound(instHeight + menu_offset + offset-20))
-        #self.hsi.resize(hsi_diameter,hsi_diameter)
-        self.heading_disp.move(qRound(instWidth*1.5-hdw/2), qRound(instHeight + menu_offset+10))
-
-        #self.vsi.move(instWidth * 2, instHeight + menu_offset)
-        #self.vsi.resize(instWidth, instHeight)
         if self.layout['type'] == 'grid':
             self.grid_layout()
     def get_config_item(self, key):
