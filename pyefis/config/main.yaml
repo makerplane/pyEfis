@@ -185,7 +185,6 @@ screens:
     instruments:
       -
         type: arc_gauge
-        db_items: TACH1
         row: 1
         column: 1
 
@@ -208,7 +207,6 @@ screens:
         right: 10
         bottom: 10
     instruments:
-      # Add code, if db_items is missing select from default
       # Add mapping feature
       # Some instruments need multiple inputs, how would one know what values/mapping is needed?
       # span
@@ -216,36 +214,21 @@ screens:
       #  columns: 3
       -
         type: airspeed_dial
-        db_items: IAS
         row: 1
         column: 1
       - type: atitude_indicator
-        db_items:
-          - PITCH
-          - ROLL
-          - ALAT
-          - TAS
         row: 1
         column: 2
       -
         type: altimeter_dial
-        db_items: ALT
         row: 1
         column: 3
       -
         type: turn_coordinator
-        db_items:
-          - ROT
-          - ALAT
         row: 2
         column: 1
       - 
         type: horizontal_situation_indicator
-        db_items:
-          - COURSE
-          - CDI
-          - GSI
-          - HEAD
         row: 2             # Row where this grid starts vertical, 1 is top
         column: 2          # Column where this grid starts horizontal, 1 is left
                            # Span is not yet implemented
@@ -271,7 +254,6 @@ screens:
           cdi_enabled: true
       -
         type: heading_display
-        db_items: HEAD
         column: 2
         row: 2
         move:
@@ -281,7 +263,6 @@ screens:
 
       -
         type: vsi_dial
-        db_items: VS
         row: 2
         column: 3
   PFDSM:
