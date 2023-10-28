@@ -190,6 +190,9 @@ class Airspeed(QWidget):
             self._airspeed = airspeed
             self.update()
 
+    def setData(self, item, value):
+            self.setAirspeed(value)
+
     airspeed = property(getAirspeed, setAirspeed)
 
     def setAsOld(self,b):

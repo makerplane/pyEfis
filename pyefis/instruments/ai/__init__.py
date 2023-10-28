@@ -421,6 +421,16 @@ class AI(QGraphicsView):
     def getPitchAngle(self):
         return self._pitchAngle
 
+    def setData(self,item,value):
+        if item == 'PITCH':
+            self.setPitchAngle(value)
+        elif item == 'ROLL':
+            self.setRollAngle(value)
+        elif item == 'ALAT':
+            self.setLateralAcceleration(value)
+        elif item == 'TAS':
+            self.setTrueAirspeed(value)
+
     pitchAngle = property(getPitchAngle, setPitchAngle)
 
 

@@ -156,6 +156,8 @@ class Altimeter(QWidget):
         if altimeter != self._altimeter:
             self._altimeter = altimeter
             self.update()
+    def setData(self, item, value):
+        self.setAltimeter(value)
 
     altimeter = property(getAltimeter, setAltimeter)
 
@@ -194,6 +196,9 @@ class Altimeter_Tape(QGraphicsView):
         self._altimeter = 0
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
         self.numerical_display.value = self._altimeter
+
+        # Ensure all vars are init so paint events do not cause crash 
+        self.resizeEvent(None)
 
     def resizeEvent(self, event):
         w = self.width()

@@ -235,6 +235,11 @@ class TurnCoordinator(QWidget):
             self._latAcc = acc
         if last_acc != self._latAcc:
             self.update()
+    def setData(self, item, value):
+        if item == 'ALAT':
+            self.setLatAcc(value)
+        elif item == 'ROT':
+            self.setROT(value)
 
     latAcc = property(getLatAcc, setLatAcc)
 

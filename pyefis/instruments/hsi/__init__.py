@@ -261,6 +261,16 @@ class HSI(QGraphicsView):
             self._heading = newheading
             self.rotate(-diff)
             self.last_update_time = now
+ 
+    def setData(self,item,value):
+        if item == 'HEAD':
+            self.setHeading(value)
+        elif item == 'COURSE':
+            self.setHeadingBug(value)
+        elif item == 'CDI':
+            self.setCdi(value)
+        elif item == 'GSI':
+            self.setGsi(value)
 
     heading = property(getHeading, setHeading)
 
@@ -378,6 +388,9 @@ class HeadingDisplay(QWidget):
             self._heading = common.bounds(0, 360, heading)
             self.update()
 
+    def setData(self,item,value):
+            self.setHeading(value)
+
     heading = property(getHeading, setHeading)
 
     def setFail(self, fail):
@@ -481,5 +494,7 @@ class DG_Tape(QGraphicsView):
         if heading != self._heading:
             self._heading = heading
             self.redraw()
+    def setData(self,item,value):
+            self.setHeading(value)
 
     heading = property(getHeading, setHeading)

@@ -190,6 +190,9 @@ class VSI_Dial(QWidget):
             self._roc = roc
             self.update()
 
+    def setData(self, item, value):
+        self.setROC(value)
+
     roc = property(getROC, setROC)
 
 
@@ -284,6 +287,9 @@ class VSI_PFD(QWidget):
     def setValue(self, value):
         self._value = value
         self.update()
+
+    def setData(self, item, value):
+        self.setValue(value)
 
     value = property(getValue, setValue)
 
@@ -486,6 +492,9 @@ class Alt_Trend_Tape(QGraphicsView):
         if vs != self._vs:
             self._vs = vs
             self.redraw()
+
+    def setData(self, item, value):
+        self.Vs(value)
 
     vs = property(setVs)
 
