@@ -175,6 +175,22 @@ screens:
     module: pyefis.screens.ems_sm
     title: Engine Management
 
+  EMSNew:
+    module: pyefis.screens.screenbuilder
+    title: Engine Management
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 800
+      columns: 640
+    instruments:
+      -
+        type: arc_gauge
+        db_items: TACH1
+        row: 1
+        column: 1
+
+
+
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
@@ -186,10 +202,15 @@ screens:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 2
       columns: 3
-    insturments:
+      margin:
+        top: 10
+        left: 10
+        right: 10
+        bottom: 10
+    instruments:
       # Add code, if db_items is missing select from default
       # Add mapping feature
-      # Some insturments need multiple inputs, how would one know what values/mapping is needed?
+      # Some instruments need multiple inputs, how would one know what values/mapping is needed?
       # span
       #  rows: 2
       #  columns: 3
