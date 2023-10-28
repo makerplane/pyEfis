@@ -15,7 +15,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: SixPack
+  defaultScreen: SixPackNew
 
 menu:
   menus:
@@ -178,6 +178,10 @@ screens:
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
+
+  SixPackNew:
+    module: pyefis.screens.screenbuilder
+    title: Standard Instrument Panel
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 2
@@ -186,6 +190,9 @@ screens:
       # Add code, if db_items is missing select from default
       # Add mapping feature
       # Some insturments need multiple inputs, how would one know what values/mapping is needed?
+      # span
+      #  rows: 2
+      #  columns: 3
       -
         type: airspeed_dial
         db_items: IAS
@@ -211,6 +218,18 @@ screens:
           - ALAT
         row: 2
         column: 1
+      - 
+        type: horizontal_situation_indicator
+        db_items:
+          - COURSE
+          - CDI
+          - GSI
+          - HEAD
+        row: 2
+        column: 2
+        options:
+          gsi_enabled: true
+          cdi_enabled: true
       -
         type: vsi_dial
         db_items: VS
