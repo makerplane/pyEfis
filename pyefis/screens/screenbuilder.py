@@ -183,11 +183,25 @@ class Screen(QWidget):
     def grid_layout(self):
         count = 1
         for i,c in self.insturment_config.items():
-            grid_width = self.width() / int(self.layout['columns'])
-            grid_height = self.height() / int(self.layout['rows'])
-            grid_x = grid_width * (int(c['column']) - 1) 
-            grid_y = grid_height * (int(c['row']) - 1) 
+            topm = 0
+            leftm = 0
+            rightm = 0
+            bottomm = 0
+            # Margins in %
+            if 'margin' in self.layout:
+                if 'top' in self.layout['margin'] and self.layout['margin']['top'] > 0 and self.layout['margin']['top'] < 100:
+                    topm = self.height() * ( self.layout['margin']['top'] / 100 )
+                if 'bottom' in self.layout['margin'] and self.layout['margin']['bottom'] > 0 and self.layout['margin']['bottom'] < 100:
+                    bottomm = self.height() * ( self.layout['margin']['bottom'] / 100 )
+                if 'left' in self.layout['margin'] and self.layout['margin']['left'] > 0 and self.layout['margin']['left'] < 100:
+                    leftm = self.height() * ( self.layout['margin']['left'] / 100 )
+                if 'right' in self.layout['margin'] and self.layout['margin']['right'] > 0 and self.layout['margin']['right'] < 100:
+                    rightm = self.height() * ( self.layout['margin']['right'] / 100 )
 
+            grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
+            grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
+            grid_x = leftm + grid_width * (int(c['column']) - 1) 
+            grid_y = topm + grid_height * (int(c['row']) - 1) 
             # Span columns to the right and rows down
             if 'span' in c:
                 if 'rows' in c['span']:
