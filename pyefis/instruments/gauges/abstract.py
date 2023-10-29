@@ -125,7 +125,6 @@ class AbstractGauge(QWidget):
 
     def setData(self,item,value):
         self.setValue(value)
-        self.setupGauge()
     value = property(getValue, setValue)
 
     def getValueText(self):
