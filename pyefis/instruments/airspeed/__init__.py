@@ -42,6 +42,18 @@ class Airspeed(QWidget):
             self.item.badChanged[bool].connect(self.repaint)
             self.item.failChanged[bool].connect(self.repaint)
 
+        # V Speeds
+        self.Vs = self.item.get_aux_value('Vs')
+        if self.Vs is None: self.Vs = 0
+        self.Vs0 = self.item.get_aux_value('Vs0')
+        if self.Vs0 is None: self.Vs0 = 0
+        self.Vno = self.item.get_aux_value('Vno')
+        if self.Vno is None: self.Vno = 0
+        self.Vne = self.item.get_aux_value('Vne')
+        if self.Vne is None: self.Vne = 200
+        self.Vfe = self.item.get_aux_value('Vfe')
+        if self.Vfe is None: self.Vfe = 0
+
 
     def paintEvent(self, event):
         w = self.width()
@@ -76,20 +88,12 @@ class Airspeed(QWidget):
         yellowPen.setWidth(4)
 
         # Dial Setup
-        # V Speeds
-        Vs = self.item.get_aux_value('Vs')
-        Vs0 = self.item.get_aux_value('Vs0')
-        Vno = self.item.get_aux_value('Vno')
-        Vne = self.item.get_aux_value('Vne')
-        #Va = 120
-        Vfe = self.item.get_aux_value('Vfe')
-
         # VSpeed to angle for drawArc
-        Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
-        Vs_angle = (-(((Vs - 30) * 2.5) + 26) + 90) * 16
-        Vfe_angle = (-(((Vfe - 30) * 2.5) + 25) + 90) * 16
-        Vno_angle = (-(((Vno - 30) * 2.5) + 25) + 90) * 16
-        Vne_angle = (-(((Vne - 30) * 2.5) + 25) + 90) * 16
+        Vs0_angle = (-(((self.Vs0 - 30) * 2.5) + 26) + 90) * 16
+        Vs_angle = (-(((self.Vs - 30) * 2.5) + 26) + 90) * 16
+        Vfe_angle = (-(((self.Vfe - 30) * 2.5) + 25) + 90) * 16
+        Vno_angle = (-(((self.Vno - 30) * 2.5) + 25) + 90) * 16
+        Vne_angle = (-(((self.Vne - 30) * 2.5) + 25) + 90) * 16
 
         radius = int(round(min(w,h) * .45))
         diameter = radius*2
