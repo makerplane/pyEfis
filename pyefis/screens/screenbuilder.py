@@ -55,6 +55,7 @@ class Screen(QWidget):
         # altimeter_trend_tape # Testing to do
         # arc_gauge
         # atitude_indicator
+        # egt_vertical_bar_gauge
         # heading_display
         # horizontal_bar_gauge
         # horizontal_situation_indicator
@@ -91,36 +92,56 @@ class Screen(QWidget):
                     raise Exception(f"Instrument {i['type']} does not have a default data item, you must specify db_item:")
                 else:
                     db_items = [i['db_item']]
-
+            # egt group needs db_items created.
+            if i['type'] == 'egt_vertical_bar_gauge':
+                if 'options' not in i:
+                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' and 'engine' is optional, defaults to 1")
+                if 'cylinders' not in i["options"]:
+                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' and 'engine' is optional, defaults to 1")
+                egt = []
+                print(int(i['options']['cylinders']))
+                if (int(i['options']['cylinders']) >= 1) and (int(i['options']['cylinders']) <= 10):
+                    if (int(i['options']['engine']) >= 1) and (int(i['options']['engine']) <= 4):
+                        cylinder = 1
+                        while cylinder <= int(i['options']['cylinders']):
+                            egt.append(f"{db_items[0]}{int(i['options']['engine'])}{cylinder}")
+                            cylinder += 1
+                    else:
+                        raise Exception("egt_vertical_bar_gauge requires option 'cylinders' (1-10) and 'engine' (1-4)")
+                else:    
+                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' (1-10) and 'engine' (1-4)")
+                print(egt)
+                db_items = egt
+                default_items = egt
             # deal with mapping
             if len(db_items) > 1:
                 # Mapping is specified and is only valid for instrument that have multiple items
                 for d in default_items:
-                    self.mapping[i['type']][d] = self.lookup_mapping(d,i.get('mapping',dict()))
+                    self.mapping[count][d] = self.lookup_mapping(d,i.get('mapping',dict()))
                     self.data_item_signals_defined[count][self.lookup_mapping(d,i.get('mapping',dict()))] = d
             else:
                 self.data_item_signals_defined[count][db_items[0]] = 'None'
 
             # keep track of what instruments use what data items 
             for item in db_items:
-                    self.define_data(count,item,i['type'])
-                    self.data_distribution[item].append(count)
+                self.define_data(count,item,i['type'])
+                self.data_distribution[item].append(count)
             # Process the type of instrument this is and create them
             if i['type'] == 'airspeed_dial':
                 self.instruments[count] = airspeed.Airspeed(self,data=self.data_items[db_items[0]])
             elif i['type'] == 'altimeter_dial':
                 self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]])
             elif i['type'] == 'atitude_indicator':
-                self.instruments[count] = ai.AI(self,data=self.get_data_dict(i['type']))
+                self.instruments[count] = ai.AI(self,data=self.get_data_dict(count))
                 #self.instruments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
                 #self.instruments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
                 #self.instruments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
             elif i['type'] == 'heading_display':
                 self.instruments[count] = hsi.HeadingDisplay(self,data=self.data_items[db_items[0]])
             elif i['type'] == 'horizontal_situation_indicator':
-                self.instruments[count] = hsi.HSI(self,data=self.get_data_dict(i['type']))
+                self.instruments[count] = hsi.HSI(self,data=self.get_data_dict(count))
             elif i['type'] == 'turn_coordinator':
-                self.instruments[count] = tc.TurnCoordinator(self,data=self.get_data_dict(i['type']))
+                self.instruments[count] = tc.TurnCoordinator(self,data=self.get_data_dict(count))
             elif i['type'] == 'vsi_dial':
                 self.instruments[count] = vsi.VSI_Dial(self,data=self.data_items[db_items[0]])
             # Gauges
@@ -130,6 +151,8 @@ class Screen(QWidget):
                 self.instruments[count] = gauges.HorizontalBar(self,data=self.data_items[db_items[0]])
             elif i['type'] == 'vertical_bar_gauge':
                 self.instruments[count] = gauges.VerticalBar(self,data=self.data_items[db_items[0]])
+            elif i['type'] == 'egt_vertical_bar_gauge':
+                self.instruments[count] = gauges.EGTGroup(self,data=self.get_data_dict(count),dbkeys=db_items,cylinders=i['options']['cylinders'])
 
             # Set options
             if 'options' in i:

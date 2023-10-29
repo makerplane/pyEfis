@@ -255,7 +255,20 @@ screens:
           decPlaces: 1
           showUnits: false
 
-
+      -
+        type: egt_vertical_bar_gauge
+        db_item: EGT
+        row: 8
+        column: 5
+        span:
+          rows: 5
+          columns: 7
+        options:
+          name: EGTs
+          decPlaces: 0
+          showUnits: false
+          cylinders: 4
+          engine: 1
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel

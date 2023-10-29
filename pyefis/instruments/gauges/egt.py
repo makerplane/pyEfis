@@ -24,15 +24,19 @@ from .abstract import AbstractGauge
 from .verticalBar import VerticalBar
 
 class EGTGroup(QWidget):
-    def __init__(self, parent=None, cylinders = 4, dbkeys = ["EGT11", "EGT12", "EGT13", "EGT14"]):
+    def __init__(self, parent=None, cylinders = 4, dbkeys = ["EGT11", "EGT12", "EGT13", "EGT14"], data=None):
         super(EGTGroup, self).__init__(parent)
+        self.db_keymap = dict()
         self.setMinimumSize(50, 100)
         self.bars = []
         #self.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
         self.normalizeMode = False
         self.peakMode = False
         for i in range(cylinders):
-            bar = VerticalBar(self)
+            if data:
+                bar = VerticalBar(self,data[dbkeys[i]])
+            else:
+                bar = VerticalBar(self)
             bar.name = str(i+1)
             bar.decimalPlaces = 0
             bar.showUnits = False
@@ -46,9 +50,13 @@ class EGTGroup(QWidget):
             bar.dbkey = dbkeys[i]
             bar.normalizeRange = 400
             self.bars.append(bar)
+            self.db_keymap[dbkeys[i]] = i
         self.smallFontPercent = 0.08
         self.bigFontPercent = 0.10
         hmi.actions.setEgtMode.connect(self.setMode)
+    
+    def setData(self,item,value):
+        self.bars[self.db_keymap[item]].setupGauge()
 
     def setMode(self, args):
         if args.lower() == "normalize":
