@@ -81,6 +81,8 @@ class Screen(QWidget):
         for i in self.get_config_item('instruments'):
             if 'ganged' in i['type']:
                 #ganged instrument
+                if 'gang_type' not in i:
+                    raise Exception(f"Instrument {i['type']} must also have 'gang_type:' horizontal|vertical specified")
                 self.insturment_config[count] = i
                 for g in i['groups']:
                     for gi in g['instruments']:
@@ -360,14 +362,6 @@ class Screen(QWidget):
                     if not justified_vertical:
                         y = grid_y + (( grid_height - height) / 2) 
 
-            # Now that we have the bounding box, process ganged instruments
-                    # small space between each group, lets use 1%
-                    # can be vertical or horizontal, math is different directions
-                    # for vertial gauge, we layout horizontal
-                    # Total width - ((1% of width) * (groups - 1) = total usable area
-                    # Divide the useable area by number of total instruments
-                    # starting at right render first group gauges, space, next group etc
-                # Get total count of all the instruments
 
             if 'ganged' in c['type']:
                 inst_count = 0
@@ -376,25 +370,40 @@ class Screen(QWidget):
                 for g in c['groups']:
                     inst_count += len(g['instruments'])
                     groups += 1
-                total_gaps = (groups - 1) * (width * (2/100))
-                gap_size = total_gaps / ( groups - 1) 
+                if 'horizontal' in c['gang_type']:
+                    total_gaps = (groups - 1) * (width * (2/100))
+                else: 
+                    total_gaps = (groups -1 ) * (height * (2/100))
+                gap_size = 0
+                if groups > 1:
+                    gap_size = total_gaps / ( groups - 1) 
                 group = -1
                 group_x = x
                 group_y = y
-                group_width = (width - total_gaps) / inst_count - 1
-                group_height = height
+                if 'horizontal' in c['gang_type']:
+                    group_width = (width - total_gaps) / inst_count 
+                    group_height = height
+                else:
+                    group_height = (height - total_gaps) / inst_count 
+                    group_width = width
                 for g in c['groups']:
                     # Render some tiles?
                     for ci in g['instruments']:
-                        this_x = group_x
                         self.move_resize_inst(i + gang_count,qRound(group_x),qRound(group_y),qRound(group_width),qRound(group_height))
                         try:
                             self.instruments[i + gang_count].setupGauge()
                         except:
                             pass
-                        group_x += group_width
+                        if 'horizontal' in c['gang_type']:
+                            group_x += group_width
+                        else:
+                            group_y += group_height
                         gang_count += 1
-                    group_x += gap_size
+                    if 'horizontal' in c['gang_type']:
+                        group_x += gap_size
+                    else:
+                        group_y += gap_size
+
 
             else:
                 self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))

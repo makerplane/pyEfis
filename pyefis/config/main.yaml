@@ -207,33 +207,30 @@ screens:
           name: MAP
           decimalPlaces: 1          
       -
-        type: horizontal_bar_gauge
-        db_item: OILP1
+        type: ganged_horizontal_bar_gauge
+        gang_type: vertical
         row: 1
         column: 21
         span:
-          rows: 3
-          columns: 7
-        options:
-          name: Oil Press
-          decPlaces: 1
-          temperature: true
-          
-      -
-        type: horizontal_bar_gauge
-        db_item: OILT1
-        row: 4
-        column: 21
-        span:
-          rows: 3
-          columns: 27
-        options:
-          name: Oil Temp
-          decPlaces: 1
-
+          rows: 5
+          columns: 14
+        groups:
+          - name: Oil
+            instruments:
+              -
+                db_item: OILP1
+                options:
+                  name: Oil Press
+                  decPlaces: 1
+                  temperature: true
+              -
+                db_item: OILT1
+                options:
+                  name: Oil Temp
+                  decPlaces: 1
       -
         type: ganged_vertical_bar_gauge
-        #db_item: VOLT
+        gang_type: horizontal
         row: 8
         column: 1
         span:
