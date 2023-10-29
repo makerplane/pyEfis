@@ -15,7 +15,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: SixPackNew
+  defaultScreen: EMSNew #EMSNew
 
 menu:
   menus:
@@ -39,7 +39,7 @@ menu:
           - ['Show', 'activate menu','PFDMenu']
       ShowMenu2:
           - ['Show', 'activate menu','BasicMenu']
-  start_menu: ShowMenu
+  start_menu: PFDMenu
 #  show_time: 3  # hides the menu after 3 seconds.  However cannot show again.  Don't use.  Here for reference only.
   number_of_buttons: 6
   buttons_spacing: 120
@@ -180,14 +180,80 @@ screens:
     title: Engine Management
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
-      rows: 800
-      columns: 640
+      rows: 16
+      columns: 27
     instruments:
       -
         type: arc_gauge
+        db_item: TACH1
         row: 1
         column: 1
+        span:
+          rows: 4
+          columns: 10
+        options:
+          name: RPM
+          decimalPlaces: 0
+      -
+        type: arc_gauge
+        db_item: MAP1
+        row: 1
+        column: 11
+        span:
+          rows: 4
+          columns: 10
+        options:
+          name: MAP
+          decimalPlaces: 1          
+      -
+        type: horizontal_bar_gauge
+        db_item: OILP1
+        row: 1
+        column: 21
+        span:
+          rows: 3
+          columns: 7
+        options:
+          name: Oil Press
+          decPlaces: 1
+          temperature: true
+          
+      -
+        type: horizontal_bar_gauge
+        db_item: OILT1
+        row: 4
+        column: 21
+        span:
+          rows: 3
+          columns: 7
+        options:
+          name: Oil Temp
+          decPlaces: 1
 
+      -
+        type: vertical_bar_gauge
+        db_item: VOLT
+        row: 8
+        column: 1
+        span:
+          rows: 5
+          columns: 2
+        options:
+          name: Volt
+          decPlaces: 1
+          showUnits: false
+      -
+        type: vertical_bar_gauge
+        db_item: CURRNT
+        row: 8
+        column: 3
+        span:
+          rows: 5
+          columns: 2
+        options:
+          name: Amp
+          decPlaces: 1
+          showUnits: false
 
 
   SixPack:
