@@ -22,8 +22,8 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge, drawCircle
 
 class ArcGauge(AbstractGauge):
-    def __init__(self, parent=None):
-        super(ArcGauge, self).__init__(parent)
+    def __init__(self, parent=None, data=None):
+        super(ArcGauge, self).__init__(parent,data)
         self.setMinimumSize(100, 50)
         self.startAngle = 45
         self.sweepAngle = 180 - 45
