@@ -77,100 +77,109 @@ class Screen(QWidget):
         self.data_signal_routing = defaultdict(lambda: defaultdict(list))  # Keeps track of the reverse maping for each instrument
         self.data_item_signals_defined = defaultdict(lambda: defaultdict(dict))  # Keeps track of the signals that have been setup for a given data item
         # Setup instruments:
-        count = 1
+        count = 0
         for i in self.get_config_item('instruments'):
-            self.insturment_config[count] = i
-            # Get the default items for this instrument
-            default_items = self.get_instrument_defaults( i['type'])
-            db_items = []
-            if default_items:
-                #This instrument has default items
-                db_items = default_items
+            if 'ganged' in i['type']:
+                #ganged instrument
+                self.insturment_config[count] = i
+                for g in i['groups']:
+                    for gi in g['instruments']:
+                        gi['type'] = i['type'].replace('ganged_','')
+                        self.setup_instruments(count,gi,ganged=True)
+
+                        count += 1     
             else:
-                #No default for this Instrument, db_item is required
-                if not 'db_item' in i:
-                    raise Exception(f"Instrument {i['type']} does not have a default data item, you must specify db_item:")
-                else:
-                    db_items = [i['db_item']]
-            # egt group needs db_items created.
-            if i['type'] == 'egt_vertical_bar_gauge':
-                if 'options' not in i:
-                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' and 'engine' is optional, defaults to 1")
-                if 'cylinders' not in i["options"]:
-                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' and 'engine' is optional, defaults to 1")
-                egt = []
-                print(int(i['options']['cylinders']))
-                if (int(i['options']['cylinders']) >= 1) and (int(i['options']['cylinders']) <= 10):
-                    if (int(i['options']['engine']) >= 1) and (int(i['options']['engine']) <= 4):
-                        cylinder = 1
-                        while cylinder <= int(i['options']['cylinders']):
-                            egt.append(f"{db_items[0]}{int(i['options']['engine'])}{cylinder}")
-                            cylinder += 1
-                    else:
-                        raise Exception("egt_vertical_bar_gauge requires option 'cylinders' (1-10) and 'engine' (1-4)")
-                else:    
-                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' (1-10) and 'engine' (1-4)")
-                print(egt)
-                db_items = egt
-                default_items = egt
-            # deal with mapping
-            if len(db_items) > 1:
-                # Mapping is specified and is only valid for instrument that have multiple items
-                for d in default_items:
-                    self.mapping[count][d] = self.lookup_mapping(d,i.get('mapping',dict()))
-                    self.data_item_signals_defined[count][self.lookup_mapping(d,i.get('mapping',dict()))] = d
-            else:
-                self.data_item_signals_defined[count][db_items[0]] = 'None'
-
-            # keep track of what instruments use what data items 
-            for item in db_items:
-                self.define_data(count,item,i['type'])
-                self.data_distribution[item].append(count)
-            # Process the type of instrument this is and create them
-            if i['type'] == 'airspeed_dial':
-                self.instruments[count] = airspeed.Airspeed(self,data=self.data_items[db_items[0]])
-            elif i['type'] == 'altimeter_dial':
-                self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]])
-            elif i['type'] == 'atitude_indicator':
-                self.instruments[count] = ai.AI(self,data=self.get_data_dict(count))
-                #self.instruments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
-                #self.instruments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
-                #self.instruments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
-            elif i['type'] == 'heading_display':
-                self.instruments[count] = hsi.HeadingDisplay(self,data=self.data_items[db_items[0]])
-            elif i['type'] == 'horizontal_situation_indicator':
-                self.instruments[count] = hsi.HSI(self,data=self.get_data_dict(count))
-            elif i['type'] == 'turn_coordinator':
-                self.instruments[count] = tc.TurnCoordinator(self,data=self.get_data_dict(count))
-            elif i['type'] == 'vsi_dial':
-                self.instruments[count] = vsi.VSI_Dial(self,data=self.data_items[db_items[0]])
-            # Gauges
-            elif i['type'] == 'arc_gauge':
-                self.instruments[count] = gauges.ArcGauge(self,data=self.data_items[db_items[0]])
-            elif i['type'] == 'horizontal_bar_gauge':
-                self.instruments[count] = gauges.HorizontalBar(self,data=self.data_items[db_items[0]])
-            elif i['type'] == 'vertical_bar_gauge':
-                self.instruments[count] = gauges.VerticalBar(self,data=self.data_items[db_items[0]])
-            elif i['type'] == 'egt_vertical_bar_gauge':
-                self.instruments[count] = gauges.EGTGroup(self,data=self.get_data_dict(count),dbkeys=db_items,cylinders=i['options']['cylinders'])
-
-            # Set options
-            if 'options' in i:
-                #loop over each option
-                for option,value in i['options'].items():
-                    if 'temperature' in option and value == True:
-                        setattr(self.instruments[count], 'unitFunction1', funcTempF)
-                        setattr(self.instruments[count], 'units1', u'\N{DEGREE SIGN}F')
-                        setattr(self.instruments[count], 'unitFunction2', funcTempC)
-                        setattr(self.instruments[count], 'units2', u'\N{DEGREE SIGN}C')
-                    else:
-                        setattr(self.instruments[count], option, value)
-
+                self.setup_instruments(count,i)
             count += 1
         #Place instruments:
         if self.layout['type'] == 'grid':
             self.grid_layout()
         self.init = True
+
+    def setup_instruments(self,count,i,ganged=False):
+        if not ganged:
+            self.insturment_config[count] = i
+        # Get the default items for this instrument
+        default_items = self.get_instrument_defaults( i['type'])
+        db_items = []
+        if default_items:
+            #This instrument has default items
+            db_items = default_items
+        else:
+            #No default for this Instrument, db_item is required
+            if not 'db_item' in i:
+                raise Exception(f"Instrument {i['type']} does not have a default data item, you must specify db_item:")
+            else:
+                db_items = [i['db_item']]
+        # egt group needs db_items created.
+        if i['type'] == 'egt_vertical_bar_gauge':
+            if 'options' not in i:
+                raise Exception("egt_vertical_bar_gauge requires option 'cylinders' and 'engine' is optional, defaults to 1")
+            if 'cylinders' not in i["options"]:
+                raise Exception("egt_vertical_bar_gauge requires option 'cylinders' and 'engine' is optional, defaults to 1")
+            egt = []
+            if (int(i['options']['cylinders']) >= 1) and (int(i['options']['cylinders']) <= 10):
+                if (int(i['options']['engine']) >= 1) and (int(i['options']['engine']) <= 4):
+                    cylinder = 1
+                    while cylinder <= int(i['options']['cylinders']):
+                        egt.append(f"{db_items[0]}{int(i['options']['engine'])}{cylinder}")
+                        cylinder += 1
+                else:
+                    raise Exception("egt_vertical_bar_gauge requires option 'cylinders' (1-10) and 'engine' (1-4)")
+            else:    
+                raise Exception("egt_vertical_bar_gauge requires option 'cylinders' (1-10) and 'engine' (1-4)")
+            db_items = egt
+            default_items = egt
+        # deal with mapping
+        if len(db_items) > 1:
+            # Mapping is specified and is only valid for instrument that have multiple items
+            for d in default_items:
+                self.mapping[count][d] = self.lookup_mapping(d,i.get('mapping',dict()))
+                self.data_item_signals_defined[count][self.lookup_mapping(d,i.get('mapping',dict()))] = d
+        else:
+            self.data_item_signals_defined[count][db_items[0]] = 'None'
+            #Used to keep track of what instruments use what data items 
+        for item in db_items:
+            self.define_data(count,item,i['type'])
+            self.data_distribution[item].append(count)
+        # Process the type of instrument this is and create them
+        if i['type'] == 'airspeed_dial':
+            self.instruments[count] = airspeed.Airspeed(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'altimeter_dial':
+            self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'atitude_indicator':
+            self.instruments[count] = ai.AI(self,data=self.get_data_dict(count))
+            #self.instruments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
+            #self.instruments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
+            #self.instruments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
+        elif i['type'] == 'heading_display':
+            self.instruments[count] = hsi.HeadingDisplay(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'horizontal_situation_indicator':
+            self.instruments[count] = hsi.HSI(self,data=self.get_data_dict(count))
+        elif i['type'] == 'turn_coordinator':
+            self.instruments[count] = tc.TurnCoordinator(self,data=self.get_data_dict(count))
+        elif i['type'] == 'vsi_dial':
+            self.instruments[count] = vsi.VSI_Dial(self,data=self.data_items[db_items[0]])
+        # Gauges
+        elif i['type'] == 'arc_gauge':
+            self.instruments[count] = gauges.ArcGauge(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'horizontal_bar_gauge':
+            self.instruments[count] = gauges.HorizontalBar(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'vertical_bar_gauge':
+            self.instruments[count] = gauges.VerticalBar(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'egt_vertical_bar_gauge':
+            self.instruments[count] = gauges.EGTGroup(self,data=self.get_data_dict(count),dbkeys=db_items,cylinders=i['options']['cylinders'])
+         # Set options
+        if 'options' in i:
+            #loop over each option
+            for option,value in i['options'].items():
+                if 'temperature' in option and value == True:
+                    setattr(self.instruments[count], 'unitFunction1', funcTempF)
+                    setattr(self.instruments[count], 'units1', u'\N{DEGREE SIGN}F')
+                    setattr(self.instruments[count], 'unitFunction2', funcTempC)
+                    setattr(self.instruments[count], 'units2', u'\N{DEGREE SIGN}C')
+                else:
+                    setattr(self.instruments[count], option, value)
 
     def get_data_dict(self,inst):
         #Returns a dict with the data items a multi-item gauge needs
@@ -212,9 +221,7 @@ class Screen(QWidget):
 
     def define_data(self, count, item, item_type):
         if not item in self.data_items:
-            print(f"db item: {item}")
             self.data_items[item] = fix.db.get_item(item)
-            print(self.data_items[item].dtype)
             if self.data_items[item].dtype == float:
                 self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item: self.data_modified(db_item=key) )
             if self.data_items[item].dtype == str:
@@ -265,22 +272,18 @@ class Screen(QWidget):
         return ['old', 'bad', 'fail']
 
     def data_modified(self,db_item):
-        print(f"modified: {db_item}")
         for inst in self.data_signal_routing[db_item]['old']:
             self.instruments[inst].setData(db_item,self.data_items[db_item].value)
 
     def aux_data_modified(self,db_item):
-        print(f"aux {db_item}")
         for inst in self.data_signal_routing[db_item]['aux']:
             self.instruments[inst].setAuxData(self.data_items[db_item].aux)
 
     def report_received(self,db_item='t'):
-        print(f"report {db_item}")
         for inst in self.data_signal_routing[db_item]['report']:
             self.instruments[inst].setupGauge()#self.data_items[db_item].aux)
 
     def data_redraw(self,db_item):
-        print(f"redraw: {db_item}")
         for inst in self.data_signal_routing[db_item]['old']:
             self.instruments[inst].update()
             try:
@@ -289,7 +292,6 @@ class Screen(QWidget):
                 pass            
 
     def grid_layout(self):
-        count = 1
         for i,c in self.insturment_config.items():
             topm = 0
             leftm = 0
@@ -357,8 +359,45 @@ class Screen(QWidget):
                         x = grid_x + (( grid_width - width) / 2)
                     if not justified_vertical:
                         y = grid_y + (( grid_height - height) / 2) 
-            print(f"{x} {y} {width} {height}")
-            self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))
+
+            # Now that we have the bounding box, process ganged instruments
+                    # small space between each group, lets use 1%
+                    # can be vertical or horizontal, math is different directions
+                    # for vertial gauge, we layout horizontal
+                    # Total width - ((1% of width) * (groups - 1) = total usable area
+                    # Divide the useable area by number of total instruments
+                    # starting at right render first group gauges, space, next group etc
+                # Get total count of all the instruments
+
+            if 'ganged' in c['type']:
+                inst_count = 0
+                gang_count = 0
+                groups = 0
+                for g in c['groups']:
+                    inst_count += len(g['instruments'])
+                    groups += 1
+                total_gaps = (groups - 1) * (width * (2/100))
+                gap_size = total_gaps / ( groups - 1) 
+                group = -1
+                group_x = x
+                group_y = y
+                group_width = (width - total_gaps) / inst_count - 1
+                group_height = height
+                for g in c['groups']:
+                    # Render some tiles?
+                    for ci in g['instruments']:
+                        this_x = group_x
+                        self.move_resize_inst(i + gang_count,qRound(group_x),qRound(group_y),qRound(group_width),qRound(group_height))
+                        try:
+                            self.instruments[i + gang_count].setupGauge()
+                        except:
+                            pass
+                        group_x += group_width
+                        gang_count += 1
+                    group_x += gap_size
+
+            else:
+                self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))
             try:
                 self.instruments[i].setupGauge()
             except:

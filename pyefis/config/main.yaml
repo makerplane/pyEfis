@@ -7,7 +7,8 @@ main:
   #screenHeight: 768
   screenWidth: 800
   screenHeight: 480
-
+  #screenWidth: 3840
+  #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: True
 
@@ -225,50 +226,112 @@ screens:
         column: 21
         span:
           rows: 3
-          columns: 7
+          columns: 27
         options:
           name: Oil Temp
           decPlaces: 1
 
       -
-        type: vertical_bar_gauge
-        db_item: VOLT
+        type: ganged_vertical_bar_gauge
+        #db_item: VOLT
         row: 8
         column: 1
         span:
           rows: 5
-          columns: 2
-        options:
-          name: Volt
-          decPlaces: 1
-          showUnits: false
-      -
-        type: vertical_bar_gauge
-        db_item: CURRNT
-        row: 8
-        column: 3
-        span:
-          rows: 5
-          columns: 2
-        options:
-          name: Amp
-          decPlaces: 1
-          showUnits: false
+          columns: 27
+        groups:
+          - name: Power
+            instruments:
+              -
+                db_item: VOLT
+                options:
+                  name: Volt
+                  decPlaces: 1
+                  showUnits: false
+              -
+                db_item: CURRNT
+                options:
+                  name: Amp
+                  decPlaces: 1
+                  showUnits: false
+          - name: EGT
+            #options:
+            #  ???? highlight max?
+            instruments:
+              -
+                db_item: EGT11
+                options:
+                  name: "1"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: EGT12
+                options:
+                  name: "2"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: EGT13
+                options:
+                  name: "3"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: EGT14
+                options:
+                  name: "4"
+                  decPlaces: 0
+                  showUnits: false
+          - name: CHT
+            instruments:
+              -
+                db_item: CHT11
+                options:
+                  name: "1"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: CHT12
+                options:
+                  name: "2"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: CHT13
+                options:
+                  name: "3"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: CHT14
+                options:
+                  name: "4"
+                  decPlaces: 0
+                  showUnits: false
+          - name: FUEL
+            instruments:
+              -
+                db_item: FUELQ1
+                options:
+                  name: "Left"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: FUELQ2
+                options:
+                  name: "Center"
+                  decPlaces: 0
+                  showUnits: false
+              -
+                db_item: FUELQ1
+                options:
+                  name: "Right"
+                  decPlaces: 0
+                  showUnits: false
 
-      -
-        type: egt_vertical_bar_gauge
-        db_item: EGT
-        row: 8
-        column: 5
-        span:
-          rows: 5
-          columns: 7
-        options:
-          name: EGTs
-          decPlaces: 0
-          showUnits: false
-          cylinders: 4
-          engine: 1
+
+
+
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
