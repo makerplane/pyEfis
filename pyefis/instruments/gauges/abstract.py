@@ -26,7 +26,7 @@ def drawCircle(p, x, y, r, start, end):
     p.drawArc(rect, qRound(start * 16), qRound(end * 16))
 
 class AbstractGauge(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, data=None):
         super(AbstractGauge, self).__init__(parent)
         self.name = None
         self.highWarn = None
@@ -49,7 +49,10 @@ class AbstractGauge(QWidget):
         self.__unitSwitching = False
         self.unitGroup = ""
 
-
+        if data:
+            self.data = data
+        else:
+            self.data = False
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -120,6 +123,9 @@ class AbstractGauge(QWidget):
         if self._value > self.peakValue:
             self.peakValue = self._value
 
+    def setData(self,item,value):
+        self.setValue(value)
+        self.setupGauge()
     value = property(getValue, setValue)
 
     def getValueText(self):
@@ -134,13 +140,16 @@ class AbstractGauge(QWidget):
         return self._dbkey
 
     def setDbkey(self, key):
-        item = fix.db.get_item(key)
-        item.auxChanged.connect(self.setAuxData)
-        item.reportReceived.connect(self.setupGauge)
-        item.annunciateChanged.connect(self.annunciateFlag)
-        item.oldChanged.connect(self.oldFlag)
-        item.badChanged.connect(self.badFlag)
-        item.failChanged.connect(self.failFlag)
+        if self.data:
+            item = self.data 
+        else:
+            item = fix.db.get_item(key)
+            item.auxChanged.connect(self.setAuxData)
+            item.reportReceived.connect(self.setupGauge)
+            item.annunciateChanged.connect(self.annunciateFlag)
+            item.oldChanged.connect(self.oldFlag)
+            item.badChanged.connect(self.badFlag)
+            item.failChanged.connect(self.failFlag)
 
         self._dbkey = key
         self.setupGauge()
@@ -161,7 +170,10 @@ class AbstractGauge(QWidget):
     # This should get called when the gauge is created and then again
     # anytime a new report of the db item is recieved from the server
     def setupGauge(self):
-        item = fix.db.get_item(self.dbkey)
+        if self.data:
+            item = self.data
+        else:
+            item = fix.db.get_item(self.dbkey)
         # min and max should always be set for FIX Gateway data.
         if item.min: self.lowRange = self.conversionFunction(item.min)
         if item.max: self.highRange = self.conversionFunction(item.max)
@@ -176,21 +188,22 @@ class AbstractGauge(QWidget):
         self.setAuxData(item.aux)
         self.setValue(item.value)
 
-        # TODO We have to redo the valueChanged signals because the
-        # datatype may have changed
-        try:
-            item.valueChanged[float].disconnect(self.setValue)
-        except:
-            pass # One will probably fail all the time
-        try:
-            item.valueChanged[int].disconnect(self.setValue)
-        except:
-            pass # One will probably fail all the time
+        if not self.data:
+            # TODO We have to redo the valueChanged signals because the
+            # datatype may have changed
+            try:
+                item.valueChanged[float].disconnect(self.setValue)
+            except:
+                pass # One will probably fail all the time
+            try:
+                item.valueChanged[int].disconnect(self.setValue)
+            except:
+                pass # One will probably fail all the time
 
-        if item.dtype == float:
-            item.valueChanged[float].connect(self.setValue)
-        elif item.dtype == int:
-            item.valueChanged[int].connect(self.setValue)
+            if item.dtype == float:
+                item.valueChanged[float].connect(self.setValue)
+            elif item.dtype == int:
+                item.valueChanged[int].connect(self.setValue)
 
 
     def setAuxData(self, auxdata):
