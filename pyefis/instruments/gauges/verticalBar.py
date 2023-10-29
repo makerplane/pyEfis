@@ -22,8 +22,8 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge
 
 class VerticalBar(AbstractGauge):
-    def __init__(self, parent=None):
-        super(VerticalBar, self).__init__(parent)
+    def __init__(self, parent=None, data=None):
+        super(VerticalBar, self).__init__(parent, data)
         self.setMinimumSize(50, 100)
         self.showValue = True
         self.showUnits = True

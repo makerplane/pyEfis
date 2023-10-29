@@ -22,8 +22,8 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge
 
 class HorizontalBar(AbstractGauge):
-    def __init__(self, parent=None):
-        super(HorizontalBar, self).__init__(parent)
+    def __init__(self, parent=None, data=None):
+        super(HorizontalBar, self).__init__(parent, data)
         self.setMinimumSize(100, 50)
 
     def resizeEvent(self, event):

@@ -30,6 +30,10 @@ from pyefis.instruments import misc
 
 import pyavtools.fix as fix
 from collections import defaultdict
+import re
+
+funcTempF = lambda x: x * (9.0/5.0) + 32.0 
+funcTempC = lambda x: x
 
 class Screen(QWidget):
     def __init__(self, parent=None,config=None):
@@ -52,8 +56,10 @@ class Screen(QWidget):
         # arc_gauge
         # atitude_indicator
         # heading_display
+        # horizontal_bar_gauge
         # horizontal_situation_indicator
         # turn_coordinator
+        # vertical_bar_gauge
         # vsi_dial
         # vsi_pfd  # Testing to do
 
@@ -120,12 +126,22 @@ class Screen(QWidget):
             # Gauges
             elif i['type'] == 'arc_gauge':
                 self.instruments[count] = gauges.ArcGauge(self,data=self.data_items[db_items[0]])
+            elif i['type'] == 'horizontal_bar_gauge':
+                self.instruments[count] = gauges.HorizontalBar(self,data=self.data_items[db_items[0]])
+            elif i['type'] == 'vertical_bar_gauge':
+                self.instruments[count] = gauges.VerticalBar(self,data=self.data_items[db_items[0]])
 
             # Set options
             if 'options' in i:
                 #loop over each option
                 for option,value in i['options'].items():
-                    setattr(self.instruments[count], option, value)
+                    if 'temperature' in option and value == True:
+                        setattr(self.instruments[count], 'unitFunction1', funcTempF)
+                        setattr(self.instruments[count], 'units1', u'\N{DEGREE SIGN}F')
+                        setattr(self.instruments[count], 'unitFunction2', funcTempC)
+                        setattr(self.instruments[count], 'units2', u'\N{DEGREE SIGN}C')
+                    else:
+                        setattr(self.instruments[count], option, value)
 
             count += 1
         #Place instruments:
