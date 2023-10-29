@@ -320,11 +320,14 @@ class Screen(QWidget):
                         y = grid_y + (( grid_height - height) / 2) 
             print(f"{x} {y} {width} {height}")
             self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))
-            
+            try:
+                self.instruments[i].setupGauge()
+            except:
+                pass
+
     def move_resize_inst(self,inst,x,y,width,height):
         self.instruments[inst].move(x,y)
         self.instruments[inst].resize(width,height)
-
 
     def resizeEvent(self, event):
         if not self.init:
