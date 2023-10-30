@@ -178,10 +178,11 @@ class Altimeter_Tape(QGraphicsView):
         else:
             self.item = fix.db.get_item("ALT")
             self._altimeter = self.item.value
-            self.item.valueChanged[float].connect(self.setAltimeter)       
-            self.item.oldChanged[bool].connect(self.setAltOld)             
-            self.item.badChanged[bool].connect(self.setAltBad)             
-            self.item.failChanged[bool].connect(self.setAltFail)           
+
+        self.item.valueChanged[float].connect(self.setAltimeter)
+        self.item.oldChanged[bool].connect(self.setAltOld)
+        self.item.badChanged[bool].connect(self.setAltBad)
+        self.item.failChanged[bool].connect(self.setAltFail)
 
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
@@ -253,7 +254,7 @@ class Altimeter_Tape(QGraphicsView):
     def redraw(self):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
-        self.numerical_display.value = self._altimeter
+        #self.numerical_display.value = self._altimeter
 
     #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
@@ -278,7 +279,11 @@ class Altimeter_Tape(QGraphicsView):
     def setAltimeter(self, altimeter):
         if altimeter != self._altimeter:
             self._altimeter = altimeter
+            self.numerical_display.value = altimeter
             self.redraw()
+
+    def setData(self, item, value):
+        self.setAltimeter(value)
 
     altimeter = property(getAltimeter, setAltimeter)
 
