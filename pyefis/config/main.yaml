@@ -5,8 +5,10 @@ main:
   # Screen Geometry
   #screenWidth: 1024
   #screenHeight: 768
-  screenWidth: 800
-  screenHeight: 480
+  screenWidth: 1920
+  screenHeight: 1080
+  #screenWidth: 800
+  #screenHeight: 480
   #screenWidth: 3840
   #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
@@ -16,7 +18,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: EMSNew #EMSNew
+  defaultScreen: MainScreen
 
 menu:
   menus:
@@ -157,6 +159,161 @@ outputs:
 # the screen
 
 screens:
+  MainScreen:
+    module: pyefis.screens.screenbuilder
+    title: Engine Management
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 110
+      columns: 303
+    instruments:
+      - type: atitude_indicator
+        row: 1
+        column: 1
+        span:
+          rows: 110
+          columns: 120
+      - type: altimeter_tape
+        db_item: ALT
+        row: 1
+        column: 105
+        span:
+          rows: 110
+          columns: 15
+        options:
+          fontsize: 22
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 1
+        column: 121
+        span:
+          rows: 110
+          columns: 60
+        groups:
+          - name: Engine
+            instruments:
+              -
+                db_item: TACH1
+                options:
+                  name: RPM
+                  decPlaces: 0
+              -
+                db_item: CHTMAX1
+                options:
+                  name: Max CHT
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: EGTAVG1
+                options:
+                  name: Avg EGT
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: H2OT1
+                options:
+                  name: Coolant
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: OILP1
+                options:
+                  name: Oil Press
+                  decPlaces: 1
+              -
+                db_item: OILT1
+                options:
+                  name: Oil Temp
+                  decPlaces: 1
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 1
+        column: 182
+        span:
+          rows: 110
+          columns: 60
+        groups:
+          - name: Engine
+            instruments:
+              -
+                db_item: TACH1
+                options:
+                  name: Fuel Total
+                  decPlaces: 0
+              -
+                db_item: CHTMAX1
+                options:
+                  name: Fuel Left
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: EGTAVG1
+                options:
+                  name: Fuel Center
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: H2OT1
+                options:
+                  name: Fuel Right
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: OILP1
+                options:
+                  name: 
+                  decPlaces: 1
+              -
+                db_item: OILT1
+                options:
+                  name: Fuel Range
+                  decPlaces: 1
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 1
+        column: 243
+        span:
+          rows: 110
+          columns: 60
+        groups:
+          - name: Misc
+            instruments:
+              -
+                db_item: H2OT1
+                options:
+                  name: Battery
+                  decPlaces: 0
+              -
+                db_item: H2OT1
+                options:
+                  name: Amps
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: EGTAVG1
+                options:
+                  name: OAT
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: H2OT1
+                options:
+                  name: Cabin Temp
+                  decPlaces: 0
+                  temperature: true
+              -
+                db_item: OILP1
+                options:
+                  name:  ???
+                  decPlaces: 1
+              -
+                db_item: OILT1
+                options:
+                  name: ????
+                  decPlaces: 1
+
+
+          
   EPFD:
     module: pyefis.screens.epfd
     title: Primary Flight Display
@@ -332,6 +489,124 @@ screens:
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
+
+  ScaleTest:
+    module: pyefis.screens.screenbuilder
+    title: Test how well things scale to different sizes
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 3
+      columns: 6
+    instruments:
+      -
+        type: airspeed_dial
+        row: 1
+        column: 1
+      -
+        type: airspeed_dial
+        row: 1
+        column: 2
+        move:
+          shrink: 10
+      -
+        type: airspeed_dial
+        row: 1
+        column: 3
+        move:
+          shrink: 20
+      -
+        type: airspeed_dial
+        row: 1
+        column: 4
+        move:
+          shrink: 30
+      -
+        type: airspeed_dial
+        row: 1
+        column: 5
+        move:
+          shrink: 40
+      -
+        type: airspeed_dial
+        row: 1
+        column: 6
+        move:
+          shrink: 50
+      - 
+        type: arc_gauge
+        db_item: IAS
+        row: 2
+        column: 1
+      - 
+        type: arc_gauge
+        db_item: IAS
+        row: 2
+        column: 2
+        move:
+          shrink: 10
+      - 
+        type: arc_gauge
+        db_item: IAS
+        row: 2
+        column: 3
+        move:
+          shrink: 20
+      - 
+        type: arc_gauge
+        db_item: IAS
+        row: 2
+        column: 4
+        move:
+          shrink: 30
+      - 
+        type: arc_gauge
+        db_item: IAS
+        row: 2
+        column: 5
+        move:
+          shrink: 40
+      - 
+        type: arc_gauge
+        db_item: IAS
+        row: 2
+        column: 6
+        move:
+          shrink: 50
+      -
+        type: altimeter_dial
+        row: 3
+        column: 1
+      -
+        type: altimeter_dial
+        row: 3
+        column: 2
+        move:
+          shrink: 10
+      -
+        type: altimeter_dial
+        row: 3
+        column: 3
+        move:
+          shrink: 20
+      -
+        type: altimeter_dial
+        row: 3
+        column: 4
+        move:
+          shrink: 30
+      -
+        type: altimeter_dial
+        row: 3
+        column: 5
+        move:
+          shrink: 40
+      -
+        type: altimeter_dial
+        row: 3
+        column: 6
+        move:
+          shrink: 50
+
 
   SixPackNew:
     module: pyefis.screens.screenbuilder
