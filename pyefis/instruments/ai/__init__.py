@@ -220,18 +220,18 @@ class AI(QGraphicsView):
         r = self.bankAngleRadius
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.yellow))
-        p.drawRect(w / 4, h / 2 - 3, w / 6, 6)
-        p.drawRect(w - w / 4 - w / 6, h / 2 - 3, w / 6, 6)
-        p.drawEllipse(w / 2 - 3, h / 2 - 3, 9, 9)
+        p.drawRect(QRectF(w / 4, h / 2 - 3, w / 6, 6))
+        p.drawRect(QRectF(w - w / 4 - w / 6, h / 2 - 3, w / 6, 6))
+        p.drawEllipse(QRectF(w / 2 - 3, h / 2 - 3, 9, 9))
         # p.setPen(QColor(Qt.black))
         # p.setBrush(QColor(Qt.white))
 
         m = self.bankMarkSize
         p.setBrush(QColor(Qt.white))
         p.translate(w / 2, h/2 - r)
-        triangle = QPolygon([QPoint(m,  m*2),
-                             QPoint(-m, m*2),
-                             QPoint(0,  m/2)])
+        triangle = QPolygonF([QPointF(m,  m*2),
+                             QPointF(-m, m*2),
+                             QPointF(0,  m/2)])
         p.drawPolygon(triangle)
 
 
@@ -280,7 +280,7 @@ class AI(QGraphicsView):
         # Slip / Skid ball
         p.setPen(QColor(Qt.black))
         p.setBrush(QColor(Qt.white))
-        p.drawEllipse(QPoint(self._latAccel * -m*12, -r + m*3), m*0.8, m*0.8)
+        p.drawEllipse(QPointF(self._latAccel * -m*12, -r + m*3), m*0.8, m*0.8)
 
         p.rotate(self._rollAngle * -1.0)
         # Add moving Bank Angle Markers
@@ -289,8 +289,8 @@ class AI(QGraphicsView):
         p.setBrush(QColor(Qt.white))
         smallMarks = [10, 20, 45]
         largeMarks = [30, 60]
-        shortLine = QLine(0, -r, 0, -(r-m))
-        longLine = QLine(0, -(r+m), 0, -(r-m))
+        shortLine = QLineF(0, -r, 0, -(r-m))
+        longLine = QLineF(0, -(r+m), 0, -(r-m))
         for angle in smallMarks:
             p.rotate(angle)
             p.drawLine(shortLine)
@@ -303,19 +303,19 @@ class AI(QGraphicsView):
             p.rotate(- 2 * angle)
             p.drawLine(longLine)
             p.rotate(angle)
-        triangle = QPolygon([QPoint(m/2, -(r+m/2)),
-                             QPoint(-m/2, -(r+m/2)),
-                             QPoint(0, -(r - m/2))])
+        triangle = QPolygonF([QPointF(m/2, -(r+m/2)),
+                             QPointF(-m/2, -(r+m/2)),
+                             QPointF(0, -(r - m/2))])
         p.drawPolygon(triangle)
         # Draw standard rate turn markers
         if self.drawBankMarkers:
             a = math.degrees(math.atan(self._tas/364.0))
             if a > self.bankAngleMaximum:
                 a = self.bankAngleMaximum
-            diamond = QPolygon([QPoint(0, -r),
-                                QPoint(-m*0.8, -(r+m*0.8)),
-                                QPoint(-0, -r - m*1.6),
-                                QPoint(m*0.8, -(r+m*0.8))])
+            diamond = QPolygonF([QPointF(0, -r),
+                                QPointF(-m*0.8, -(r+m*0.8)),
+                                QPointF(-0, -r - m*1.6),
+                                QPointF(m*0.8, -(r+m*0.8))])
             p.setBrush(Qt.transparent)
             p.rotate(a)
             p.drawPolygon(diamond)
@@ -361,6 +361,11 @@ class AI(QGraphicsView):
                     self.setScene (self.fail_scene)
                 else:
                     self.setScene (self.scene)
+                    # Initially set to grey
+                    # we may have old data while recovering
+                    if hasattr(self, 'sky_rect'):
+                        self.sky_rect.setBrush (self.gray_sky)
+                        self.land_rect.setBrush (self.gray_land)
                     self.redraw()
 
     def setAIOld(self, old):

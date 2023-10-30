@@ -58,8 +58,8 @@ class NumericalDisplay(QGraphicsView):
                                             self.font_family, self.font_size)
         self.scene.addWidget (self.scrolling_area)
         self.digit_vertical_spacing = font_height
-        self.scrolling_area.resize(font_width*self.scroll_decimal+border_width, self.h)
-        sax = self.w-font_width*self.scroll_decimal-border_width
+        self.scrolling_area.resize(qRound(font_width*self.scroll_decimal+border_width), self.h)
+        sax = qRound(self.w-font_width*self.scroll_decimal-border_width)
         self.scrolling_area.move(sax, 0)
         prest = '0' * (self.total_decimals - self.scroll_decimal)
         if self._bad or self._old:

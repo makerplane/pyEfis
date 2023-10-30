@@ -1,3 +1,0 @@
-geomag
-PyYAML
--e git://github.com/makerplane/pyAvTools#egg=pyAvTools

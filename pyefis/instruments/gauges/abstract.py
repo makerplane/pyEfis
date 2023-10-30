@@ -22,8 +22,8 @@ import pyavtools.fix as fix
 import pyefis.hmi as hmi
 
 def drawCircle(p, x, y, r, start, end):
-    rect = QRect(x - r, y - r, r * 2, r * 2)
-    p.drawArc(rect, start * 16, end * 16)
+    rect = QRectF(x - r, y - r, r * 2, r * 2)
+    p.drawArc(rect, qRound(start * 16), qRound(end * 16))
 
 class AbstractGauge(QWidget):
     def __init__(self, parent=None):

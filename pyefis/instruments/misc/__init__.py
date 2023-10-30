@@ -33,7 +33,7 @@ class StaticText(QWidget):
 
     def resizeEvent(self, event):
         self.Font = QFont()
-        self.Font.setPixelSize(self.height()*self.fontPercent)
+        self.Font.setPixelSize(qRound(self.height()*self.fontPercent))
         self.textRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):

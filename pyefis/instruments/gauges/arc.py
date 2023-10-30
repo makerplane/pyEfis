@@ -29,7 +29,7 @@ class ArcGauge(AbstractGauge):
         self.sweepAngle = 180 - 45
 
     def resizeEvent(self, event):
-        self.arcCenter = QPoint(self.width() / 2, self.height())
+        self.arcCenter = QPointF(self.width() / 2, self.height())
         self.arcRadius = self.height() - 10
 
         # A polygon for the pointer
@@ -114,11 +114,11 @@ class ArcGauge(AbstractGauge):
         pen.setWidth(1)
         p.setPen(pen)
         f = QFont()
-        f.setPixelSize(self.height() / 6)
+        f.setPixelSize(qRound(self.height() / 6))
         p.setFont(f)
         opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
         #p.drawText(QPoint(centerX - (r - 40), centerY - (r - 40)), self.name)
-        p.drawText(QPoint(self.width() / 20,f.pixelSize()), self.name)
+        p.drawText(QPointF(self.width() / 20,f.pixelSize()), self.name)
 
         # Main value text
         path = QPainterPath()
@@ -126,7 +126,7 @@ class ArcGauge(AbstractGauge):
         p.setBrush(brush)
         pen.setColor(QColor(Qt.black))
         p.setPen(pen)
-        f.setPixelSize(self.height() / 2)
+        f.setPixelSize(qRound(self.height() / 2))
         fm = QFontMetrics(f)
         x = fm.width(self.valueText)
         path.addText(QPointF( self.width()-x, self.height()-1),f, self.valueText)
