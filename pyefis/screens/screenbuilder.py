@@ -154,6 +154,8 @@ class Screen(QWidget):
             #self.instruments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
             #self.instruments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
             #self.instruments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
+        elif i['type'] == 'altimeter_tape':
+            self.instruments[count] = altimeter.Altimeter_Tape(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'heading_display':
             self.instruments[count] = hsi.HeadingDisplay(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'horizontal_situation_indicator':
@@ -373,7 +375,7 @@ class Screen(QWidget):
                 if 'horizontal' in c['gang_type']:
                     total_gaps = (groups - 1) * (width * (2/100))
                 else: 
-                    total_gaps = (groups -1 ) * (height * (2/100))
+                    total_gaps = (groups -1 ) * (height * (6/100))
                 gap_size = 0
                 if groups > 1:
                     gap_size = total_gaps / ( groups - 1) 
