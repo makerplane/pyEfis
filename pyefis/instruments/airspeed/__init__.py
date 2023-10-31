@@ -365,6 +365,9 @@ class Airspeed_Tape(QGraphicsView):
         if airspeed != self._airspeed:
             self._airspeed = airspeed
             self.redraw()
+    def setData(self, item, value):
+            self.setAirspeed(value)
+            #self.resizeEvent(None)
 
     airspeed = property(getAirspeed, setAirspeed)
 
