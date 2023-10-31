@@ -94,6 +94,7 @@ class Screen(QWidget):
                 for g in i['groups']:
                     for gi in g['instruments']:
                         gi['type'] = i['type'].replace('ganged_','')
+                        gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
                         self.setup_instruments(count,gi,ganged=True)
 
                         count += 1     
