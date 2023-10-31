@@ -48,9 +48,11 @@ class AbstractGauge(QWidget):
         self.peakMode = False
         self.__unitSwitching = False
         self.unitGroup = ""
-
+        # if data was passed we do not handle the data internally
+        # 
         if data:
-            self.data = data
+            self.item = data
+            self.data = True
         else:
             self.data = False
         # These properties can be modified by the parent
@@ -123,8 +125,9 @@ class AbstractGauge(QWidget):
         if self._value > self.peakValue:
             self.peakValue = self._value
 
-    def setData(self,item,value):
-        self.setValue(value)
+    def setData(self, item, value):
+        self.value = value
+
     value = property(getValue, setValue)
 
     def getValueText(self):
@@ -139,16 +142,14 @@ class AbstractGauge(QWidget):
         return self._dbkey
 
     def setDbkey(self, key):
-        if self.data:
-            item = self.data 
-        else:
-            item = fix.db.get_item(key)
-            item.auxChanged.connect(self.setAuxData)
-            item.reportReceived.connect(self.setupGauge)
-            item.annunciateChanged.connect(self.annunciateFlag)
-            item.oldChanged.connect(self.oldFlag)
-            item.badChanged.connect(self.badFlag)
-            item.failChanged.connect(self.failFlag)
+        if not self.data:
+            self.item = fix.db.get_item(key)
+            self.item.auxChanged.connect(self.setAuxData)
+            self.item.reportReceived.connect(self.setupGauge)
+            self.item.annunciateChanged.connect(self.annunciateFlag)
+            self.item.oldChanged.connect(self.oldFlag)
+            self.item.badChanged.connect(self.badFlag)
+            self.item.failChanged.connect(self.failFlag)
 
         self._dbkey = key
         self.setupGauge()
@@ -169,40 +170,38 @@ class AbstractGauge(QWidget):
     # This should get called when the gauge is created and then again
     # anytime a new report of the db item is recieved from the server
     def setupGauge(self):
-        if self.data:
-            item = self.data
-        else:
-            item = fix.db.get_item(self.dbkey)
+        if not self.data:
+            self.item = fix.db.get_item(self.dbkey)
         # min and max should always be set for FIX Gateway data.
-        if item.min: self.lowRange = self.conversionFunction(item.min)
-        if item.max: self.highRange = self.conversionFunction(item.max)
-        self._units = item.units
+        if self.item.min: self.lowRange = self.conversionFunction(self.item.min)
+        if self.item.max: self.highRange = self.conversionFunction(self.item.max)
+        self._units = self.item.units
         # set the flags
-        self.fail = item.fail
-        self.bad = item.bad
-        self.old = item.old
-        self.annunciate = item.annunciate
+        self.fail = self.item.fail
+        self.bad = self.item.bad
+        self.old = self.item.old
+        self.annunciate = self.item.annunciate
         self.setColors()
         # set the axuliiary data and the value
-        self.setAuxData(item.aux)
-        self.setValue(item.value)
+        self.setAuxData(self.item.aux)
+        self.setValue(self.item.value)
 
+        # TODO We have to redo the valueChanged signals because the
+        # datatype may have changed
         if not self.data:
-            # TODO We have to redo the valueChanged signals because the
-            # datatype may have changed
             try:
-                item.valueChanged[float].disconnect(self.setValue)
+                self.item.valueChanged[float].disconnect(self.setValue)
             except:
                 pass # One will probably fail all the time
             try:
-                item.valueChanged[int].disconnect(self.setValue)
+                self.item.valueChanged[int].disconnect(self.setValue)
             except:
                 pass # One will probably fail all the time
 
-            if item.dtype == float:
-                item.valueChanged[float].connect(self.setValue)
-            elif item.dtype == int:
-                item.valueChanged[int].connect(self.setValue)
+            if self.item.dtype == float:
+                self.item.valueChanged[float].connect(self.setValue)
+            elif self.item.dtype == int:
+                self.item.valueChanged[int].connect(self.setValue)
 
 
     def setAuxData(self, auxdata):
@@ -281,7 +280,8 @@ class AbstractGauge(QWidget):
         self.__currentUnits = 1
         self.unitsOverride = self.unitsOverride1
         self.conversionFunction = self.conversionFunction1
-        hmi.actions.setInstUnits.connect(self.setUnits)
+        if not self.data:
+            hmi.actions.setInstUnits.connect(self.setUnits)
         self.update()
 
     def setUnits(self, args):
@@ -289,7 +289,8 @@ class AbstractGauge(QWidget):
         command = x[1].lower()
         names = x[0].split(',')
         if self.dbkey in names or '*' in names or self.unitGroup in names:
-            item = fix.db.get_item(self.dbkey)
+            if not self.data:
+                self.item = fix.db.get_item(self.dbkey)
             if command == "toggle":
                 if self.__currentUnits == 1:
                     self.unitsOverride = self.unitsOverride2
@@ -299,5 +300,5 @@ class AbstractGauge(QWidget):
                     self.unitsOverride = self.unitsOverride1
                     self.conversionFunction = self.conversionFunction1
                     self.__currentUnits = 1
-            self.setAuxData(item.aux) # Trigger conversion for aux data
-            self.value = item.value # Trigger the conversion for value
+            self.setAuxData(self.item.aux) # Trigger conversion for aux data
+            self.value = self.item.value # Trigger the conversion for value
