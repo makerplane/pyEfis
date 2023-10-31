@@ -27,6 +27,7 @@ class ArcGauge(AbstractGauge):
         self.setMinimumSize(100, 50)
         self.startAngle = 45
         self.sweepAngle = 180 - 45
+        self.nameLocation = 'top' # can also be 'right' above the value
 
     def get_height(self, width):
         return width/ 2
@@ -143,11 +144,16 @@ class ArcGauge(AbstractGauge):
         pen.setWidth(1)
         p.setPen(pen)
         f = QFont()
+        f.setPixelSize(qRound(self.r_height / 2))
+        y = f.pixelSize()
         f.setPixelSize(qRound(self.r_height / 6))
+        fm = QFontMetrics(f)
+        x = fm.width(self.name)
         p.setFont(f)
-        #opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
-        #p.drawText(QPoint(centerX - (r - 40), centerY - (r - 40)), self.name)
-        p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
+        if self.nameLocation == 'top':
+            p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
+        elif self.nameLocation == 'right':
+            p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
 
         # Main value text
         path = QPainterPath()
