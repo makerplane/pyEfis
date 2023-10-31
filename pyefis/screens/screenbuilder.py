@@ -31,6 +31,12 @@ from pyefis.instruments import misc
 import pyavtools.fix as fix
 from collections import defaultdict
 import re
+import pyefis.hmi as hmi
+
+import logging
+
+logger=logging.getLogger(__name__)
+
 
 funcTempF = lambda x: x * (9.0/5.0) + 32.0 
 funcTempC = lambda x: x
@@ -51,6 +57,7 @@ class Screen(QWidget):
         # list of dial types supported so far:
         # airspeed_dial
         # airspeed_trend_tape # Testing to do
+        # airspeed_tape
         # altimeter_dial
         # altimeter_trend_tape # Testing to do
         # arc_gauge
@@ -139,7 +146,7 @@ class Screen(QWidget):
                 self.mapping[count][d] = self.lookup_mapping(d,i.get('mapping',dict()))
                 self.data_item_signals_defined[count][self.lookup_mapping(d,i.get('mapping',dict()))] = d
         else:
-            self.data_item_signals_defined[count][db_items[0]] = 'None'
+            self.data_item_signals_defined[count][db_items[0]] = db_items[0]
             #Used to keep track of what instruments use what data items 
         for item in db_items:
             self.define_data(count,item,i['type'])
@@ -147,6 +154,12 @@ class Screen(QWidget):
         # Process the type of instrument this is and create them
         if i['type'] == 'airspeed_dial':
             self.instruments[count] = airspeed.Airspeed(self,data=self.data_items[db_items[0]])
+        if i['type'] == 'airspeed_box':
+            self.instruments[count] = airspeed.Airspeed_Box(self,data=self.data_items[db_items[0]])
+        if i['type'] == 'airspeed_tape':
+            self.instruments[count] = airspeed.Airspeed_Tape(self)#,data=self.data_items[db_items[0]])
+        if i['type'] == 'airspeed_trend_tape':
+            self.instruments[count] = vsi.AS_Trend_Tape(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'altimeter_dial':
             self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'atitude_indicator':
@@ -177,11 +190,16 @@ class Screen(QWidget):
         if 'options' in i:
             #loop over each option
             for option,value in i['options'].items():
-                if 'temperature' in option and value == True:
-                    setattr(self.instruments[count], 'unitFunction1', funcTempF)
-                    setattr(self.instruments[count], 'units1', u'\N{DEGREE SIGN}F')
-                    setattr(self.instruments[count], 'unitFunction2', funcTempC)
-                    setattr(self.instruments[count], 'units2', u'\N{DEGREE SIGN}C')
+                if 'temperature' in option and value == True and 'gauge' in i['type']:
+                    self.instruments[count].setDbkey(db_items[0])
+                    self.instruments[count].conversionFunction1 = funcTempF
+                    self.instruments[count].unitsOverride1 = u'\N{DEGREE SIGN}F'
+                    self.instruments[count].conversionFunction2 = funcTempC
+                    self.instruments[count].unitsOverride2 = u'\N{DEGREE SIGN}C'
+                    self.instruments[count].unitGroup = 'Temperature'
+                    self.instruments[count].setUnitSwitching()
+                    self.instruments[count].setDbkey(db_items[0])
+                    hmi.actions.setInstUnits.connect(self.instruments[count].setUnits)
                 else:
                     setattr(self.instruments[count], option, value)
 
@@ -202,9 +220,9 @@ class Screen(QWidget):
     def get_instrument_defaults(self, inst):
         # Always return an array for simplicity
         # a value of boolean false indicates that no default value exists and db_item must be provided
-        if 'airspeed_dial' == inst:
+        if inst in ['airspeed_dial','airspeed_tape', 'airspeed_box', 'airspeed_trend_tape']:
             return ['IAS']
-        elif 'altimeter_dial' == inst:
+        elif inst in ['altimeter_dial', 'altimeter_tape', 'altimeter_trend_tape' ]:
             return ['ALT']
         elif 'atitude_indicator' == inst:
             return ['PITCH','ROLL','ALAT','TAS']
@@ -227,40 +245,40 @@ class Screen(QWidget):
         if not item in self.data_items:
             self.data_items[item] = fix.db.get_item(item)
             if self.data_items[item].dtype == float:
-                self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item: self.data_modified(db_item=key) )
+                self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item,signal='float': self.data_modified(db_item=key,signal=signal) )
             if self.data_items[item].dtype == str:
-                self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
+                self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item,signal='str': self.data_modified(db_item=key,signal=signal))
             if self.data_items[item].dtype == bool:
-                self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
+                self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item,signal='bool': self.data_modified(db_item=key,signal=signal))
             if self.data_items[item].dtype == int:
-                self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item: self.data_modified(db_item=key))
+                self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item,signal='int': self.data_modified(db_item=key,signal=signal))
 
         # Not All gauges need all of the signals
         # We will only subscribe to the ones we need that have not already been subscripbed
         if 'old' in self.what_signals(item_type) and not ('old' in self.data_item_signals_defined[item][count]):
-            self.data_items[item].oldChanged[bool].connect(lambda oldChanged, key=item: self.data_redraw(db_item=key))
+            self.data_items[item].oldChanged[bool].connect(lambda oldChanged, key=item,signal='old': self.data_redraw(db_item=key,signal=signal))
             self.data_item_signals_defined[item][count] = 'old'
             self.data_signal_routing[item]['old'].append(count)
 
         if 'bad' in self.what_signals(item_type) and not ('bad' in self.data_item_signals_defined[item][count]):
-            self.data_items[item].badChanged[bool].connect(lambda badChanged, key=item: self.data_redraw(db_item=key))
+            self.data_items[item].badChanged[bool].connect(lambda badChanged, key=item,signal='bad': self.data_redraw(db_item=key,signal=signal))
             self.data_item_signals_defined[item][count] = 'bad'
-            self.data_signal_routing[item]['old'].append(count)
+            self.data_signal_routing[item]['bad'].append(count)
 
         if 'fail' in self.what_signals(item_type) and not ('fail' in self.data_item_signals_defined[item][count]):
-            self.data_items[item].failChanged[bool].connect(lambda failChanged, key=item: self.data_redraw(db_item=key))
+            self.data_items[item].failChanged[bool].connect(lambda failChanged, key=item,signal='fail': self.data_redraw(db_item=key,signal=signal))
             self.data_item_signals_defined[item][count] = 'fail'
-            self.data_signal_routing[item]['old'].append(count)
+            self.data_signal_routing[item]['fail'].append(count)
 
         if 'aux' in self.what_signals(item_type) and not ('aux' in self.data_item_signals_defined[item][count]):
-            self.data_items[item].auxChanged.connect(lambda auxChanged, key=item: self.aux_data_modified(db_item=key))
+            self.data_items[item].auxChanged.connect(lambda auxChanged, key=item,signal='aux': self.aux_data_modified(db_item=key,signal=signal))
             self.data_item_signals_defined[item][count] = 'aux'
             self.data_signal_routing[item]['aux'].append(count)
 
         if 'ann' in self.what_signals(item_type) and not ('ann' in self.data_item_signals_defined[item][count]):
-            self.data_items[item].annunciateChanged[bool].connect(lambda annunciateChanged, key=item: self.report_received(db_item=key))
+            self.data_items[item].annunciateChanged[bool].connect(lambda annunciateChanged, key=item,signal='ann': self.report_received(db_item=key,signal=signal))
             self.data_item_signals_defined[item][count] = 'ann'
-            self.data_signal_routing[item]['report'].append(count)
+            self.data_signal_routing[item]['ann'].append(count)
 
         if 'report' in self.what_signals(item_type) and not ('report' in self.data_item_signals_defined[item][count]):
             self.data_items[item].reportReceived.connect(self.report_received)
@@ -275,20 +293,24 @@ class Screen(QWidget):
             return ['old', 'bad', 'fail', 'aux', 'ann', 'report' ]
         return ['old', 'bad', 'fail']
 
-    def data_modified(self,db_item):
+    def data_modified(self,db_item,signal='unknown'):
         for inst in self.data_signal_routing[db_item]['old']:
+            logger.debug(f"modified: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
             self.instruments[inst].setData(db_item,self.data_items[db_item].value)
 
-    def aux_data_modified(self,db_item):
+    def aux_data_modified(self,db_item,signal='unknown'):
         for inst in self.data_signal_routing[db_item]['aux']:
             self.instruments[inst].setAuxData(self.data_items[db_item].aux)
+            logger.debug(f"aux: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
 
-    def report_received(self,db_item='t'):
+    def report_received(self,db_item='t',signal='unknown'):
         for inst in self.data_signal_routing[db_item]['report']:
-            self.instruments[inst].setupGauge()#self.data_items[db_item].aux)
+            self.instruments[inst].setupGauge()
+            logger.debug(f"report: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
 
-    def data_redraw(self,db_item):
+    def data_redraw(self,db_item,signal='unknown'):
         for inst in self.data_signal_routing[db_item]['old']:
+            logger.debug(f"redraw: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
             self.instruments[inst].update()
             try:
                 self.instruments[inst].setupGauge()
