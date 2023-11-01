@@ -27,6 +27,7 @@ from pyefis.instruments import vsi
 from pyefis.instruments import tc
 from pyefis.instruments import gauges
 from pyefis.instruments import misc
+from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 
 import pyavtools.fix as fix
 from collections import defaultdict
@@ -64,6 +65,7 @@ class Screen(QWidget):
         # atitude_indicator
         # egt_vertical_bar_gauge
         # heading_display
+        # heading_tape
         # horizontal_bar_gauge
         # horizontal_situation_indicator
         # turn_coordinator
@@ -172,6 +174,8 @@ class Screen(QWidget):
             self.instruments[count] = altimeter.Altimeter_Tape(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'heading_display':
             self.instruments[count] = hsi.HeadingDisplay(self,data=self.data_items[db_items[0]])
+        elif i['type'] == 'heading_tape':
+            self.instruments[count] = hsi.DG_Tape(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'horizontal_situation_indicator':
             self.instruments[count] = hsi.HSI(self,data=self.get_data_dict(count))
         elif i['type'] == 'turn_coordinator':
@@ -187,6 +191,9 @@ class Screen(QWidget):
             self.instruments[count] = gauges.VerticalBar(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'egt_vertical_bar_gauge':
             self.instruments[count] = gauges.EGTGroup(self,data=self.get_data_dict(count),dbkeys=db_items,cylinders=i['options']['cylinders'])
+        elif i['type'] == 'virtual_vfr':
+            self.instruments[count] = VirtualVfr(self,data=self.get_data_dict(count))
+
          # Set options
         if 'options' in i:
             #loop over each option
@@ -227,7 +234,7 @@ class Screen(QWidget):
             return ['ALT']
         elif 'atitude_indicator' == inst:
             return ['PITCH','ROLL','ALAT','TAS']
-        elif 'heading_display' == inst:
+        elif inst in [ 'heading_display', 'heading_tape']:
             return ['HEAD']
         elif 'horizontal_situation_indicator' == inst:
             return ['COURSE','CDI','GSI','HEAD']
@@ -235,6 +242,8 @@ class Screen(QWidget):
             return ['ROT','ALAT']
         elif 'vsi_dial' == inst:
             return ['VS']
+        elif 'virtual_vfr' == inst:
+            return ['PITCH','LAT','LONG','HEAD','ALT','PITCH','ROLL','ALAT','TAS']
 
     def get_instrument_default_options(self, inst):
         if i['type'] == 'heading_display':
