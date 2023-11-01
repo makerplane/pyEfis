@@ -378,8 +378,12 @@ class AI(QGraphicsView):
                     # Initially set to grey
                     # we may have old data while recovering
                     if hasattr(self, 'sky_rect'):
-                        self.sky_rect.setBrush (self.gray_sky)
-                        self.land_rect.setBrush (self.gray_land)
+                        if self._AIOld:
+                            self.sky_rect.setBrush (self.gray_sky)
+                            self.land_rect.setBrush (self.gray_land)
+                        else:
+                            self.sky_rect.setBrush (self.gblue_brush)
+                            self.land_rect.setBrush (self.gbrown_brush)
                     self.redraw()
 
     def setAIOld(self, old):
