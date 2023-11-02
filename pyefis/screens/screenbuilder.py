@@ -166,7 +166,7 @@ class Screen(QWidget):
         elif i['type'] == 'altimeter_dial':
             self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self,data=self.get_data_dict(count))
+            self.instruments[count] = ai.AI(self,data=self.get_data_dict2(count))
             #self.instruments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
             #self.instruments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
             #self.instruments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
@@ -219,6 +219,13 @@ class Screen(QWidget):
             r[name] = self.data_items[item]
         return r
 
+    def get_data_dict2(self,inst):
+        #Returns a dict with the data items a multi-item gauge needs
+        r = dict()
+        for name, item in self.mapping[inst].items():
+            r[name] = self.data_items[item].value
+        return r
+
     def lookup_mapping(self,item,mapping=dict()):
           return mapping.get(item,item)
 
@@ -253,19 +260,19 @@ class Screen(QWidget):
         return false
 
     def define_data(self, count, item, item_type):
+        self.data_signal_routing[item]['setData'].append(count)
         if not item in self.data_items:
             self.data_items[item] = fix.db.get_item(item)
+            if self.data_items[item].dtype == float:
+                self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item: self.setData(db_item=key) )
+            if self.data_items[item].dtype == str:
+                self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item: self.setData(db_item=key) )
+            if self.data_items[item].dtype == bool:
+                self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item: self.setData(db_item=key) )
+            if self.data_items[item].dtype == int:
+                self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item: self.setData(db_item=key) )
 
     def define_signals(self, count, item, item_type):
-        
-        if self.data_items[item].dtype == float:
-            self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item,signal='float': self.data_modified(db_item=key,signal=signal) )
-        if self.data_items[item].dtype == str:
-            self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item,signal='str': self.data_modified(db_item=key,signal=signal))
-        if self.data_items[item].dtype == bool:
-            self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item,signal='bool': self.data_modified(db_item=key,signal=signal))
-        if self.data_items[item].dtype == int:
-            self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item,signal='int': self.data_modified(db_item=key,signal=signal))
 
         # Not All gauges need all of the signals
         # We will only subscribe to the ones we need that have not already been subscripbed
@@ -277,34 +284,34 @@ class Screen(QWidget):
             # Init the signal in the item
             self.instruments[count].setOld(self.data_items[item].old)
             self.data_items[item].oldChanged[bool].connect(lambda oldChanged, key=item: self.setOld(db_item=key))
-            self.data_item_signals_defined[item][count] = 'old'
-            self.data_signal_routing[item]['old'].append(count)
+            self.data_item_signals_defined[item][count] = 'setOld'
+            self.data_signal_routing[item]['setOld'].append(count)
         if hasattr( self.instruments[count], 'setBad') :
             # Init the signal in the item
             self.instruments[count].setBad(self.data_items[item].bad)
             self.data_items[item].badChanged[bool].connect(lambda oldChanged, key=item: self.setBad(db_item=key))
-            self.data_item_signals_defined[item][count] = 'bad'
-            self.data_signal_routing[item]['bad'].append(count)
+            self.data_item_signals_defined[item][count] = 'setBad'
+            self.data_signal_routing[item]['setBad'].append(count)
         if hasattr( self.instruments[count], 'setFail') :
             # Init the signal in the item
             self.instruments[count].setFail(self.data_items[item].fail)
             self.data_items[item].failChanged[bool].connect(lambda oldChanged, key=item: self.setFail(db_item=key))
-            self.data_item_signals_defined[item][count] = 'fail'
-            self.data_signal_routing[item]['fail'].append(count)
+            self.data_item_signals_defined[item][count] = 'setFail'
+            self.data_signal_routing[item]['setFail'].append(count)
 
         if hasattr( self.instruments[count], 'setAux') :
             # Init the signal in the item
             self.instruments[count].setAux(self.data_items[item].aux)
             self.data_items[item].auxChanged[bool].connect(lambda oldChanged, key=item: self.setAux(db_item=key))
-            self.data_item_signals_defined[item][count] = 'aux'
-            self.data_signal_routing[item]['aux'].append(count)
+            self.data_item_signals_defined[item][count] = 'setAux'
+            self.data_signal_routing[item]['setAux'].append(count)
 
         if hasattr( self.instruments[count], 'setAnnunciate') :
             # Init the signal in the item
             self.instruments[count].setAnnunciate(self.data_items[item].annunciate)
             self.data_items[item].annunciateChanged[bool].connect(lambda oldChanged, key=item: self.setAnnunciate(db_item=key))
-            self.data_item_signals_defined[item][count] = 'ann'
-            self.data_signal_routing[item]['ann'].append(count)
+            self.data_item_signals_defined[item][count] = 'setAnn'
+            self.data_signal_routing[item]['setAnn'].append(count)
 
 
         # The below can be removed once all items are updated to use the above methods
@@ -347,7 +354,7 @@ class Screen(QWidget):
         return ['old', 'bad', 'fail']
 
     def data_modified(self,db_item,signal='unknown'):
-        for inst in self.data_signal_routing[db_item]['old']:
+        for inst in self.data_signal_routing[db_item]['data']:
             logger.debug(f"modified: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
             self.instruments[inst].setData(db_item,self.data_items[db_item].value)
 
@@ -356,28 +363,33 @@ class Screen(QWidget):
             self.instruments[inst].setAuxData(self.data_items[db_item].aux)
             logger.debug(f"aux: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
 
+    def setData(self,db_item,signal='unknown'):
+        for inst in self.data_signal_routing[db_item]['setData']:
+            logger.debug(f"setData: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
+            self.instruments[inst].setData(db_item,self.data_items[db_item].value)
+
     def setOld(self,db_item):
-        for inst in self.data_signal_routing[db_item]['old']:
+        for inst in self.data_signal_routing[db_item]['setOld']:
             logger.debug(f"Calling setOld for {inst} {type(self.instruments[inst])}")
             self.instruments[inst].setOld(self.data_items[db_item].old)
 
     def setBad(self,db_item):
-        for inst in self.data_signal_routing[db_item]['bad']:
+        for inst in self.data_signal_routing[db_item]['setBad']:
             logger.debug(f"Calling setBad for {inst} {type(self.instruments[inst])}")
             self.instruments[inst].setBad(self.data_items[db_item].bad)
 
     def setFail(self,db_item):
-        for inst in self.data_signal_routing[db_item]['fail']:
+        for inst in self.data_signal_routing[db_item]['setFail']:
             logger.debug(f"Calling setFail for {inst} {type(self.instruments[inst])}")
             self.instruments[inst].setFail(self.data_items[db_item].fail)
 
     def setAux(self,db_item):
-        for inst in self.data_signal_routing[db_item]['aux']:
+        for inst in self.data_signal_routing[db_item]['setAux']:
             logger.debug(f"Calling setAux for {inst} {type(self.instruments[inst])}")
             self.instruments[inst].setAux(self.data_items[db_item].aux)
 
     def setAnnunciate(self,db_item):
-        for inst in self.data_signal_routing[db_item]['ann']:
+        for inst in self.data_signal_routing[db_item]['setAnn']:
             logger.debug(f"Calling setAnnunciate for {inst} {type(self.instruments[inst])}")
             self.instruments[inst].setAnnunciate(self.data_items[db_item].annunciate)
 
