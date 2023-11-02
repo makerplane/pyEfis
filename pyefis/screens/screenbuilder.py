@@ -210,6 +210,7 @@ class Screen(QWidget):
                     hmi.actions.setInstUnits.connect(self.instruments[count].setUnits)
                 else:
                     setattr(self.instruments[count], option, value)
+        self.define_signals(count,item,i['type'])
 
     def get_data_dict(self,inst):
         #Returns a dict with the data items a multi-item gauge needs
@@ -254,17 +255,59 @@ class Screen(QWidget):
     def define_data(self, count, item, item_type):
         if not item in self.data_items:
             self.data_items[item] = fix.db.get_item(item)
-            if self.data_items[item].dtype == float:
-                self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item,signal='float': self.data_modified(db_item=key,signal=signal) )
-            if self.data_items[item].dtype == str:
-                self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item,signal='str': self.data_modified(db_item=key,signal=signal))
-            if self.data_items[item].dtype == bool:
-                self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item,signal='bool': self.data_modified(db_item=key,signal=signal))
-            if self.data_items[item].dtype == int:
-                self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item,signal='int': self.data_modified(db_item=key,signal=signal))
+
+    def define_signals(self, count, item, item_type):
+        
+        if self.data_items[item].dtype == float:
+            self.data_items[item].valueChanged[float].connect(lambda valueChanged, key=item,signal='float': self.data_modified(db_item=key,signal=signal) )
+        if self.data_items[item].dtype == str:
+            self.data_items[item].valueChanged[str].connect(lambda valueChanged, key=item,signal='str': self.data_modified(db_item=key,signal=signal))
+        if self.data_items[item].dtype == bool:
+            self.data_items[item].valueChanged[bool].connect(lambda valueChanged, key=item,signal='bool': self.data_modified(db_item=key,signal=signal))
+        if self.data_items[item].dtype == int:
+            self.data_items[item].valueChanged[int].connect(lambda valueChanged, key=item,signal='int': self.data_modified(db_item=key,signal=signal))
 
         # Not All gauges need all of the signals
         # We will only subscribe to the ones we need that have not already been subscripbed
+
+        # If something wants to get notified then it must have a method to send the data.
+        # setOld, setBad, setFail etc
+
+        if hasattr( self.instruments[count], 'setOld') :
+            # Init the signal in the item
+            self.instruments[count].setOld(self.data_items[item].old)
+            self.data_items[item].oldChanged[bool].connect(lambda oldChanged, key=item: self.setOld(db_item=key))
+            self.data_item_signals_defined[item][count] = 'old'
+            self.data_signal_routing[item]['old'].append(count)
+        if hasattr( self.instruments[count], 'setBad') :
+            # Init the signal in the item
+            self.instruments[count].setBad(self.data_items[item].bad)
+            self.data_items[item].badChanged[bool].connect(lambda oldChanged, key=item: self.setBad(db_item=key))
+            self.data_item_signals_defined[item][count] = 'bad'
+            self.data_signal_routing[item]['bad'].append(count)
+        if hasattr( self.instruments[count], 'setFail') :
+            # Init the signal in the item
+            self.instruments[count].setFail(self.data_items[item].fail)
+            self.data_items[item].failChanged[bool].connect(lambda oldChanged, key=item: self.setFail(db_item=key))
+            self.data_item_signals_defined[item][count] = 'fail'
+            self.data_signal_routing[item]['fail'].append(count)
+
+        if hasattr( self.instruments[count], 'setAux') :
+            # Init the signal in the item
+            self.instruments[count].setAux(self.data_items[item].aux)
+            self.data_items[item].auxChanged[bool].connect(lambda oldChanged, key=item: self.setAux(db_item=key))
+            self.data_item_signals_defined[item][count] = 'aux'
+            self.data_signal_routing[item]['aux'].append(count)
+
+        if hasattr( self.instruments[count], 'setAnnunciate') :
+            # Init the signal in the item
+            self.instruments[count].setAnnunciate(self.data_items[item].annunciate)
+            self.data_items[item].annunciateChanged[bool].connect(lambda oldChanged, key=item: self.setAnnunciate(db_item=key))
+            self.data_item_signals_defined[item][count] = 'ann'
+            self.data_signal_routing[item]['ann'].append(count)
+
+
+        # The below can be removed once all items are updated to use the above methods
         if 'old' in self.what_signals(item_type) and not ('old' in self.data_item_signals_defined[item][count]):
             self.data_items[item].oldChanged[bool].connect(lambda oldChanged, key=item,signal='old': self.data_redraw(db_item=key,signal=signal))
             self.data_item_signals_defined[item][count] = 'old'
@@ -313,6 +356,31 @@ class Screen(QWidget):
             self.instruments[inst].setAuxData(self.data_items[db_item].aux)
             logger.debug(f"aux: {signal} signal for: {db_item}:{self.data_items[db_item].value} {type(self.instruments[inst])}")
 
+    def setOld(self,db_item):
+        for inst in self.data_signal_routing[db_item]['old']:
+            logger.debug(f"Calling setOld for {inst} {type(self.instruments[inst])}")
+            self.instruments[inst].setOld(self.data_items[db_item].old)
+
+    def setBad(self,db_item):
+        for inst in self.data_signal_routing[db_item]['bad']:
+            logger.debug(f"Calling setBad for {inst} {type(self.instruments[inst])}")
+            self.instruments[inst].setBad(self.data_items[db_item].bad)
+
+    def setFail(self,db_item):
+        for inst in self.data_signal_routing[db_item]['fail']:
+            logger.debug(f"Calling setFail for {inst} {type(self.instruments[inst])}")
+            self.instruments[inst].setFail(self.data_items[db_item].fail)
+
+    def setAux(self,db_item):
+        for inst in self.data_signal_routing[db_item]['aux']:
+            logger.debug(f"Calling setAux for {inst} {type(self.instruments[inst])}")
+            self.instruments[inst].setAux(self.data_items[db_item].aux)
+
+    def setAnnunciate(self,db_item):
+        for inst in self.data_signal_routing[db_item]['ann']:
+            logger.debug(f"Calling setAnnunciate for {inst} {type(self.instruments[inst])}")
+            self.instruments[inst].setAnnunciate(self.data_items[db_item].annunciate)
+
     def report_received(self,db_item='t',signal='unknown'):
         for inst in self.data_signal_routing[db_item]['report']:
             self.instruments[inst].setupGauge()
@@ -325,7 +393,7 @@ class Screen(QWidget):
             try:
                 self.instruments[inst].setupGauge()
             except:
-                pass            
+                pass           
 
     def grid_layout(self):
         for i,c in self.insturment_config.items():
