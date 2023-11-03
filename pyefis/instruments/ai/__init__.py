@@ -67,37 +67,60 @@ class AI(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-
+        
+        # Assume True until told otherwise
+        self._AIOld = dict()
+        self._AIBad = dict()
+        self._AIFail = dict()
+        for p in ['PITCH', 'ROLL','ALAT','TAS']:
+            self._AIOld[p] = False
+            self._AIBad[p] = False
+            self._AIFail[p] = False
         if data:
+            # Init data
             self._pitchAngle = data['PITCH']
             self._rollAngle = data['ROLL']
             self._latAccel = data["ALAT"]
             self._tas = data["TAS"]
-            self._AIOld = True
-            self._AIBad = True
-            self._AIFail = True
         else:
             # Only place fix is needed for backard compatability
             pitch = fix.db.get_item("PITCH")
             pitch.valueChanged[float].connect(self.setPitchAngle)
-            pitch.oldChanged[bool].connect(self.setOld)
-            pitch.badChanged[bool].connect(self.setBad)
-            pitch.failChanged[bool].connect(self.setFail)
+            pitch.oldChanged[bool].connect(self.setAIOldPitch)
+            pitch.badChanged[bool].connect(self.setAIBadPitch)
+            pitch.failChanged[bool].connect(self.setAIFailPitch)
+            self._AIOld['PITCH'] = pitch.old
+            self._AIBad['PITCH'] = pitch.bad
+            self._AIFail['PITCH'] = pitch.fail
             self._pitchAngle = pitch.value
             roll = fix.db.get_item("ROLL")
             roll.valueChanged[float].connect(self.setRollAngle)
-            roll.oldChanged[bool].connect(self.setOld)
-            roll.badChanged[bool].connect(self.setBad)
-            roll.failChanged[bool].connect(self.setFail)
+            roll.oldChanged[bool].connect(self.setAIOldRoll)
+            roll.badChanged[bool].connect(self.setAIBadRoll)
+            roll.failChanged[bool].connect(self.setAIFailRoll)
             self._rollAngle = roll.value
-            self._AIOld = roll.old
-            self._AIBad = roll.bad
-            self._AIFail = roll.fail
+            self._AIOld['ROLL'] = roll.old
+            self._AIBad['ROLL'] = roll.bad
+            self._AIFail['ROLL'] = roll.fail
             alat = fix.db.get_item("ALAT")
             alat.valueChanged[float].connect(self.setLateralAcceleration)
+            alat.oldChanged[bool].connect(self.setAIOldLAcc)
+            alat.badChanged[bool].connect(self.setAIBadLAcc)
+            alat.failChanged[bool].connect(self.setAIFailLAcc)
+            self._AIOld['ALAT'] = alat.old
+            self._AIBad['ALAT'] = alat.bad
+            self._AIFail['ALAT'] = alat.fail
+
             self._latAccel = alat.value
             tas = fix.db.get_item("TAS")
             tas.valueChanged[float].connect(self.setTrueAirspeed)
+            tas.oldChanged[bool].connect(self.setAIOldTAS)
+            tas.badChanged[bool].connect(self.setAIBadTAS)
+            tas.failChanged[bool].connect(self.setAIFailTAS)
+            self._AIOld['TAS'] = tas.old
+            self._AIBad['TAS'] = tas.bad
+            self._AIFail['TAS'] = tas.fail
+
             self._tas = tas.value
         # We store all the pitch tick marks and text in a list so that
         # we can adjust the opacity of the items.
@@ -135,7 +158,7 @@ class AI(QGraphicsView):
         gradientLGray.setColorAt(1.0, QColor(153, 153, 153))
         gradientLGray.setSpread(0)
         self.gray_sky = QBrush(gradientLGray)
-        if self._AIOld or self._AIBad:
+        if self.getAIOld() or self.getAIBad():
             brush = self.gray_sky
         else:
             brush = self.gblue_brush
@@ -152,7 +175,7 @@ class AI(QGraphicsView):
         gradientDGray.setColorAt(0.2, QColor(75, 75, 75))
         gradientDGray.setSpread(0)
         self.gray_land = QBrush(gradientDGray)
-        if self._AIOld or self._AIBad:
+        if self.getAIOld() or self.getAIBad():
             brush = self.gray_land
         else:
             brush = self.gbrown_brush
@@ -340,10 +363,14 @@ class AI(QGraphicsView):
     def wheelEvent(self, event):
         pass
 
+    def showEvent(self, event):
+        self.redraw()
+
     def setRollAngle(self, angle):
-        if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
+        if angle != self._rollAngle and not self.getAIFail():
             self._rollAngle = common.bounds(-180, 180, angle)
-            self.redraw()
+            if self.isVisible():
+                self.redraw()
 
     def getRollAngle(self):
         return self._rollAngle
@@ -351,22 +378,48 @@ class AI(QGraphicsView):
     rollAngle = property(getRollAngle, setRollAngle)
 
     def setLateralAcceleration(self, value):
-        if value != self._latAccel and self.isVisible():
+        if value != self._latAccel:
             self._latAccel = common.bounds(-0.3, 0.3, value)
-            self.update()
+            if self.isVisible():
+                self.update()
 
     def setTrueAirspeed(self, value):
-        if value != self._tas and self.isVisible():
+        if value != self._tas:
             self._tas = value
-            self.update()
+            if self.isVisible():
+                self.update()
 
+    def setPitchAngle(self, angle):
+        if angle != self._pitchAngle and not self.getAIFail():
+            self._pitchAngle = common.bounds(-90, 90, angle)
+            self.setPitchItems()
+            if self.isVisible():
+                self.redraw()
 
-    def setFail(self, fail):
+    def getPitchAngle(self):
+        return self._pitchAngle
+
+    def getAIFail(self):
+        return True in self._AIFail.values()
+
+    def setAIFailRoll(self, fail):
+        self.setFail(fail,'ROLL')
+
+    def setAIFailPitch(self, fail):
+        self.setFail(fail,'PITCH')
+
+    def setAIFailLAcc(self, fail):
+        self.setFail(fail,'ALAT')
+
+    def setAIFailTAS(self, fail):
+        self.setFail(fail,'TAS')
+
+    def setFail(self, fail,item=None):
         log.debug("Set AI Fail")
-        if fail != self._AIFail:
-            self._AIFail = fail
+        if fail != self._AIFail[item]:
+            self._AIFail[item] = fail
             if hasattr(self, 'fail_scene'):
-                if fail:
+                if self.getAIFail():
                     self.resetTransform()
                     self.setScene (self.fail_scene)
                 else:
@@ -374,7 +427,7 @@ class AI(QGraphicsView):
                     # Initially set to grey
                     # we may have old data while recovering
                     if hasattr(self, 'sky_rect'):
-                        if self._AIOld:
+                        if self.getAIFail():
                             self.sky_rect.setBrush (self.gray_sky)
                             self.land_rect.setBrush (self.gray_land)
                         else:
@@ -382,12 +435,27 @@ class AI(QGraphicsView):
                             self.land_rect.setBrush (self.gbrown_brush)
                     self.redraw()
 
-    def setOld(self, old):
+    def getAIOld(self):
+        return True in self._AIOld.values()
+
+    def setAIOldRoll(self, old):
+        self.setOld(old,'ROLL')
+
+    def setAIOldPitch(self, old):
+        self.setOld(old,'PITCH')
+
+    def setAIOldLAcc(self, old):
+        self.setOld(old,'ALAT')
+
+    def setAIOldTAS(self, old):
+        self.setOld(old,'TAS')
+
+    def setOld(self, old, item=None):
         log.debug("Set AI Old")
-        if old != self._AIOld:
-            self._AIOld = old
+        if old != self._AIOld[item]:
+            self._AIOld[item] = old
             if hasattr(self, 'sky_rect'):
-                if old:
+                if self.getAIOld():
                     self.sky_rect.setBrush (self.gray_sky)
                     self.land_rect.setBrush (self.gray_land)
                     #self.old_text.show()
@@ -395,14 +463,29 @@ class AI(QGraphicsView):
                     self.sky_rect.setBrush (self.gblue_brush)
                     self.land_rect.setBrush (self.gbrown_brush)
                     #self.old_text.hide()
-                    self.redraw()
+                self.redraw()
 
-    def setBad(self, bad):
+    def getAIBad(self):
+        return True in self._AIBad.values()
+
+    def setAIBadRoll(self, bad):
+        self.setBad(bad,'ROLL')
+
+    def setAIBadPitch(self, bad):
+        self.setBad(bad,'PITCH')
+
+    def setAIBadLAcc(self, bad):
+        self.setBad(bad,'ALAT')
+
+    def setAIBadTAS(self, bad):
+        self.setBad(bad,'TAS')
+
+    def setBad(self, bad, item=None):
         log.debug("Set AI Bad")
-        if bad != self._AIBad:
-            self._AIBad = bad
+        if bad != self._AIBad[item]:
+            self._AIBad[item] = bad
             if hasattr(self, 'sky_rect'):
-                if bad:
+                if self.getAIBad():
                     self.sky_rect.setBrush (self.gray_sky)
                     self.land_rect.setBrush (self.gray_land)
                     #self.bad_text.show()
@@ -410,16 +493,7 @@ class AI(QGraphicsView):
                     self.sky_rect.setBrush (self.gblue_brush)
                     self.land_rect.setBrush (self.gbrown_brush)
                     #self.bad_text.hide()
-                    self.redraw()
-
-    def setPitchAngle(self, angle):
-        if angle != self._pitchAngle and self.isVisible() and (not self._AIFail):
-            self._pitchAngle = common.bounds(-90, 90, angle)
-            self.setPitchItems()
-            self.redraw()
-
-    def getPitchAngle(self):
-        return self._pitchAngle
+                self.redraw()
 
     def setData(self,item,value):
         if item == 'PITCH':
@@ -430,7 +504,6 @@ class AI(QGraphicsView):
             self.setLateralAcceleration(value)
         elif item == 'TAS':
             self.setTrueAirspeed(value)
-        print(f"Set {item} to {value}")
     pitchAngle = property(getPitchAngle, setPitchAngle)
 
 
