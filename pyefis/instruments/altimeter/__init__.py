@@ -172,17 +172,16 @@ class Altimeter_Tape(QGraphicsView):
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = fontsize
 
-        print("tape init")
         if data:
             self.item=data
         else:
             self.item = fix.db.get_item("ALT")
             self._altimeter = self.item.value
 
-        self.item.valueChanged[float].connect(self.setAltimeter)
-        self.item.oldChanged[bool].connect(self.setAltOld)
-        self.item.badChanged[bool].connect(self.setAltBad)
-        self.item.failChanged[bool].connect(self.setAltFail)
+            self.item.valueChanged[float].connect(self.setAltimeter)
+            self.item.oldChanged[bool].connect(self.setAltOld)
+            self.item.badChanged[bool].connect(self.setAltBad)
+            self.item.failChanged[bool].connect(self.setAltFail)
 
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
@@ -194,7 +193,7 @@ class Altimeter_Tape(QGraphicsView):
         self.maxalt = maxalt
         self.myparent = parent
 
-        self._altimeter = 0
+        self._altimeter = self.item.value
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
         self.numerical_display.value = self._altimeter
 
@@ -254,7 +253,7 @@ class Altimeter_Tape(QGraphicsView):
     def redraw(self):
         self.resetTransform()
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
-        #self.numerical_display.value = self._altimeter
+        self.numerical_display.value = self._altimeter
 
     #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
