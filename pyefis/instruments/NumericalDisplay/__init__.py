@@ -152,7 +152,7 @@ class NumericalDisplay(QGraphicsView):
 
     def getBad(self):
         return self._bad
-    def setBad(self, b):
+    def setBad(self, b,item=None):
         if self._bad != b:
             self._bad = b
             #if b:

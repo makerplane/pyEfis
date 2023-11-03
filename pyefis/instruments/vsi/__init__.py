@@ -514,7 +514,7 @@ class Alt_Trend_Tape(QGraphicsView):
 
     def getBad(self):
         return self._bad
-    def setBad(self, b):
+    def setBad(self, b,item=None):
         if self._bad != b:
             self._bad = b
             self.redraw()
@@ -522,7 +522,7 @@ class Alt_Trend_Tape(QGraphicsView):
 
     def getOld(self):
         return self._old
-    def setOld(self, b):
+    def setOld(self, b, item=None):
         if self._old != b:
             self._old = b
             self.redraw()
@@ -530,7 +530,7 @@ class Alt_Trend_Tape(QGraphicsView):
 
     def getFail(self):
         return self._fail
-    def setFail(self, b):
+    def setFail(self, b, item=None):
         if self._fail != b:
             self._fail = b
             self.redraw()

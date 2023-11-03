@@ -274,7 +274,7 @@ class HSI(QGraphicsView):
 
     heading = property(getHeading, setHeading)
 
-    def setFail(self, fail):
+    def setFail(self, fail, item=None):
         if fail != self.item.fail:
             if self.isVisible():
                 if fail:
@@ -393,13 +393,13 @@ class HeadingDisplay(QWidget):
 
     heading = property(getHeading, setHeading)
 
-    def setFail(self, fail):
+    def setFail(self, fail, item=None):
         self.repaint()
 
-    def setOld(self, old):
+    def setOld(self, old, item=None):
         self.repaint()
 
-    def setBad(self, bad):
+    def setBad(self, bad,item=None):
         self.repaint()
 
 class DG_Tape(QGraphicsView):
