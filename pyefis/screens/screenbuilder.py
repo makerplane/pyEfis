@@ -165,14 +165,14 @@ class Screen(QWidget):
         if i['type'] == 'airspeed_trend_tape':
             self.instruments[count] = vsi.AS_Trend_Tape(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'altimeter_dial':
-            self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]])
+            self.instruments[count] = altimeter.Altimeter(self,data=self.data_items[db_items[0]].value)
         elif i['type'] == 'atitude_indicator':
             self.instruments[count] = ai.AI(self,data=self.get_data_dict2(count))
             #self.instruments[count].fontSize = i.get('options',{"font_size": 12}).get('font_size', 12)
             #self.instruments[count].bankMarkSize = i.get('options',{'bankMarkSize': 7}).get('bankMarkSize', 7)
             #self.instruments[count].pitchDegreesShown = i.get('options',{'pitchDegreesShown': 60}).get('pitchDegreesShown', 60)
         elif i['type'] == 'altimeter_tape':
-            self.instruments[count] = altimeter.Altimeter_Tape(self,data=self.data_items[db_items[0]])
+            self.instruments[count] = altimeter.Altimeter_Tape(self,data=self.data_items[db_items[0]].value)
         elif i['type'] == 'heading_display':
             self.instruments[count] = hsi.HeadingDisplay(self,data=self.data_items[db_items[0]])
         elif i['type'] == 'heading_tape':

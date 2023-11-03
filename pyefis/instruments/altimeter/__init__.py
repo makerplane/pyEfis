@@ -31,14 +31,23 @@ class Altimeter(QWidget):
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
+        # Assume bad state when starting
+        self._altOld = True
+        self._altBad = True
+        self._altFail = True
         if data:
-            self.item=data
+            self._altimeter = data
         else:
             self.item = fix.db.get_item("ALT")
+            self._altimeter = self.item.value
+
             self.item.valueChanged[float].connect(self.setAltimeter)
-            self.item.oldChanged[bool].connect(self.repaint)
-            self.item.badChanged[bool].connect(self.repaint)
-            self.item.failChanged[bool].connect(self.repaint)
+            self.item.oldChanged[bool].connect(self.setOld)
+            self.item.badChanged[bool].connect(self.setBad)
+            self.item.failChanged[bool].connect(self.setFail)
+            self._altOld = self.item.old
+            self._altBad = self.item.bad
+            self._altFail = self.item.fail
 
     # TODO We continuously draw things that don't change.  Should draw the
     # background save to pixmap or something and then blit it and draw arrows.
@@ -56,7 +65,7 @@ class Altimeter(QWidget):
         dial.fillRect(0, 0, w, h, Qt.black)
 
         # Setup Pens
-        if self.item.old or self.item.bad:
+        if self._altOld or self._altBad:
             warn_font = QFont("FixedSys", 30, QFont.Bold)
             dialPen = QPen(QColor(Qt.gray))
             dialBrush = QBrush(QColor(Qt.gray))
@@ -100,7 +109,7 @@ class Altimeter(QWidget):
             dial.rotate(7.2)
             count += 7.2
 
-        if self.item.fail:
+        if self._altFail:
             warn_font = QFont("FixedSys", 30, QFont.Bold)
             dial.resetTransform()
             dial.setPen (QPen(QColor(Qt.red)))
@@ -134,13 +143,13 @@ class Altimeter(QWidget):
         dial.drawPolygon(outside_dial)
 
         """ Not sure if this is needed
-        if self.item.bad:
+        if self._altBad:
             dial.resetTransform()
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
             dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
-        elif self.item.old:
+        elif self._altOld:
             dial.resetTransform()
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
@@ -156,10 +165,23 @@ class Altimeter(QWidget):
         if altimeter != self._altimeter:
             self._altimeter = altimeter
             self.update()
+
+    altimeter = property(getAltimeter, setAltimeter)
+
     def setData(self, item, value):
         self.setAltimeter(value)
 
-    altimeter = property(getAltimeter, setAltimeter)
+    def setBad(self, bad, item=None):
+        self._altBad = bad
+        if self.isVisible(): self.repaint()
+
+    def setFail(self,fail, item=None):
+        self._altFail = fail
+        if self.isVisible(): self.repaint()
+
+    def setOld(self, old, item=None):
+        self._altOld = old
+        if self.isVisible(): self.repaint()
 
 
 class Altimeter_Tape(QGraphicsView):
@@ -172,16 +194,23 @@ class Altimeter_Tape(QGraphicsView):
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = fontsize
 
+        # Assume bad state when starting
+        self._altOld = True
+        self._altBad = True
+        self._altFail = True
         if data:
-            self.item=data
+            self._altimeter = data
         else:
             self.item = fix.db.get_item("ALT")
             self._altimeter = self.item.value
 
             self.item.valueChanged[float].connect(self.setAltimeter)
-            self.item.oldChanged[bool].connect(self.setAltOld)
-            self.item.badChanged[bool].connect(self.setAltBad)
-            self.item.failChanged[bool].connect(self.setAltFail)
+            self.item.oldChanged[bool].connect(self.setOld)
+            self.item.badChanged[bool].connect(self.setBad)
+            self.item.failChanged[bool].connect(self.setFail)
+            self._altOld = self.item.old
+            self._altBad = self.item.bad
+            self._altFail = self.item.fail
 
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
@@ -193,7 +222,6 @@ class Altimeter_Tape(QGraphicsView):
         self.maxalt = maxalt
         self.myparent = parent
 
-        self._altimeter = self.item.value
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
         self.numerical_display.value = self._altimeter
 
@@ -243,12 +271,12 @@ class Altimeter_Tape(QGraphicsView):
         self.numerical_display.show()
         self.numerical_display.value = self._altimeter
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
-        self.setAltOld(self.item.old)
-        self.setAltBad(self.item.bad)
-        self.setAltFail(self.item.fail)
 
     def y_offset(self, alt):
         return self.height_pixel - (alt*self.pph) - self.height()/2
+
+    def showEvent(self, event):
+        self.redraw()
 
     def redraw(self):
         self.resetTransform()
@@ -279,18 +307,24 @@ class Altimeter_Tape(QGraphicsView):
         if altimeter != self._altimeter:
             self._altimeter = altimeter
             self.numerical_display.value = altimeter
-            self.redraw()
+            if self.isVisible(): self.redraw()
+
+    altimeter = property(getAltimeter, setAltimeter)
 
     def setData(self, item, value):
         self.setAltimeter(value)
 
-    altimeter = property(getAltimeter, setAltimeter)
+    def setBad(self, bad, item=None):
+        self._altBad = bad
+        self.numerical_display.bad = bad
 
-    def setAltOld(self,b):
-        self.numerical_display.old = b
+    def setFail(self,fail, item=None):
+        self._altFail = fail
+        self.numerical_display.fail = fail
 
-    def setAltBad(self,b):
-        self.numerical_display.bad = b
+    def setOld(self, old, item=None):
+        self._altOld = old
+        self.numerical_display.old = old
 
-    def setAltFail(self,b):
-        self.numerical_display.fail = b
+
+
