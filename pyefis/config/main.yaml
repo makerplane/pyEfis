@@ -18,7 +18,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: MainScreen
+  defaultScreen: PFD #MainScreen
 
 menu:
   menus:
@@ -160,37 +160,60 @@ outputs:
 
 screens:
   MainScreen:
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
-    title: Engine Management
+    title: Screen Builder
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
-      columns: 303
+      columns: 384
     instruments:
-      - type: atitude_indicator
+#      - type: atitude_indicator
+      - type: virtual_vfr
         row: 1
-        column: 1
+        column: 50
         span:
           rows: 110
-          columns: 120
+          columns: 150
       - type: altimeter_tape
         db_item: ALT
         row: 1
-        column: 105
+        column: 185
         span:
           rows: 110
           columns: 15
         options:
           fontsize: 22
+      - type: airspeed_tape
+        db_item: IAS
+        row: 1
+        column: 50
+        span:
+          rows: 110
+          columns: 15
+        options:
+          fontsize: 22
+      - type: heading_tape
+        db_item: IAS
+        row: 100
+        column: 50
+        span:
+          rows: 11
+          columns: 150
+        options:
+          fontsize: 25
       - type: ganged_arc_gauge
         gang_type: vertical
         row: 1
-        column: 121
+        column: 201
         span:
           rows: 110
-          columns: 60
+          columns: 40
         groups:
           - name: Engine
+            common_options:
+              nameLocation: right
             instruments:
               -
                 db_item: TACH1
@@ -228,105 +251,109 @@ screens:
       - type: ganged_arc_gauge
         gang_type: vertical
         row: 1
-        column: 182
+        column: 242
         span:
           rows: 110
-          columns: 60
+          columns: 40
         groups:
           - name: Engine
+            common_options:
+              nameLocation: right
             instruments:
               -
-                db_item: TACH1
+                db_item: FUELQT
                 options:
                   name: Fuel Total
                   decPlaces: 0
               -
-                db_item: CHTMAX1
+                db_item: FUELQ1
                 options:
                   name: Fuel Left
                   decPlaces: 0
                   temperature: true
               -
-                db_item: EGTAVG1
+                db_item: FUELQ2
                 options:
                   name: Fuel Center
                   decPlaces: 0
                   temperature: true
               -
-                db_item: H2OT1
+                db_item: FUELQ3
                 options:
                   name: Fuel Right
                   decPlaces: 0
                   temperature: true
               -
-                db_item: OILP1
+                db_item: FUELF1
                 options:
-                  name: 
+                  name: Fuel Flow
                   decPlaces: 1
               -
-                db_item: OILT1
+                db_item: FUELP1
                 options:
-                  name: Fuel Range
+                  name: Fuel Pressure
                   decPlaces: 1
       - type: ganged_arc_gauge
         gang_type: vertical
         row: 1
-        column: 243
+        column: 283
         span:
           rows: 110
-          columns: 60
+          columns: 40
         groups:
           - name: Misc
+            common_options:
+              nameLocation: right
             instruments:
               -
-                db_item: H2OT1
+                db_item: VOLT
                 options:
                   name: Battery
                   decPlaces: 0
               -
-                db_item: H2OT1
+                db_item: CURRNT
                 options:
                   name: Amps
                   decPlaces: 0
                   temperature: true
               -
-                db_item: EGTAVG1
+                db_item: OAT
                 options:
                   name: OAT
                   decPlaces: 0
                   temperature: true
               -
-                db_item: H2OT1
+                db_item: CAT
                 options:
                   name: Cabin Temp
                   decPlaces: 0
                   temperature: true
               -
-                db_item: OILP1
+                db_item: BARO
                 options:
-                  name:  ???
+                  name:  Baro set
                   decPlaces: 1
               -
-                db_item: OILT1
+                db_item: THR1
                 options:
-                  name: ????
+                  name: Throttle
                   decPlaces: 1
 
 
           
   EPFD:
     module: pyefis.screens.epfd
-    title: Primary Flight Display
-    dbpath: /home/phil/.makerplane/data/CIFP/FAACIFP18
-    indexpath: /home/phil/.makerplane/data/CIFP/index.bin
+    title: E Primary Flight Display
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
     check_engine: [MAP1, TACH1, OILP1, OILT1, FUELQT, FUELF1, CHTMAX1, EGTAVG1]
     update_period: .1
 
   PFD:
     module: pyefis.screens.pfd
     title: Primary Flight Display
-    dbpath: /home/phil/.makerplane/data/CIFP/FAACIFP18
-    indexpath: /home/phil/.makerplane/data/CIFP/index.bin
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
     update_period: .1
 
   EMS:
@@ -335,7 +362,7 @@ screens:
 
   EMSNew:
     module: pyefis.screens.screenbuilder
-    title: Engine Management
+    title: Engine Management New
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 16
@@ -533,41 +560,35 @@ screens:
         move:
           shrink: 50
       - 
-        type: arc_gauge
-        db_item: IAS
+        type: atitude_indicator
         row: 2
         column: 1
       - 
-        type: arc_gauge
-        db_item: IAS
+        type: atitude_indicator
         row: 2
         column: 2
         move:
           shrink: 10
       - 
-        type: arc_gauge
-        db_item: IAS
+        type: atitude_indicator
         row: 2
         column: 3
         move:
           shrink: 20
       - 
-        type: arc_gauge
-        db_item: IAS
+        type: atitude_indicator
         row: 2
         column: 4
         move:
           shrink: 30
       - 
-        type: arc_gauge
-        db_item: IAS
+        type: atitude_indicator
         row: 2
         column: 5
         move:
           shrink: 40
       - 
-        type: arc_gauge
-        db_item: IAS
+        type: atitude_indicator
         row: 2
         column: 6
         move:
@@ -610,7 +631,7 @@ screens:
 
   SixPackNew:
     module: pyefis.screens.screenbuilder
-    title: Standard Instrument Panel
+    title: Standard Instrument Panel New
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 2
