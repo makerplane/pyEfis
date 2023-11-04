@@ -34,6 +34,7 @@ class ActionClass(QWidget):
     menuEncoder = pyqtSignal(object)
     setMenuFocus = pyqtSignal(object)
     setInstUnits = pyqtSignal(object)
+    doExit = pyqtSignal(object)
     # arg = <inst name>,<inst name>,<inst name>,..:<Command>
 
 
@@ -52,6 +53,7 @@ class ActionClass(QWidget):
                           "menu encoder":self.menuEncoder,
                           "set menu focus":self.setMenuFocus,
                           "set instrument units":self.setInstUnits,
+                          "exit":self.doExit,
                           "evaluate":eval
                     }
 
