@@ -28,9 +28,37 @@ class ArcGauge(AbstractGauge):
         self.startAngle = 45
         self.sweepAngle = 180 - 45
 
+    def get_height(self, width):
+        return width/ 2
+
+    def get_width(self, height):
+        return height * 2
+
     def resizeEvent(self, event):
-        self.arcCenter = QPointF(self.width() / 2, self.height())
-        self.arcRadius = self.height() - 10
+        #Properly pick a center and arc that will fit the area defined
+        if self.width() < self.height():
+            self.r_height = self.get_height(self.width())
+            self.r_width = self.width()
+            if self.height() < self.r_height:
+                self.r_height = self.height()
+                self.r_width = self.get_width(self.height())
+        else:
+            self.r_width = self.get_width(self.height())
+            self.r_height = self.height()
+            if self.width() < self.r_width:
+                self.r_height = self.get_height(self.width())
+                self.r_width = self.width()
+
+        c_height = ((self.height() - self.r_height)  / 2) + self.r_height
+        self.lrcx = self.width() - ((self.width()  - self.r_width)  / 2)
+        self.lrcy =  self.height() - ((self.height() - self.r_height)  / 2)
+        self.tlcx = 0 +  ((self.width() - self.r_width)   / 2)
+        self.tlcy = 0 + ((self.height() - self.r_height)  / 2)
+
+
+        self.arcCenter = QPointF(self.width() / 2, c_height -  5)
+
+        self.arcRadius = self.r_height - 10
 
         # A polygon for the pointer
         self.arrow = QPolygonF()
@@ -114,11 +142,10 @@ class ArcGauge(AbstractGauge):
         pen.setWidth(1)
         p.setPen(pen)
         f = QFont()
-        f.setPixelSize(qRound(self.height() / 6))
+        f.setPixelSize(qRound(self.r_height / 6))
         p.setFont(f)
-        opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
         #p.drawText(QPoint(centerX - (r - 40), centerY - (r - 40)), self.name)
-        p.drawText(QPointF(self.width() / 20,f.pixelSize()), self.name)
+        p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
 
         # Main value text
         path = QPainterPath()
@@ -126,8 +153,8 @@ class ArcGauge(AbstractGauge):
         p.setBrush(brush)
         pen.setColor(QColor(Qt.black))
         p.setPen(pen)
-        f.setPixelSize(qRound(self.height() / 2))
+        f.setPixelSize(qRound(self.r_height / 2))
         fm = QFontMetrics(f)
         x = fm.width(self.valueText)
-        path.addText(QPointF( self.width()-x, self.height()-1),f, self.valueText)
+        path.addText(QPointF( self.lrcx - x, self.lrcy - 1),f, self.valueText)
         p.drawPath(path)
