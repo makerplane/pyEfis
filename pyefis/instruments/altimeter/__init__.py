@@ -26,11 +26,12 @@ from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, bg_color=Qt.black):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
+        self.bg_color = bg_color
         self.item = fix.db.get_item("ALT")
         self.item.valueChanged[float].connect(self.setAltimeter)
         self.item.oldChanged[bool].connect(self.repaint)
@@ -50,7 +51,7 @@ class Altimeter(QWidget):
         center_y = h/2
 
         # Draw the Black Background
-        dial.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, QColor(self.bg_color))
 
         # Setup Pens
         if self.item.old or self.item.bad:
