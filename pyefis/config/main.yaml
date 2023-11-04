@@ -5,12 +5,12 @@ main:
   # Screen Geometry
   #screenWidth: 1024
   #screenHeight: 768
-  #screenWidth: 1920
-  #screenHeight: 1080
+  screenWidth: 1920
+  screenHeight: 1080
   #screenWidth: 800
   #screenHeight: 480
-  screenWidth: 3840
-  screenHeight: 1100
+  #screenWidth: 3840
+  #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: True
 
@@ -18,7 +18,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: MainScreen
+  defaultScreen: ScaleTest #MainScreen
 
 menu:
   menus:
@@ -399,7 +399,7 @@ screens:
       -
         type: arc_gauge
         row: 1
-        column: 11
+        column: 10
         span:
           rows: 4
           columns: 10
@@ -411,10 +411,10 @@ screens:
         type: ganged_horizontal_bar_gauge
         gang_type: vertical
         row: 1
-        column: 21
+        column: 20
         span:
           rows: 5
-          columns: 14
+          columns: 7
         groups:
           - name: Oil
             instruments:
@@ -533,119 +533,152 @@ screens:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
 
+
+
+# The purpose of this screen is to ensure that dials render properly when given different ratio bounding areas
+# Also useful to make sure that elements of the instrument are scaling with size, for example I have found many
+# instruments that have hard coded pixel sizes for various elements or they are scaled to a dimension that 
+# does not make the most sense. For example the altimeter/airspeed tapes should scale font sizes based on
+# the width. That would ensure as resolutions are increased/decreased the tapes look the same and
+# are redable.
+#
+# Things like color bands, tick marks, pointers etc seem to not scale currently.
+#
+# for instruments that only display well when rendered at a specific ratio they should include the following method:
+#    def getRatio(self):
+#        # Return X for 1:x specifying the ratio for this instrument
+#        return X
+#
+# screenbuilder uses this to ensure gauges are given an appropriately ratio for their bounding box.
+#
+# Ideally all instruments should also have the ability to change background color.
+# Making it transparent allows for some overlap of the gauges so we can fit many more on this test page.
+#
+# This test page should render proper looking gauges even if the screen resolution is changed.
+# If this is not happening then an issue exists in the gauge and/or screenbuilder.
+# Since care has been taken in screen builder to follow the above noted method most likely the gauge/instrument is to blame. 
+
   ScaleTest:
     module: pyefis.screens.screenbuilder
     title: Test how well things scale to different sizes
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
-      rows: 3
-      columns: 6
+      rows: 10
+      columns: 19
     instruments:
       -
         type: airspeed_dial
-        row: 1
-        column: 1
-      -
-        type: airspeed_dial
+        description: Tall box
         row: 1
         column: 1
         span:
+          rows: 7
+          columns: 3
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: airspeed_dial
+        description: Wide box
+        row: 4
+        column: 1
+        span:
+          rows: 3
+          columns: 7
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: airspeed_dial
+        description: scaled box
+        row: 7
+        column: 1
+        span:
+          rows: 2
           columns: 2
         options:
           bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
       -
         type: airspeed_dial
-        row: 1
-        column: 3
-        move:
-          shrink: 20
-      -
-        type: airspeed_dial
-        row: 1
-        column: 4
-        move:
-          shrink: 30
-      -
-        type: airspeed_dial
-        row: 1
-        column: 5
-        move:
-          shrink: 40
-      -
-        type: airspeed_dial
-        row: 1
-        column: 6
-        move:
-          shrink: 50
-      - 
-        type: atitude_indicator
-        row: 2
+        description: scaled box
+        row: 7
         column: 1
-      - 
-        type: atitude_indicator
-        row: 2
-        column: 2
+        span:
+          rows: 4
+          columns: 4
+        options:
+          bg_color: "#00000000"
         move:
-          shrink: 10
-      - 
-        type: atitude_indicator
-        row: 2
-        column: 3
-        move:
-          shrink: 20
-      - 
-        type: atitude_indicator
-        row: 2
-        column: 4
-        move:
-          shrink: 30
-      - 
-        type: atitude_indicator
-        row: 2
-        column: 5
-        move:
-          shrink: 40
-      - 
-        type: atitude_indicator
-        row: 2
-        column: 6
-        move:
-          shrink: 50
-      -
-        type: altimeter_dial
-        row: 3
-        column: 1
-      -
-        type: altimeter_dial
-        row: 3
-        column: 2
-        move:
-          shrink: 10
-      -
-        type: altimeter_dial
-        row: 3
-        column: 3
-        move:
-          shrink: 20
-      -
-        type: altimeter_dial
-        row: 3
-        column: 4
-        move:
-          shrink: 30
-      -
-        type: altimeter_dial
-        row: 3
-        column: 5
-        move:
-          shrink: 40
-      -
-        type: altimeter_dial
-        row: 3
-        column: 6
-        move:
-          shrink: 50
+          justify:
+            - bottom
+            - right
 
+      -
+        type: altimeter_dial
+        description: Tall box
+        row: 1
+        column: 4
+        span:
+          rows: 7
+          columns: 3
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: altimeter_dial
+        description: Wide box
+        row: 4
+        column: 4
+        span:
+          rows: 3
+          columns: 7
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: altimeter_dial
+        description: scaled box
+        row: 7
+        column: 4
+        span:
+          rows: 2
+          columns: 2
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: altimeter_dial
+        description: scaled box
+        row: 7
+        column: 4
+        span:
+          rows: 4
+          columns: 4
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - bottom
+            - right
 
   SixPackNew:
     module: pyefis.screens.screenbuilder

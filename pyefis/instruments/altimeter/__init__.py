@@ -38,6 +38,10 @@ class Altimeter(QWidget):
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
+
     # TODO We continuously draw things that don't change.  Should draw the
     # background save to pixmap or something and then blit it and draw arrows.
     def paintEvent(self, event):

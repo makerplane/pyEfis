@@ -54,6 +54,10 @@ class TurnCoordinator(QWidget):
         self.alat_multiplier = 1.0 / (0.217)
         self.max_tc_displacement = 1.0 / self.alat_multiplier
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
+
     def resizeEvent(self, event):
         self.tick_thickness = self.height() / 32
         self.tick_length = self.width() / 12

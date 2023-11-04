@@ -40,6 +40,9 @@ class Airspeed(QWidget):
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
 
     def paintEvent(self, event):
         w = self.width()

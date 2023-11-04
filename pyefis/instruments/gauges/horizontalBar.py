@@ -26,6 +26,10 @@ class HorizontalBar(AbstractGauge):
         super(HorizontalBar, self).__init__(parent)
         self.setMinimumSize(100, 50)
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 2
+
     def resizeEvent(self, event):
         self.bigFont = QFont()
         self.bigFont.setPixelSize(qRound(self.height() / 2))

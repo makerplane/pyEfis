@@ -42,6 +42,10 @@ class VerticalBar(AbstractGauge):
         self.peakColor = QColor(Qt.magenta)
         self._oldpencolor = self.penGoodColor
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 0.5
+
     def getNormalizeMode(self):
         return self._normalizeMode
 

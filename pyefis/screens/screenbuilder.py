@@ -245,17 +245,29 @@ class Screen(QWidget):
                         grid_width = grid_width * int(c['span']['columns'])
 
 
-            width = grid_width
-            height = grid_height
-            x = grid_x
-            y = grid_y
+            width = r_width = grid_width
+            height = r_height = grid_height
+            x = r_x = grid_x
+            y = r_y = grid_y
+
+            # Here we need the size of the object for things that need to have specific dimensions
+            # example the round gauges
+            # need to know if a specific type needs a specific ratio or not
+            # we will get this from the instrument.
+            ratio = False
+            logger.debug(f"{c['type']} {'ganged' in c['type']}")
+            if  'ganged' not in c['type'] and hasattr( self.instruments[i], 'getRatio'):
+                #This instrument needs a specific ratio
+                ratio = self.instruments[i].getRatio()
+                logger.debug(f"Instrument {c['type']} has ratio 1:{ratio}")
+                r_width,r_height,r_x,r_y = self.get_bounding_box(width, height,x,y,ratio)
 
             if 'move' in c:
                 if 'shrink' in c['move']:
                     if (c['move'].get('shrink',0) < 99 ) and (c['move'].get('shrink',0) >= 0):
                         # Valid shrink percentage
-                        width = grid_width - (grid_width * c['move'].get('shrink',0)/ 100)
-                        height = grid_height - (grid_height * c['move'].get('shrink',0)/ 100)
+                        r_width = r_width - (r_width * c['move'].get('shrink',0)/ 100)
+                        r_height = r_height - (r_height * c['move'].get('shrink',0)/ 100)
                     else:
                         raise Exception("shrink must be a valid number between 1 and 99")
                     justified_horizontal = False
@@ -266,21 +278,22 @@ class Screen(QWidget):
                                 x = grid_x
                                 justified_horizontal = True
                             elif j == 'right':
-                                x = grid_x + ( grid_width - width)
+                                x = grid_x + ( grid_width - r_width)
                                 justified_horizontal = True
                             if j == 'top':
                                 y = grid_y
                                 justified_vertical = True
                             elif j == 'bottom':
-                                y = grid_y + ( grid_height - height)
+                                y = grid_y + ( grid_height - r_height)
                                 justified_vertical = True
-                    
                     # Default is to center
                     if not justified_horizontal:
-                        x = grid_x + (( grid_width - width) / 2)
+                        x = grid_x + (( grid_width - r_width) / 2)
                     if not justified_vertical:
-                        y = grid_y + (( grid_height - height) / 2) 
-
+                        y = grid_y + (( grid_height - r_height) / 2) 
+            elif ratio:
+                x = grid_x + (( grid_width - r_width) / 2)
+                y = grid_y + (( grid_height - r_height) / 2)
 
             if 'ganged' in c['type']:
                 inst_count = 0
@@ -305,10 +318,20 @@ class Screen(QWidget):
                 else:
                     group_height = (height - total_gaps) / inst_count 
                     group_width = width
+
                 for g in c['groups']:
                     # Render some tiles?
                     for ci in g['instruments']:
-                        self.move_resize_inst(i + gang_count,qRound(group_x),qRound(group_y),qRound(group_width),qRound(group_height))
+                        g_width = group_width
+                        g_height = group_height
+                        g_x = group_x
+                        g_y = group_y
+                        if hasattr( self.instruments[i], 'getRatio'):
+                            g_ratio = self.instruments[i].getRatio()
+                            logger.debug(f"Ganged Instrument {c['type']} has ratio 1:{g_ratio}")
+                            g_width,g_height,g_x,g_y = self.get_bounding_box(g_width, g_height,g_x,g_y,g_ratio)
+
+                        self.move_resize_inst(i + gang_count,qRound(g_x),qRound(g_y),qRound(g_width),qRound(g_height))
                         try:
                             self.instruments[i + gang_count].setupGauge()
                         except:
@@ -325,12 +348,13 @@ class Screen(QWidget):
 
 
             else:
-                self.move_resize_inst(i,qRound(x),qRound(y),qRound(width),qRound(height))
+                self.move_resize_inst(i,qRound(x),qRound(y),qRound(r_width),qRound(r_height))
             try:
                 # Gauges need this run to set them up
                 self.instruments[i].setupGauge()
             except:
                 pass
+
 
     def move_resize_inst(self,inst,x,y,width,height):
         self.instruments[inst].move(x,y)
@@ -345,3 +369,29 @@ class Screen(QWidget):
 
     def get_config_item(self, key):
         return self.parent.get_config_item(self, key)
+
+
+    def get_bounding_box(self, width, height,x,y,ratio):
+        if width < height:
+            r_height = width / ratio
+            r_width = width
+            if height < r_height:
+                r_height = height
+                r_width = height * ratio
+        else:
+            r_width = height * ratio
+            r_height = height
+            if width < r_width:
+                r_height = width / ratio
+                r_width = width
+        # r_height and r_width are in correct ratio to fit within the box
+        if r_height == height:
+            # It is the width we need to center
+            r_y = y
+            r_x = x + ((width - r_width)/2)
+        else:
+            # If is the height we need to center
+            r_x = x
+            r_y = y + ((height - r_height)/2)
+        logger.debug(f"x:{x}, r_x:{r_x} y:{y} r_y:{r_y} width:{width} r_width:{r_width} height:{height} r_height:{r_height}")
+        return (r_width,r_height,r_x,r_y)

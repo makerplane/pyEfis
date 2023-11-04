@@ -28,6 +28,10 @@ class ArcGauge(AbstractGauge):
         self.startAngle = 45
         self.sweepAngle = 180 - 45
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 2
+
     def resizeEvent(self, event):
         self.arcCenter = QPointF(self.width() / 2, self.height())
         self.arcRadius = self.height() - 10
