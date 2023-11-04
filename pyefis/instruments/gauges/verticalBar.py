@@ -72,6 +72,25 @@ class VerticalBar(AbstractGauge):
 
     peakMode = property(getPeakMode, setPeakMode)
 
+
+    def setMode(self, args):
+        print(f"Seting mode for {self._dbkey}")
+        if args.lower() == "normalize":
+                self.normalizeMode = not self._normalizeMode
+        elif args.lower() == "peak":
+                self.peakMode = not self._peakMode
+        elif args.lower() == "reset peak":
+                self.resetPeak()
+        elif args.lower() == "lean":
+                self.resetPeak()
+                self.normalizeMode = True
+                self.peakMode = True
+        elif args.lower() == "normal":
+                self.normalizeMode = False
+                self.peakMode = False
+
+
+
     def resizeEvent(self, event):
         self.barWidth = self.width() * self.barWidthPercent
         self.lineWidth = self.width() * self.lineWidthPercent
@@ -203,7 +222,7 @@ class VerticalBar(AbstractGauge):
                 y = self.barTop + (self.barHeight - self.interpolate(self.peakValue, self.barHeight))
             if y < self.barTop: y = self.barTop
             if y > self.barBottom: y = self.barBottom
-            p.drawRect(self.lineLeft, y-2, self.lineWidth, 4)
+            p.drawRect(qRound(self.lineLeft), qRound(y-2), qRound(self.lineWidth), qRound(4))
 
         # Indicator Line
         brush = QBrush(self.penColor)

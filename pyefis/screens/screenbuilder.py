@@ -32,6 +32,7 @@ from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 import pyavtools.fix as fix
 from collections import defaultdict
 import re
+import pyefis.hmi as hmi
 
 import logging
 
@@ -155,6 +156,9 @@ class Screen(QWidget):
         if 'options' in i:
             #loop over each option
             for option,value in i['options'].items():
+                if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
+                    hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
+                    next
                 if 'dbkey' in option: 
                     self.instruments[count].setDbkey(value)
                     next
