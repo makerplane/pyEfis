@@ -330,10 +330,14 @@ class AI(QGraphicsView):
     def wheelEvent(self, event):
         pass
 
+    def showEvent(self, event):
+        self.redraw()
+
     def setRollAngle(self, angle):
-        if angle != self._rollAngle and self.isVisible() and (not self._AIFail):
+        if angle != self._rollAngle and not self._AIFail:
             self._rollAngle = common.bounds(-180, 180, angle)
-            self.redraw()
+            if self.isVisible():
+                self.redraw()
 
     def getRollAngle(self):
         return self._rollAngle
@@ -341,14 +345,16 @@ class AI(QGraphicsView):
     rollAngle = property(getRollAngle, setRollAngle)
 
     def setLateralAcceleration(self, value):
-        if value != self._latAccel and self.isVisible():
+        if value != self._latAccel:
             self._latAccel = common.bounds(-0.3, 0.3, value)
-            self.update()
+            if self.isVisible():
+                self.update()
 
     def setTrueAirspeed(self, value):
-        if value != self._tas and self.isVisible():
+        if value != self._tas:
             self._tas = value
-            self.update()
+            if self.isVisible():
+                self.update()
 
 
     def setAIFail(self, fail):
@@ -399,10 +405,11 @@ class AI(QGraphicsView):
                     self.redraw()
 
     def setPitchAngle(self, angle):
-        if angle != self._pitchAngle and self.isVisible() and (not self._AIFail):
+        if angle != self._pitchAngle and not self._AIFail:
             self._pitchAngle = common.bounds(-90, 90, angle)
             self.setPitchItems()
-            self.redraw()
+            if self.isVisible():
+                self.redraw()
 
     def getPitchAngle(self):
         return self._pitchAngle
