@@ -27,11 +27,12 @@ from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
     FULL_WIDTH = 400
-    def __init__(self, parent=None, fontsize=20):
+    def __init__(self, parent=None, fontsize=20, bg_color=Qt.black):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = fontsize
+        self.bg_color = bg_color
         self._airspeed = 0
         self.item = fix.db.get_item("IAS")
         self.item.valueChanged[float].connect(self.setAirspeed)
@@ -39,6 +40,9 @@ class Airspeed(QWidget):
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
 
     def paintEvent(self, event):
         w = self.width()
@@ -47,7 +51,7 @@ class Airspeed(QWidget):
         dial.setRenderHint(QPainter.Antialiasing)
 
         #Draw the Black Background
-        dial.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, QColor(self.bg_color))
 
         # Setup Pens
         f = QFont()

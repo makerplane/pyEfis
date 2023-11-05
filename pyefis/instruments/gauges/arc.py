@@ -34,6 +34,10 @@ class ArcGauge(AbstractGauge):
     def get_width(self, height):
         return height * 2
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 2
+
     def resizeEvent(self, event):
         #Properly pick a center and arc that will fit the area defined
         if self.width() < self.height():

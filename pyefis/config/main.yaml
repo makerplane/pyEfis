@@ -5,9 +5,12 @@ main:
   # Screen Geometry
   #screenWidth: 1024
   #screenHeight: 768
-  screenWidth: 800
-  screenHeight: 480
-
+  screenWidth: 1920
+  screenHeight: 1080
+  #screenWidth: 800
+  #screenHeight: 480
+  #screenWidth: 3840
+  #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: True
 
@@ -15,7 +18,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: EPFD
+  defaultScreen: ScaleTest #MainScreen
 
 menudisabled:
   menus:
@@ -39,7 +42,7 @@ menudisabled:
           - ['Show', 'activate menu','PFDMenu']
       ShowMenu2:
           - ['Show', 'activate menu','BasicMenu']
-  start_menu: ShowMenu
+  start_menu: PFDMenu
 #  show_time: 3  # hides the menu after 3 seconds.  However cannot show again.  Don't use.  Here for reference only.
   number_of_buttons: 6
   buttons_spacing: 120
@@ -297,6 +300,19 @@ keybindingsdisabled:
     action: Change Value
     args: BARO,-0.01
 
+  - key: "1"
+    action: Set EGT Mode
+    args: Normalize
+  - key: "2"
+    action: Set EGT Mode
+    args: Peak
+  - key: "3"
+    action: Set EGT Mode
+    args: Lean
+  - key: "4"
+    action: Set EGT Mode
+    args: Reset Peak
+
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
 databindingsdisabled:
@@ -358,29 +374,585 @@ outputs:
 # the screen
 
 screens:
+  MainScreen:
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
+    module: pyefis.screens.screenbuilder
+    title: Screen Builder
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 110
+      columns: 384
+    instruments:
+#      - type: atitude_indicator
+      - type: virtual_vfr
+        row: 1
+        column: 91
+        span:
+          rows: 110
+          columns: 150
+      - type: horizontal_situation_indicator
+        row: 1
+        column: 91
+        span:
+          rows: 110
+          columns: 150
+        move:
+          shrink: 12
+        options:
+          fontSize: 28
+          fgcolor: "#aaaaaa"
+          bgcolor: "#aaaaaa"
+      - type: altimeter_tape
+        row: 1
+        column: 226
+        span:
+          rows: 110
+          columns: 15
+        options:
+          fontsize: 28
+          number_font_size: 40
+      - type: airspeed_tape
+        row: 1
+        column: 91
+        span:
+          rows: 110
+          columns: 15
+        options:
+          fontsize: 28
+      - type: heading_display
+        row: 1
+        column: 91
+        span:
+          rows: 110
+          columns: 150
+        move:
+          shrink: 95
+          justify: 
+            - top
+        options:
+          #bg_color: "#00000000"
+          #fg_color: "#000000"
+          fontSize: 10
+          font_size: 30
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 1
+        column: 50
+        span:
+          rows: 110
+          columns: 40
+        groups:
+          - name: Engine
+            common_options:
+              nameLocation: right
+              decimalPlaces: 0
+            instruments:
+              -
+                options:
+                  name: RPM
+                  dbkey: TACH1
+              -
+                options:
+                  name: Max CHT
+                  temperature: true
+                  dbkey: CHTMAX1
+              -
+                options:
+                  name: Avg EGT
+                  temperature: true
+                  dbkey: EGTAVG1
+              -
+                options:
+                  name: Coolant
+                  temperature: true
+                  dbkey: H2OT1
+              -
+                options:
+                  name: Oil Press
+                  dbkey: OILP1
+              -
+                options:
+                  name: Oil Temp
+                  dbkey: OILT1
+                  temperature: true
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 1
+        column: 242
+        span:
+          rows: 110
+          columns: 40
+        groups:
+          - name: Engine
+            common_options:
+              nameLocation: right
+              decimalPlaces: 0
+            instruments:
+              -
+                options:
+                  name: Fuel Total
+                  dbkey: FUELQT
+              -
+                options:
+                  name: Fuel Left
+                  dbkey: FUELQ1
+              -
+                options:
+                  name: Fuel Center
+                  dbkey: FUELQ2
+              -
+                options:
+                  name: Fuel Right
+                  dbkey: FUELQ3
+              -
+                options:
+                  name: Fuel Flow
+                  dbkey: FUELF1
+              -
+                options:
+                  name: Fuel Pressure
+                  dbkey: FUELP1
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 1
+        column: 283
+        span:
+          rows: 110
+          columns: 40
+        groups:
+          - name: Misc
+            common_options:
+              nameLocation: right
+              decimalPlaces: 0 
+            instruments:
+              -
+                options:
+                  name: Battery
+                  decimalPlaces: 1
+                  dbkey: VOLT
+              -
+                options:
+                  name: Amps
+                  decimalPlaces: 1
+                  dbkey: CURRNT
+              -
+                options:
+                  name: OAT
+                  decimalPlaces: 1
+                  temperature: true
+                  showUnits: true
+                  dbkey: OAT
+              -
+                options:
+                  name: Cabin Temp
+                  decimalPlaces: 1
+                  temperature: true
+                  dbkey: CAT
+              -
+                options:
+                  name:  Baro set
+                  decimalPlaces: 1
+                  dbkey: BARO
+              -
+                options:
+                  name: Throttle
+                  dbkey: THR1
+
+          
   EPFD:
     module: pyefis.screens.epfd
-    title: Primary Flight Display
-    dbpath: /home/phil/.makerplane/data/CIFP/FAACIFP18
-    indexpath: /home/phil/.makerplane/data/CIFP/index.bin
+    title: E Primary Flight Display
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
     check_engine: [MAP1, TACH1, OILP1, OILT1, FUELQT, FUELF1, CHTMAX1, EGTAVG1]
     update_period: .1
 
   PFD:
     module: pyefis.screens.pfd
     title: Primary Flight Display
-    dbpath: /home/phil/.makerplane/data/CIFP/FAACIFP18
-    indexpath: /home/phil/.makerplane/data/CIFP/index.bin
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
     update_period: .1
 
   EMS:
     module: pyefis.screens.ems_sm
     title: Engine Management
 
+  EMSNew:
+    module: pyefis.screens.screenbuilder
+    title: Engine Management New
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 16
+      columns: 27
+    instruments:
+      -
+        type: arc_gauge
+        row: 1
+        column: 1
+        span:
+          rows: 4
+          columns: 10
+        options:
+          name: RPM
+          decimalPlaces: 0
+          dbkey: TACH1
+      -
+        type: arc_gauge
+        row: 1
+        column: 10
+        span:
+          rows: 4
+          columns: 10
+        options:
+          name: MAP
+          decimalPlaces: 1          
+          dbkey: MAP1
+      -
+        type: ganged_horizontal_bar_gauge
+        gang_type: vertical
+        row: 1
+        column: 20
+        span:
+          rows: 5
+          columns: 7
+        groups:
+          - name: Oil
+            instruments:
+              -
+                options:
+                  name: Oil Press
+                  dbkey: OILP1
+              -
+                options:
+                  name: Oil Temp
+                  dbkey: OILT1 
+                  temperature: true
+      -
+        type: ganged_vertical_bar_gauge
+        gang_type: horizontal
+        row: 8
+        column: 1
+        span:
+          rows: 5
+          columns: 27
+        groups:
+          - name: Power
+            instruments:
+              -
+                options:
+                  name: Volt
+                  decimapPlaces: 1
+                  showUnits: false
+                  dbkey: VOLT
+              -
+                options:
+                  name: Amp
+                  showUnits: false
+                  dbkey: CURRNT
+          - name: EGT
+            #options:
+            #  ???? highlight max?
+            common_options:
+              egt_mode_switching: true
+              normalizeRange: 400
+            instruments:
+              -
+                options:
+                  name: "1"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: EGT11
+              -
+                options:
+                  name: "2"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: EGT12
+              -
+                options:
+                  name: "3"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: EGT13
+              -
+                options:
+                  name: "4"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: EGT14
+          - name: CHT
+            instruments:
+              -
+                options:
+                  name: "1"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: CHT11
+              -
+                options:
+                  name: "2"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: CHT12
+              -
+                options:
+                  name: "3"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: CHT13
+              -
+                options:
+                  name: "4"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: CHT14
+          - name: FUEL
+            instruments:
+              -
+                options:
+                  name: "Left"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: FUELQ1
+              -
+                options:
+                  name: "Center"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: FUELQ2
+              -
+                options:
+                  name: "Right"
+                  decPlaces: 0
+                  showUnits: false
+                  dbkey: FUELQ1
+
+
+
   SixPack:
     module: pyefis.screens.sixpack
     title: Standard Instrument Panel
 
+
+
+# The purpose of this screen is to ensure that dials render properly when given different ratio bounding areas
+# Also useful to make sure that elements of the instrument are scaling with size, for example I have found many
+# instruments that have hard coded pixel sizes for various elements or they are scaled to a dimension that 
+# does not make the most sense. For example the altimeter/airspeed tapes should scale font sizes based on
+# the width. That would ensure as resolutions are increased/decreased the tapes look the same and
+# are redable.
+#
+# Things like color bands, tick marks, pointers etc seem to not scale currently.
+#
+# for instruments that only display well when rendered at a specific ratio they should include the following method:
+#    def getRatio(self):
+#        # Return X for 1:x specifying the ratio for this instrument
+#        return X
+#
+# screenbuilder uses this to ensure gauges are given an appropriately ratio for their bounding box.
+#
+# Ideally all instruments should also have the ability to change background color.
+# Making it transparent allows for some overlap of the gauges so we can fit many more on this test page.
+#
+# This test page should render proper looking gauges even if the screen resolution is changed.
+# If this is not happening then an issue exists in the gauge and/or screenbuilder.
+# Since care has been taken in screen builder to follow the above noted method most likely the gauge/instrument is to blame. 
+
+  ScaleTest:
+    module: pyefis.screens.screenbuilder
+    title: Test how well things scale to different sizes
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 10
+      columns: 19
+    instruments:
+      -
+        type: airspeed_dial
+        description: Tall box
+        row: 1
+        column: 1
+        span:
+          rows: 7
+          columns: 3
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: airspeed_dial
+        description: Wide box
+        row: 4
+        column: 1
+        span:
+          rows: 3
+          columns: 7
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: airspeed_dial
+        description: scaled box
+        row: 7
+        column: 1
+        span:
+          rows: 2
+          columns: 2
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: airspeed_dial
+        description: scaled box
+        row: 7
+        column: 1
+        span:
+          rows: 4
+          columns: 4
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - bottom
+            - right
+
+      -
+        type: altimeter_dial
+        description: Tall box
+        row: 1
+        column: 4
+        span:
+          rows: 7
+          columns: 3
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: altimeter_dial
+        description: Wide box
+        row: 4
+        column: 4
+        span:
+          rows: 3
+          columns: 7
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: altimeter_dial
+        description: scaled box
+        row: 7
+        column: 4
+        span:
+          rows: 2
+          columns: 2
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - top
+            - left
+      -
+        type: altimeter_dial
+        description: scaled box
+        row: 7
+        column: 4
+        span:
+          rows: 4
+          columns: 4
+        options:
+          bg_color: "#00000000"
+        move:
+          justify:
+            - bottom
+            - right
+
+  SixPackNew:
+    module: pyefis.screens.screenbuilder
+    title: Standard Instrument Panel New
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 2
+      columns: 3
+      margin:
+        top: 10
+        left: 10
+        right: 10
+        bottom: 10
+    instruments:
+      # Add mapping feature
+      # Some instruments need multiple inputs, how would one know what values/mapping is needed?
+      # span
+      #  rows: 2
+      #  columns: 3
+      -
+        type: airspeed_dial
+        row: 1
+        column: 1
+      - type: atitude_indicator
+        row: 1
+        column: 2
+      -
+        type: altimeter_dial
+        row: 1
+        column: 3
+      -
+        type: turn_coordinator
+        row: 2
+        column: 1
+      - 
+        type: horizontal_situation_indicator
+        row: 2             # Row where this grid starts vertical, 1 is top
+        column: 2          # Column where this grid starts horizontal, 1 is left
+                           # Span is not yet implemented
+        #span:             # Defines if this grid should span multiple columns or rows making it larger
+          #rows: 2         # This grid will occupuy row 2 and 3, 2 rows
+          #columns: 2      # This grid will occupy columns 2 and 3, 2 columns
+        move:              # Everything maintains aspect ratio of the grid you defined, 
+                           # with row, column and span but you can make things smaller by percentages
+                           # The default is for the object to occupy the whole space
+          shrink: 21       # This will reduce the size by 10 percent
+                           # When shrinking the default is for the object to be centered horizontal and vertically
+          justify:         # If you want to move it you can use 'top', 'bottom', 'left' or 'right'
+            - bottom       # If you decide to configure top and bottom or right and left
+                           # Only one of the mutually exclusive options will be used
+                           # While this might seem limiting, keep in mind that you can make a high number of initial grids
+                           # Then use span along with shrink and justify to get items precisely placed.
+                           # Hopefully one day all the widgets will be updated to scale fonts and such based on the size of the space they occupy
+                           # This would make it very simple to resize, just change the size of the window and all items will be proportionally 
+                           # moved and sized to fit. If you go wider gauges might have more space between them horizontally
+                           # However, the screen would still be usable without having to change any other setting.
+        options:
+          gsi_enabled: true
+          cdi_enabled: true
+      -
+        type: heading_display
+        column: 2
+        row: 2
+        move:
+          shrink: 80
+          justify:
+            - top
+
+      -
+        type: vsi_dial
+        row: 2
+        column: 3
   PFDSM:
     module: pyefis.screens.pfd_sm
     title: PFD Small

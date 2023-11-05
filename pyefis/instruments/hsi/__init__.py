@@ -70,6 +70,10 @@ class HSI(QGraphicsView):
         self.myparent = parent
         self.update_period = None
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
+
     def resizeEvent(self, event):
         self.scene = QGraphicsScene(0, 0, self.width(), self.height())
         self.cx = self.width() / 2.0
