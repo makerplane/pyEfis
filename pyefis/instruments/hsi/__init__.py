@@ -31,7 +31,7 @@ from pyefis import common
 
 
 class HSI(QGraphicsView):
-    def __init__(self, parent=None, font_size=15, fgcolor=Qt.white, bgcolor=Qt.black):
+    def __init__(self, parent=None, font_size=15, fgcolor=Qt.white, bgcolor=Qt.black, gsi_enabled=False, cdi_enabled=False):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -42,31 +42,86 @@ class HSI(QGraphicsView):
         self.tickSize = self.fontSize * 0.7
         self.fg_color = fgcolor
         self.bg_color = bgcolor
+        self.gsi_enabled = gsi_enabled
+        self.cdi_enabled = cdi_enabled
         # List for tick mark visibility, Top, Bottom, Right, Left
         self.visiblePointers = [True, True, True, True]
 
-        item = fix.db.get_item("COURSE")
-        self._headingSelect = item.value
-        item.valueChanged[float].connect(self.setHeadingBug)
+        self._CdiOld = True
+        self._CdiBad = True
+        self._CdiFail = True
+
+        self._GsiOld = True
+        self._GsiBad = True
+        self._GsiFail = True
+
+        self._CourseOld = True
+        self._CourseBad = True
+        self._CourseFail = True
+
+        self._HeadOld = True
+        self._HeadBad = True
+        self._HeadFail = True
+
+        self._courseDeviation = 0
+        self._glideSlopeIndicator = 0
+        self.labels = list()
+
+        self.item = fix.db.get_item("COURSE")
+        self._headingSelect = self.item.value
+        self.item.valueChanged[float].connect(self.setHeadingBug)
+        self.item.oldChanged[bool].connect(self.setCourseOld)
+        self.item.badChanged[bool].connect(self.setCourseBad)
+        self.item.failChanged[bool].connect(self.setCourseFail)
+        self.setCourseOld(self.item.old)
+        self.setCourseBad(self.item.bad)
+        self.setCourseFail(self.item.fail)
+
+        if self.cdi_enabled:
+            self.cdidb = fix.db.get_item("CDI")
+            self._courseDeviation = self.cdidb.value
+            self.cdidb.valueChanged[float].connect(self.setCdi)
+            self.cdidb.failChanged[bool].connect(self.setCdiOld)
+            self.cdidb.failChanged[bool].connect(self.setCdiFail)
+            self.cdidb.failChanged[bool].connect(self.setCdiOld)
+            self.setCdiOld(self.cdidb.old)
+            self.setCdiBad(self.cdidb.bad)
+            self.setCdiFail(self.cdidb.fail)
+        else:
+            self._CdiOld = False
+            self._CdiBad = False
+            self._CdiFail = False
+        if self.gsi_enabled:
+            self.gsidb = fix.db.get_item("GSI")
+            self._glideSlopeIndicator = self.gsidb.value
+            self.gsidb.valueChanged[float].connect(self.setGsi)
+            self.gsidb.failChanged[bool].connect(self.setGsiOld)
+            self.gsidb.failChanged[bool].connect(self.setGsiFail)
+            self.gsidb.failChanged[bool].connect(self.setGsiOld)
+            self.setGsiOld(self.gsidb.old)
+            self.setGsiBad(self.gsidb.bad)
+            self.setGsiFail(self.gsidb.fail)
+        else:
+            self._GsiOld = False
+            self._GsiBad = False
+            self._GsiFail = False
+
+        self.head = fix.db.get_item("HEAD")
+        self._heading = self.head.value
+        self.head.valueChanged[float].connect(self.setHeading)
+        self.head.oldChanged[bool].connect(self.setHeadOld)
+        self.head.badChanged[bool].connect(self.setHeadBad)
+        self.head.failChanged[bool].connect(self.setHeadFail)
+        self.setHeadFail(self.head.fail)
+        self.setHeadOld(self.head.old)
+        self.setHeadBad(self.head.bad)
+        self.setHeadFail(self.head.fail)
+
         self._courseSelect = 1
-
-        self.cdidb = fix.db.get_item("CDI")
-        self._courseDeviation = self.cdidb.value
-        self.cdidb.valueChanged[float].connect(self.setCdi)
-        self._showCDI = not self.cdidb.old
-
-        self.gsidb = fix.db.get_item("GSI")
-        self._glideSlopeIndicator = self.gsidb.value
-        self.gsidb.valueChanged[float].connect(self.setGsi)
-        self._showGSI = not self.gsidb.old
+        self._showCDI = not self.isOld()
+        self._showGSI = not self.isOld()
         self.cardinal = ["N", "E", "S", "W"]
-
-        self.item = fix.db.get_item("HEAD")
-        self._heading = self.item.value
-        self.item.valueChanged[float].connect(self.setHeading)
         self.heading_bug = None
-        self.item.failChanged[bool].connect(self.setFail)
-        self._fail = False
         self.myparent = parent
         self.update_period = None
 
@@ -92,7 +147,6 @@ class HSI(QGraphicsView):
         f.setFamily ("Sans")
         f.setPixelSize(self.fontSize)
 
-        self.labels = list()
         for count in range(0, 360, 5):
             angle = (count) * math.pi / 180.0
             cosa = math.cos(angle)
@@ -173,8 +227,6 @@ class HSI(QGraphicsView):
 
         self.overlay = self.map.toImage()
 
-        self.setFail(self.item.fail)
-
 
 
     def heading_bug_polygon(self):
@@ -195,7 +247,6 @@ class HSI(QGraphicsView):
     def paintEvent(self, event):
         super(HSI, self).paintEvent(event)
 
-
         c = QPainter(self.viewport())
 
         # Put the static overlay image on the view
@@ -210,34 +261,33 @@ class HSI(QGraphicsView):
 
 
         # GSI index tics
-        # c.setPen(compassPen)
-        # deviation = -1.0
-        # while deviation <= 1.0:
-        #     c.drawLine(self.cx - 5, self.cy + deviation*self.gsipph,
-        #                self.cx + 5, self.cy + deviation*self.gsipph)
-        #     c.drawLine(self.cx + deviation*self.cdippw, self.cy - 5,
-        #                self.cx + deviation*self.cdippw, self.cy + 5)
-        #     deviation += 1.0/3.0
+        if self.cdi_enabled or self.gsi_enabled:
+            c.setPen(compassPen)
+            deviation = -1.0
+            while deviation <= 1.0:
+                c.drawLine(qRound(self.cx - 5), qRound(self.cy + deviation*self.gsipph),
+                           qRound(self.cx + 5), qRound(self.cy + deviation*self.gsipph))
+                c.drawLine(qRound(self.cx + deviation*self.cdippw), qRound(self.cy - 5),
+                           qRound(self.cx + deviation*self.cdippw), qRound(self.cy + 5))
+                deviation += 1.0/3.0
 
-        # c.setPen(cdiPen)
-        # self._showCDI = not self.cdidb.old
-        # if self._showCDI:
-        #     x = self.cx + self._courseDeviation * self.cdippw
-        #     c.drawLine(x, self.cy + self.r - self.fontSize*2 - 6,
-        #            x, self.cy - self.r + self.fontSize*2 + 6)
-        #
-        # self._showGSI = not self.gsidb.old
-        # if self._showGSI:
-        #     y = self.cy - self._glideSlopeIndicator * self.gsipph
-        #     c.drawLine(self.cx + self.r - self.fontSize*2 - 6, y,
-        #            self.cx - self.r + self.fontSize*2 + 6, y)
+            c.setPen(cdiPen)
+            self._showCDI = not self.isOld()
+            if self._showCDI and self.cdi_enabled:
+                x = self.cx + self._courseDeviation * self.cdippw
+                c.drawLine(qRound(x), qRound(self.cy + self.r - self.fontSize*2 - 6),
+                           qRound(x), qRound(self.cy - self.r + self.fontSize*2 + 6))
+       
+            self._showGSI = not self.isOld()
+            if self._showGSI and self.gsi_enabled:
+                y = self.cy - self._glideSlopeIndicator * self.gsipph
+                c.drawLine(qRound(self.cx + self.r - self.fontSize*2 - 6), qRound(y),
+                           qRound(self.cx - self.r + self.fontSize*2 + 6), qRound(y))
 
     def getHeading(self):
         return self._heading
 
     def setHeading(self, heading):
-        if not self.isVisible():
-            return
         if heading != self._heading:
             now = time.time()
             newheading = common.bounds(0, 360, heading)
@@ -250,18 +300,38 @@ class HSI(QGraphicsView):
             self.rotate(-diff)
             self.last_update_time = now
 
+    def setHeadOld(self,old):
+        self._HeadOld = old
+
+    def setHeadBad(self,bad):
+        self._HeadBad = bad
+
+    def setHeadFail(self,fail):
+        if fail != self._HeadFail:
+            self._HeadFail = fail
+            self.changeFail()
+ 
     heading = property(getHeading, setHeading)
 
-    def setFail(self, fail):
-        if fail != self._fail:
-            self._fail = fail
-            if self.isVisible():
-                if fail:
-                    for l in self.labels:
-                        l.setOpacity(0)
-                else:
-                    for l in self.labels:
-                        l.setOpacity(1)
+    def isOld(self):
+        return self._GsiOld    or self._GsiBad\
+            or self._CdiOld    or self._CdiBad\
+            or self._HeadOld   or self._HeadBad\
+            or self._CourseOld or self._CourseBad
+
+    def isFail(self):
+        return self._GsiFail\
+            or self._CdiFail\
+            or self._HeadBad\
+            or self._CourseBad
+
+    def changeFail(self):
+        if self.isFail():
+            for l in self.labels:
+                l.setOpacity(0)
+        else:
+            for l in self.labels:
+                l.setOpacity(1)
 
     def getHeadingBug(self):
         return self._headingSelect
@@ -275,13 +345,44 @@ class HSI(QGraphicsView):
 
     headingBug = property(getHeadingBug, setHeadingBug)
 
+    def setCourseOld(self,old):
+        self._CourseOld = old
+
+    def setCourseBad(self,bad):
+        self._CourseBad = bad
+
+    def setCourseFail(self,fail):
+        if fail != self._CourseFail:
+            self._CourseFail = fail
+            self.changeFail()
+
     def getCdi(self):
         return self._courseDeviation
 
     def setCdi(self, cdi):
         if cdi != self._courseDeviation:
             self._courseDeviation = cdi
-            self.update()
+            if self.isVisible(): 
+                self.update()
+
+    def setCdiOld(self, old):
+        if self.cdi_enabled:
+            self._CdiOld = old
+            if self.isVisible():
+                self.update()
+
+    def setCdiBad(self, bad):
+        if self.cdi_enabled:
+            self._CdiBad = bad
+            if self.isVisible():
+                self.update()
+
+    def setCdiFail(self, fail):
+        if self.cdi_enabled:
+            if fail != self._CdiFail:
+                self._CdiFail = fail
+                self.changeFail()
+
 
     cdi = property(getCdi, setCdi)
 
@@ -291,9 +392,28 @@ class HSI(QGraphicsView):
     def setGsi(self, gsi):
         if gsi != self._glideSlopeIndicator:
             self._glideSlopeIndicator = gsi
-            self.update()
+            if self.isVisible(): self.update()
 
     gsi = property(getGsi, setGsi)
+
+    def setGsiOld(self, old):
+        if self.gsi_enabled:
+            self._GsiOld = old
+            if self.isVisible():
+                self.update()
+
+    def setGsiBad(self, bad):
+        if self.gsi_enabled:
+            self._GsiBad = bad
+            if self.isVisible():
+                self.update()
+
+    def setGsiFail(self, fail):
+        if self.gsi_enabled:
+            if fail != self._GsiFail:
+                self._GsiFail = fail
+                self.changeFail()
+
 
     # We don't want this responding to keystrokes
     def keyPressEvent(self, event):
@@ -303,6 +423,8 @@ class HSI(QGraphicsView):
     def wheelEvent(self, event):
         pass
 
+    def showEvent(self, event):
+        self.update()
 
 
 class HeadingDisplay(QWidget):
@@ -313,15 +435,20 @@ class HeadingDisplay(QWidget):
         self.fg_color = fgcolor
         self.bg_color = bgcolor
 
+        self._Old = True
+        self._Bad = True
+        self._Fail = True
+
         self.item = fix.db.get_item("HEAD")
-        self._heading = self.item.value
         self.item.valueChanged[float].connect(self.setHeading)
         self.item.failChanged[bool].connect(self.setFail)
         self.item.badChanged[bool].connect(self.setBad)
         self.item.oldChanged[bool].connect(self.setOld)
-        self._bad = self.item.bad
-        self._old = self.item.old
-        self._fail = self.item.fail
+        self.setOld(self.item.old)
+        self.setBad(self.item.bad)
+        self.setFail(self.item.fail)
+
+        self._heading = self.item.value
 
         self.font = QFont()
         self.font.setBold(True)
@@ -341,15 +468,15 @@ class HeadingDisplay(QWidget):
         c.setFont(self.font)
         tr = QRectF(0, 0, self.width()-1, self.height()-1)
         c.drawRect(tr)
-        if self._fail:
+        if self._Fail:
             heading_text = "XXX"
             c.setBrush(QBrush(QColor(Qt.red)))
             c.setPen(QPen(QColor(Qt.red)))
-        elif self._bad:
+        elif self._Bad:
             heading_text = ""
             c.setBrush(QBrush(QColor(255, 150, 0)))
             c.setPen(QPen(QColor(255, 150, 0)))
-        elif self._old:
+        elif self._Old:
             heading_text = ""
             c.setBrush(QBrush(QColor(255, 150, 0)))
             c.setPen(QPen(QColor(255, 150, 0)))
@@ -364,21 +491,24 @@ class HeadingDisplay(QWidget):
     def setHeading(self, heading):
         if heading != self._heading:
             self._heading = common.bounds(0, 360, heading)
-            self.update()
+            if self.isVisible(): self.update()
 
     heading = property(getHeading, setHeading)
 
     def setFail(self, fail):
-        self._fail = fail
+        self._Fail = fail
         self.repaint()
 
     def setOld(self, old):
-        self._old = old
+        self._Old = old
         self.repaint()
 
     def setBad(self, bad):
-        self._bad = bad
+        self._Bad = bad
         self.repaint()
+
+    def showEvent(self, event):
+        self.update()
 
 class DG_Tape(QGraphicsView):
     def __init__(self, parent=None):
@@ -397,8 +527,9 @@ class DG_Tape(QGraphicsView):
 
         item = fix.db.get_item("HEAD", True)
         item.valueChanged[float].connect(self.setHeading)
+        self._heading = item.value
 
-        #fix.db.get_item("COURSE", True).valueChanged[float].connect(self.setHeadingBug)
+        # TODO Seems the heading tape does not have bad/fail/old
         self.dpp = 10
     def resizeEvent(self, event):
         w = self.width()
@@ -471,3 +602,7 @@ class DG_Tape(QGraphicsView):
             self.redraw()
 
     heading = property(getHeading, setHeading)
+
+    def showEvent(self, event):
+        self.redraw()
+
