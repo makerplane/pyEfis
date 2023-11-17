@@ -214,12 +214,12 @@ class Altimeter_Tape(QGraphicsView):
         self.setScene(self.scene)
 
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
-        nbh=50
-        self.numerical_display.resize (70, nbh)
-        self.numeric_box_pos = QPoint(2, qRound(h/2-nbh/2))
+        nbh=w/1.20
+        self.numerical_display.resize (qRound(w/1.20), qRound(nbh/1.45))
+        self.numeric_box_pos = QPoint(0, qRound(h/2-(nbh/1.45)/2))
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setX(self.numeric_box_pos.x()+self.numerical_display.width())
-        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
+        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+(nbh/1.45)/2)+1)
         self.numerical_display.show()
         self.numerical_display.value = self._altimeter
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
@@ -251,7 +251,7 @@ class Altimeter_Tape(QGraphicsView):
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
-        triangle_size = 11
+        triangle_size = w/8
         p.drawConvexPolygon(QPolygonF([QPointF(0, -triangle_size),
                              QPointF(0, triangle_size),
                              QPointF(triangle_size, 0)]))

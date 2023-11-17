@@ -304,9 +304,9 @@ class Airspeed_Tape(QGraphicsView):
         l.setOpacity(self.foregroundOpacity)
 
         self.numerical_display = NumericalDisplay(self)
-        nbh = 50
-        self.numerical_display.resize (47, nbh)
-        self.numeric_box_pos = QPoint(qRound(w-48), qRound(h/2-nbh/2))
+        nbh = w/2
+        self.numerical_display.resize (qRound(w/2), qRound(nbh))
+        self.numeric_box_pos = QPoint(qRound(w-w/2), qRound(h/2-nbh/2))
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
         self.numerical_display.show()
@@ -345,10 +345,10 @@ class Airspeed_Tape(QGraphicsView):
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
-        triangle_size = 11
-        p.drawConvexPolygon(QPolygon([QPoint(0, -triangle_size-3),
-                             QPoint(0, triangle_size-2),
-                             QPoint(-triangle_size, -1)]))
+        triangle_size = w/8
+        p.drawConvexPolygon(QPolygon([QPoint(0, qRound(-triangle_size-3)),
+                             QPoint(0, qRound(triangle_size-2)),
+                             QPoint(qRound(-triangle_size), -1)]))
 
     def getAirspeed(self):
         return self._airspeed
