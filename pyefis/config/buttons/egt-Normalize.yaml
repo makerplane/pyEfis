@@ -1,0 +1,13 @@
+type: toggle
+text: "Normalize\n "
+dbkey: BTN2
+conditions:
+  - when: on
+    actions:
+      - set value: BTN3, False #Turn off EGT Peak button
+      - set value: BTN4, False #Turn off EGT Lean button
+      - set egt mode: normal
+      - Set EGT Mode: Normalize
+  - when: off
+    actions:
+      - set EGT Mode: normal
