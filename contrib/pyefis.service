@@ -1,0 +1,34 @@
+# Place this in $HOME/.config/systemd/useri/
+#
+# Edit the paths on the ExecStart line below to match your environment
+#
+#
+# Enable it:
+#    systemctl --user enable pyefis.service
+# Start it:
+#    systemctl --user start pyefis.service
+#
+# Disable it:
+#    systemctl --user disable pyefis.service
+# Stop it:
+#    systemctl --user stop pyefis.service
+#
+#
+# If it crashes or exits systemd will restart it
+# systemd will start it when you log in too
+# Simple way to ensure it always stays running
+# Not tested but should work with automatic login too
+#
+[Unit]
+Description=pyefis
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=exec
+Restart=always
+RestartSec=1s
+ExecStart=/path/to/your/bin/python /path/to/your/pyEfis.py
+
+[Install]
+WantedBy=graphical-session.target
