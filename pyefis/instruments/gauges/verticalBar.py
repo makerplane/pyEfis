@@ -45,7 +45,7 @@ class VerticalBar(AbstractGauge):
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
-        return 0.5
+        return 0.35
 
     def getNormalizeMode(self):
         return self._normalizeMode
