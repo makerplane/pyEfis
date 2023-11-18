@@ -279,3 +279,12 @@ class Altimeter_Tape(QGraphicsView):
 
     def setAltFail(self,b):
         self.numerical_display.fail = b
+
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass
+
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+

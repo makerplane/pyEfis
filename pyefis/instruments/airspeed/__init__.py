@@ -370,6 +370,14 @@ class Airspeed_Tape(QGraphicsView):
     def setAsFail(self,b):
         self.numerical_display.fail = b
 
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass
+
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+
 
 class Airspeed_Box(QWidget):
     """Represents a simple numeric display type gauge.  The benefit of using this
