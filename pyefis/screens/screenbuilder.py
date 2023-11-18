@@ -27,6 +27,9 @@ from pyefis.instruments import vsi
 from pyefis.instruments import tc
 from pyefis.instruments import gauges
 from pyefis.instruments import misc
+from pyefis.instruments import button
+from pyefis.instruments import misc
+
 from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 
 import pyavtools.fix as fix
@@ -35,7 +38,7 @@ import re
 import pyefis.hmi as hmi
 
 import logging
-
+import os
 logger=logging.getLogger(__name__)
 
 
@@ -132,23 +135,41 @@ class Screen(QWidget):
             self.instruments[count] = ai.AI(self)
         elif i['type'] == 'altimeter_tape':
             self.instruments[count] = altimeter.Altimeter_Tape(self)
+        elif i['type'] == 'altimeter_trend_tape':
+            self.instruments[count] = vsi.Alt_Trend_Tape(self)
+        elif i['type'] == 'button':
+            if 'options' in i and 'config' in i['options']:
+                self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.path,i['options']['config']))
+            else:
+                logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
             self.instruments[count] = hsi.HeadingDisplay(self)
         elif i['type'] == 'heading_tape':
             self.instruments[count] = hsi.DG_Tape(self)
         elif i['type'] == 'horizontal_situation_indicator':
-            self.instruments[count] = hsi.HSI(self)
+            #TODO Fix this so cdi/gsi can be enabled/disabled
+            self.instruments[count] = hsi.HSI(self, cdi_enabled=True, gsi_enabled=True)
+        elif i['type'] == 'numeric_display':
+            self.instruments[count] = gauges.NumericDisplay(self)
+        elif i['type'] == 'value_text':
+            self.instruments[count] = misc.ValueDisplay(self)
+        elif i['type'] == 'static_text':
+            print(i['options']['text'])
+            self.instruments[count] = misc.StaticText(text=i['options']['text'], parent=self)
         elif i['type'] == 'turn_coordinator':
             self.instruments[count] = tc.TurnCoordinator(self)
         elif i['type'] == 'vsi_dial':
             self.instruments[count] = vsi.VSI_Dial(self)
+        elif i['type'] == 'vsi_pfd':
+            self.instruments[count] = vsi.VSI_PFD(self)
+
         # Gauges
         elif i['type'] == 'arc_gauge':
-            self.instruments[count] = gauges.ArcGauge(self)
+            self.instruments[count] = gauges.ArcGauge(self,min_size=False)
         elif i['type'] == 'horizontal_bar_gauge':
-            self.instruments[count] = gauges.HorizontalBar(self)
+            self.instruments[count] = gauges.HorizontalBar(self,min_size=False)
         elif i['type'] == 'vertical_bar_gauge':
-            self.instruments[count] = gauges.VerticalBar(self)
+            self.instruments[count] = gauges.VerticalBar(self,min_size=False)
         elif i['type'] == 'virtual_vfr':
             self.instruments[count] = VirtualVfr(self)
 
@@ -198,7 +219,7 @@ class Screen(QWidget):
             return ['COURSE','CDI','GSI','HEAD']
         elif 'turn_coordinator' == inst:
             return ['ROT','ALAT']
-        elif 'vsi_dial' == inst:
+        elif inst in ['vsi_dial','vsi_pfd']:
             return ['VS']
         elif 'virtual_vfr' == inst:
             return ['PITCH','LAT','LONG','HEAD','ALT','PITCH','ROLL','ALAT','TAS']

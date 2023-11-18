@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import *
 import importlib
 import logging
 import sys
+import os
 from pyefis import hooks
 from pyefis import hmi
 
@@ -61,6 +62,7 @@ class Main(QMainWindow):
     def __init__(self, config, parent=None):
         super(Main, self).__init__(parent)
 
+        self.path = os.path.dirname(__file__)
         self.screenWidth = int(config["main"]["screenWidth"])
         self.screenHeight = int(config["main"]["screenHeight"])
         self.screenColor = config["main"]["screenColor"]
