@@ -252,18 +252,18 @@ class Screen(QWidget):
 
             grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
             grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
-            grid_x = leftm + grid_width * (int(c['column']) - 1) 
-            grid_y = topm + grid_height * (int(c['row']) - 1) 
+            grid_x = leftm + grid_width * ((c['column']) - 1)
+            grid_y = topm + grid_height * ((c['row']) - 1)
             # Span columns to the right and rows down
             if 'span' in c:
                 if 'rows' in c['span']:
                     # spanning rows
                     if c['span']['rows'] >= 2:
-                        grid_height = grid_height * int(c['span']['rows'])
+                        grid_height = grid_height * (c['span']['rows'])
                 if 'columns' in c['span']:
                     #spanning columns
                     if c['span']['columns'] >= 2:
-                        grid_width = grid_width * int(c['span']['columns'])
+                        grid_width = grid_width * (c['span']['columns'])
 
 
             width = r_width = grid_width
@@ -342,25 +342,31 @@ class Screen(QWidget):
 
                 for g in c['groups']:
                     # Render some tiles?
+                    # Option to add gap between each instrument
+                    if 'horizontal' in c['gang_type']:
+                        hgap = g.get('gap', 0)/100 * group_width
+                        vgap = 0
+                    else:
+                        vgap = g.get('gap', 0)/100 * group_height
+                        hgap = 0
                     for ci in g['instruments']:
-                        g_width = group_width
-                        g_height = group_height
+                        g_width = group_width   - ( hgap * (len(g['instruments']) - 1)) 
+                        g_height = group_height - ( vgap * (len(g['instruments']) - 1))
                         g_x = group_x
                         g_y = group_y
                         if hasattr( self.instruments[i], 'getRatio'):
                             g_ratio = self.instruments[i].getRatio()
                             logger.debug(f"Ganged Instrument {c['type']} has ratio 1:{g_ratio}")
                             g_width,g_height,g_x,g_y = self.get_bounding_box(g_width, g_height,g_x,g_y,g_ratio)
-
                         self.move_resize_inst(i + gang_count,qRound(g_x),qRound(g_y),qRound(g_width),qRound(g_height))
                         try:
                             self.instruments[i + gang_count].setupGauge()
                         except:
                             pass
                         if 'horizontal' in c['gang_type']:
-                            group_x += group_width
+                            group_x += group_width + hgap
                         else:
-                            group_y += group_height
+                            group_y += group_height + vgap
                         gang_count += 1
                     if 'horizontal' in c['gang_type']:
                         group_x += gap_size
