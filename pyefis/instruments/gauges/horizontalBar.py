@@ -22,9 +22,10 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge
 
 class HorizontalBar(AbstractGauge):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, min_size=True):
         super(HorizontalBar, self).__init__(parent)
-        self.setMinimumSize(100, 50)
+        if min_size:
+            self.setMinimumSize(100, 50)
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument

@@ -40,6 +40,18 @@ class Airspeed(QWidget):
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
 
+        # V Speeds need to be init before paint
+        self.Vs = self.item.get_aux_value('Vs')
+        if self.Vs is None: self.Vs = 0
+        self.Vs0 = self.item.get_aux_value('Vs0')
+        if self.Vs0 is None: self.Vs0 = 0
+        self.Vno = self.item.get_aux_value('Vno')
+        if self.Vno is None: self.Vno = 0
+        self.Vne = self.item.get_aux_value('Vne')
+        if self.Vne is None: self.Vne = 200
+        self.Vfe = self.item.get_aux_value('Vfe')
+        if self.Vfe is None: self.Vfe = 0
+
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
         return 1
@@ -77,20 +89,13 @@ class Airspeed(QWidget):
         yellowPen.setWidth(4)
 
         # Dial Setup
-        # V Speeds
-        Vs = self.item.get_aux_value('Vs')
-        Vs0 = self.item.get_aux_value('Vs0')
-        Vno = self.item.get_aux_value('Vno')
-        Vne = self.item.get_aux_value('Vne')
-        #Va = 120
-        Vfe = self.item.get_aux_value('Vfe')
 
         # VSpeed to angle for drawArc
-        Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
-        Vs_angle = (-(((Vs - 30) * 2.5) + 26) + 90) * 16
-        Vfe_angle = (-(((Vfe - 30) * 2.5) + 25) + 90) * 16
-        Vno_angle = (-(((Vno - 30) * 2.5) + 25) + 90) * 16
-        Vne_angle = (-(((Vne - 30) * 2.5) + 25) + 90) * 16
+        Vs0_angle = (-(((self.Vs0 - 30) * 2.5) + 26) + 90) * 16
+        Vs_angle = (-(((self.Vs - 30) * 2.5) + 26) + 90) * 16
+        Vfe_angle = (-(((self.Vfe - 30) * 2.5) + 25) + 90) * 16
+        Vno_angle = (-(((self.Vno - 30) * 2.5) + 25) + 90) * 16
+        Vne_angle = (-(((self.Vne - 30) * 2.5) + 25) + 90) * 16
 
         radius = int(round(min(w,h) * .45))
         diameter = radius*2
@@ -300,9 +305,9 @@ class Airspeed_Tape(QGraphicsView):
         l.setOpacity(self.foregroundOpacity)
 
         self.numerical_display = NumericalDisplay(self)
-        nbh = 50
-        self.numerical_display.resize (47, nbh)
-        self.numeric_box_pos = QPoint(qRound(w-48), qRound(h/2-nbh/2))
+        nbh = w/2
+        self.numerical_display.resize (qRound(w/2), qRound(nbh))
+        self.numeric_box_pos = QPoint(qRound(w-w/2), qRound(h/2-nbh/2))
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
         self.numerical_display.show()
@@ -341,10 +346,10 @@ class Airspeed_Tape(QGraphicsView):
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
-        triangle_size = 11
-        p.drawConvexPolygon(QPolygon([QPoint(0, -triangle_size-3),
-                             QPoint(0, triangle_size-2),
-                             QPoint(-triangle_size, -1)]))
+        triangle_size = w/8
+        p.drawConvexPolygon(QPolygon([QPoint(0, qRound(-triangle_size-3)),
+                             QPoint(0, qRound(triangle_size-2)),
+                             QPoint(qRound(-triangle_size), -1)]))
 
     def getAirspeed(self):
         return self._airspeed
