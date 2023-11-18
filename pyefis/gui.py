@@ -203,9 +203,6 @@ def initialize(config):
         menu = hmi.menu.Menu(mainWindow, config["menu"])
         menu.start()
 
-    if 'buttonmenu' in config:
-       buttonmenu = hmi.buttonmenu.Menu(mainWindow, config["buttonmenu"])
-
     if 'FMS' in config:
         sys.path.insert(0, config["FMS"]["module_dir"])
         ui = importlib.import_module ("qtui")
