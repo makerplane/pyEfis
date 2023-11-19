@@ -139,6 +139,7 @@ class HSI(QGraphicsView):
 
         # Setup Pens
         compassPen = QPen(QColor(self.fg_color), 1.5)
+        textBrush = QBrush(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
         nobrush = QBrush()
 
@@ -169,7 +170,7 @@ class HSI(QGraphicsView):
                 br = t.sceneBoundingRect()
                 t.setRotation(count)
                 t.setPen(compassPen)
-                t.setBrush(compassBrush)
+                t.setBrush(textBrush)
                 iy3 = -self.r + self.tickSize*1.1
                 ix3 = -br.width()/2
                 x3 = (ix3*cosa - iy3*sina) + self.cx
@@ -182,7 +183,7 @@ class HSI(QGraphicsView):
                 br = t.sceneBoundingRect()
                 t.setRotation(count)
                 t.setPen(compassPen)
-                t.setBrush(compassBrush)
+                t.setBrush(textBrush)
                 iy3 = -self.r + self.tickSize*1.1
                 ix3 = -br.width()/2
                 x3 = (ix3*cosa - iy3*sina) + self.cx
