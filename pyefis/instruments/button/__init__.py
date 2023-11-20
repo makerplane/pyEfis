@@ -39,6 +39,7 @@ class Button(QWidget):
     def __init__(self, parent=None, config_file=None):
         super(Button, self).__init__(parent)
 
+        self.parent = parent
         config = yaml.load(open(config_file), Loader=yaml.SafeLoader)
         self._conditions = config.get('conditions', [])
         self.config = config
@@ -150,6 +151,7 @@ class Button(QWidget):
             self._button.setChecked(data)
 
     def processConditions(self,clicked=False):
+        self._db_data['SCREEN'] = self.parent.parent.getRunningScreen()
         self._db_data['CLICKED'] = clicked
         for cond in self._conditions:
             if 'when' in cond:
