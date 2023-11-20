@@ -34,6 +34,7 @@ import os
 import pathlib
 import re
 from pyefis import hmi
+import time
 
 class Button(QWidget):
     def __init__(self, parent=None, config_file=None):
@@ -49,6 +50,14 @@ class Button(QWidget):
         self._style['fg'] = QColor(self.config.get('fg_color',"black"))
         self._title = ""
         self._toggle = False
+
+        self._dbkey = fix.db.get_item(self.config['dbkey'])
+        time.sleep(0.01)
+        #self._button.setChecked(self._dbkey.value)
+
+        #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
+
+
         if self.config['type'] == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
@@ -58,8 +67,8 @@ class Button(QWidget):
             self._button.clicked.connect(self.buttonToggled)
 
         self._button.setEnabled(True)
-        self._dbkey = fix.db.get_item(self.config['dbkey'])
-        self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
+        #self._dbkey = fix.db.get_item(self.config['dbkey'])
+        #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
 
         self._db = dict() #All the fix db items
         self._db_data = dict() #All the fix db data for use in pycond
@@ -68,6 +77,7 @@ class Button(QWidget):
         self.setStyle('set text', self.config['text'])
         # On startup set button back to proper state
         self._button.setChecked(self._dbkey.value)
+        self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
         self.processConditions()
 
 
@@ -96,6 +106,7 @@ class Button(QWidget):
             for aux in self._db[key].aux:
                 self._db_data[f"{key}.aux.{aux}"] = self._db[key].aux[aux]
         self._db_data[self._dbkey.key] = self._dbkey.value
+        time.sleep(0.01)
 
     def dataChanged(self,key=None,signal=None):
         if signal == 'value':
@@ -129,32 +140,41 @@ class Button(QWidget):
 
     title = property(getTitle,setTitle)
 
-    def buttonClicked(self):
-        pass
     def buttonToggled(self):
         # Button can be toggled by _dbkey or by clicking the button
         # Make sure they stay in sync
-        if not self.isVisible(): return
+        logger.debug(f"{self._button.text()}:buttonToggled:self._button.isChecked({self._button.isChecked()})")
+        #if not self.isVisible(): return
+
         # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
             fix.db.set_value(self._dbkey.key, self._button.isChecked())
             # Now we evaluate conditions and update the button style/text/state
             self.processConditions(True)
+            #fix.db.set_value(self._dbkey.key, self._button.isChecked())
+
         elif not self._toggle:
             # Simple button
             self.processConditions(True)
 
+
     def dbkeyChanged(self,data):
+        if self._dbkey.bad:
+            return
         # The same button configuration might be used on multiple screens
         # Only buttons on the active screen should be changing.
+        logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()})")
         self._db_data[self._dbkey.key] = self._dbkey.value
         #if not self.isVisible(): return
         #self._db_data[self._dbkey.key] = self._dbkey.value
-        if self._toggle and self._button.isChecked() == data:
+        if self._toggle and self._button.isChecked() == self._dbkey.value:
             #This is a recursive call do nothing
+            logger.debug(f"{self._button.text()}:recursive:data={data}:self._button.isChecked({self._button.isChecked()})")
             return
         else:
-            self._button.setChecked(data)
+            logger.debug(f"{self._button.text()}:toggled:data={data}:self._button.isChecked({self._button.isChecked()})")
+            self._button.setChecked(self._dbkey.value)
+            self.processConditions(True)
 
     def showEvent(self,event):
         self.processConditions()
@@ -168,7 +188,7 @@ class Button(QWidget):
                 if type(cond['when']) == str:
                     expr = pc.to_struct(pc.tokenize(cond['when'], sep=' ', brkts='[]'))
                     if pc.pycond(expr)(state=self._db_data) == True:
-                        logger.debug(f"{self.parent.parent.getRunningScreen()}:cond['when']")
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{cond['when']}")
                         self.processActions(cond['actions'])
                         if not cond.get('continue', False): return
                 elif type(cond['when']) == bool:
