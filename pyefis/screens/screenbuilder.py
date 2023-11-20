@@ -39,6 +39,8 @@ import pyefis.hmi as hmi
 
 import logging
 import os
+import yaml
+
 logger=logging.getLogger(__name__)
 
 
@@ -84,21 +86,30 @@ class Screen(QWidget):
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
-            if 'ganged' in i['type']:
-                #ganged instrument
-                if 'gang_type' not in i:
-                    raise Exception(f"Instrument {i['type']} must also have 'gang_type:' horizontal|vertical specified")
-                self.insturment_config[count] = i
-                for g in i['groups']:
-                    for gi in g['instruments']:
-                        gi['type'] = i['type'].replace('ganged_','')
-                        gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
-                        self.setup_instruments(count,gi,ganged=True)
-
-                        count += 1     
+            if 'include,' in i['type']:
+                # Here we will include some instruments defined in another file
+                args = i['type'].split(',')
+                iconfig = yaml.load(open(os.path.join(self.parent.path,args[1])), Loader=yaml.SafeLoader)
+                insts = iconfig['instruments']
             else:
-                self.setup_instruments(count,i)
-            count += 1
+                insts = [i]
+            print(insts)
+            for inst in insts:        
+                if 'ganged' in inst['type']:
+                    #ganged instrument
+                    if 'gang_type' not in inst:
+                        raise Exception(f"Instrument {inst['type']} must also have 'gang_type:' horizontal|vertical specified")
+                    self.insturment_config[count] = inst
+                    for g in inst['groups']:
+                        for gi in g['instruments']:
+                            gi['type'] = inst['type'].replace('ganged_','')
+                            gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
+                            self.setup_instruments(count,gi,ganged=True)
+
+                            count += 1     
+                else:
+                    self.setup_instruments(count,inst)
+                count += 1
         #Place instruments:
         #if self.layout['type'] == 'grid':
         self.grid_layout()
