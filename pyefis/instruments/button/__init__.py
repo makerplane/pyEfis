@@ -65,6 +65,11 @@ class Button(QWidget):
         elif self.config['type'] == 'simple':
             self._button.setCheckable(False)
             self._button.clicked.connect(self.buttonToggled)
+        elif self.config['type'] == 'repeat':
+            self._button.pressed.connect(self.buttonToggled)
+            self._button.setAutoRepeat(True)
+            self._button.setAutoRepeatInterval(self.config.get('repeat_interval', 300))
+            self._button.setAutoRepeatDelay(self.config.get('repeat_delay', 300))
 
         self._button.setEnabled(True)
         #self._dbkey = fix.db.get_item(self.config['dbkey'])
@@ -206,8 +211,8 @@ class Button(QWidget):
         for act in actions:
             for action,args in act.items():
                 try:
-                    hmi.actions.trigger(action, args)
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:HMI:{action}:{args}")
+                    hmi.actions.trigger(action, args)
                 except:
                     self.setStyle(action,args)
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:STYLE:{action}:{args}")
