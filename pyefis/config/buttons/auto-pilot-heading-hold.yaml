@@ -8,12 +8,12 @@ condition_keys:
   - APSTAT
   - APREQ
 conditions:
-  - when: "BTNAP eq false or APSTAT ne 'ARMED'"
+  - when: "APSTAT ne 'ARMED'"
     actions:
       - button: disable
-      - set bg color: darkgray
+      - set bg color: red
       - set value: BTNHH, false
-  - when: "BTNAP eq true and APSTAT eq 'ARMED'"
+  - when: "APSTAT eq 'ARMED'"
     actions:
       - button: enable
     continue: true

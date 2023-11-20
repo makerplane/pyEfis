@@ -1,0 +1,97 @@
+instruments:
+  - type: button
+    row: 2
+    column: 376
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-next.yaml
+  - type: button
+    row: 2
+    column: 1
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-next.yaml
+  - type: button
+    row: 20
+    column: 376
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-ems.yaml
+  - type: button
+    row: 20
+    column: 1
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-ems.yaml
+  - type: button
+    row: 38
+    column: 376
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-pfd.yaml
+  - type: button
+    row: 38
+    column: 1
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-pfd.yaml
+  - type: button
+    row: 56
+    column: 376
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-back.yaml
+  - type: button
+    row: 56
+    column: 1
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/screen-back.yaml
+  - type: button
+    row: 74
+    column: 376
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/auto-pilot-heading-hold.yaml
+  - type: button
+    row: 74
+    column: 1
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/auto-pilot-heading-hold.yaml
+  - type: button
+    row: 92
+    column: 376
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/auto-pilot-flight-plan.yaml
+  - type: button
+    row: 92
+    column: 1
+    span:
+      rows: 16
+      columns: 24
+    options:
+      config: config/buttons/auto-pilot-flight-plan.yaml

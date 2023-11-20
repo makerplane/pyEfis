@@ -10,18 +10,18 @@ condition_keys:
   - WPLAT
   - WPLON
 conditions:
-  - when: "WPLAT.old eq true or WPLON.old eq true  or BTNAP eq false or APSTAT ne 'ARMED'"
+  - when: "WPLAT.old eq true or WPLON.old eq true or APSTAT ne 'ARMED'"
     # When any condition would prevent use of this mode disable the button
     # This will prevent eval of any other conditions
     actions:
       - set value: BTNFP, False
       - button: disable
-      - set bg color: darkgray
-  - when: "BTNAP eq true and APMODE ne 'GUIDED' and WPLAT.old ne true and WPLON.old ne true"
+      - set bg color: red
+  - when: "APMODE ne 'GUIDED' and WPLAT.old ne true and WPLON.old ne true"
     actions:
       - button: enable
     continue: true
-  - when: "BTNAP eq true and APMODE ne 'GUIDED' and APREQ ne 'GUIDED'"
+  - when: "APMODE ne 'GUIDED' and APREQ ne 'GUIDED'"
     actions:
       - set bg color: lightgray
     continue: true
