@@ -134,21 +134,31 @@ class Button(QWidget):
     def buttonToggled(self):
         # Button can be toggled by _dbkey or by clicking the button
         # Make sure they stay in sync
+        if not self.isVisible(): return
+        # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
             fix.db.set_value(self._dbkey.key, self._button.isChecked())
-        # Now we evaluate conditions and update the button style/text/state
-        self.processConditions(True)
+            # Now we evaluate conditions and update the button style/text/state
+            self.processConditions(True)
+        elif not self._toggle:
+            # Simple button
+            self.processConditions(True)
 
     def dbkeyChanged(self,data):
         # The same button configuration might be used on multiple screens
         # Only buttons on the active screen should be changing.
         self._db_data[self._dbkey.key] = self._dbkey.value
-        if not self.isVisible(): return
+        #if not self.isVisible(): return
+        #self._db_data[self._dbkey.key] = self._dbkey.value
         if self._toggle and self._button.isChecked() == data:
             #This is a recursive call do nothing
             return
         else:
             self._button.setChecked(data)
+
+    def showEvent(self,event):
+        self.processConditions()
+        self._button.setChecked(self._dbkey.value)
 
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.parent.getRunningScreen()
@@ -158,6 +168,7 @@ class Button(QWidget):
                 if type(cond['when']) == str:
                     expr = pc.to_struct(pc.tokenize(cond['when'], sep=' ', brkts='[]'))
                     if pc.pycond(expr)(state=self._db_data) == True:
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:cond['when']")
                         self.processActions(cond['actions'])
                         if not cond.get('continue', False): return
                 elif type(cond['when']) == bool:
@@ -175,10 +186,11 @@ class Button(QWidget):
         for act in actions:
             for action,args in act.items():
                 try:
-                    hmi.actions.trigger(action, args)            
+                    hmi.actions.trigger(action, args)
+                    logger.debug(f"{self.parent.parent.getRunningScreen()}:HMI:{action}:{args}")
                 except:
                     self.setStyle(action,args)
-#TODO def showEvent() to bring button state current when switching screens
+                    logger.debug(f"{self.parent.parent.getRunningScreen()}:STYLE:{action}:{args}")
 
     def setStyle(self,action='',args=None):
 
