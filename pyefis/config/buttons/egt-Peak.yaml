@@ -1,15 +1,17 @@
 type: toggle
 text: "Peak\n "
-dbkey: BTN3
+dbkey: EGTBTN3
 conditions:
-  - when: on
+  - when: "CLICKED eq true and EGTBTN3 eq true"
     actions:
-      - set value: BTN2, False #Turn off EGT Normalize button
-      - set value: BTN4, False #Turn off EGT Lean button
+      - set value: EGTBTN2, False #Turn off EGT Normalize button
+      - set value: EGTBTN4, False #Turn off EGT Lean button
       - set EGT Mode: normal
       - Set EGT Mode: Peak
-  - when: off
+      - set bg color: green
+  - when: "CLICKED eq true and EGTBTN3 eq false"
     actions:
       - set EGT Mode: normal
+      - set bg color: lightgray
 
     

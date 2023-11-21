@@ -1,6 +1,6 @@
 type: simple
 text: "Reset\nPeak"
-dbkey: BTN1
+dbkey: EGTBTN1
 conditions:
   - when: on
     actions:

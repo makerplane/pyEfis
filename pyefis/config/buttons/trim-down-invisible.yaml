@@ -1,0 +1,10 @@
+type: repeat
+text: ""
+dbkey: BTNTRIMDN
+transparent: true
+repeat_interval: 10
+repeat_delay: 100
+conditions:
+  - when: "CLICKED eq true" 
+    actions:
+      - change value: TRIMP,-1

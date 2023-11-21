@@ -1,5 +1,5 @@
 type: toggle
-text: "Heading\nHold"
+text: "Heading\nHold1"
 dbkey: BTNHH
 condition_keys:
   - BTNAP
@@ -12,7 +12,7 @@ conditions:
     actions:
       - button: disable
       - set bg color: red
-      - set value: BTNHH, false
+      - button: unchecked
   - when: "APSTAT eq 'ARMED'"
     actions:
       - button: enable
@@ -31,7 +31,7 @@ conditions:
     # We a are on, FP is off, we are armed and not in cruise mode like we should be
     actions:
       - set value: APREQ, CRUISE
-      - set value: BTNFP, False
+#      - set value: BTNFP, False
       - set bg color: orange
   - when: "CLICKED eq false and APMODE eq 'CRUISE' and APREQ eq 'CRUISE'"
     # We have transitioned to cruise mode

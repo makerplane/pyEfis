@@ -14,7 +14,7 @@ conditions:
     # When any condition would prevent use of this mode disable the button
     # This will prevent eval of any other conditions
     actions:
-      - set value: BTNFP, False
+      - button: unchecked
       - button: disable
       - set bg color: red
   - when: "APMODE ne 'GUIDED' and WPLAT.old ne true and WPLON.old ne true"
@@ -32,7 +32,7 @@ conditions:
   - when: "CLICKED eq true and BTNFP eq true and APMODE ne 'GUIDED'"
     actions:
       - set value: APREQ, GUIDED
-      - set value: BTNHH, False
+#      - set value: BTNHH, False
       - set bg color: orange
   - when: "BTNFP eq true and APMODE eq 'GUIDED' and APREQ eq 'GUIDED'"
     actions:

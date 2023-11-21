@@ -19,7 +19,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: MainScreen
+  defaultScreen: PFD
 
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
@@ -147,6 +147,7 @@ outputs:
   BTNHH: OnChange
   BTNFP: OnChange
   APREQ: OnChange
+  TRIMP: OnChange
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."
 # followed by the name.  The only required configuration is
@@ -154,7 +155,7 @@ outputs:
 # the screen
 
 screens:
-  MainScreen:
+  PFD:
     dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
     indexpath: /home/eblevins/projects/efis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
@@ -275,6 +276,43 @@ screens:
           columns: 50
         options:
           _dbkey: APMSG
+      - type: vertical_bar_gauge
+        row: 70
+        column: 72.5
+        span:
+          rows: 39
+          columns: 15
+        options:
+          name: Trim
+          decimapPlaces: 0
+          showUnits: false
+          showValue: false
+          dbkey: TRIMP
+      - type: button
+        row: 70
+        column: 75
+        span:
+          rows: 15
+          columns: 10
+        options:
+          config: config/buttons/trim-up-invisible.yaml
+      - type: button
+        row: 85
+        column: 75
+        span:
+          rows: 10
+          columns: 10
+        options:
+          config: config/buttons/trim-center-invisible.yaml
+      - type: button
+        row: 95
+        column: 75
+        span:
+          rows: 15
+          columns: 10
+        options:
+          config: config/buttons/trim-down-invisible.yaml
+
 #      - type: ganged_arc_gauge
 #        gang_type: vertical
 #        row: 1
@@ -415,32 +453,33 @@ screens:
 #                  dbkey: THR1
 
           
-  EMSNew:
+  EMS:
     module: pyefis.screens.screenbuilder
     title: Engine Management New
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
-      rows: 16
-      columns: 27
+      rows: 110
+      columns: 400
     instruments:
+      - type: include,config/includes/side-buttons.yaml
       - type: static_text
         row: 1
-        column: 1
+        column: 100
         span:
-          rows: 1
-          columns: 20
+          rows: 10
+          columns: 40
         options:
           text: "Screen Builder"
       - type: ganged_button
         gang_type: horizontal
-        row: 14
-        column: 4.75
-        move:
-          shrink: 25
-          justify: top
+        row: 100
+        column: 100
+        #move:
+        #  shrink: 25
+        #  justify: top
         span:
-          rows: 1
-          columns: 7.5
+          rows: 10
+          columns: 200
         groups:
           - name: Buttons
             gap: 1
@@ -460,33 +499,22 @@ screens:
       -
         type: arc_gauge
         row: 1
-        column: 1
+        column: 25
         span:
-          rows: 4
-          columns: 10
+          rows: 25
+          columns: 50
         options:
           name: RPM
           decimalPlaces: 0
           dbkey: TACH1
       -
-        type: arc_gauge
-        row: 1
-        column: 10
-        span:
-          rows: 4
-          columns: 10
-        options:
-          name: MAP
-          decimalPlaces: 1          
-          dbkey: MAP1
-      -
         type: ganged_horizontal_bar_gauge
         gang_type: vertical
         row: 1
-        column: 20
+        column: 200
         span:
-          rows: 5
-          columns: 7
+          rows: 50
+          columns: 100
         groups:
           - name: Oil
             instruments:
@@ -501,40 +529,40 @@ screens:
                   temperature: true
       -
         type: static_text
-        row: 6
-        column: 1
+        row: 40
+        column: 100
         span:
-          columns: 4
+          columns: 10
         options:
           text: Power
         move:
           shrink: 10
       -
         type: static_text
-        row: 6
-        column: 6
+        row: 40
+        column: 120
         span:
-          columns: 7
+          columns: 10
         options:
           text: EGT
         move:
           shrink: 10
       -
         type: static_text
-        row: 6
-        column: 14
+        row: 40
+        column: 140
         span:
-          columns: 7
+          columns: 10
         options:
           text: CHT
         move:
           shrink: 10
       -
         type: static_text
-        row: 6
-        column: 23
+        row: 40
+        column: 160
         span:
-          columns: 4
+          columns: 10
         options:
           text: FUEL
         move:
@@ -542,11 +570,11 @@ screens:
       -
         type: ganged_vertical_bar_gauge
         gang_type: horizontal
-        row: 7
-        column: 1
+        row: 50
+        column: 25
         span:
-          rows: 7
-          columns: 27
+          rows: 50
+          columns: 350
         groups:
           - name: Power
             instruments:
@@ -570,25 +598,25 @@ screens:
             instruments:
               -
                 options:
-                  name: "1"
+                  name: "EGT 1"
                   decPlaces: 0
                   showUnits: false
                   dbkey: EGT11
               -
                 options:
-                  name: "2"
+                  name: "EGT 2"
                   decPlaces: 0
                   showUnits: false
                   dbkey: EGT12
               -
                 options:
-                  name: "3"
+                  name: "EGT 3"
                   decPlaces: 0
                   showUnits: false
                   dbkey: EGT13
               -
                 options:
-                  name: "4"
+                  name: "EGT 4"
                   decPlaces: 0
                   showUnits: false
                   dbkey: EGT14
@@ -596,25 +624,25 @@ screens:
             instruments:
               -
                 options:
-                  name: "1"
+                  name: "CHT 1"
                   decPlaces: 0
                   showUnits: false
                   dbkey: CHT11
               -
                 options:
-                  name: "2"
+                  name: "CHT 2"
                   decPlaces: 0
                   showUnits: false
                   dbkey: CHT12
               -
                 options:
-                  name: "3"
+                  name: "CHT 3"
                   decPlaces: 0
                   showUnits: false
                   dbkey: CHT13
               -
                 options:
-                  name: "4"
+                  name: "CHT 4"
                   decPlaces: 0
                   showUnits: false
                   dbkey: CHT14
