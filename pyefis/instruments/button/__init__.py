@@ -59,7 +59,7 @@ class Button(QWidget):
 
         #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
 
-
+        self._repeat = False
         if self.config['type'] == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
@@ -68,6 +68,7 @@ class Button(QWidget):
             self._button.setCheckable(False)
             self._button.clicked.connect(self.buttonToggled)
         elif self.config['type'] == 'repeat':
+            self._repeat = True
             self._button.pressed.connect(self.buttonToggled)
             self._button.setAutoRepeat(True)
             self._button.setAutoRepeatInterval(self.config.get('repeat_interval', 300))
@@ -182,6 +183,14 @@ class Button(QWidget):
             logger.debug(f"{self._button.text()}:toggled:data={data}:self._button.isChecked({self._button.isChecked()})")
             self._button.setChecked(self._dbkey.value)
             self.processConditions(True)
+            if self._repeat:
+                # Send press even while true, send release event when false
+                # Physical button would need to only set True while button is pressed, then set to False when released
+                if self._dbkey.value:
+                    event = QMouseEvent(QEvent.MouseButtonPress, QPoint(0,0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier);
+                else:
+                    event = QMouseEvent(QEvent.MouseButtonRelease, QPoint(0,0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier);
+                QApplication.sendEvent(self._button, event);
 
     def showEvent(self,event):
         self.processConditions()
