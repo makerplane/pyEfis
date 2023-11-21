@@ -26,6 +26,9 @@ class HorizontalBar(AbstractGauge):
         super(HorizontalBar, self).__init__(parent)
         if min_size:
             self.setMinimumSize(100, 50)
+        self.showValue = True
+        self.showUnits = True
+        self.showName = True
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
@@ -51,19 +54,19 @@ class HorizontalBar(AbstractGauge):
         pen.setColor(self.textColor)
         p.setPen(pen)
         p.setFont(self.smallFont)
-        p.drawText(self.nameTextRect, self.name)
+        if self.showName: p.drawText(self.nameTextRect, self.name)
 
         # Units
         p.setFont(self.smallFont)
         opt = QTextOption(Qt.AlignRight)
-        p.drawText(self.valueTextRect, self.units, opt)
+        if self.showUnits: p.drawText(self.valueTextRect, self.units, opt)
 
         # Main Value
         p.setFont(self.bigFont)
         pen.setColor(self.valueColor)
         p.setPen(pen)
         opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
-        p.drawText(self.valueTextRect, self.valueText, opt)
+        if self.showValue: p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)
