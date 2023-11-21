@@ -185,10 +185,11 @@ class Button(QWidget):
 
     def showEvent(self,event):
         self.processConditions()
+        # Do we need to only do this for toggle buttons?
         self._button.setChecked(self._dbkey.value)
 
     def processConditions(self,clicked=False):
-        self._db_data['SCREEN'] = self.parent.parent.getRunningScreen()
+        self._db_data['SCREEN'] = self.parent.screenName
         self._db_data['CLICKED'] = clicked
         for cond in self._conditions:
             if 'when' in cond:
@@ -240,7 +241,6 @@ class Button(QWidget):
         self.font = QFont()
         self.font.setPixelSize(qRound(self.height() * 38/100))
         self._style['border_size'] = qRound(self._button.height() * 6/100)
-        print(f"transparent:{self._style['transparent']}")
         if self._style['transparent']:
             self._button.setStyleSheet(f"QPushButton {{border: 1px solid {self._style['bg'].name()}; background: transparent;border-radius: 6px}}")# border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
         else:
