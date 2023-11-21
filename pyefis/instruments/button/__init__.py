@@ -48,6 +48,8 @@ class Button(QWidget):
         self._style = dict()
         self._style['bg'] = QColor(self.config.get('bg_color',"lightgray"))
         self._style['fg'] = QColor(self.config.get('fg_color',"black"))
+        self._style['transparent'] = self.config.get('transparent',False)
+
         self._title = ""
         self._toggle = False
 
@@ -238,7 +240,11 @@ class Button(QWidget):
         self.font = QFont()
         self.font.setPixelSize(qRound(self.height() * 38/100))
         self._style['border_size'] = qRound(self._button.height() * 6/100)
-        self._button.setStyleSheet(f"QPushButton {{border: 2px solid {self._style['bg'].darker(130).name()};border-radius: 6px; background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].lighter(110).name()}, stop: 1 {self._style['bg'].name()});border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
+        print(f"transparent:{self._style['transparent']}")
+        if self._style['transparent']:
+            self._button.setStyleSheet(f"QPushButton {{border: 1px solid {self._style['bg'].name()}; background: transparent;border-radius: 6px}}")# border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
+        else:
+            self._button.setStyleSheet(f"QPushButton {{border: 2px solid {self._style['bg'].darker(130).name()};border-radius: 6px; background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].lighter(110).name()}, stop: 1 {self._style['bg'].name()});border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
 
         self._button.setFont(self.font)
 
