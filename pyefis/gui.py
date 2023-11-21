@@ -81,6 +81,7 @@ class Main(QMainWindow):
         for idx, scr in enumerate(screens):
 
             scr.object = scr.module.Screen(self)
+            setattr(scr.object,'screenName',scr.name)
             log.debug("Loading Screen {0}".format(scr.name))
             # TODO Figure out how to have different size screens
             scr.object.resize(self.width(), self.height())
