@@ -147,6 +147,7 @@ outputs:
   BTNHH: OnChange
   BTNFP: OnChange
   APREQ: OnChange
+  TRIMR: OnChange
   TRIMP: OnChange
   TRIMY: OnChange
 # Screen definitions describe the screens that will be loaded
