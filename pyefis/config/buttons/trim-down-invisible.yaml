@@ -2,8 +2,8 @@ type: repeat
 text: ""
 dbkey: BTNTRIMDN
 transparent: true
-repeat_interval: 10
-repeat_delay: 100
+repeat_interval: 5
+repeat_delay: 50
 conditions:
   - when: "CLICKED eq true" 
     actions:

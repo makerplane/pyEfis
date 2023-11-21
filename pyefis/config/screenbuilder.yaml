@@ -148,6 +148,7 @@ outputs:
   BTNFP: OnChange
   APREQ: OnChange
   TRIMP: OnChange
+  TRIMY: OnChange
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."
 # followed by the name.  The only required configuration is
@@ -235,7 +236,7 @@ screens:
           columns: 10
       - type: numeric_display
         row: 50
-        column: 218
+        column: 240
         span:
           rows: 5
           columns: 10
@@ -312,6 +313,78 @@ screens:
           columns: 10
         options:
           config: config/buttons/trim-down-invisible.yaml
+      - type: horizontal_bar_gauge
+        row: 100
+        column: 85
+        span:
+          rows: 20
+          columns: 39
+        options:
+          name: Yaw
+          decimapPlaces: 0
+          showUnits: false
+          showValue: false
+          dbkey: TRIMY
+      - type: horizontal_bar_gauge
+        row: 90
+        column: 85
+        span:
+          rows: 20
+          columns: 39
+        options:
+          name: Roll
+          decimapPlaces: 0
+          showUnits: false
+          showValue: false
+          dbkey: TRIMR
+      - type: button
+        row: 100
+        column: 85
+        span:
+          rows: 10
+          columns: 15
+        options:
+          config: config/buttons/trim-yaw-left-invisible.yaml
+      - type: button
+        row: 100
+        column: 100
+        span:
+          rows: 10
+          columns: 10
+        options:
+          config: config/buttons/trim-yaw-center-invisible.yaml
+      - type: button
+        row: 100
+        column: 110
+        span:
+          rows: 10
+          columns: 15
+        options:
+          config: config/buttons/trim-yaw-right-invisible.yaml
+      - type: button
+        row: 90
+        column: 85
+        span:
+          rows: 10
+          columns: 15
+        options:
+          config: config/buttons/trim-roll-left-invisible.yaml
+      - type: button
+        row: 90
+        column: 100
+        span:
+          rows: 10
+          columns: 10
+        options:
+          config: config/buttons/trim-roll-center-invisible.yaml
+      - type: button
+        row: 90
+        column: 110
+        span:
+          rows: 10
+          columns: 15
+        options:
+          config: config/buttons/trim-roll-right-invisible.yaml
 
 #      - type: ganged_arc_gauge
 #        gang_type: vertical

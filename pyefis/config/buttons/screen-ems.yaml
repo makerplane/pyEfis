@@ -1,14 +1,19 @@
 type: simple
-text: "EMS"
+text: ""
 dbkey: BTN6
 conditions:
-  - when: "CLICKED eq true" 
-    actions:
-      - show next screen: true
   - when: "SCREEN eq 'EMS'"
     actions:
-      - set bg color: orange
-  - when: "SCREEN ne 'EMS'"
+      - set text: PFD
+    continue: true
+  - when: "SCREEN eq 'PFD'"
     actions:
-      - set bg color: lightgrey
+      - set text: EMS
+    continue: true
+  - when: "CLICKED eq true and SCREEN eq 'PFD'" 
+    actions:
+      - show screen: EMS
+  - when: "CLICKED eq true and SCREEN eq 'EMS'"
+    actions:
+      - show screen: PFD
 

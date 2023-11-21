@@ -1,5 +1,5 @@
 type: toggle
-text: "Heading\nHold1"
+text: "Heading\nHold"
 dbkey: BTNHH
 condition_keys:
   - BTNAP
@@ -33,7 +33,7 @@ conditions:
       - set value: APREQ, CRUISE
 #      - set value: BTNFP, False
       - set bg color: orange
-  - when: "CLICKED eq false and APMODE eq 'CRUISE' and APREQ eq 'CRUISE'"
+  - when: "CLICKED eq false and APMODE eq 'CRUISE' and [APREQ eq 'CRUISE' or APREQ eq 'INIT']"
     # We have transitioned to cruise mode
     actions:
       - set bg color: green

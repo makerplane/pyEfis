@@ -3,7 +3,7 @@ instruments:
     row: 2
     column: 376
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/screen-next.yaml
@@ -11,7 +11,7 @@ instruments:
     row: 2
     column: 1
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/screen-next.yaml
@@ -19,23 +19,23 @@ instruments:
     row: 20
     column: 376
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
-      config: config/buttons/screen-ems.yaml
+      config: config/buttons/screen-ems-pfd.yaml
   - type: button
     row: 20
     column: 1
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
-      config: config/buttons/screen-ems.yaml
+      config: config/buttons/screen-ems-pfd.yaml
   - type: button
     row: 38
     column: 376
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/trim-up.yaml
@@ -43,7 +43,7 @@ instruments:
     row: 38
     column: 1
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/trim-up.yaml
@@ -51,7 +51,7 @@ instruments:
     row: 56
     column: 376
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/trim-down.yaml
@@ -59,7 +59,7 @@ instruments:
     row: 56
     column: 1
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/trim-down.yaml
@@ -67,7 +67,7 @@ instruments:
     row: 74
     column: 376
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/auto-pilot-heading-hold.yaml
@@ -75,7 +75,7 @@ instruments:
     row: 74
     column: 1
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/auto-pilot-heading-hold.yaml
@@ -83,7 +83,7 @@ instruments:
     row: 92
     column: 376
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/auto-pilot-flight-plan.yaml
@@ -91,7 +91,7 @@ instruments:
     row: 92
     column: 1
     span:
-      rows: 16
+      rows: 15
       columns: 24
     options:
       config: config/buttons/auto-pilot-flight-plan.yaml

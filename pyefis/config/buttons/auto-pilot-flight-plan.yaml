@@ -34,9 +34,10 @@ conditions:
       - set value: APREQ, GUIDED
 #      - set value: BTNHH, False
       - set bg color: orange
-  - when: "BTNFP eq true and APMODE eq 'GUIDED' and APREQ eq 'GUIDED'"
+  - when: "CLICKED eq false and APMODE eq 'GUIDED' and [ APREQ eq 'GUIDED' or APREQ eq 'INIT']"
     actions:
       - set bg color: green
+      - button: checked
 #      - set value: BTNHH, False
 
 

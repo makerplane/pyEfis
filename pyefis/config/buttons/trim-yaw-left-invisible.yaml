@@ -1,10 +1,10 @@
 type: repeat
 text: ""
-dbkey: BTNTRIMUP
+dbkey: BTNTRIMYL
 transparent: true
 repeat_interval: 5
 repeat_delay: 50
 conditions:
   - when: "CLICKED eq true" 
     actions:
-      - change value: TRIMP,1
+      - change value: TRIMY,-1
