@@ -114,6 +114,11 @@ class Screen(QWidget):
         #if self.layout['type'] == 'grid':
         self.grid_layout()
         self.init = True
+        if self.layout.get('draw_grid', False):
+            self.grid = GridOverlay(self,self.layout)
+            self.grid.move(0,0)
+            self.grid.resize(self.width(),self.height())
+
 
     def setup_instruments(self,count,i,ganged=False):
         if not ganged:
@@ -263,17 +268,18 @@ class Screen(QWidget):
 
             grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
             grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
-            grid_x = leftm + grid_width * ((c['column']) - 1)
-            grid_y = topm + grid_height * ((c['row']) - 1)
+            grid_x = leftm + grid_width * ((c['column']) )
+            grid_y = topm + grid_height * ((c['row']) )
+            
             # Span columns to the right and rows down
             if 'span' in c:
                 if 'rows' in c['span']:
                     # spanning rows
-                    if c['span']['rows'] >= 2:
+                    if c['span']['rows'] >= 0:
                         grid_height = grid_height * (c['span']['rows'])
                 if 'columns' in c['span']:
                     #spanning columns
-                    if c['span']['columns'] >= 2:
+                    if c['span']['columns'] >= 0:
                         grid_width = grid_width * (c['span']['columns'])
 
 
@@ -433,3 +439,71 @@ class Screen(QWidget):
             r_y = y + ((height - r_height)/2)
         logger.debug(f"x:{x}, r_x:{r_x} y:{y} r_y:{r_y} width:{width} r_width:{r_width} height:{height} r_height:{r_height}")
         return (r_width,r_height,r_x,r_y)
+
+
+
+
+
+
+
+
+
+class GridOverlay(QWidget):
+    def __init__(self, parent=None,layout=None):
+        super(GridOverlay, self).__init__(parent)
+        self.layout = layout
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.Font = QFont()
+
+    def paintEvent(self,event):
+        topm = 0
+        leftm = 0
+        rightm = 0
+        bottomm = 0
+        # Margins in %
+        if 'margin' in self.layout:
+            if 'top' in self.layout['margin'] and self.layout['margin']['top'] > 0 and self.layout['margin']['top'] < 100:
+                topm = self.height() * ( self.layout['margin']['top'] / 100 )
+            if 'bottom' in self.layout['margin'] and self.layout['margin']['bottom'] > 0 and self.layout['margin']['bottom'] < 100:
+                bottomm = self.height() * ( self.layout['margin']['bottom'] / 100 )
+            if 'left' in self.layout['margin'] and self.layout['margin']['left'] > 0 and self.layout['margin']['left'] < 100:
+                leftm = self.height() * ( self.layout['margin']['left'] / 100 )
+            if 'right' in self.layout['margin'] and self.layout['margin']['right'] > 0 and self.layout['margin']['right'] < 100:
+                rightm = self.height() * ( self.layout['margin']['right'] / 100 )
+
+        grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
+        grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
+        grid_x = leftm# + grid_width)
+        grid_y = topm# + grid_height)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QPen(Qt.red,1))
+        self.Font.setPixelSize(qRound(grid_height*5))
+        painter.setFont(self.Font)
+        x = 0
+        self.textRect = QRectF(int(0), int(0), qRound(grid_width), qRound(grid_height))
+        while x <= int(self.layout['columns']):
+            grid_x = leftm + grid_width * (x)
+            painter.setPen(QPen(Qt.red,1))
+            if (x) % 10 == 0:
+                painter.setPen(QPen(Qt.green,3))
+                self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
+                painter.drawText(self.textRect, str(x),QTextOption(Qt.AlignCenter))
+                painter.setPen(QPen(Qt.red,3))
+            painter.drawLine(qRound(grid_x), qRound(grid_y), qRound(grid_x), self.height())
+            x += 5
+        y = 0
+        grid_x = leftm
+        while y <= int(self.layout['rows']):
+            grid_y = topm + grid_height * (y)
+            painter.setPen(QPen(Qt.red,1))
+            if (y) % 10 == 0:
+                if y > 0:
+                    painter.setPen(QPen(Qt.green,3))
+                    self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
+                    painter.drawText(self.textRect, str(y),QTextOption(Qt.AlignCenter))
+
+                painter.setPen(QPen(Qt.red,3))
+            painter.drawLine(qRound(grid_x), qRound(grid_y), self.width(),  qRound(grid_y))
+            y += 5
+
