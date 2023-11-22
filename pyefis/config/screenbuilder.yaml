@@ -147,6 +147,7 @@ outputs:
   BTNHH: OnChange
   BTNFP: OnChange
   APREQ: OnChange
+  APADJ: OnChange
   TRIMR: OnChange
   TRIMP: OnChange
   TRIMY: OnChange
@@ -157,6 +158,9 @@ outputs:
 # the screen
 
 screens:
+#  WAYDROID:
+#    module: pyefis.screens.waydroid
+#    title: Waydroid
   PFD:
     dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
     indexpath: /home/eblevins/projects/efis/CIFP/index.bin
@@ -164,50 +168,51 @@ screens:
     title: Screen Builder
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      draw_grid: true
       rows: 110
       columns: 400
     instruments:
       - type: include,config/includes/side-buttons.yaml
-      - type: static_text
-        row: 56
-        column: 1
-        span:
-          rows: 2
-          columns: 25
-        options:
-          text: "Screen Builder"
-      - type: value_text
-        row: 68
-        column: 2
-        span:
-          rows: 2
-          columns: 25
-        options:
-          _dbkey: WPHEAD
-      - type: value_text
-        row: 71
-        column: 2
-        span:
-          rows: 2
-          columns: 25
-        options:
-          _dbkey: WPLON
-      - type: value_text
-        row: 74
-        column: 2
-        span:
-          rows: 2
-          columns: 25
-        options:
-          _dbkey: WPLAT
+#      - type: static_text
+#        row: 56
+#        column: 1
+#        span:
+#          rows: 2
+#          columns: 25
+#        options:
+#          text: "Screen Builder"
+#      - type: value_text
+#        row: 68
+#        column: 2
+#        span:
+#          rows: 2
+#          columns: 25
+#        options:
+#          _dbkey: WPHEAD
+#      - type: value_text
+#        row: 71
+#        column: 2
+#        span:
+#          rows: 2
+#          columns: 25
+#        options:
+#          _dbkey: WPLON
+#      - type: value_text
+#        row: 74
+#        column: 2
+#        span:
+#          rows: 2
+#          columns: 25
+#        options:
+#          _dbkey: WPLAT
       - type: virtual_vfr
-        row: 1
+        row: 0
         column: 75
         span:
           rows: 115
           columns: 200
       - type: horizontal_situation_indicator
-        row: 1
+        row: 0
         column: 75
         span:
           rows: 115
@@ -221,7 +226,7 @@ screens:
           cdi_enabled: true
           gsi_enabled: true
       - type: altimeter_tape
-        row: 1
+        row: 0
         column: 250
         span:
           rows: 110
@@ -230,7 +235,7 @@ screens:
           fontsize: 28
           number_font_size: 40
       - type: vsi_pfd
-        row: 1
+        row: 0
         column: 240
         span:
           rows: 50
@@ -245,7 +250,7 @@ screens:
           decimalPlaces: 0
           dbkey: VS
       - type: airspeed_tape
-        row: 1
+        row: 0
         column: 75
         span:
           rows: 110
@@ -253,7 +258,7 @@ screens:
         options:
           fontsize: 40
       - type: heading_display
-        row: 1
+        row: 0
         column: 170
         span:
           rows: 7
@@ -263,7 +268,7 @@ screens:
           fg_color: "#FFFFFF"
           font_size: 47
       - type: static_text
-        row: 1
+        row: 0
         column: 75
         span:
           rows: 5
@@ -271,21 +276,107 @@ screens:
         options:
           text: "Auto Pilot:"
       - type: value_text
-        row: 1
+        row: 0
+        column: 210
+        span:
+          rows: 5
+          columns: 35
+        options:
+          _dbkey: TIMEZ
+      - type: value_text
+        row: 5
+        column: 210
+        span:
+          rows: 5
+          columns: 35
+        options:
+          _dbkey: TIMEL
+      - type: value_text
+        row: 0
         column: 102
         span:
           rows: 5
           columns: 50
         options:
           _dbkey: APMSG
-      - type: vertical_bar_gauge
-        row: 70
-        column: 72.5
+      - type: static_text
+        row: 90
+        column: 224
         span:
-          rows: 39
+          rows: 4
+          columns: 10
+        options:
+          text: "Baro:"
+      - type: numeric_display
+        row: 90
+        column: 235        
+        span:
+          rows: 4
+          columns: 12
+        options:
+          dbkey: BARO
+          decimalPlaces: 2          
+      - type: static_text
+        row: 95
+        column: 224
+        span:
+          rows: 4
+          columns: 10
+        options:
+          text: "DALT:"
+      - type: numeric_display
+        row: 95
+        column: 235
+        span:
+          rows: 4
           columns: 15
         options:
-          name: Trim
+          dbkey: DALT
+          decimalPlaces: 0
+      - type: static_text
+        row: 100
+        column: 224
+        span:
+          rows: 4
+          columns: 10
+        options:
+          text: "PALT:"
+      - type: numeric_display
+        row: 100
+        column: 235
+        span:
+          rows: 4
+          columns: 15
+        options:
+          dbkey: PALT
+          decimalPlaces: 0
+      - type: static_text
+        row: 105
+        column: 224
+        span:
+          rows: 4
+          columns: 10
+        options:
+          text: "OAT:"
+      - type: numeric_display
+        row: 105
+        column: 235
+        span:
+          rows: 4
+          columns: 10
+        options:
+          dbkey: OAT
+          temperature: true
+          showUnits: true
+          decimalPlaces: 0
+      - type: vertical_bar_gauge
+        row: 71
+        column: 72.5
+        span:
+          rows: 38
+          columns: 15
+        options:
+          name: Pitch
           decimapPlaces: 0
           showUnits: false
           showValue: false
@@ -316,10 +407,10 @@ screens:
           config: config/buttons/trim-down-invisible.yaml
       - type: horizontal_bar_gauge
         row: 100
-        column: 85
+        column: 86
         span:
           rows: 20
-          columns: 39
+          columns: 38
         options:
           name: Yaw
           decimapPlaces: 0
@@ -328,10 +419,10 @@ screens:
           dbkey: TRIMY
       - type: horizontal_bar_gauge
         row: 90
-        column: 85
+        column: 86
         span:
           rows: 20
-          columns: 39
+          columns: 38
         options:
           name: Roll
           decimapPlaces: 0
@@ -408,7 +499,7 @@ screens:
 
       - type: ganged_arc_gauge
         gang_type: vertical
-        row: 1
+        row: 0
         column: 25
         span:
           rows: 110
@@ -444,7 +535,7 @@ screens:
                   temperature: true
       - type: ganged_arc_gauge
         gang_type: vertical
-        row: 1
+        row: 0
         column: 275
         span:
           rows: 110
@@ -475,7 +566,7 @@ screens:
 
       - type: ganged_arc_gauge
         gang_type: vertical
-        row: 1
+        row: 0
         column: 325
         span:
           rows: 110
@@ -534,10 +625,11 @@ screens:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 400
+      draw_grid: true
     instruments:
       - type: include,config/includes/side-buttons.yaml
       - type: static_text
-        row: 1
+        row: 0
         column: 100
         span:
           rows: 10
@@ -572,7 +664,7 @@ screens:
                   config: config/buttons/egt-reset-peak.yaml
       -
         type: arc_gauge
-        row: 1
+        row: 0
         column: 25
         span:
           rows: 25
@@ -584,7 +676,7 @@ screens:
       -
         type: ganged_horizontal_bar_gauge
         gang_type: vertical
-        row: 1
+        row: 0
         column: 200
         span:
           rows: 50
@@ -669,6 +761,7 @@ screens:
             common_options:
               egt_mode_switching: true
               normalizeRange: 400
+              temperature: true
             instruments:
               -
                 options:
@@ -695,6 +788,8 @@ screens:
                   showUnits: false
                   dbkey: EGT14
           - name: CHT
+            common_options:
+              temperature: true
             instruments:
               -
                 options:
