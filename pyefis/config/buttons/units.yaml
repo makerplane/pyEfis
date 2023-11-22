@@ -1,0 +1,8 @@
+type: simple
+text: "Units"
+dbkey: BTN6
+conditions:
+  - when: "CLICKED eq true"
+    actions:
+      - Set Instrument Units: "OAT,OILT1,Temperature:Toggle"
+
