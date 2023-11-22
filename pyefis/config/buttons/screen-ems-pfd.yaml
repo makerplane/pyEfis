@@ -1,14 +1,29 @@
 type: simple
 text: ""
 dbkey: BTN6
+condition_keys:
+  - CHT11
+  - CHT12
+  - CHT13
+  - CHT14
+  - EGT11
+  - EGT12
+  - EGT13
+  - EGT14
 conditions:
   - when: "SCREEN eq 'EMS'"
     actions:
       - set text: PFD
+      - set bg color: lightgray
     continue: true
   - when: "SCREEN eq 'PFD'"
     actions:
       - set text: EMS
+      - set bg color: lightgray
+    continue: true
+  - when: "SCREEN eq 'PFD' and [CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate]"
+    actions:
+      - set bg color: red
     continue: true
   - when: "CLICKED eq true and SCREEN eq 'PFD'" 
     actions:
