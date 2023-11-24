@@ -86,6 +86,8 @@ class Screen(QWidget):
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
+            if 'disabled' in i and i['disabled'] == True:
+                continue
             if 'include,' in i['type']:
                 # Here we will include some instruments defined in another file
                 args = i['type'].split(',')
@@ -199,7 +201,7 @@ class Screen(QWidget):
                 if 'dbkey' in option: 
                     self.instruments[count].setDbkey(value)
                     next
-                if 'temperature' in option and value == True and 'gauge' in i['type']:
+                if 'temperature' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
                     self.instruments[count].conversionFunction1 = funcTempF
                     self.instruments[count].unitsOverride1 = u'\N{DEGREE SIGN}F'
                     self.instruments[count].conversionFunction2 = funcTempC
