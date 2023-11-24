@@ -168,7 +168,7 @@ screens:
     title: Screen Builder
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
-      draw_grid: true
+      draw_grid: false #true
       rows: 110
       columns: 400
     instruments:
@@ -627,17 +627,9 @@ screens:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 400
-      draw_grid: true
+      draw_grid: false #true
     instruments:
       - type: include,config/includes/side-buttons.yaml
-      - type: static_text
-        row: 0
-        column: 100
-        span:
-          rows: 10
-          columns: 40
-        options:
-          text: "Screen Builder"
       - type: ganged_button
         gang_type: horizontal
         row: 100
@@ -665,99 +657,107 @@ screens:
                 options:
                   config: config/buttons/egt-reset-peak.yaml
       -
-        type: arc_gauge
+        type: ganged_vertical_bar_gauge
+        gang_type: horizontal
         row: 0
         column: 25
         span:
-          rows: 25
-          columns: 50
-        options:
-          name: RPM
-          decimalPlaces: 0
-          dbkey: TACH1
-      -
-        type: ganged_horizontal_bar_gauge
-        gang_type: vertical
-        row: 0
-        column: 200
-        span:
-          rows: 50
-          columns: 100
+          rows: 55
+          columns: 350
         groups:
-          - name: Oil
+          - name: RPM
+            common_options:
+              showUnits: false
             instruments:
               -
                 options:
-                  name: Oil Press
-                  dbkey: OILP1
+                  name: RPM
+                  decimalPlaces: 0
+                  dbkey: TACH1
               -
                 options:
-                  name: Oil Temp
-                  dbkey: OILT1 
-                  temperature: true
-                  showUnits: true
-      -
-        type: static_text
-        row: 40
-        column: 100
-        span:
-          columns: 10
-        options:
-          text: Power
-        move:
-          shrink: 10
-      -
-        type: static_text
-        row: 40
-        column: 120
-        span:
-          columns: 10
-        options:
-          text: EGT
-        move:
-          shrink: 10
-      -
-        type: static_text
-        row: 40
-        column: 140
-        span:
-          columns: 10
-        options:
-          text: CHT
-        move:
-          shrink: 10
-      -
-        type: static_text
-        row: 40
-        column: 160
-        span:
-          columns: 10
-        options:
-          text: FUEL
-        move:
-          shrink: 10
-      -
-        type: ganged_vertical_bar_gauge
-        gang_type: horizontal
-        row: 50
-        column: 25
-        span:
-          rows: 50
-          columns: 350
-        groups:
+                  name: TPS
+                  decimalPlaces: 0
+                  dbkey: TACH1
+          - name: Engine
+            instruments:
+              -
+                options:
+                  name: MAP
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: IT
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: AFR
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: AFRT
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: EGO
+                  decimalPlaces: 0
+                  dbkey: MAP1
           - name: Power
+            common_options:
+              showUnits: true
             instruments:
               -
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
                   dbkey: CURRNT
+          - name: Temps
+            instruments:
+              -
+                options:
+                  name: IAT
+                  decimalPlaces: 0
+                  dbkey: MAP1
+                  temperature: true
+              -
+                options:
+                  name: OAT
+                  decimalPlaces: 0
+                  dbkey: MAP1
+                  temperature: true
+              -
+                options:
+                  name: COOL
+                  decimalPlaces: 0
+                  dbkey: MAP1
+                  temperature: true
+              -
+                options:
+                  name: OILT
+                  decimalPlaces: 0
+                  dbkey: OILT1
+                  temperature: true
+              -
+                options:
+                  name: Oil Press
+                  dbkey: OILP1
+      -
+        type: ganged_vertical_bar_gauge
+        gang_type: horizontal
+        row: 55
+        column: 25
+        span:
+          rows: 55
+          columns: 350
+        groups:
           - name: EGT
             #options:
             #  ???? highlight max?
@@ -765,81 +765,84 @@ screens:
               egt_mode_switching: true
               normalizeRange: 400
               temperature: true
-              highlightKey: EGTMAX1 
+              highlightKey: EGTMAX1
+              showUnits: true
+              decPlaces: 0 
             instruments:
               -
                 options:
                   name: "EGT 1"
-                  decPlaces: 0
-                  showUnits: false # Units display under the value making bar smaller
                   dbkey: EGT11
               -
                 options:
                   name: "EGT 2"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: EGT12
               -
                 options:
                   name: "EGT 3"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: EGT13
               -
                 options:
                   name: "EGT 4"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: EGT14
           - name: CHT
             common_options:
               temperature: true
               highlightKey: CHTMAX1
+              showUnits: true
+              decPlaces: 0
             instruments:
               -
                 options:
                   name: "CHT 1"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: CHT11
               -
                 options:
                   name: "CHT 2"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: CHT12
               -
                 options:
                   name: "CHT 3"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: CHT13
               -
                 options:
                   name: "CHT 4"
-                  decPlaces: 0
-                  showUnits: false
                   dbkey: CHT14
           - name: FUEL
+            common_options:
+              showUnits: true
             instruments:
+              -
+                options:
+                  name: "Fuel"
+                  decPlaces: 0
+                  dbkey: FUELF1
+              -
+                options:
+                  name: "Fuel"
+                  decPlaces: 0
+                  dbkey: FUELP1
               -
                 options:
                   name: "Left"
                   decPlaces: 0
-                  showUnits: false
                   dbkey: FUELQ1
               -
                 options:
                   name: "Center"
                   decPlaces: 0
-                  showUnits: false
                   dbkey: FUELQ2
               -
                 options:
                   name: "Right"
                   decPlaces: 0
-                  showUnits: false
-                  dbkey: FUELQ1
+                  dbkey: FUELQ3
+              -
+                options:
+                  name: "CAT"
+                  decPlaces: 0
+                  temperature: true
+                  dbkey: CAT
 
 
 
