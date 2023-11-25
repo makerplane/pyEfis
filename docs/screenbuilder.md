@@ -43,7 +43,7 @@ screens:
       rows: 200
       draw_grid: true
 ```
-![Grid Image](/docs/images/grid_grid.png)
+![Grid Image](/docs/images/draw_grid.png)
 
 ## Margins
 Maybe you do not want instruments showing up behind the menu or some other customization you have made. Setting a margin will exclude that region from your grid so no gauges will be placed in that area.
