@@ -124,7 +124,7 @@ screens:
           rows: 100
           columns: 100
 ```
-In the screen I highlighted 100x100 with blue, you can see the gauge is entered in that 100x100 area:
+In the screen I highlighted 100x100 with blue, you can see the gauge is centered in that 100x100 area:
 ![Span Image](/docs/images/span.png)
 
 ### Move
@@ -152,7 +152,8 @@ screens:
           shrink: 50
 ```
 The ASI is 50% smaller and centered in the 100x100 span specified:
-![Span Image](/docs/images/span.png)
+
+![Span Image](/docs/images/shrink.png)
 
 A more useful example for shrink would be to place a `horizontal_situation_indicator` over an `attitude_indicator`, placing both in the same row/column and span will be them centered to one another, then you can shrink the `horizontal_situation_indicator` to the size you desire.
 
@@ -340,42 +341,53 @@ Below is a list of the instrument types, defaults and options. This is a WIP and
 
 
 airspeed_dial
+
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
 airspeed_box
 
 airspeed_tape
+
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
 airspeed_trend_tape
 
 altimeter_dial
+
 ![Altimeter Dial](/docs/images/altimeter_dial.png)
 
 altimeter_tape
+
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
 
 altimeter_trend_tape
+
 ![Altimeter Trend Tape](/docs/images/altimeter_trend_tape.png)
 
 atitude_indicator
+
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
 arc_gauge
+
 ![Arc Gauge](/docs/images/arc_gauge.png)
 
 button
 
 heading_display
+
 ![Heading Display](/docs/images/heading_display.png)
 
 heading_tape
+
 ![Heading Tape](/docs/images/heading_tape.png)
 
 horizontal_bar_gauge
+
 ![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
 
 horizontal_situation_indicator
+
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
 numeric_display
@@ -383,19 +395,24 @@ numeric_display
 static_text
 
 turn_coordinator
+
 ![Turn Coordinator](/docs/images/turn_coordinator.png)
 
 value_display
 
 vertical_bar_gauge
+
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
 
 virtual_vfr
+
 ![Virtual VFR](/docs/images/virtual_vfr.png)
 
 vsi_dial
+
 ![VSI Dial](/docs/images/vsi_dial.png)
 
 vsi_pfd
+
 ![VSI PFD](/docs/images/vsi_pfd.png)
 
