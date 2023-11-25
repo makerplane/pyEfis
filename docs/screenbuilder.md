@@ -15,6 +15,7 @@ screens:
 The next thing you need to do is define a layout grid for your screen.
 
 To specify the grud you need to define the `columns:` and `rows:` that make up your grid.
+The first column and row is 0
 
 For a Six Pack using `rows: 2` and `columns: 3` makes sense.
 If you are doing more complex layouts you can make the number of grids really high.
@@ -50,7 +51,7 @@ Maybe you do not want instruments showing up behind the menu or some other custo
 
 Margins are defined under `layout:` using the key `margin:`
 
-In this example we will exclude the bottom 10% of the screen:
+In this example we will exclude the top 10% and left 10% of the screen:
 
 ```
 screens:
@@ -58,11 +59,14 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Six Pack
     layout:
-      columns: 640
-      rows: 480
+      columns: 300
+      rows: 200
       margin:
-        bottom: 10
+        top: 10
+        left: 10
 ```
+![Margin Image](/docs/images/margin.png)
+
 Margins are specified in percentage, not grid or pixels, to hopefully allow screens to work well for others that might have a different resolution.
 You can specify margins for `top`, `bottom`, `left` and `right`
 
@@ -82,27 +86,25 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Six Pack
     layout:
-      columns: 640
-      rows: 480
-      margin:
-        bottom: 10
+      columns: 300
+      rows: 200
     instruments:
       - type: airspeed_dial
-        row: 1
-        column: 1
+        row: 0
+        column: 0
 ```
 ### Span
 The next most useful option is `span:` which allows the instrument to span columns to the right and rows down.
-Back to the example grid of 640 x 480 that matches the resolution, `rows:` and `columns:` specify how many pixels tall and wide the instrument will be. 
+Back to the example grid of 300 x 200. 
 
 If you want the six gauges evenly places with three on top and two rows high:<br>
 
 set the height to:<br>
-`480 / 2 = 240`<br>
+`200 / 2 = 100`<br>
 and the columns to<br>
-`640 / 3 = 213.33`<br>
+`300 / 3 = 100`<br>
 
-You can drop the decimals. It is OK that that rows and columns do not match, the gauge will be as large as possible to fit in that area but will not be distorted. The default is to center vertically and horizontally.
+You can drop any decimals from your calculations. It is OK that that rows and columns do not match, the gauge will be as large as possible to fit in that area but will not be distorted. The default is to center vertically and horizontally.
 
 ```
 screens:
@@ -116,132 +118,85 @@ screens:
         bottom: 10
     instruments:
       - type: airspeed_dial
-        db_items: IAS
-        row: 1
-        column: 1
+        row: 0
+        column: 0
         span:
-          rows: 240
-          columns: 213
+          rows: 100
+          columns: 100
 ```
+In the screen I highlighted 100x100 with blue, you can see the gauge is entered in that 100x100 area:
+![Span Image](/docs/images/span.png)
 
 ### Move
 The next option is `move:` that provides two options `shrink:` and `justify:`
 
-Shrink allows you to shrink and item by percentage, this is useful in cases where you might want to keep the layout simple but need to fit a couple of instruments in the same area.
+Shrink allows you to shrink an item by percentage and justify allows you to shift it to the top, bottom, right or left. By default if you shrink without justify it will be centered.
 
-Imagine our example six pack, it would be much easier to have just three columns and two rows because you do not need any math to figure out the span:
+
 ```
 screens:
   SixPackNew:
     module: pyefis.screens.screenbuilder
     title: Six Pack
     layout:
-      columns: 3
-      rows: 2
+      columns: 300
+      rows: 200
     instruments:
       - type: airspeed_dial
-        db_items: IAS
-        row: 1
-        column: 1
+        row: 0
+        column: 0
+        span:
+          rows: 100
+          columns: 100
+        move:
+          shrink: 50
 ```
+The ASI is 50% smaller and centered in the 100x100 span specified:
+![Span Image](/docs/images/span.png)
 
-For the HSI you want to display a small heading box above it. First you place the HSI:
-```
-screens:
-  SixPackNew:
-    module: pyefis.screens.screenbuilder
-    title: Six Pack
-    layout:
-      columns: 3
-      rows: 2
-    instruments:
-      - 
-        type: horizontal_situation_indicator
-        row: 2
-        column: 2
-```
-Now you shrink it a little and move it down to make room for the heading box:
-```
-screens:
-  SixPackNew:
-    module: pyefis.screens.screenbuilder
-    title: Six Pack
-    layout:
-      columns: 3
-      rows: 2
-    instruments:
-      - 
-        type: horizontal_situation_indicator
-        row: 2
-        column: 2
-        move:
-          shrink: 21
-          justify:
-            - bottom
-```
-Then you can place the heading box which also needs to shrink and justify to the top:
-```
-screens:
-  SixPackNew:
-    module: pyefis.screens.screenbuilder
-    title: Six Pack
-    layout:
-      columns: 3
-      rows: 2
-    instruments:
-      - 
-        type: horizontal_situation_indicator
-        row: 2
-        column: 2
-        move:
-          shrink: 21
-          justify:
-            - bottom
-      -
-        type: heading_display
-        db_items: HEAD
-        column: 2
-        row: 2
-        move:
-          shrink: 80
-          justify:
-            - top
-```
+A more useful example for shrink would be to place a `horizontal_situation_indicator` over an `attitude_indicator`, placing both in the same row/column and span will be them centered to one another, then you can shrink the `horizontal_situation_indicator` to the size you desire.
 
 ### Options
 Some instruments have options, for example the HSI has the options `gsi_enabled` and `cdi_enabled` that can enable the glide slope indicator or the course deviation indicator
-We will add those options to the HSI
+We will add those options to the HSI along with some shrink and justify to provide additional examples:
 ```
 screens:
   SixPackNew:
     module: pyefis.screens.screenbuilder
     title: Six Pack
     layout:
-      columns: 3
-      rows: 2
+      columns: 300
+      rows: 200
     instruments:
       - 
         type: horizontal_situation_indicator
         options:
           gsi_enabled: true
           cdi_enabled: true
-        row: 2
-        column: 2
+        row: 100
+        column: 100
+        span:
+          rows: 100
+          columns: 100
         move:
-          shrink: 21
+          shrink: 10
           justify:
             - bottom
       -
         type: heading_display
-        column: 2
-        row: 2
+        column: 100
+        row: 100
+        span:
+          rows: 100
+          columns: 100
         move:
           shrink: 80
           justify:
             - top
 ```
+![Options Image](/docs/images/options_move.png)
 
-#### FIX db keys
+#### FIX db keys ####
 Some instruments, primarily gauges do not have default FIX db keys associated with them. In these cases you just specify the option `dbkey:`
 
 Here is an example instrument for a tachometer:
@@ -272,7 +227,7 @@ The default is to gang them vertically, if you want to gang horizontally you mus
 ```
 
 #### Groups ####
-Each instrument in a gang must belong to a gang group. Each gang group will be slightly sperated on the screen to visuallt sperate each group from one another.
+Each instrument in a gang must belong to a gang group. Each gang group will be slightly sperated on the screen to visually sperate each group from one another.
 
 
 It is acceptable to only have a single group.
@@ -385,9 +340,62 @@ Below is a list of the instrument types, defaults and options. This is a WIP and
 
 
 airspeed_dial
+![Airspeed Dial](/docs/images/airspeed_dial.png)
+
+airspeed_box
+
+airspeed_tape
+![Airspeed Tape](/docs/images/airspeed_tape.png)
+
+airspeed_trend_tape
+
 altimeter_dial
+![Altimeter Dial](/docs/images/altimeter_dial.png)
+
+altimeter_tape
+![Airspeed Tape](/docs/images/altimeter_tape.png)
+
+altimeter_trend_tape
+![Altimeter Trend Tape](/docs/images/altimeter_trend_tape.png)
+
 atitude_indicator
+![Atitude Indicator](/docs/images/atitude_indicator.png)
+
+arc_gauge
+![Arc Gauge](/docs/images/arc_gauge.png)
+
+button
+
 heading_display
+![Heading Display](/docs/images/heading_display.png)
+
+heading_tape
+![Heading Tape](/docs/images/heading_tape.png)
+
+horizontal_bar_gauge
+![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
+
 horizontal_situation_indicator
+![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
+
+numeric_display
+
+static_text
+
 turn_coordinator
+![Turn Coordinator](/docs/images/turn_coordinator.png)
+
+value_display
+
+vertical_bar_gauge
+![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
+
+virtual_vfr
+![Virtual VFR](/docs/images/virtual_vfr.png)
+
 vsi_dial
+![VSI Dial](/docs/images/vsi_dial.png)
+
+vsi_pfd
+![VSI PFD](/docs/images/vsi_pfd.png)
+
