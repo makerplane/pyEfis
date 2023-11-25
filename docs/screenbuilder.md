@@ -17,17 +17,33 @@ The next thing you need to do is define a layout grid for your screen.
 To specify the grud you need to define the `columns:` and `rows:` that make up your grid.
 
 For a Six Pack using `rows: 2` and `columns: 3` makes sense.
-If you are doing more complex layouts you can make them really high.
-For example if your screen is 640 x 480, you could set `columns: 640` and `rows: 480`, now you can place gauges by the pixel!
+If you are doing more complex layouts you can make the number of grids really high.
+For example if your screen is 640 x 480, you could set `columns: 640` and `rows: 480`, now you can place gauges by the pixel.
+Also consider that if you want to share your screen with others they might need a different resolution. Selecting a grid size that is easy to calculate might make more sense such as 600x400, the center if the screen would be `column: 300` and `row:200` sightly easier to calaulate than `320/220`
 ```
 screens:
   SixPackNew:
     module: pyefis.screens.screenbuilder
     title: Six Pack
     layout:
-      columns: 640
-      rows: 480
+      columns: 300
+      rows: 200
 ```
+
+## Drawing a Grid on the Screen
+While building your screen it might be helpful to have a grid overlayed on the screen so you could preview what it looks like and use the grid to help determine what row/column is needed to place an instrument where you want it.
+To do this you can add the option `draw_grid: true` under layout:
+```
+screens:
+  SixPackNew:
+    module: pyefis.screens.screenbuilder
+    title: Six Pack
+    layout:
+      columns: 300
+      rows: 200
+      draw_grid: true
+```
+![Grid Image](/docs/images/grid_grid.png)
 
 ## Margins
 Maybe you do not want instruments showing up behind the menu or some other customization you have made. Setting a margin will exclude that region from your grid so no gauges will be placed in that area.
