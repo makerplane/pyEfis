@@ -335,9 +335,46 @@ Following along with the example, here are the two groups for Power and EGT for 
 
 ```
 
+#### Instrument Includes ####
+The configuration file can start to become quite large and you might want to reuse the same instrument configs on different screens. For this you can use the include option.
+This will include the file config/includes/side-buttons.yaml:
+```
+    instruments:
+      - type: include,config/includes/side-buttons.yaml
+```
+If You wanted to use those same buttons on every screen just include them in every screen.
+
+Include files are made just like the main.yaml file except the top level is `instruments:`
+```
+instruments:
+  - type: button
+    row: 2
+    column: 376
+    span:
+      rows: 15
+      columns: 24
+    options:
+      config: config/buttons/screen-ems-pfd.yaml
+```
+All of the instruments are defined the same as in the main.yaml
+Currently you cannot use includes inside of includes.
+
+
 
 # Instrument List #
 Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. Currenlty not many options have common names, one instrument might use font_size where another is fontsize or fontSize. Hopefully the community can decide on some common naming and update the code to make maintaining the list here much easier.
+
+To add a button you need to spcify the option `config:` that points to the yaml file with the configuration for the button:
+```
+      - type: button
+        row: 70
+        column: 75
+        span:
+          rows: 15
+          columns: 10
+        options:
+          config: config/buttons/trim-up-invisible.yaml
+```
 
 
 airspeed_dial
@@ -373,6 +410,95 @@ arc_gauge
 ![Arc Gauge](/docs/images/arc_gauge.png)
 
 button
+Buttons should not be confused with the menu tho one could replace the menu with buttons if desired. The idea behind buttons is to provide an interactive instrument that can display data, change state such as color in response to data and perform actions within the system. The motivation to create this was because I wanted to place some physical buttons along each side of the screen so the pilot and co-pilot would have easy access to the buttons. Next to each physical button on the screen would be a button that shows the status of some option. For example, while viewing the Primary Flight Display screen if an engine item annunciates the button labeled EMS will turn red to indicate n alert condition. Pressing the button will take you to the EMS screen.  While viewing the EMS screen the button text changed to PFD, pressing it will take you back to the PFD screen.
+
+Every button needs to have `type:` `text:` and `dbkey:` defined.i
+```
+type: simple
+text: ""
+dbkey: BTN6
+```
+
+dbkey must be a boolean and can be used for a physical button input too.
+Three types of buttons:
+simple: <br>
+A simple button is like a momentary pushbutton. It will perform some action when pressed then go back to the non-pressed state.
+You could trigger a press by pressing the button with touchscreen or mouse or by setting sbkey to True
+toggle:<br>
+A toggle button is either on or off, it will perform actions when pressed or released.
+You could trigger on by setting dbkey to True and off by setting dbkey to False
+repeat:<br>
+A repeat button is the same as a  simple button however it will repeat actions if it is held down.
+
+The next option that might be useful is `condition_keys:`
+This optional option allows you to define what FIX db items this button needs to use within conditions to make decisions on what action to perform. This is an array of one or more FIX db keys
+```
+type: simple
+text: ""
+dbkey: BTN6
+condition_keys:
+  - CHT11
+  - CHT12
+  - CHT13
+  - CHT14
+  - EGT11
+  - EGT12
+  - EGT13
+  - EGT14
+```
+
+The `conditions:` key is an array of conditions, then when true, will execute the actions defined. 
+```
+conditions:
+  - when: "SCREEN eq 'EMS'"
+    actions:
+      - set text: PFD
+      - set bg color: lightgray
+    continue: true
+```
+In the example above `when:` is the condition where we are checking if the SCREEN the button is on is the screen named EMS. This condition will be evaluated whenever dbkey or any of the confition_keys changes. If `when:` evaluates to true the actions specified will be executed. By default once a condition evaluates to true no other conditions will be evaluated. But in this example the option `continue: true` is included which allows the following conditions to also be evaluated.
+
+All of the conditions are evaluated using the library `pycond`, you can read its documentation if you need help making conditions but normally `eq`, `ne`, `and`, `or` and the breackets `[]` are suffecient to make condition statements.
+
+the dbkey and condition_keys are avaliable to use in the conditions. IF you included `CHT11` as a dbkey or condition_key you can use CHT11 as a variable in the condition statement. For all FIX db items variables or `old`, `bad` etc and aux values are also avaliable.
+```
+KEY.old
+KEY.bad
+KEY.fail
+KEY.annunciate
+KEY.aux.min
+KEY.aux.max
+etc etc
+```
+
+In addition to those variables the variables `CLICKED` and `SCREEN` are also provided.
+SCREEN will contain the value of the screen name
+CLICKED will be true if the user has clicked the button to trigger evaluation of the conditions and false if the evaluation was triggered from just data changes.
+
+Here is a list of all the actions:
+set airspeed mode: 
+set egt mode: (
+show next screen: true
+show previous screen: true
+set value: KEY,value
+change value:
+toggle value:
+activate menu item:
+activate menu:
+menu encoder:
+set menu focus:
+set instrument units:
+exit:
+set bg color:
+set fg color:
+set text:
+button: (disable|enable|checked|unchecked)
+
+While attempts were made to prevent loops it is still possible to trigger them. To avoid the do not create an action in a button that changes its own dbkey. Instead use `button:checked` or `button:unchecked`
+Avoid taking actions on button 'A' that cause button 'B' to take actions on button 'A'
+The order of conditions and actions does matter. Avoiding loops and unexpected behaviour can be accomplished with re-ording and limited use of continue.
+disabeling a button does not prevent it from evaluating conditions and performing actions. It only prevent a user from clicking a button. Using the variable `CLICKED` in your conditions can be very useful to distinguise between user initiated actions and FIX db values initiating actions.
+
 
 heading_display
 
