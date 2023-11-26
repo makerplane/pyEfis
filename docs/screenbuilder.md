@@ -197,7 +197,7 @@ screens:
 ```
 ![Options Image](/docs/images/options_move.png)
 
-#### FIX db keys ####
+#### FIX db keys
 Some instruments, primarily gauges do not have default FIX db keys associated with them. In these cases you just specify the option `dbkey:`
 
 Here is an example instrument for a tachometer:
@@ -213,7 +213,7 @@ Here is an example instrument for a tachometer:
             decimalPlaces: 0
 ``` 
 
-### Ganged Instruments ###
+### Ganged Instruments
 Ganged instruments are perfect for when you want to configure a column or row of instruments. To use them you simply prefix the instrument type with `ganged_`
 
 For example `ganged_arc_gauge`
@@ -227,7 +227,7 @@ The default is to gang them vertically, if you want to gang horizontally you mus
 
 ```
 
-#### Groups ####
+#### Groups
 Each instrument in a gang must belong to a gang group. Each gang group will be slightly sperated on the screen to visually sperate each group from one another.
 
 
@@ -264,7 +264,7 @@ You can give the group a name, tho currently nothing is done with the name inter
 
 ```
 
-##### Common Options #####
+#### Common Options #####
 
 `common_options` can be specifed for each gang group and will be applied to all instruments defined in that group. If the same option is specified in `common_options:` and the instrument `options:`, the value defined for the instrument will be used for that instrument.
 
@@ -377,41 +377,60 @@ To add a button you need to spcify the option `config:` that points to the yaml 
 ```
 
 
-airspeed_dial
+## airspeed_dial
 
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
-airspeed_box
+## airspeed_box
 
-airspeed_tape
+## airspeed_tape
 
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
-airspeed_trend_tape
+## airspeed_trend_tape
 
-altimeter_dial
+## altimeter_dial
 
 ![Altimeter Dial](/docs/images/altimeter_dial.png)
 
-altimeter_tape
+## altimeter_tape
 
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
 
-altimeter_trend_tape
+## altimeter_trend_tape
 
 ![Altimeter Trend Tape](/docs/images/altimeter_trend_tape.png)
 
-atitude_indicator
+## atitude_indicator
 
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
-arc_gauge
+## arc_gauge
 
 ![Arc Gauge](/docs/images/arc_gauge.png)
 
-button
-Buttons should not be confused with the menu tho one could replace the menu with buttons if desired. The idea behind buttons is to provide an interactive instrument that can display data, change state such as color in response to data and perform actions within the system. The motivation to create this was because I wanted to place some physical buttons along each side of the screen so the pilot and co-pilot would have easy access to the buttons. Next to each physical button on the screen would be a button that shows the status of some option. For example, while viewing the Primary Flight Display screen if an engine item annunciates the button labeled EMS will turn red to indicate n alert condition. Pressing the button will take you to the EMS screen.  While viewing the EMS screen the button text changed to PFD, pressing it will take you back to the PFD screen.
+## button
 
+Buttons should not be confused with the menu tho one could replace the menu with buttons if desired. The idea behind buttons is to provide an interactive instrument that can display data, change state such as color in response to data and perform actions within the system. The motivation to create this was because I wanted to place some physical buttons along each side of the screen so the pilot and co-pilot would have easy access to the buttons. Next to each physical button on the screen would be a button that shows the status of some option. For example, while viewing the Primary Flight Display screen if an engine item annunciates the button labeled EMS will turn red to indicate an alert condition. Pressing the button will take you to the EMS screen.  While viewing the EMS screen the button text changed to PFD, pressing it will take you back to the PFD screen.
+<br>
+Example buttons:
+![EMS Gray](/docs/images/ems-gray.png)
+![EMS Red](/docs/images/ems-red.png)
+
+### Adding a button
+To add a button you need to spcify the option `config:` that points to the yaml file with the configuration for the button:
+```
+      - type: button
+        row: 70
+        column: 75
+        span:
+          rows: 15
+          columns: 10
+        options:
+          config: config/buttons/trim-up-invisible.yaml
+```
+
+### Button configuration
 Every button needs to have `type:` `text:` and `dbkey:` defined.i
 ```
 type: simple
@@ -419,17 +438,23 @@ text: ""
 dbkey: BTN6
 ```
 
+### dbkey and physical buttons
 dbkey must be a boolean and can be used for a physical button input too.
 Three types of buttons:
 simple: <br>
-A simple button is like a momentary pushbutton. It will perform some action when pressed then go back to the non-pressed state.
-You could trigger a press by pressing the button with touchscreen or mouse or by setting sbkey to True
+A simple button is like a momentary pushbutton. It will perform some action when pressed then go back to the non-pressed state. It does not repeat actions if held down.
+You could trigger a press by pressing the button with touchscreen or mouse or by setting dbkey to True
 toggle:<br>
 A toggle button is either on or off, it will perform actions when pressed or released.
 You could trigger on by setting dbkey to True and off by setting dbkey to False
 repeat:<br>
-A repeat button is the same as a  simple button however it will repeat actions if it is held down.
+A repeat button is the same as a simple button however it will repeat actions if it is held down.
+<br>
+Example buttons with invisible background color overlayed on top of a vertical bar gauge to control and show position of a trim tab:
+![Trim Pitch](/docs/images/trim-pitch.png)
 
+
+### Condition keys
 The next option that might be useful is `condition_keys:`
 This optional option allows you to define what FIX db items this button needs to use within conditions to make decisions on what action to perform. This is an array of one or more FIX db keys
 ```
@@ -447,6 +472,8 @@ condition_keys:
   - EGT14
 ```
 
+### Conditions
+
 The `conditions:` key is an array of conditions, then when true, will execute the actions defined. 
 ```
 conditions:
@@ -459,6 +486,8 @@ conditions:
 In the example above `when:` is the condition where we are checking if the SCREEN the button is on is the screen named EMS. This condition will be evaluated whenever dbkey or any of the confition_keys changes. If `when:` evaluates to true the actions specified will be executed. By default once a condition evaluates to true no other conditions will be evaluated. But in this example the option `continue: true` is included which allows the following conditions to also be evaluated.
 
 All of the conditions are evaluated using the library `pycond`, you can read its documentation if you need help making conditions but normally `eq`, `ne`, `and`, `or` and the breackets `[]` are suffecient to make condition statements.
+
+### Variables
 
 the dbkey and condition_keys are avaliable to use in the conditions. IF you included `CHT11` as a dbkey or condition_key you can use CHT11 as a variable in the condition statement. For all FIX db items variables or `old`, `bad` etc and aux values are also avaliable.
 ```
@@ -500,45 +529,45 @@ The order of conditions and actions does matter. Avoiding loops and unexpected b
 disabeling a button does not prevent it from evaluating conditions and performing actions. It only prevent a user from clicking a button. Using the variable `CLICKED` in your conditions can be very useful to distinguise between user initiated actions and FIX db values initiating actions.
 
 
-heading_display
+## heading_display
 
 ![Heading Display](/docs/images/heading_display.png)
 
-heading_tape
+## heading_tape
 
 ![Heading Tape](/docs/images/heading_tape.png)
 
-horizontal_bar_gauge
+## horizontal_bar_gauge
 
 ![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
 
-horizontal_situation_indicator
+## horizontal_situation_indicator
 
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
-numeric_display
+## numeric_display
 
-static_text
+## static_text
 
-turn_coordinator
+## turn_coordinator
 
 ![Turn Coordinator](/docs/images/turn_coordinator.png)
 
-value_display
+## value_display
 
-vertical_bar_gauge
+## vertical_bar_gauge
 
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
 
-virtual_vfr
+## virtual_vfr
 
 ![Virtual VFR](/docs/images/virtual_vfr.png)
 
-vsi_dial
+## vsi_dial
 
 ![VSI Dial](/docs/images/vsi_dial.png)
 
-vsi_pfd
+## vsi_pfd
 
 ![VSI PFD](/docs/images/vsi_pfd.png)
 
