@@ -104,7 +104,7 @@ set the height to:<br>
 and the columns to<br>
 `300 / 3 = 100`<br>
 
-You can drop any decimals from your calculations. It is OK that that rows and columns do not match, the gauge will be as large as possible to fit in that area but will not be distorted. The default is to center vertically and horizontally.
+You can drop any decimals from your calculations. It is OK that the rows and columns do not match, the gauge will be as large as possible to fit in that area but will not be distorted. The default is to center vertically and horizontally.
 
 ```
 screens:
@@ -336,7 +336,7 @@ Following along with the example, here are the two groups for Power and EGT for 
 ```
 
 #### Instrument Includes ####
-The configuration file can start to become quite large and you might want to reuse the same instrument configs on different screens. For this you can use the include option.
+The configuration file can start to become quite large and you might want to reuse the same instrument configs on different screens. For this you can use the include option.<br>
 This will include the file config/includes/side-buttons.yaml:
 ```
     instruments:
@@ -413,8 +413,8 @@ To add a button you need to spcify the option `config:` that points to the yaml 
 
 Buttons should not be confused with the menu tho one could replace the menu with buttons if desired. The idea behind buttons is to provide an interactive instrument that can display data, change state such as color in response to data and perform actions within the system. The motivation to create this was because I wanted to place some physical buttons along each side of the screen so the pilot and co-pilot would have easy access to the buttons. Next to each physical button on the screen would be a button that shows the status of some option. For example, while viewing the Primary Flight Display screen if an engine item annunciates the button labeled EMS will turn red to indicate an alert condition. Pressing the button will take you to the EMS screen.  While viewing the EMS screen the button text changed to PFD, pressing it will take you back to the PFD screen.
 <br>
-Example buttons:
-![EMS Gray](/docs/images/ems-gray.png)
+Example buttons:<br>
+![EMS Gray](/docs/images/ems-gray.png)<br>
 ![EMS Red](/docs/images/ems-red.png)
 
 ### Adding a button
@@ -450,7 +450,7 @@ You could trigger on by setting dbkey to True and off by setting dbkey to False
 repeat:<br>
 A repeat button is the same as a simple button however it will repeat actions if it is held down.
 <br>
-Example buttons with invisible background color overlayed on top of a vertical bar gauge to control and show position of a trim tab:
+Example buttons with invisible background color overlayed on top of a vertical bar gauge to control and show position of a trim tab:<br>
 ![Trim Pitch](/docs/images/trim-pitch.png)
 
 
@@ -483,13 +483,13 @@ conditions:
       - set bg color: lightgray
     continue: true
 ```
-In the example above `when:` is the condition where we are checking if the SCREEN the button is on is the screen named EMS. This condition will be evaluated whenever dbkey or any of the confition_keys changes. If `when:` evaluates to true the actions specified will be executed. By default once a condition evaluates to true no other conditions will be evaluated. But in this example the option `continue: true` is included which allows the following conditions to also be evaluated.
+In the example above `when:` is the condition where we are checking if the SCREEN the button is on is the screen named EMS. This condition will be evaluated whenever dbkey or any of the confition_keys changes. If `when:` evaluates to true the actions specified will be executed. By default once a condition evaluates to true no other conditions will be evaluated. But in this example the option `continue: true` is included which allows the following conditions to also be evaluated.<br>
 
 All of the conditions are evaluated using the library `pycond`, you can read its documentation if you need help making conditions but normally `eq`, `ne`, `and`, `or` and the breackets `[]` are suffecient to make condition statements.
 
 ### Variables
 
-the dbkey and condition_keys are avaliable to use in the conditions. IF you included `CHT11` as a dbkey or condition_key you can use CHT11 as a variable in the condition statement. For all FIX db items variables or `old`, `bad` etc and aux values are also avaliable.
+the dbkey and condition_keys are avaliable to use in the conditions. If you included `CHT11` as a dbkey or condition_key you can use CHT11 as a variable in the condition statement. For all FIX db items variables or `old`, `bad` etc and aux values are also avaliable.
 ```
 KEY.old
 KEY.bad
@@ -505,25 +505,29 @@ SCREEN will contain the value of the screen name
 CLICKED will be true if the user has clicked the button to trigger evaluation of the conditions and false if the evaluation was triggered from just data changes.
 
 Here is a list of all the actions:
-set airspeed mode: 
-set egt mode: (
-show next screen: true
-show previous screen: true
-set value: KEY,value
-change value:
-toggle value:
-activate menu item:
-activate menu:
-menu encoder:
-set menu focus:
-set instrument units:
-exit:
-set bg color:
-set fg color:
-set text:
-button: (disable|enable|checked|unchecked)
 
-While attempts were made to prevent loops it is still possible to trigger them. To avoid the do not create an action in a button that changes its own dbkey. Instead use `button:checked` or `button:unchecked`
+  * set airspeed mode: 
+  * set egt mode: 
+  * show next screen: true
+  * show previous screen: true
+  * set value: KEY,value
+  * change value:  KEY,0.1
+  * toggle value:  true
+  * activate menu item: 1
+  * activate menu: MENU_NAME
+  * menu encoder: <VALUE>
+  * set menu focus:
+  * set instrument units:
+  * exit: true
+  * set bg color: #hex or predefined qt color name
+  * set fg color: #hex or predefined qt color name
+  * set text: See Below
+  * button: (disable|enable|checked|unchecked)
+
+### Button Text
+When using the action `set text:` setting static text is always an option such as `set text: EMS` resulting in the button saying `EMS` You can also use any of the variables used in conditions by simply putting curly brackets around the variable name such as `set text: {CHT11}`
+
+While attempts were made to prevent loops it is still possible to trigger them. To avoid them do not create an action in a button that changes its own dbkey. Instead use `button:checked` or `button:unchecked`
 Avoid taking actions on button 'A' that cause button 'B' to take actions on button 'A'
 The order of conditions and actions does matter. Avoiding loops and unexpected behaviour can be accomplished with re-ording and limited use of continue.
 disabeling a button does not prevent it from evaluating conditions and performing actions. It only prevent a user from clicking a button. Using the variable `CLICKED` in your conditions can be very useful to distinguise between user initiated actions and FIX db values initiating actions.
