@@ -25,7 +25,7 @@ instruments:
       config: config/buttons/screen-map-pfd.yaml
   - type: button
     row: 20
-    column: 1
+    column: 0
     span:
       rows: 15
       columns: 24

@@ -5,13 +5,13 @@ main:
   # Screen Geometry
   #screenWidth: 1024
   #screenHeight: 768
-  #screenWidth: 1920
-  #screenHeight: 550
+  screenWidth: 1920
+  screenHeight: 550
   #screenHeight: 1080
   #screenWidth: 640
   #screenHeight: 480
-  screenWidth: 3840
-  screenHeight: 1100
+  #screenWidth: 3840
+  #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: True
 
@@ -142,6 +142,8 @@ outputs:
   BTN4: OnChange
   BTN5: OnChange
   BTN6: OnChange
+  BTN8: OnChange
+  BTN9: OnChange
   ACID: OnChange  
   BTNAP: OnChange
   BTNHH: OnChange
@@ -203,10 +205,11 @@ screens:
                   dbkey: FUELQT
 
       - type: weston
+        disabled: true
         row: 0
         column: 75
         span:
-          rows: 110
+          rows: 118
           columns: 300
         options:
           socket: pyefis-waydroid-1
@@ -369,7 +372,24 @@ screens:
           columns: 12
         options:
           dbkey: BARO
-          decimalPlaces: 2          
+          decimalPlaces: 2
+          pressure: true
+      - type: button
+        row: 80
+        column: 224
+        span:
+          rows: 10
+          columns: 10
+        options:
+          config: config/buttons/baro-down-invisible.yaml
+      - type: button
+        row: 80
+        column: 238
+        span:
+          rows: 10
+          columns: 10
+        options:
+          config: config/buttons/baro-up-invisible.yaml          
       - type: static_text
         row: 95
         column: 224
@@ -424,10 +444,10 @@ screens:
           showUnits: true
           decimalPlaces: 0
       - type: vertical_bar_gauge
-        row: 71
+        row: 68
         column: 72.5
         span:
-          rows: 38
+          rows: 41
           columns: 15
         options:
           name: Pitch
@@ -436,10 +456,10 @@ screens:
           showValue: false
           dbkey: TRIMP
       - type: button
-        row: 70
+        row: 71
         column: 75
         span:
-          rows: 15
+          rows: 14
           columns: 10
         options:
           config: config/buttons/trim-up-invisible.yaml
