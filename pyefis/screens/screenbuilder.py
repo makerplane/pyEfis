@@ -215,10 +215,10 @@ class Screen(QWidget):
                     self.instruments[count].setUnitSwitching()
                     next
                 elif 'pressure' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
-                    self.instruments[count].conversionFunction1 = funcPressHpa 
-                    self.instruments[count].unitsOverride1 = 'hPa'
-                    self.instruments[count].conversionFunction2 = funcPressInHg
-                    self.instruments[count].unitsOverride2 = 'inHg'
+                    self.instruments[count].conversionFunction1 = funcPressInHg
+                    self.instruments[count].unitsOverride1 = 'inHg'
+                    self.instruments[count].conversionFunction2 = funcPressHpa
+                    self.instruments[count].unitsOverride2 = 'hPa'
                     self.instruments[count].unitGroup = 'Pressure'
                     self.instruments[count].setUnitSwitching()
                     next
