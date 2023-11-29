@@ -407,8 +407,8 @@ screens:
       columns: 27
     instruments:
       - type: static_text
-        row: 1
-        column: 1
+        row: 0
+        column: 0
         span:
           rows: 1
           columns: 20
@@ -416,8 +416,8 @@ screens:
           text: "Screen Builder"
       - type: ganged_button
         gang_type: horizontal
-        row: 14
-        column: 4.75
+        row: 13
+        column: 3.75
         move:
           shrink: 25
           justify: top
@@ -442,8 +442,8 @@ screens:
                   config: config/buttons/egt-reset-peak.yaml
       -
         type: arc_gauge
-        row: 1
-        column: 1
+        row: 0
+        column: 0
         span:
           rows: 4
           columns: 10
@@ -453,7 +453,7 @@ screens:
           dbkey: TACH1
       -
         type: arc_gauge
-        row: 1
+        row: 0
         column: 10
         span:
           rows: 4
@@ -465,7 +465,7 @@ screens:
       -
         type: ganged_horizontal_bar_gauge
         gang_type: vertical
-        row: 1
+        row: 0
         column: 20
         span:
           rows: 5
@@ -484,7 +484,7 @@ screens:
                   temperature: true
       -
         type: static_text
-        row: 6
+        row: 5
         column: 1
         span:
           columns: 4
@@ -494,8 +494,8 @@ screens:
           shrink: 10
       -
         type: static_text
-        row: 6
-        column: 6
+        row: 5
+        column: 5
         span:
           columns: 7
         options:
@@ -504,8 +504,8 @@ screens:
           shrink: 10
       -
         type: static_text
-        row: 6
-        column: 14
+        row: 5
+        column: 13
         span:
           columns: 7
         options:
@@ -514,8 +514,8 @@ screens:
           shrink: 10
       -
         type: static_text
-        row: 6
-        column: 23
+        row: 5
+        column: 22
         span:
           columns: 4
         options:
@@ -525,8 +525,8 @@ screens:
       -
         type: ganged_vertical_bar_gauge
         gang_type: horizontal
-        row: 7
-        column: 1
+        row: 6
+        column: 0
         span:
           rows: 7
           columns: 27
@@ -637,11 +637,6 @@ screens:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 2
       columns: 3
-      margin:
-        top: 10
-        left: 10
-        right: 10
-        bottom: 10
     instruments:
       # Add mapping feature
       # Some instruments need multiple inputs, how would one know what values/mapping is needed?
@@ -650,25 +645,25 @@ screens:
       #  columns: 3
       -
         type: airspeed_dial
-        row: 1
-        column: 1
+        row: 0
+        column: 0
         options:
           bg_color: "#00000000"
       - type: atitude_indicator
-        row: 1
-        column: 2
+        row: 0
+        column: 1
       -
         type: altimeter_dial
-        row: 1
-        column: 3
+        row: 0
+        column: 2
       -
         type: turn_coordinator
-        row: 2
-        column: 1
+        row: 1
+        column: 0
       - 
         type: horizontal_situation_indicator
-        row: 2             # Row where this grid starts vertical, 1 is top
-        column: 2          # Column where this grid starts horizontal, 1 is left
+        row: 1             # Row where this grid starts vertical, 1 is top
+        column: 1          # Column where this grid starts horizontal, 1 is left
                            # Span is not yet implemented
         #span:             # Defines if this grid should span multiple columns or rows making it larger
           #rows: 2         # This grid will occupuy row 2 and 3, 2 rows
@@ -692,8 +687,8 @@ screens:
           cdi_enabled: true
       -
         type: heading_display
-        column: 2
-        row: 2
+        column: 1
+        row: 1
         move:
           shrink: 80
           justify:
@@ -701,11 +696,11 @@ screens:
 
       -
         type: vsi_dial
-        row: 2
-        column: 3
+        row: 1
+        column: 2
       - type: static_text
-        row: 2.6
-        column: 1
+        row: 1.6
+        column: 0
         span:
           rows: 1
           columns: 3
