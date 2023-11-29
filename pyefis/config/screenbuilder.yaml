@@ -5,13 +5,13 @@ main:
   # Screen Geometry
   #screenWidth: 1024
   #screenHeight: 768
-  screenWidth: 1920
-  screenHeight: 550
+  #screenWidth: 1920
+  #screenHeight: 550
   #screenHeight: 1080
-  #screenWidth: 800
+  #screenWidth: 640
   #screenHeight: 480
-  #screenWidth: 3840
-  #screenHeight: 1100
+  screenWidth: 3840
+  screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: True
 
@@ -19,7 +19,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: PFD
+  defaultScreen: MAP
 
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
@@ -158,9 +158,63 @@ outputs:
 # the screen
 
 screens:
-#  WAYDROID:
-#    module: pyefis.screens.waydroid
-#    title: Waydroid
+  MAP:
+    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
+    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
+    module: pyefis.screens.screenbuilder
+    title: Screen Builder
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      draw_grid: false #true
+      rows: 110
+      columns: 400
+    instruments:
+      - type: include,config/includes/side-buttons.yaml
+      - type: ganged_arc_gauge
+        gang_type: vertical
+        row: 0
+        column: 25
+        span:
+          rows: 110
+          columns: 50
+        groups:
+          - name: Engine
+            common_options:
+              nameLocation: right
+              decimalPlaces: 0
+            instruments:
+              -
+                options:
+                  name: RPM
+                  dbkey: TACH1
+              -
+                options:
+                  name: Coolant
+                  temperature: true
+                  dbkey: H2OT1
+                  showUnits: true
+              -
+                options:
+                  name: Oil Press
+                  dbkey: OILP1
+              -
+                options:
+                  name: Fuel Total
+                  dbkey: FUELQT
+
+      - type: weston
+        row: 0
+        column: 75
+        span:
+          rows: 110
+          columns: 300
+        options:
+          socket: pyefis-waydroid-1
+          ini: config/weston.ini
+          command: waydroid
+          args:
+            - show-full-ui
+      
   PFD:
     dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
     indexpath: /home/eblevins/projects/efis/CIFP/index.bin
@@ -586,11 +640,12 @@ screens:
               -
                 options:
                   name: Fuel Right
-                  dbkey: FUELQ2
+                  dbkey: FUELQ3
               -
                 options:
                   name: Fuel Flow
                   dbkey: FUELF1
+                  decimalPlaces: 1
               -
                 options:
                   name: Amps
@@ -631,6 +686,7 @@ screens:
     instruments:
       - type: include,config/includes/side-buttons.yaml
       - type: ganged_button
+        disabled: true
         gang_type: horizontal
         row: 100
         column: 100
@@ -677,8 +733,9 @@ screens:
               -
                 options:
                   name: TPS
-                  decimalPlaces: 0
-                  dbkey: TACH1
+                  decimalPlaces: 2
+                  dbkey: THR1
+                  showUnits: True
           - name: Engine
             instruments:
               -
@@ -725,19 +782,19 @@ screens:
                 options:
                   name: IAT
                   decimalPlaces: 0
-                  dbkey: MAP1
+                  dbkey: CAT
                   temperature: true
               -
                 options:
                   name: OAT
                   decimalPlaces: 0
-                  dbkey: MAP1
+                  dbkey: OAT
                   temperature: true
               -
                 options:
                   name: COOL
                   decimalPlaces: 0
-                  dbkey: MAP1
+                  dbkey: H2OT1
                   temperature: true
               -
                 options:

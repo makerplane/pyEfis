@@ -16,16 +16,16 @@ conditions:
       - set text: PFD
       - set bg color: lightgray
     continue: true
-  - when: "SCREEN eq 'PFD'"
+  - when: "SCREEN eq 'PFD' or SCREEN eq 'MAP'"
     actions:
       - set text: EMS
       - set bg color: lightgray
     continue: true
-  - when: "SCREEN eq 'PFD' and [CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate]"
+  - when: "SCREEN ne 'EMS' and [ CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate ]"
     actions:
       - set bg color: red
     continue: true
-  - when: "CLICKED eq true and SCREEN eq 'PFD'" 
+  - when: "CLICKED eq true and [ SCREEN eq 'PFD' or SCREEN eq 'MAP' ]" 
     actions:
       - show screen: EMS
   - when: "CLICKED eq true and SCREEN eq 'EMS'"

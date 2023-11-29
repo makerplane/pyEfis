@@ -19,6 +19,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from pyefis.instruments import ai
+from pyefis.instruments import weston
 # from pyefis.instruments import gauges
 from pyefis.instruments import hsi
 from pyefis.instruments import airspeed
@@ -95,7 +96,6 @@ class Screen(QWidget):
                 insts = iconfig['instruments']
             else:
                 insts = [i]
-            print(insts)
             for inst in insts:        
                 if 'ganged' in inst['type']:
                     #ganged instrument
@@ -139,6 +139,8 @@ class Screen(QWidget):
         #        dbkey = i['options']['dbkey']            
 
         # Process the type of instrument this is and create them
+        if i['type'] == 'weston':
+            self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
         if i['type'] == 'airspeed_dial':
             self.instruments[count] = airspeed.Airspeed(self)
         if i['type'] == 'airspeed_box':
@@ -172,7 +174,7 @@ class Screen(QWidget):
         elif i['type'] == 'value_text':
             self.instruments[count] = misc.ValueDisplay(self)
         elif i['type'] == 'static_text':
-            print(i['options']['text'])
+            #print(i['options']['text'])
             self.instruments[count] = misc.StaticText(text=i['options']['text'], parent=self)
         elif i['type'] == 'turn_coordinator':
             self.instruments[count] = tc.TurnCoordinator(self)
