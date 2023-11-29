@@ -48,6 +48,9 @@ logger=logging.getLogger(__name__)
 funcTempF = lambda x: x * (9.0/5.0) + 32.0 
 funcTempC = lambda x: x
 
+funcPressHpa = lambda x: x * 33.863889532610884 
+funcPressInHg = lambda x: x
+
 class Screen(QWidget):
     def __init__(self, parent=None,config=None):
         super(Screen, self).__init__(parent)
@@ -209,6 +212,14 @@ class Screen(QWidget):
                     self.instruments[count].conversionFunction2 = funcTempC
                     self.instruments[count].unitsOverride2 = u'\N{DEGREE SIGN}C'
                     self.instruments[count].unitGroup = 'Temperature'
+                    self.instruments[count].setUnitSwitching()
+                    next
+                elif 'pressure' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
+                    self.instruments[count].conversionFunction1 = funcPressHpa 
+                    self.instruments[count].unitsOverride1 = 'hPa'
+                    self.instruments[count].conversionFunction2 = funcPressInHg
+                    self.instruments[count].unitsOverride2 = 'inHg'
+                    self.instruments[count].unitGroup = 'Pressure'
                     self.instruments[count].setUnitSwitching()
                     next
                 else:
