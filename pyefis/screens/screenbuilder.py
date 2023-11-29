@@ -51,6 +51,9 @@ funcTempC = lambda x: x
 funcPressHpa = lambda x: x * 33.863889532610884 
 funcPressInHg = lambda x: x
 
+funcDistanceMeters = lambda x: x / 3.28084
+funcDistanceFeet = lambda x: x
+
 class Screen(QWidget):
     def __init__(self, parent=None,config=None):
         super(Screen, self).__init__(parent)
@@ -220,6 +223,14 @@ class Screen(QWidget):
                     self.instruments[count].conversionFunction2 = funcPressHpa
                     self.instruments[count].unitsOverride2 = 'hPa'
                     self.instruments[count].unitGroup = 'Pressure'
+                    self.instruments[count].setUnitSwitching()
+                    next
+                elif 'distance' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
+                    self.instruments[count].conversionFunction1 = funcDistanceFeet
+                    self.instruments[count].unitsOverride1 = 'Ft'
+                    self.instruments[count].conversionFunction2 = funcDistanceMeters
+                    self.instruments[count].unitsOverride2 = 'M'
+                    self.instruments[count].unitGroup = 'Distance'
                     self.instruments[count].setUnitSwitching()
                     next
                 else:
