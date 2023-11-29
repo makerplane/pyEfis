@@ -24,17 +24,12 @@ class Weston(QGraphicsView):
                 win.setFlag(Qt.FramelessWindowHint, True)
                 wid = QWidget.createWindowContainer(win, self, Qt.FramelessWindowHint)
                 self.layout().addWidget(wid)
-                self.weston.finished.connect(self.close_maybe)
                 break
         self.waydroid = QProcess(self)
         env = QProcessEnvironment.systemEnvironment()
         env.insert("WAYLAND_DISPLAY",socket)
         self.waydroid.setProcessEnvironment(env)
         self.waydroid.start(command,args)
-        self.waydroid.finished.connect(self.close_maybe)
-
-    def close_maybe(self):
-        pass
 
     def closeEvent(self, event):
         self.weston.terminate()
