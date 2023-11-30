@@ -51,8 +51,8 @@ funcTempC = lambda x: x
 funcPressHpa = lambda x: x * 33.863889532610884 
 funcPressInHg = lambda x: x
 
-funcDistanceMeters = lambda x: x / 3.28084
-funcDistanceFeet = lambda x: x
+funcAltitudeMeters = lambda x: x / 3.28084
+funcAltitudeFeet = lambda x: x
 
 class Screen(QWidget):
     def __init__(self, parent=None,config=None):
@@ -119,7 +119,6 @@ class Screen(QWidget):
                     self.setup_instruments(count,inst)
                 count += 1
         #Place instruments:
-        #if self.layout['type'] == 'grid':
         self.grid_layout()
         self.init = True
         if self.layout.get('draw_grid', False):
@@ -225,12 +224,12 @@ class Screen(QWidget):
                     self.instruments[count].unitGroup = 'Pressure'
                     self.instruments[count].setUnitSwitching()
                     next
-                elif 'distance' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
-                    self.instruments[count].conversionFunction1 = funcDistanceFeet
+                elif 'altitude' in option and value == True and (i['type'] in ['gauge', 'numeric_display','altimeter_tape','altimeter_dial']):
+                    self.instruments[count].conversionFunction1 = funcAltitudeFeet
                     self.instruments[count].unitsOverride1 = 'Ft'
-                    self.instruments[count].conversionFunction2 = funcDistanceMeters
+                    self.instruments[count].conversionFunction2 = funcAltitudeMeters
                     self.instruments[count].unitsOverride2 = 'M'
-                    self.instruments[count].unitGroup = 'Distance'
+                    self.instruments[count].unitGroup = 'Altitude'
                     self.instruments[count].setUnitSwitching()
                     next
                 else:
@@ -434,8 +433,8 @@ class Screen(QWidget):
         if not self.init:
             self.init_screen()
 
-        if self.layout['type'] == 'grid':
-            self.grid_layout()
+        #if self.layout['type'] == 'grid':
+        self.grid_layout()
 
     def get_config_item(self, key):
         return self.parent.get_config_item(self, key)

@@ -291,6 +291,7 @@ screens:
         options:
           fontsize: 28
           number_font_size: 40
+          altitude: true
       - type: vsi_pfd
         row: 0
         column: 240
@@ -407,6 +408,7 @@ screens:
         options:
           dbkey: DALT
           decimalPlaces: 0
+          altitude: true
       - type: static_text
         row: 100
         column: 224
@@ -424,6 +426,7 @@ screens:
         options:
           dbkey: PALT
           decimalPlaces: 0
+          altitude: true
       - type: static_text
         row: 105
         column: 224

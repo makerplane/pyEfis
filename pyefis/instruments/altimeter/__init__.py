@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import *
 import pyavtools.fix as fix
 
 from pyefis.instruments.NumericalDisplay import NumericalDisplay
+import pyefis.hmi as hmi 
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300
@@ -37,6 +38,10 @@ class Altimeter(QWidget):
         self.item.oldChanged[bool].connect(self.repaint)
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
+
+        self.conversionFunction1 = lambda x: x
+        self.conversionFunction2 = lambda x: x
+        self.conversionFunction = lambda x: x
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
@@ -150,13 +155,40 @@ class Altimeter(QWidget):
             dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
         """
 
+    def setUnitSwitching(self):
+        """When this function is called the unit switching features are used"""
+        self.__currentUnits = 1
+        self.unitsOverride = self.unitsOverride1
+        self.conversionFunction = self.conversionFunction1
+        hmi.actions.setInstUnits.connect(self.setUnits)
+        self.update()
+
+    def setUnits(self, args):
+        x = args.split(':')
+        command = x[1].lower()
+        names = x[0].split(',')
+        if self.item.key in names or '*' in names or self.unitGroup in names:
+            #item = fix.db.get_item(self.dbkey)
+            if command == "toggle":
+                if self.__currentUnits == 1:
+                    self.unitsOverride = self.unitsOverride2
+                    self.conversionFunction = self.conversionFunction2
+                    self.__currentUnits = 2
+                else:
+                    self.unitsOverride = self.unitsOverride1
+                    self.conversionFunction = self.conversionFunction1
+                    self.__currentUnits = 1
+            #self.setAuxData(item.aux) # Trigger conversion for aux data
+            self.altimeter = self.item.value # Trigger the conversion for value
+
 
     def getAltimeter(self):
         return self._altimeter
 
     def setAltimeter(self, altimeter):
-        if altimeter != self._altimeter:
-            self._altimeter = altimeter
+        cvalue = self.conversionFunction(altimeter)
+        if cvalue != self._altimeter:
+            self._altimeter = cvalue
             self.update()
 
     altimeter = property(getAltimeter, setAltimeter)
@@ -181,7 +213,12 @@ class Altimeter_Tape(QGraphicsView):
 
 
         self.maxalt = maxalt
+        self._maxalt = maxalt
         self.myparent = parent
+
+        self.conversionFunction1 = lambda x: x
+        self.conversionFunction2 = lambda x: x
+        self.conversionFunction = lambda x: x
 
 
     def resizeEvent(self, event):
@@ -261,12 +298,40 @@ class Altimeter_Tape(QGraphicsView):
                              QPointF(0, triangle_size),
                              QPointF(triangle_size, 0)]))
 
+    def setUnitSwitching(self):
+        """When this function is called the unit switching features are used"""
+        self.__currentUnits = 1
+        self.unitsOverride = self.unitsOverride1
+        self.conversionFunction = self.conversionFunction1
+        hmi.actions.setInstUnits.connect(self.setUnits)
+        self.update()
+
+    def setUnits(self, args):
+        x = args.split(':')
+        command = x[1].lower()
+        names = x[0].split(',')
+        if self.item.key in names or '*' in names or self.unitGroup in names:
+            #item = fix.db.get_item(self.dbkey)
+            if command == "toggle":
+                if self.__currentUnits == 1:
+                    self.unitsOverride = self.unitsOverride2
+                    self.conversionFunction = self.conversionFunction2
+                    self.__currentUnits = 2
+                else:
+                    self.unitsOverride = self.unitsOverride1
+                    self.conversionFunction = self.conversionFunction1
+                    self.__currentUnits = 1
+            #self.setAuxData(item.aux) # Trigger conversion for aux data
+            self.altimeter = self.item.value # Trigger the conversion for value
+
     def getAltimeter(self):
         return self._altimeter
 
     def setAltimeter(self, altimeter):
-        if altimeter != self._altimeter:
-            self._altimeter = altimeter
+        cvalue = self.conversionFunction(altimeter)
+        if cvalue != self._altimeter:
+            self._altimeter = cvalue
+            self.maxalt = self.conversionFunction(self._maxalt) 
             self.redraw()
 
     altimeter = property(getAltimeter, setAltimeter)

@@ -30,7 +30,7 @@ menu:
           - ['Back', 'Show Previous Screen','']
           - ['Next', 'Show Next Screen','']
           - ['EMS', 'Show Screen','EMS']
-          - ['Units', 'Set Instrument Units', 'OAT,OILT1,Temperature:Toggle']
+          - ['Units', 'Set Instrument Units', 'OAT,OILT1,Temperature,Altitude,Pressure:Toggle']
           - ['Basic', 'activate menu','BasicMenu']
       BasicMenu:
           - ['Hide', 'activate menu', 'ShowMenu2']
@@ -274,7 +274,7 @@ keybindings:
     direction: UP
   - key: U
     action: Set Instrument Units
-    args: OAT,OILT1,Temperature:Toggle
+    args: OAT,OILT1,Temperature,Pressure,Altitude:Toggle
 
   - key: F1
     action: Activate Menu Item
@@ -656,6 +656,8 @@ screens:
         type: altimeter_dial
         row: 0
         column: 2
+        options:
+          altitude: true
       -
         type: turn_coordinator
         row: 1
