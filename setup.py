@@ -31,9 +31,9 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="aviation, makerplane, efis",
-    package_data={
-        "pyefis": ["config/*","config/includes/*", "config/buttons/*"],
-    },
+    #package_data={
+    #    "pyefis": ["config/*","config/includes/*", "config/buttons/*"],
+    #},
     packages=find_packages(exclude=["tests.*", "tests"]),
     python_requires=">=3.7, <4",
     install_requires=[
@@ -46,6 +46,7 @@ setup(
     extras_require={
         "build": ["build==0.10.0"],
     },
+    include_package_data= True,
     entry_points={
         "console_scripts": [
             "pyefis=pyefis.main:main",
