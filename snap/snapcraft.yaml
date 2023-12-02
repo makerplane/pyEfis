@@ -1,0 +1,44 @@
+name: pyefis
+version: "0.1"
+summary: makerplane EFIS
+description: |
+    EFIS display
+base: core22
+
+# The embedded android does not work with strict confinment 
+# Without that it is possible to use strict confinement
+confinement: classic
+compression: lzo 
+
+parts:
+  pyefis:
+    plugin: python
+    source: .
+    stage-packages:
+      - python3.10-minimal
+      - python3-pip
+      - python3-setuptools
+      - python3-wheel
+      - python3-venv
+      - python3-minimal
+      - python3-distutils
+      - python3-pkg-resources
+# Needed for strict mode:
+#      - libgl1
+    build-attributes:
+     - enable-patchelf
+
+apps:
+  pyefis:
+# Needed for strict mode:
+#    extensions: [gnome]
+    command: bin/pyefis
+    plugs: [ network]
+# Needed for strict mode:
+#    plugs: [ network, desktop, desktop-legacy, wayland, x11, opengl] 
+    environment:
+      LANG: C.UTF-8
+      PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
+# Needed for strict mode:
+#      LD_LIBRARY_PATH: "" 
+
