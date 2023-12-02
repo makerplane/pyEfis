@@ -32,7 +32,7 @@ setup(
     ],
     keywords="aviation, makerplane, efis",
     package_data={
-        "pyefis": ["config/*"],
+        "pyefis": ["config/*","config/includes/*", "config/buttons/*"],
     },
     packages=find_packages(exclude=["tests.*", "tests"]),
     python_requires=">=3.7, <4",
