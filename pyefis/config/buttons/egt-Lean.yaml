@@ -1,0 +1,15 @@
+type: toggle
+text: "Lean\n "
+dbkey: EGTBTN4
+conditions:
+  - when: "CLICKED eq true and EGTBTN4 eq true" 
+    actions:
+      - set value: EGTBTN3, False #Turn off EGT Peak button
+      - set value: EGTBTN2, False #Turn off EGT normalize button
+      - set egt mode: normal #Ensure all are off
+      - Set EGT Mode: Lean # Then enable the mode we want
+      - set bg color: green
+  - when: "CLICKED eq true and EGTBTN4 eq false"
+    actions:
+      - set EGT Mode: normal
+      - set bg color: lightgray

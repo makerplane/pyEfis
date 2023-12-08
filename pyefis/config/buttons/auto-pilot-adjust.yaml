@@ -1,0 +1,23 @@
+type: toggle
+text: "AP\nAdjust"
+dbkey: APADJ
+condition_keys:
+  - APMODE
+  - APSTAT
+conditions:
+  - when: "APMODE eq 'TRIM'"
+    actions:
+      - button: disable
+      - set bg color: darkgray
+      - button: unchecked
+  - when: "APSTAT eq 'ARMED' and APMODE ne 'TRIM' and APADJ eq false"
+    actions:
+      - button: enable
+      - set bg color: lightgray
+    continue: true
+  - when: "CLICKED eq true and APADJ eq true and APMODE ne 'TRIM'"
+    actions:
+      - set bg color: green
+      - button: checked
+
+

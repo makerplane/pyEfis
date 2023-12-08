@@ -24,9 +24,10 @@ from .abstract import AbstractGauge
 from .verticalBar import VerticalBar
 
 class EGTGroup(QWidget):
-    def __init__(self, parent=None, cylinders = 4, dbkeys = ["EGT11", "EGT12", "EGT13", "EGT14"]):
+    def __init__(self, parent=None, cylinders = 4, dbkeys = ["EGT11", "EGT12", "EGT13", "EGT14"], min_size=True):
         super(EGTGroup, self).__init__(parent)
-        self.setMinimumSize(50, 100)
+        if min_size:
+            self.setMinimumSize(50, 100)
         self.bars = []
         #self.conversionFunction = lambda x: x * (9.0/5.0) + 32.0
         self.normalizeMode = False

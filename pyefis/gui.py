@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import *
 import importlib
 import logging
 import sys
+import os
 from pyefis import hooks
 from pyefis import hmi
 
@@ -61,6 +62,7 @@ class Main(QMainWindow):
     def __init__(self, config, parent=None):
         super(Main, self).__init__(parent)
 
+        self.path = os.path.dirname(__file__)
         self.screenWidth = int(config["main"]["screenWidth"])
         self.screenHeight = int(config["main"]["screenHeight"])
         self.screenColor = config["main"]["screenColor"]
@@ -79,6 +81,7 @@ class Main(QMainWindow):
         for idx, scr in enumerate(screens):
 
             scr.object = scr.module.Screen(self)
+            setattr(scr.object,'screenName',scr.name)
             log.debug("Loading Screen {0}".format(scr.name))
             # TODO Figure out how to have different size screens
             scr.object.resize(self.width(), self.height())
@@ -202,9 +205,6 @@ def initialize(config):
     if 'menu' in config:
         menu = hmi.menu.Menu(mainWindow, config["menu"])
         menu.start()
-
-    if 'buttonmenu' in config:
-       buttonmenu = hmi.buttonmenu.Menu(mainWindow, config["buttonmenu"])
 
     if 'FMS' in config:
         sys.path.insert(0, config["FMS"]["module_dir"])

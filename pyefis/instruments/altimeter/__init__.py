@@ -23,19 +23,29 @@ from PyQt5.QtWidgets import *
 import pyavtools.fix as fix
 
 from pyefis.instruments.NumericalDisplay import NumericalDisplay
+import pyefis.hmi as hmi 
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, bg_color=Qt.black):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
+        self.bg_color = bg_color
         self.item = fix.db.get_item("ALT")
         self.item.valueChanged[float].connect(self.setAltimeter)
         self.item.oldChanged[bool].connect(self.repaint)
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
+
+        self.conversionFunction1 = lambda x: x
+        self.conversionFunction2 = lambda x: x
+        self.conversionFunction = lambda x: x
+
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
 
     # TODO We continuously draw things that don't change.  Should draw the
     # background save to pixmap or something and then blit it and draw arrows.
@@ -50,7 +60,7 @@ class Altimeter(QWidget):
         center_y = h/2
 
         # Draw the Black Background
-        dial.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, QColor(self.bg_color))
 
         # Setup Pens
         if self.item.old or self.item.bad:
@@ -145,13 +155,40 @@ class Altimeter(QWidget):
             dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
         """
 
+    def setUnitSwitching(self):
+        """When this function is called the unit switching features are used"""
+        self.__currentUnits = 1
+        self.unitsOverride = self.unitsOverride1
+        self.conversionFunction = self.conversionFunction1
+        hmi.actions.setInstUnits.connect(self.setUnits)
+        self.update()
+
+    def setUnits(self, args):
+        x = args.split(':')
+        command = x[1].lower()
+        names = x[0].split(',')
+        if self.item.key in names or '*' in names or self.unitGroup in names:
+            #item = fix.db.get_item(self.dbkey)
+            if command == "toggle":
+                if self.__currentUnits == 1:
+                    self.unitsOverride = self.unitsOverride2
+                    self.conversionFunction = self.conversionFunction2
+                    self.__currentUnits = 2
+                else:
+                    self.unitsOverride = self.unitsOverride1
+                    self.conversionFunction = self.conversionFunction1
+                    self.__currentUnits = 1
+            #self.setAuxData(item.aux) # Trigger conversion for aux data
+            self.altimeter = self.item.value # Trigger the conversion for value
+
 
     def getAltimeter(self):
         return self._altimeter
 
     def setAltimeter(self, altimeter):
-        if altimeter != self._altimeter:
-            self._altimeter = altimeter
+        cvalue = self.conversionFunction(altimeter)
+        if cvalue != self._altimeter:
+            self._altimeter = cvalue
             self.update()
 
     altimeter = property(getAltimeter, setAltimeter)
@@ -176,7 +213,12 @@ class Altimeter_Tape(QGraphicsView):
 
 
         self.maxalt = maxalt
+        self._maxalt = maxalt
         self.myparent = parent
+
+        self.conversionFunction1 = lambda x: x
+        self.conversionFunction2 = lambda x: x
+        self.conversionFunction = lambda x: x
 
 
     def resizeEvent(self, event):
@@ -214,12 +256,12 @@ class Altimeter_Tape(QGraphicsView):
         self.setScene(self.scene)
 
         self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
-        nbh=50
-        self.numerical_display.resize (70, nbh)
-        self.numeric_box_pos = QPoint(2, qRound(h/2-nbh/2))
+        nbh=w/1.20
+        self.numerical_display.resize (qRound(w/1.20), qRound(nbh/1.45))
+        self.numeric_box_pos = QPoint(0, qRound(h/2-(nbh/1.45)/2))
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setX(self.numeric_box_pos.x()+self.numerical_display.width())
-        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
+        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+(nbh/1.45)/2)+1)
         self.numerical_display.show()
         self.numerical_display.value = self._altimeter
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
@@ -251,17 +293,45 @@ class Altimeter_Tape(QGraphicsView):
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
-        triangle_size = 11
+        triangle_size = w/8
         p.drawConvexPolygon(QPolygonF([QPointF(0, -triangle_size),
                              QPointF(0, triangle_size),
                              QPointF(triangle_size, 0)]))
+
+    def setUnitSwitching(self):
+        """When this function is called the unit switching features are used"""
+        self.__currentUnits = 1
+        self.unitsOverride = self.unitsOverride1
+        self.conversionFunction = self.conversionFunction1
+        hmi.actions.setInstUnits.connect(self.setUnits)
+        self.update()
+
+    def setUnits(self, args):
+        x = args.split(':')
+        command = x[1].lower()
+        names = x[0].split(',')
+        if self.item.key in names or '*' in names or self.unitGroup in names:
+            #item = fix.db.get_item(self.dbkey)
+            if command == "toggle":
+                if self.__currentUnits == 1:
+                    self.unitsOverride = self.unitsOverride2
+                    self.conversionFunction = self.conversionFunction2
+                    self.__currentUnits = 2
+                else:
+                    self.unitsOverride = self.unitsOverride1
+                    self.conversionFunction = self.conversionFunction1
+                    self.__currentUnits = 1
+            #self.setAuxData(item.aux) # Trigger conversion for aux data
+            self.altimeter = self.item.value # Trigger the conversion for value
 
     def getAltimeter(self):
         return self._altimeter
 
     def setAltimeter(self, altimeter):
-        if altimeter != self._altimeter:
-            self._altimeter = altimeter
+        cvalue = self.conversionFunction(altimeter)
+        if cvalue != self._altimeter:
+            self._altimeter = cvalue
+            self.maxalt = self.conversionFunction(self._maxalt) 
             self.redraw()
 
     altimeter = property(getAltimeter, setAltimeter)
@@ -274,3 +344,12 @@ class Altimeter_Tape(QGraphicsView):
 
     def setAltFail(self,b):
         self.numerical_display.fail = b
+
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass
+
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+

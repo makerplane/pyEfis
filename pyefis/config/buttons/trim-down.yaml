@@ -1,0 +1,9 @@
+type: repeat
+text: "Trim\nDown"
+dbkey: BTNTRIMDN
+repeat_interval: 10
+repeat_delay: 100
+conditions:
+  - when: "CLICKED eq true" 
+    actions:
+      - change value: TRIMP,-1

@@ -1,0 +1,13 @@
+type: repeat
+text: "+"
+dbkey: BTN8
+transparent: true
+# If repeats too fast can cause VARO set loops
+# This is more of an issue when the variable, BARO in this case, is ued
+# by the compute plugin in Fix Gateway
+repeat_interval: 100
+repeat_delay: 300
+conditions:
+  - when: "CLICKED eq true" 
+    actions:
+      - change value: "BARO, 0.01"

@@ -1,0 +1,14 @@
+type: simple
+text: "PFD"
+dbkey: BTN6
+conditions:
+  - when: "CLICKED eq true and SCREEN ne 'MainScreen'" 
+    actions:
+      - show screen: true
+  - when: "SCREEN eq 'MainScreen'"
+    actions:
+      - set bg color: orange
+  - when: "SCREEN ne 'MainScreen'"
+    actions:
+      - set bg color: lightgrey
+

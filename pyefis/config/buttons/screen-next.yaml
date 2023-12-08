@@ -1,0 +1,7 @@
+type: simple
+text: "Next"
+dbkey: BTN6
+conditions:
+  - when: "CLICKED eq true" 
+    actions:
+      - show next screen: true
