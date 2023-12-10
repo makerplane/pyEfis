@@ -95,14 +95,22 @@ class Screen(QWidget):
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
                 continue
+            relative = False
             if 'include,' in i['type']:
                 # Here we will include some instruments defined in another file
                 args = i['type'].split(',')
+                relative = i.get('relative', False)
+                relative_x = i.get('row', 0)
+                relative_y = i.get('column', 0)
+                
                 iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
                 insts = iconfig['instruments']
             else:
                 insts = [i]
             for inst in insts:        
+                if relative:
+                  inst['row'] = inst['row'] + relative_x
+                  inst['column'] = inst['column'] + relative_y
                 if 'ganged' in inst['type']:
                     #ganged instrument
                     if 'gang_type' not in inst:
