@@ -171,7 +171,7 @@ screens:
       rows: 110
       columns: 400
     instruments:
-      - type: include,config/includes/side-buttons.yaml
+      - type: include,includes/side-buttons.yaml
       - type: ganged_arc_gauge
         gang_type: vertical
         row: 0
@@ -213,7 +213,7 @@ screens:
           columns: 300
         options:
           socket: pyefis-waydroid-1
-          ini: config/weston.ini
+          ini: weston.ini
           command: waydroid
           args:
             - show-full-ui
@@ -229,7 +229,7 @@ screens:
       rows: 110
       columns: 400
     instruments:
-      - type: include,config/includes/side-buttons.yaml
+      - type: include,includes/side-buttons.yaml
 #      - type: static_text
 #        row: 56
 #        column: 1
@@ -382,7 +382,7 @@ screens:
           rows: 10
           columns: 10
         options:
-          config: config/buttons/baro-down-invisible.yaml
+          config: buttons/baro-down-invisible.yaml
       - type: button
         row: 80
         column: 238
@@ -390,7 +390,7 @@ screens:
           rows: 10
           columns: 10
         options:
-          config: config/buttons/baro-up-invisible.yaml          
+          config: buttons/baro-up-invisible.yaml          
       - type: static_text
         row: 95
         column: 224
@@ -465,7 +465,7 @@ screens:
           rows: 14
           columns: 10
         options:
-          config: config/buttons/trim-up-invisible.yaml
+          config: buttons/trim-up-invisible.yaml
       - type: button
         row: 85
         column: 75
@@ -473,7 +473,7 @@ screens:
           rows: 10
           columns: 10
         options:
-          config: config/buttons/trim-center-invisible.yaml
+          config: buttons/trim-center-invisible.yaml
       - type: button
         row: 95
         column: 75
@@ -481,7 +481,7 @@ screens:
           rows: 15
           columns: 10
         options:
-          config: config/buttons/trim-down-invisible.yaml
+          config: buttons/trim-down-invisible.yaml
       - type: horizontal_bar_gauge
         row: 100
         column: 86
@@ -513,7 +513,7 @@ screens:
           rows: 10
           columns: 15
         options:
-          config: config/buttons/trim-yaw-left-invisible.yaml
+          config: buttons/trim-yaw-left-invisible.yaml
       - type: button
         row: 100
         column: 100
@@ -521,7 +521,7 @@ screens:
           rows: 10
           columns: 10
         options:
-          config: config/buttons/trim-yaw-center-invisible.yaml
+          config: buttons/trim-yaw-center-invisible.yaml
       - type: button
         row: 100
         column: 110
@@ -529,7 +529,7 @@ screens:
           rows: 10
           columns: 15
         options:
-          config: config/buttons/trim-yaw-right-invisible.yaml
+          config: buttons/trim-yaw-right-invisible.yaml
       - type: button
         row: 90
         column: 85
@@ -537,7 +537,7 @@ screens:
           rows: 10
           columns: 15
         options:
-          config: config/buttons/trim-roll-left-invisible.yaml
+          config: buttons/trim-roll-left-invisible.yaml
       - type: button
         row: 90
         column: 100
@@ -545,7 +545,7 @@ screens:
           rows: 10
           columns: 10
         options:
-          config: config/buttons/trim-roll-center-invisible.yaml
+          config: buttons/trim-roll-center-invisible.yaml
       - type: button
         row: 90
         column: 110
@@ -553,7 +553,7 @@ screens:
           rows: 10
           columns: 15
         options:
-          config: config/buttons/trim-roll-right-invisible.yaml
+          config: buttons/trim-roll-right-invisible.yaml
 
 #      - type: ganged_arc_gauge
 #        gang_type: vertical
@@ -707,7 +707,7 @@ screens:
       columns: 400
       draw_grid: false #true
     instruments:
-      - type: include,config/includes/side-buttons.yaml
+      - type: include,includes/side-buttons.yaml
       - type: ganged_button
         disabled: true
         gang_type: horizontal
@@ -725,16 +725,16 @@ screens:
             instruments:
               -
                 options:
-                  config: config/buttons/egt-Normalize.yaml
+                  config: buttons/egt-Normalize.yaml
               -
                 options:
-                  config: config/buttons/egt-Lean.yaml
+                  config: buttons/egt-Lean.yaml
               -
                 options:
-                  config: config/buttons/egt-Peak.yaml
+                  config: buttons/egt-Peak.yaml
               -
                 options:
-                  config: config/buttons/egt-reset-peak.yaml
+                  config: buttons/egt-reset-peak.yaml
       -
         type: ganged_vertical_bar_gauge
         gang_type: horizontal
