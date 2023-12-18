@@ -474,10 +474,14 @@ class Screen(QWidget):
         return (r_width,r_height,r_x,r_y)
 
 
-
-
-
-
+    def closeEvent(self, event):
+        if 'instruments' not in self.__dict__:
+            return
+        for inst in self.instruments:
+            try:
+                self.instruments[inst].close()
+            except:
+                pass
 
 
 
