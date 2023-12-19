@@ -1,4 +1,4 @@
-# Place this in $HOME/.config/systemd/useri/
+# Place this in $HOME/.config/systemd/user/
 #
 # Edit the paths on the ExecStart line below to match your environment
 #
