@@ -18,6 +18,7 @@ import copy
 import math
 import time
 import threading
+import os
 
 from geomag import declination
 
@@ -107,8 +108,8 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
-        self.pov = PointOfView(self.myparent.get_config_item('dbpath'),
-                               self.myparent.get_config_item('indexpath'),
+        self.pov = PointOfView(os.path.expanduser(self.myparent.get_config_item('dbpath')),
+                               os.path.expanduser(self.myparent.get_config_item('indexpath')),
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)

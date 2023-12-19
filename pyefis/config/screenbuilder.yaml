@@ -161,8 +161,8 @@ outputs:
 
 screens:
   MAP:
-    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
-    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
+    dbpath: ~/.makerplane/pyefis/CIFP/FAACIFP18
+    indexpath: ~/.makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Screen Builder
     layout:
@@ -191,8 +191,8 @@ screens:
             - show-full-ui
       
   PFD:
-    dbpath: /home/eblevins/projects/efis/CIFP/FAACIFP18
-    indexpath: /home/eblevins/projects/efis/CIFP/index.bin
+    dbpath: ~/.makerplane/pyefis/CIFP/FAACIFP18
+    indexpath: ~/.makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Screen Builder
     layout:
