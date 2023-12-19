@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 import subprocess
 import time
 import re
+import os
 
 class Weston(QGraphicsView):
     def __init__(self, parent=None, socket=None, ini=None, command=None, args=None):
@@ -14,6 +15,12 @@ class Weston(QGraphicsView):
         self.setLayout(layout)
 
         self.weston = QProcess(self)
+        westenv = QProcessEnvironment.systemEnvironment()
+        env = QProcessEnvironment.systemEnvironment()
+        if os.getenv('SNAP_INSTANCE_NAME') == 'pyefis':
+            westenv.insert("LD_LIBRARY_PATH","")
+            env.insert("LD_LIBRARY_PATH","")
+            self.weston.setProcessEnvironment(westenv)
         self.weston.start('weston', [f"-c{ini}",'-Bx11-backend.so',f"-S{socket}"])
         time.sleep(1)
         p = subprocess.run(['xprop', '-root'], stdout=subprocess.PIPE)
@@ -26,7 +33,6 @@ class Weston(QGraphicsView):
                 self.layout().addWidget(wid)
                 break
         self.waydroid = QProcess(self)
-        env = QProcessEnvironment.systemEnvironment()
         env.insert("WAYLAND_DISPLAY",socket)
         self.waydroid.setProcessEnvironment(env)
         self.waydroid.start(command,args)
