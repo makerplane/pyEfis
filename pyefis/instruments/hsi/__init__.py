@@ -465,6 +465,7 @@ class HeadingDisplay(QWidget):
         self.resize(qRound(br.width()*1.2), qRound(br.height()*1.2))
 
     def paintEvent(self, event):
+        self.font.setPixelSize(self.fontSize)
         c = QPainter(self)
         compassPen = QPen(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
