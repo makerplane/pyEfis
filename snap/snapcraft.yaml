@@ -20,6 +20,14 @@ parts:
       snapcraftctl build
       $SNAPCRAFT_PROJECT_DIR/snap/local/patch-ctypes.sh
     stage-packages:
+      - libqt5core5a
+      - libqt5qml5
+      - libqt5qmlmodels5
+      - libqt5quick5
+      - libqt5svg5
+      - libqt5waylandclient5
+      - libqt5waylandcompositor5
+      - libqt5x11extras5
       - python3.10-minimal
       - libpython3.10-minimal
       - libpython3.10-stdlib
@@ -50,6 +58,7 @@ apps:
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       # This is needed for embedded android:
       QT_QPA_PLATFORM: xcb
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins/ 
 # Needed for strict mode:
 #      LD_LIBRARY_PATH: "" 
 
