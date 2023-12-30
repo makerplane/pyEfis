@@ -61,4 +61,12 @@ apps:
       QT_PLUGIN_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins/ 
 # Needed for strict mode:
 #      LD_LIBRARY_PATH: "" 
+  makecifpindex:
+# Needed for strict mode:
+#    extensions: [gnome]
+    command: bin/makecifpindex
+    plugs: [ network, desktop-legacy, desktop, wayland, x11, opengl]
+    environment:
+      PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
 
