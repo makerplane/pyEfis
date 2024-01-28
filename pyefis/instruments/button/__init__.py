@@ -52,8 +52,10 @@ class Button(QWidget):
 
         self._title = ""
         self._toggle = False
-
-        self._dbkey = fix.db.get_item(self.config['dbkey'])
+        # Repalce {id} in the dbkey so we can have different 
+        # button names per node without having 
+        # to duplicate all buttons.
+        self._dbkey = fix.db.get_item(self.config['dbkey'].replace('{id}', str(self.parent.parent.nodeID)))
         time.sleep(0.01)
         #self._button.setChecked(self._dbkey.value)
 

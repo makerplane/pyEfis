@@ -68,6 +68,7 @@ class Main(QMainWindow):
         self.screenWidth = int(config["main"]["screenWidth"])
         self.screenHeight = int(config["main"]["screenHeight"])
         self.screenColor = config["main"]["screenColor"]
+        self.nodeID = config["main"].get('nodeID', 1)
 
         self.setObjectName("EFIS")
         self.resize(self.screenWidth, self.screenHeight)
