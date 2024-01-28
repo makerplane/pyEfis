@@ -184,7 +184,7 @@ class Button(QWidget):
             return
         else:
             logger.debug(f"{self._button.text()}:toggled:data={data}:self._button.isChecked({self._button.isChecked()})")
-            if not self._repeat:
+            if not self._repeat and not self._toggle:
                 # A simple button
                 # The logic in here is for dealing with physical buttons
                 # Only take action if changing from False to True
