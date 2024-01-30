@@ -330,6 +330,7 @@ class Screen(QWidget):
             if  'ganged' not in c['type'] and hasattr( self.instruments[i], 'getRatio'):
                 #This instrument needs a specific ratio
                 ratio = self.instruments[i].getRatio()
+                ratio = c.get('ratio', ratio)
                 logger.debug(f"Instrument {c['type']} has ratio 1:{ratio}")
                 r_width,r_height,r_x,r_y = self.get_bounding_box(width, height,x,y,ratio)
 
@@ -406,6 +407,7 @@ class Screen(QWidget):
                         g_y = group_y
                         if hasattr( self.instruments[i], 'getRatio'):
                             g_ratio = self.instruments[i].getRatio()
+                            g_ratio = c.get('ratio', g_ratio)
                             logger.debug(f"Ganged Instrument {c['type']} has ratio 1:{g_ratio}")
                             g_width,g_height,g_x,g_y = self.get_bounding_box(g_width, g_height,g_x,g_y,g_ratio)
                         self.move_resize_inst(i + gang_count,qRound(g_x),qRound(g_y),qRound(g_width),qRound(g_height))
