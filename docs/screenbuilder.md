@@ -360,9 +360,21 @@ All of the instruments are defined the same as in the main.yaml
 Currently you cannot use includes inside of includes.
 
 ##### Include relative #####
-When defiing includes you can assume that each instrument starts at 0.
+When defining includes you can assume that each instrument starts at 0.
 Then within the main config you can define `relative: true` along with row and column and the instruments in the include will be rendered starting at the defined row and column.  This allows you to define something complex such as AHRS with heading and such then reuse that definition on various screens and different locations on the screen.
 
+##### Include scaling #####
+If you want to use use an include but want it to be a different size simply specify `span` with the row and columns you want the include to occupy.
+```
+    instruments:
+      - type: include,includes/virtual_vfr.yaml
+        relative: true
+        row: 0
+        column: 0
+        span:
+          rows: 55
+          columns: 77.5
+```
 
 # Instrument List #
 Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. Currenlty not many options have common names, one instrument might use font_size where another is fontsize or fontSize. Hopefully the community can decide on some common naming and update the code to make maintaining the list here much easier.
