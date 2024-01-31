@@ -205,12 +205,17 @@ class Screen(QWidget):
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
-            self.instruments[count] = hsi.HeadingDisplay(self)
+            fontPercent = None
+            if 'fontPercent' in i['options']: 
+                fontPercent = i['options']['fontPercent']
+            self.instruments[count] = hsi.HeadingDisplay(self,fontPercent=fontPercent)
         elif i['type'] == 'heading_tape':
             self.instruments[count] = hsi.DG_Tape(self)
         elif i['type'] == 'horizontal_situation_indicator':
             #TODO Fix this so cdi/gsi can be enabled/disabled
-            self.instruments[count] = hsi.HSI(self, cdi_enabled=True, gsi_enabled=True)
+            if 'fontPercent' in i['options']:
+                fontPercent = i['options']['fontPercent']
+            self.instruments[count] = hsi.HSI(self, fontPercent=fontPercent, cdi_enabled=True, gsi_enabled=True)
         elif i['type'] == 'numeric_display':
             self.instruments[count] = gauges.NumericDisplay(self)
         elif i['type'] == 'value_text':
