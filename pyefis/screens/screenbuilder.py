@@ -102,15 +102,44 @@ class Screen(QWidget):
                 relative = i.get('relative', False)
                 relative_x = i.get('row', 0)
                 relative_y = i.get('column', 0)
-                
+                span_rows = 0
+                span_cols = 0
+                if 'span' in i:
+                    span_rows = i['span'].get('rows',0)
+                    span_cols = i['span'].get('columns',0)
+ 
                 iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
                 insts = iconfig['instruments']
+                inst_rows = 0
+                inst_cols = 0
+                # Calculate max spans
+                for inst in insts:
+                    if 'span' in inst:
+                        if 'rows' in inst['span']:
+                            if inst['span']['rows'] > inst_rows: inst_rows = inst['span']['rows']
+                        if 'columns' in inst['span']:
+                            if inst['span']['columns'] > inst_cols: inst_cols = inst['span']['rows']
+
             else:
                 insts = [i]
             for inst in insts:        
                 if relative:
-                  inst['row'] = inst['row'] + relative_x
-                  inst['column'] = inst['column'] + relative_y
+                    row_p = 1
+                    col_p = 1
+                    if span_rows > 0 and inst_rows > 0:
+                        row_p = ( span_rows / inst_rows )
+                    if span_cols > 0 and inst_cols > 0:
+                        col_p = ( span_cols / inst_cols )
+                    inst['row'] = (inst['row'] * row_p) + relative_x
+                    inst['column'] = (inst['column'] * col_p) + relative_y
+                    if 'span' in inst:
+                        if 'rows' in inst['span']:
+                            if inst['span']['rows'] >= 0:
+                                inst['span']['rows'] = inst['span']['rows'] * row_p
+                        if 'columns' in inst['span']:
+                            if inst['span']['columns'] >= 0:
+                                inst['span']['columns'] = inst['span']['columns'] * col_p
+                  
                 if 'ganged' in inst['type']:
                     #ganged instrument
                     if 'gang_type' not in inst:
