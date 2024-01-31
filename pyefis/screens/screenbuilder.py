@@ -118,7 +118,7 @@ class Screen(QWidget):
                         if 'rows' in inst['span']:
                             if inst['span']['rows'] > inst_rows: inst_rows = inst['span']['rows']
                         if 'columns' in inst['span']:
-                            if inst['span']['columns'] > inst_cols: inst_cols = inst['span']['rows']
+                            if inst['span']['columns'] > inst_cols: inst_cols = inst['span']['columns']
 
             else:
                 insts = [i]
