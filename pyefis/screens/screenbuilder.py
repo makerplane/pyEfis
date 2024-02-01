@@ -182,6 +182,10 @@ class Screen(QWidget):
         #    if 'options' in i and 'dbkey' in i['options']:
         #        dbkey = i['options']['dbkey']            
 
+        fontPercent = None
+        if 'options' in i:
+            if 'fontPercent' in i['options']:
+                fontPercent = i['options']['fontPercent']
         # Process the type of instrument this is and create them
         if i['type'] == 'weston':
             self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
@@ -190,7 +194,7 @@ class Screen(QWidget):
         if i['type'] == 'airspeed_box':
             self.instruments[count] = airspeed.Airspeed_Box(self)
         if i['type'] == 'airspeed_tape':
-            self.instruments[count] = airspeed.Airspeed_Tape(self)
+            self.instruments[count] = airspeed.Airspeed_Tape(self,fontPercent=fontPercent)
         if i['type'] == 'airspeed_trend_tape':
             self.instruments[count] = vsi.AS_Trend_Tape(self)
         elif i['type'] == 'altimeter_dial':
@@ -207,16 +211,11 @@ class Screen(QWidget):
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
-            fontPercent = None
-            if 'fontPercent' in i['options']: 
-                fontPercent = i['options']['fontPercent']
             self.instruments[count] = hsi.HeadingDisplay(self,fontPercent=fontPercent)
         elif i['type'] == 'heading_tape':
             self.instruments[count] = hsi.DG_Tape(self)
         elif i['type'] == 'horizontal_situation_indicator':
             #TODO Fix this so cdi/gsi can be enabled/disabled
-            if 'fontPercent' in i['options']:
-                fontPercent = i['options']['fontPercent']
             self.instruments[count] = hsi.HSI(self, fontPercent=fontPercent, cdi_enabled=True, gsi_enabled=True)
         elif i['type'] == 'numeric_display':
             self.instruments[count] = gauges.NumericDisplay(self)

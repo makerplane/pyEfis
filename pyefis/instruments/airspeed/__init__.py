@@ -209,10 +209,11 @@ class Airspeed(QWidget):
 
 
 class Airspeed_Tape(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, fontPercent=None):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
         self.update_period = None
+        self.fontPercent = fontPercent
         # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
         self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -244,6 +245,10 @@ class Airspeed_Tape(QGraphicsView):
         self.minorDiv = 5
 
     def resizeEvent(self, event):
+        if self.fontPercent:
+            self.fontsize = qRound(self.width() * self.fontPercent)
+            self.pph = qRound(self.fontsize * 0.4)
+
         w = self.width()
         h = self.height()
         self.markWidth = w / 5
