@@ -116,9 +116,11 @@ class Screen(QWidget):
                 for inst in insts:
                     if 'span' in inst:
                         if 'rows' in inst['span']:
-                            if inst['span']['rows'] > inst_rows: inst_rows = inst['span']['rows']
+                            # inst_rows shold be the sum of row + row span
+                            if inst['span']['rows'] > inst_rows + inst['row']: inst_rows = inst['span']['rows'] + inst['row']
                         if 'columns' in inst['span']:
-                            if inst['span']['columns'] > inst_cols: inst_cols = inst['span']['columns']
+                            # inst_cols should be the sum of colum + column span
+                            if inst['span']['columns'] > inst_cols + inst['column']: inst_cols = inst['span']['columns'] + inst['column']
 
             else:
                 insts = [i]
