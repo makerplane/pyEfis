@@ -145,7 +145,7 @@ class HSI(QGraphicsView):
         self.gsipph = self.r * 0.5
 
         # Setup Pens
-        compassPen = QPen(QColor(self.fg_color), self.fontSize * 0.07) #1.5)
+        compassPen = QPen(QColor(self.fg_color), self.fontSize * 0.02)
         textBrush = QBrush(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
         nobrush = QBrush()
