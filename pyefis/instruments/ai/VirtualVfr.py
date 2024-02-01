@@ -54,11 +54,12 @@ class VirtualVfr(AI):
     PAPI_YOFFSET = 8
     PAPI_LIGHT_SPACING = 9
     VORTAC_ICON_PATH="vortac.png"
-    def __init__(self, parent=None):
-        super(VirtualVfr, self).__init__(parent)
+    def __init__(self, parent=None, fontPercent=None):
+        super(VirtualVfr, self).__init__(parent, fontPercent=fontPercent)
         self.display_objects = dict()
-        time.sleep(.4)      # Pause to let DB load
+        time.sleep(.6)      # Pause to let DB load
 
+        self.fontPercent = fontPercent
         self._VFROld = dict()
         self._VFRBad = dict()
         self._VFRFail = dict()

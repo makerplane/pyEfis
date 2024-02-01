@@ -200,7 +200,7 @@ class Screen(QWidget):
         elif i['type'] == 'altimeter_dial':
             self.instruments[count] = altimeter.Altimeter(self)
         elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self)
+            self.instruments[count] = ai.AI(self,fontPercent=fontPercent)
         elif i['type'] == 'altimeter_tape':
             self.instruments[count] = altimeter.Altimeter_Tape(self)
         elif i['type'] == 'altimeter_trend_tape':
@@ -239,7 +239,7 @@ class Screen(QWidget):
         elif i['type'] == 'vertical_bar_gauge':
             self.instruments[count] = gauges.VerticalBar(self,min_size=False)
         elif i['type'] == 'virtual_vfr':
-            self.instruments[count] = VirtualVfr(self)
+            self.instruments[count] = VirtualVfr(self,fontPercent=fontPercent)
 
          # Set options
         if 'options' in i:
