@@ -17,6 +17,7 @@ parts:
     # Use the OS provided pyqt5 to reduce build issues
     override-build: |
       sed -i 's/"PyQt5==5.15.9",//' setup.py
+      sed -i 's/pyavtools==0.1.0/pyavtools @ git+https:\/\/github.com\/makerplane\/pyAvTools\/@b00273a9016e9a4b975f8efe51d63405103d58fb#egg=pyavtools/' setup.py 
       snapcraftctl build
       $SNAPCRAFT_PROJECT_DIR/snap/local/patch-ctypes.sh
     stage-packages:
