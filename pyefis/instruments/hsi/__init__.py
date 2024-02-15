@@ -31,17 +31,17 @@ from pyefis import common
 
 
 class HSI(QGraphicsView):
-    def __init__(self, parent=None, font_size=15, fontPercent=None, fgcolor=Qt.white, bgcolor=Qt.black, gsi_enabled=False, cdi_enabled=False):
+    def __init__(self, parent=None, font_size=15, font_percent=None, fgcolor=Qt.white, bgcolor=Qt.black, gsi_enabled=False, cdi_enabled=False):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontPercent = None
-        if fontPercent:
-            self.fontPercent = fontPercent
-            font_size = qRound(self.fontPercent * self.width())
+        self.font_percent = None
+        if font_percent:
+            self.font_percent = font_percent
+            font_size = qRound(self.font_percent * self.width())
         self.fontSize = font_size
         self.tickSize = self.fontSize * 0.7
         self.fg_color = fgcolor
@@ -134,8 +134,8 @@ class HSI(QGraphicsView):
         return 1
 
     def resizeEvent(self, event):
-        if self.fontPercent:
-            self.fontSize = qRound(self.fontPercent * self.width())
+        if self.font_percent:
+            self.fontSize = qRound(self.font_percent * self.width())
         self.tickSize = self.fontSize * 0.7
         self.scene = QGraphicsScene(0, 0, self.width(), self.height())
         self.cx = self.width() / 2.0
@@ -440,12 +440,12 @@ class HSI(QGraphicsView):
 
 
 class HeadingDisplay(QWidget):
-    def __init__(self, parent=None, font_size=15, fgcolor=Qt.gray, bgcolor=Qt.black, fontPercent=None):
+    def __init__(self, parent=None, font_size=15, fgcolor=Qt.gray, bgcolor=Qt.black, font_percent=None):
         super(HeadingDisplay, self).__init__(parent)
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontPercent = fontPercent
-        if self.fontPercent:
-            font_size = qRound(self.fontPercent * self.height())
+        self.font_percent = font_percent
+        if self.font_percent:
+            font_size = qRound(self.font_percent * self.height())
         self.fontSize = font_size
         
         self.fg_color = fgcolor
@@ -476,8 +476,8 @@ class HeadingDisplay(QWidget):
         self.resize(qRound(br.width()*1.2), qRound(br.height()*1.2))
 
     def paintEvent(self, event):
-        if self.fontPercent:
-            self.fontSize = qRound(self.fontPercent * self.height())
+        if self.font_percent:
+            self.fontSize = qRound(self.font_percent * self.height())
         self.font.setPixelSize(self.fontSize)
         c = QPainter(self)
         compassPen = QPen(QColor(self.fg_color))

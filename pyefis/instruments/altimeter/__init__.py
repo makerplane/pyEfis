@@ -195,16 +195,16 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None, maxalt=50000, fontsize=15,fontPercent=None):
+    def __init__(self, parent=None, maxalt=50000, fontsize=15,font_percent=None):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontPercent = fontPercent
-        if self.fontPercent:
-            self.fontsize = qRound(self.width() * self.fontPercent)
+        self.font_percent = font_percent
+        if self.font_percent:
+            self.fontsize = qRound(self.width() * self.font_percent)
             self.pph = qRound(self.fontsize * 0.4)
         else:
             self.fontsize = fontsize
@@ -228,8 +228,8 @@ class Altimeter_Tape(QGraphicsView):
 
 
     def resizeEvent(self, event):
-        if self.fontPercent:
-            self.fontsize = qRound(self.width() * self.fontPercent)
+        if self.font_percent:
+            self.fontsize = qRound(self.width() * self.font_percent)
             self.pph = qRound(self.fontsize * 0.02)
 
         w = self.width()

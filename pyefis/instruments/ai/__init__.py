@@ -36,14 +36,14 @@ log = logging.getLogger(__name__)
 #   Add configuration for bank angle tick sizes
 
 class AI(QGraphicsView):
-    def __init__(self, parent=None,fontPercent=None):
+    def __init__(self, parent=None,font_percent=None):
         super(AI, self).__init__(parent)
         self.myparent = parent
         # The following information is meant to be configurable from the screen
         # definition file
-        self.fontPercent = fontPercent
-        if self.fontPercent:
-            self.fontSize = qRound(self.width() * self.fontPercent)
+        self.font_percent = font_percent
+        if self.font_percent:
+            self.fontSize = qRound(self.width() * self.font_percent)
         else:
             self.fontSize = 30
         # Number of degrees shown from top to bottom
@@ -122,8 +122,8 @@ class AI(QGraphicsView):
         self.pitchItems = []
 
     def resizeEvent(self, event):
-        if self.fontPercent:
-            self.fontSize = qRound(self.width() * self.fontPercent)
+        if self.font_percent:
+            self.fontSize = qRound(self.width() * self.font_percent)
             self.minorDivWidth = qRound(self.fontSize * 0.3)
             self.majorDivWidth = self.minorDivWidth * 4
             self.numberedDivWidth = self.minorDivWidth * 5

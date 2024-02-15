@@ -182,10 +182,10 @@ class Screen(QWidget):
         #    if 'options' in i and 'dbkey' in i['options']:
         #        dbkey = i['options']['dbkey']            
 
-        fontPercent = None
+        font_percent = None
         if 'options' in i:
-            if 'fontPercent' in i['options']:
-                fontPercent = i['options']['fontPercent']
+            if 'font_percent' in i['options']:
+                font_percent = i['options']['font_percent']
         # Process the type of instrument this is and create them
         if i['type'] == 'weston':
             self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
@@ -194,13 +194,13 @@ class Screen(QWidget):
         if i['type'] == 'airspeed_box':
             self.instruments[count] = airspeed.Airspeed_Box(self)
         if i['type'] == 'airspeed_tape':
-            self.instruments[count] = airspeed.Airspeed_Tape(self,fontPercent=fontPercent)
+            self.instruments[count] = airspeed.Airspeed_Tape(self,font_percent=font_percent)
         if i['type'] == 'airspeed_trend_tape':
             self.instruments[count] = vsi.AS_Trend_Tape(self)
         elif i['type'] == 'altimeter_dial':
             self.instruments[count] = altimeter.Altimeter(self)
         elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self,fontPercent=fontPercent)
+            self.instruments[count] = ai.AI(self,font_percent=font_percent)
         elif i['type'] == 'altimeter_tape':
             self.instruments[count] = altimeter.Altimeter_Tape(self)
         elif i['type'] == 'altimeter_trend_tape':
@@ -211,12 +211,12 @@ class Screen(QWidget):
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
-            self.instruments[count] = hsi.HeadingDisplay(self,fontPercent=fontPercent)
+            self.instruments[count] = hsi.HeadingDisplay(self,font_percent=font_percent)
         elif i['type'] == 'heading_tape':
             self.instruments[count] = hsi.DG_Tape(self)
         elif i['type'] == 'horizontal_situation_indicator':
             #TODO Fix this so cdi/gsi can be enabled/disabled
-            self.instruments[count] = hsi.HSI(self, fontPercent=fontPercent, cdi_enabled=True, gsi_enabled=True)
+            self.instruments[count] = hsi.HSI(self, font_percent=font_percent, cdi_enabled=True, gsi_enabled=True)
         elif i['type'] == 'numeric_display':
             self.instruments[count] = gauges.NumericDisplay(self)
         elif i['type'] == 'value_text':
@@ -239,7 +239,7 @@ class Screen(QWidget):
         elif i['type'] == 'vertical_bar_gauge':
             self.instruments[count] = gauges.VerticalBar(self,min_size=False)
         elif i['type'] == 'virtual_vfr':
-            self.instruments[count] = VirtualVfr(self,fontPercent=fontPercent)
+            self.instruments[count] = VirtualVfr(self,font_percent=font_percent)
 
          # Set options
         if 'options' in i:

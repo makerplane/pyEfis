@@ -209,11 +209,11 @@ class Airspeed(QWidget):
 
 
 class Airspeed_Tape(QGraphicsView):
-    def __init__(self, parent=None, fontPercent=None):
+    def __init__(self, parent=None, font_percent=None):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
         self.update_period = None
-        self.fontPercent = fontPercent
+        self.font_percent = font_percent
         # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
         self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -245,8 +245,8 @@ class Airspeed_Tape(QGraphicsView):
         self.minorDiv = 5
 
     def resizeEvent(self, event):
-        if self.fontPercent:
-            self.fontsize = qRound(self.width() * self.fontPercent)
+        if self.font_percent:
+            self.fontsize = qRound(self.width() * self.font_percent)
             self.pph = qRound(self.fontsize * 0.4)
 
         w = self.width()
@@ -399,16 +399,16 @@ class Airspeed_Box(QWidget):
 
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
         self.valueAlignment = Qt.AlignRight  | Qt.AlignVCenter
-        self.smallFontPercent = 0.4
+        self.small_font_percent = 0.4
         self.color = Qt.white
         self.modeText = self.modes[self._modeIndicator]
         hmi.actions.setAirspeedMode.connect(self.setMode)
 
     def resizeEvent(self, event):
         self.bigFont = QFont()
-        self.bigFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
+        self.bigFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         self.smallFont = QFont()
-        self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
+        self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         qm = QFontMetrics(self.smallFont)
 
         self.modeTextRect = QRectF(0, 0, self.width()-5, self.height()*0.4)
