@@ -84,38 +84,58 @@ class Screen(QWidget):
         # vsi_dial
         # vsi_pfd  # Testing to do
 
+
+    def calc_includes(self,i):
+        args = i['type'].split(',')
+        iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        insts = iconfig['instruments']
+
+        inst_rows = 0
+        inst_cols = 0
+        # Calculate max spans
+        for inst in insts:
+            if 'span' in inst:
+                if 'rows' in inst['span']:
+                    # inst_rows shold be the sum of row + row span
+                    if inst['span']['rows'] > inst_rows + inst['row']: inst_rows = inst['span']['rows'] + inst['row']
+                if 'columns' in inst['span']:
+                    # inst_cols should be the sum of colum + column span
+                    if inst['span']['columns'] > inst_cols + inst['column']: inst_cols = inst['span']['columns'] + inst['column']
+            else:
+                # This is not spanned
+                if 'include,' in i['type']:
+                    # Need to resolve these includes too
+                    rows, cols = self.calc_includes(inst)
+                    if rows + inst['row'] > inst_rows + inst['row']: inst_row = rows + inst['row']
+                    if cols + inst['column'] > inst_cols + inst['column']: inst_cols = cols + inst['column']
+
+                    
+        return [ inst_rows, inst_cols]
+
     def load_instrument(self,i,count,replacements=None):
         if not replacements:
             replacements = { '{id}': self.parent.nodeID }
-        relative = False
+        span_rows = 0
+        span_cols = 0
+        relative_x = 0
+        relative_y = 0
+        inst_rows = 0
+        inst_cols = 0
         if 'include,' in i['type']:
-            # Here we will include some instruments defined in another file
-            args = i['type'].split(',')
-            relative = i.get('relative', False)
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
-            span_rows = 0
-            span_cols = 0
+            inst_rows, inst_cols = self.calc_includes(i)
             if 'span' in i:
                 span_rows = i['span'].get('rows',0)
                 span_cols = i['span'].get('columns',0)
-
+            args = i['type'].split(',')
             iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
             insts = iconfig['instruments']
-            inst_rows = 0
-            inst_cols = 0
-            # Calculate max spans
-            for inst in insts:
-                if 'span' in inst:
-                    if 'rows' in inst['span']:
-                        # inst_rows shold be the sum of row + row span
-                        if inst['span']['rows'] > inst_rows + inst['row']: inst_rows = inst['span']['rows'] + inst['row']
-                    if 'columns' in inst['span']:
-                        # inst_cols should be the sum of colum + column span
-                        if inst['span']['columns'] > inst_cols + inst['column']: inst_cols = inst['span']['columns'] + inst['column']
+
         else:
             insts = [i]
         for inst in insts:
+            print(inst)
             # Replacements
             # Convert to YAML string, replace, convert back to dict
             # Seems more effecient than nested recursion
@@ -136,23 +156,24 @@ class Screen(QWidget):
             for rep in this_replacements:
                 inst_str = inst_str.replace(rep,str(this_replacements[rep]))
             inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
-            if relative:
-                row_p = 1
-                col_p = 1
-                if span_rows > 0 and inst_rows > 0:
-                    row_p = ( span_rows / inst_rows )
-                if span_cols > 0 and inst_cols > 0:
-                    col_p = ( span_cols / inst_cols )
-                inst['row'] = (inst['row'] * row_p) + relative_x
-                inst['column'] = (inst['column'] * col_p) + relative_y
-                if 'span' in inst:
-                    if 'rows' in inst['span']:
-                        if inst['span']['rows'] >= 0:
-                            inst['span']['rows'] = inst['span']['rows'] * row_p
-                    if 'columns' in inst['span']:
-                        if inst['span']['columns'] >= 0:
-                            inst['span']['columns'] = inst['span']['columns'] * col_p
-                
+            row_p = 1
+            col_p = 1
+            print(inst)
+            if span_rows > 0 and inst_rows > 0:
+                row_p = ( span_rows / inst_rows )
+            if span_cols > 0 and inst_cols > 0:
+                col_p = ( span_cols / inst_cols )
+            inst['row'] = (inst['row'] * row_p) + relative_x
+            inst['column'] = (inst['column'] * col_p) + relative_y
+            if 'span' in inst:
+                if 'rows' in inst['span']:
+                    if inst['span']['rows'] >= 0:
+                        inst['span']['rows'] = inst['span']['rows'] * row_p
+                if 'columns' in inst['span']:
+                    if inst['span']['columns'] >= 0:
+                        inst['span']['columns'] = inst['span']['columns'] * col_p
+            print(inst)
+            print(f"span_rows: {span_rows}, inst_rows: {inst_rows}, span_cols: {span_cols}, inst_cols: {inst_cols}, relative_x: {relative_x}, relative_y: {relative_y}")     
             if 'ganged' in inst['type']:
                 #ganged instrument
                 if 'gang_type' not in inst:
