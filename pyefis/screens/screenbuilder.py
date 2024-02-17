@@ -84,6 +84,95 @@ class Screen(QWidget):
         # vsi_dial
         # vsi_pfd  # Testing to do
 
+    def load_instrument(self,i,count,replacements=None):
+        if not replacements:
+            replacements = { '{id}': self.parent.nodeID }
+        relative = False
+        if 'include,' in i['type']:
+            # Here we will include some instruments defined in another file
+            args = i['type'].split(',')
+            relative = i.get('relative', False)
+            relative_x = i.get('row', 0)
+            relative_y = i.get('column', 0)
+            span_rows = 0
+            span_cols = 0
+            if 'span' in i:
+                span_rows = i['span'].get('rows',0)
+                span_cols = i['span'].get('columns',0)
+
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            insts = iconfig['instruments']
+            inst_rows = 0
+            inst_cols = 0
+            # Calculate max spans
+            for inst in insts:
+                if 'span' in inst:
+                    if 'rows' in inst['span']:
+                        # inst_rows shold be the sum of row + row span
+                        if inst['span']['rows'] > inst_rows + inst['row']: inst_rows = inst['span']['rows'] + inst['row']
+                    if 'columns' in inst['span']:
+                        # inst_cols should be the sum of colum + column span
+                        if inst['span']['columns'] > inst_cols + inst['column']: inst_cols = inst['span']['columns'] + inst['column']
+        else:
+            insts = [i]
+        for inst in insts:
+            # Replacements
+            # Convert to YAML string, replace, convert back to dict
+            # Seems more effecient than nested recursion
+            inst_str = yaml.dump(inst)
+            this_replacements = replacements
+            # From include definition if we have one
+            if 'replace' in i:
+                logger.debug("This instrument has replacement(s)")
+                for rep in i['replace']:
+                    this_replacements[f"{{{rep}}}"] = str(i['replace'][rep])
+            # This specific instrument
+            if 'replace' in inst:
+                # Replace items specific to this instrument
+                logger.debug("This instrument has replacement(s)")
+                for rep in inst['replace']:
+                    this_replacements[f"{{{rep}}}"] = str(inst['replace'][rep])
+            # Perform replacements
+            for rep in this_replacements:
+                inst_str = inst_str.replace(rep,str(this_replacements[rep]))
+            inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
+            if relative:
+                row_p = 1
+                col_p = 1
+                if span_rows > 0 and inst_rows > 0:
+                    row_p = ( span_rows / inst_rows )
+                if span_cols > 0 and inst_cols > 0:
+                    col_p = ( span_cols / inst_cols )
+                inst['row'] = (inst['row'] * row_p) + relative_x
+                inst['column'] = (inst['column'] * col_p) + relative_y
+                if 'span' in inst:
+                    if 'rows' in inst['span']:
+                        if inst['span']['rows'] >= 0:
+                            inst['span']['rows'] = inst['span']['rows'] * row_p
+                    if 'columns' in inst['span']:
+                        if inst['span']['columns'] >= 0:
+                            inst['span']['columns'] = inst['span']['columns'] * col_p
+                
+            if 'ganged' in inst['type']:
+                #ganged instrument
+                if 'gang_type' not in inst:
+                    raise Exception(f"Instrument {inst['type']} must also have 'gang_type:' horizontal|vertical specified")
+                self.insturment_config[count] = inst
+                for g in inst['groups']:
+                    for gi in g['instruments']:
+                        gi['type'] = inst['type'].replace('ganged_','')
+                        gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
+                        self.setup_instruments(count,gi,ganged=True)
+                        count += 1     
+            else:
+                # TODO Check if this is an include, if it is recurse and resolve those instruments
+                if 'include,' in inst['type']:
+                    count = self.load_instrument(inst,count,this_replacements)
+                else: 
+                    self.setup_instruments(count,inst)
+            count += 1
+        return count
+
     def init_screen(self):
         self.layout = self.parent.get_config_item(self,'layout')
         self.instruments = dict() # Each instrument
@@ -93,82 +182,7 @@ class Screen(QWidget):
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
                 continue
-            # Build dict of replacements
-            replacements = { '{id}': self.parent.nodeID }
-            if 'replace' in i:
-                logger.debug("This instrument has replacement(s)")
-                for rep in i['replace']:
-                    replacements[f"{{{rep}}}"] = i['replace'][rep]
-
-            relative = False
-            if 'include,' in i['type']:
-                # Here we will include some instruments defined in another file
-                args = i['type'].split(',')
-                relative = i.get('relative', False)
-                relative_x = i.get('row', 0)
-                relative_y = i.get('column', 0)
-                span_rows = 0
-                span_cols = 0
-                if 'span' in i:
-                    span_rows = i['span'].get('rows',0)
-                    span_cols = i['span'].get('columns',0)
- 
-                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
-                insts = iconfig['instruments']
-                inst_rows = 0
-                inst_cols = 0
-                # Calculate max spans
-                for inst in insts:
-                    if 'span' in inst:
-                        if 'rows' in inst['span']:
-                            # inst_rows shold be the sum of row + row span
-                            if inst['span']['rows'] > inst_rows + inst['row']: inst_rows = inst['span']['rows'] + inst['row']
-                        if 'columns' in inst['span']:
-                            # inst_cols should be the sum of colum + column span
-                            if inst['span']['columns'] > inst_cols + inst['column']: inst_cols = inst['span']['columns'] + inst['column']
-
-            else:
-                insts = [i]
-            for inst in insts:
-                # Replacements
-                # Convert to YAML string, replace, convert back to dict
-                # Seems more effecient than nested recursion
-                inst_str = yaml.dump(inst)
-                for rep in replacements:
-                    inst_str = inst_str.replace(rep,str(replacements[rep]))
-                inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
-                if relative:
-                    row_p = 1
-                    col_p = 1
-                    if span_rows > 0 and inst_rows > 0:
-                        row_p = ( span_rows / inst_rows )
-                    if span_cols > 0 and inst_cols > 0:
-                        col_p = ( span_cols / inst_cols )
-                    inst['row'] = (inst['row'] * row_p) + relative_x
-                    inst['column'] = (inst['column'] * col_p) + relative_y
-                    if 'span' in inst:
-                        if 'rows' in inst['span']:
-                            if inst['span']['rows'] >= 0:
-                                inst['span']['rows'] = inst['span']['rows'] * row_p
-                        if 'columns' in inst['span']:
-                            if inst['span']['columns'] >= 0:
-                                inst['span']['columns'] = inst['span']['columns'] * col_p
-                  
-                if 'ganged' in inst['type']:
-                    #ganged instrument
-                    if 'gang_type' not in inst:
-                        raise Exception(f"Instrument {inst['type']} must also have 'gang_type:' horizontal|vertical specified")
-                    self.insturment_config[count] = inst
-                    for g in inst['groups']:
-                        for gi in g['instruments']:
-                            gi['type'] = inst['type'].replace('ganged_','')
-                            gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
-                            self.setup_instruments(count,gi,ganged=True)
-
-                            count += 1     
-                else:
-                    self.setup_instruments(count,inst)
-                count += 1
+            count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
         self.init = True
