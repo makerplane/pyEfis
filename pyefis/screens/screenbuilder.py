@@ -84,8 +84,6 @@ class Screen(QWidget):
         # vsi_dial
         # vsi_pfd  # Testing to do
 
-
-
     def init_screen(self):
         self.layout = self.parent.get_config_item(self,'layout')
         self.instruments = dict() # Each instrument
@@ -95,6 +93,13 @@ class Screen(QWidget):
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
                 continue
+            # Build dict of replacements
+            replacements = { '{id}': self.parent.nodeID }
+            if 'replace' in i:
+                logger.debug("This instrument has replacement(s)")
+                for rep in i['replace']:
+                    replacements[f"{{{rep}}}"] = i['replace'][rep]
+
             relative = False
             if 'include,' in i['type']:
                 # Here we will include some instruments defined in another file
@@ -124,7 +129,14 @@ class Screen(QWidget):
 
             else:
                 insts = [i]
-            for inst in insts:        
+            for inst in insts:
+                # Replacements
+                # Convert to YAML string, replace, convert back to dict
+                # Seems more effecient than nested recursion
+                inst_str = yaml.dump(inst)
+                for rep in replacements:
+                    inst_str = inst_str.replace(rep,str(replacements[rep]))
+                inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
                 if relative:
                     row_p = 1
                     col_p = 1
