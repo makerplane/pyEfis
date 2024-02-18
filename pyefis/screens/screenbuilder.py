@@ -89,7 +89,6 @@ class Screen(QWidget):
         args = i['type'].split(',')
         iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
         insts = iconfig['instruments']
-
         inst_rows = 0
         inst_cols = 0
         # Calculate max spans
@@ -109,18 +108,13 @@ class Screen(QWidget):
                     if rows + inst['row'] > inst_rows + inst['row']: inst_row = rows + inst['row']
                     if cols + inst['column'] > inst_cols + inst['column']: inst_cols = cols + inst['column']
 
-                    
-        return [ inst_rows, inst_cols]
+        return [ inst_rows, inst_cols ]
 
-    def load_instrument(self,i,count,replacements=None):
+    def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0):
         if not replacements:
             replacements = { '{id}': self.parent.nodeID }
         span_rows = 0
         span_cols = 0
-        relative_x = 0
-        relative_y = 0
-        inst_rows = 0
-        inst_cols = 0
         if 'include,' in i['type']:
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
@@ -135,7 +129,6 @@ class Screen(QWidget):
         else:
             insts = [i]
         for inst in insts:
-            print(inst)
             # Replacements
             # Convert to YAML string, replace, convert back to dict
             # Seems more effecient than nested recursion
@@ -156,9 +149,6 @@ class Screen(QWidget):
             for rep in this_replacements:
                 inst_str = inst_str.replace(rep,str(this_replacements[rep]))
             inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
-            row_p = 1
-            col_p = 1
-            print(inst)
             if span_rows > 0 and inst_rows > 0:
                 row_p = ( span_rows / inst_rows )
             if span_cols > 0 and inst_cols > 0:
@@ -172,8 +162,6 @@ class Screen(QWidget):
                 if 'columns' in inst['span']:
                     if inst['span']['columns'] >= 0:
                         inst['span']['columns'] = inst['span']['columns'] * col_p
-            print(inst)
-            print(f"span_rows: {span_rows}, inst_rows: {inst_rows}, span_cols: {span_cols}, inst_cols: {inst_cols}, relative_x: {relative_x}, relative_y: {relative_y}")     
             if 'ganged' in inst['type']:
                 #ganged instrument
                 if 'gang_type' not in inst:
@@ -186,9 +174,9 @@ class Screen(QWidget):
                         self.setup_instruments(count,gi,ganged=True)
                         count += 1     
             else:
-                # TODO Check if this is an include, if it is recurse and resolve those instruments
+                # Check if this is an include, if it is recurse and resolve those instruments
                 if 'include,' in inst['type']:
-                    count = self.load_instrument(inst,count,this_replacements)
+                    count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols)
                 else: 
                     self.setup_instruments(count,inst)
             count += 1
