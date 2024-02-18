@@ -30,10 +30,11 @@ from pyefis.instruments import gauges
 from pyefis.instruments import misc
 from pyefis.instruments import button
 from pyefis.instruments import misc
-
 from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 
 import pyavtools.fix as fix
+import pyavtools.scheduler as scheduler
+
 from collections import defaultdict
 import re
 import pyefis.hmi as hmi
@@ -110,7 +111,11 @@ class Screen(QWidget):
 
         return [ inst_rows, inst_cols ]
 
-    def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0):
+    def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0,state=False):
+        # Timed display states
+        # The states defiend first, from a parent, overrides any states defined in children
+        if not state:
+            state =  i.get('display_state', False)
         if not replacements:
             replacements = { '{id}': self.parent.nodeID }
         span_rows = 0
@@ -172,20 +177,60 @@ class Screen(QWidget):
                         gi['type'] = inst['type'].replace('ganged_','')
                         gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
                         self.setup_instruments(count,gi,ganged=True)
+                        if state:
+                            self.display_state_inst[state].append(count)
+                            if state > 1:
+                                self.instruments[count].setVisible(False)
                         count += 1     
             else:
                 # Check if this is an include, if it is recurse and resolve those instruments
                 if 'include,' in inst['type']:
-                    count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols)
+                    count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
                     self.setup_instruments(count,inst)
+                    if state:
+                        self.display_state_inst[state].append(count)
+                        if state > 1:
+                           self.instruments[count].setVisible(False)
             count += 1
         return count
+
+    def change_display_states(self):
+        # Verify we have something to do
+        if self.display_states < 2: return
+
+        # Hide all instruments for current state
+        for i in self.display_state_inst[self.display_state_current]:
+            self.instruments[i].setVisible(False)
+
+        if self.display_state_current == self.display_states: 
+            # When at the end loop back to the start
+            self.display_state_current = 1
+        else:
+            # Increment to next state
+            self.display_state_current += 1
+        # Unhide all instruments for the next state
+        for i in self.display_state_inst[self.display_state_current]:
+            self.instruments[i].setVisible(True)
 
     def init_screen(self):
         self.layout = self.parent.get_config_item(self,'layout')
         self.instruments = dict() # Each instrument
         self.insturment_config = dict () # configuration for the instruments
+
+        # Timed display states
+        self.display_timer = None
+        self.display_states = 0
+        self.display_state_current = 0
+        self.display_state_inst = defaultdict(list)
+        # Init timer if defined
+        if self.layout.get('display_state', False):
+            scheduler.initialize()
+            #scheduler.timers.append(scheduler.IntervalTimer(self.layout['display_state']['interval']))
+            self.timer = scheduler.scheduler.getTimer(1000) #self.layout['display_state']['interval'])
+            self.display_states = self.layout['display_state']['states']
+            self.display_state_current = 1
+
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
@@ -200,6 +245,9 @@ class Screen(QWidget):
             self.grid.move(0,0)
             self.grid.resize(self.width(),self.height())
 
+        if self.layout.get('display_state', False):
+            # STart the timer after all instruments defined
+            self.timer.add_callback(self.change_display_states)
 
     def setup_instruments(self,count,i,ganged=False):
         if not ganged:
