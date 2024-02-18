@@ -112,9 +112,11 @@ class Screen(QWidget):
 
     def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0,state=False):
         # Timed display states
-        # The states defiend first, from a parent, overrides any states defined in children
+        # we want to propigate state to all children unless the child has its own setting
+        parent_state = state
         if not state:
             state =  i.get('display_state', False)
+            parent_state = state
         if not replacements:
             replacements = { '{id}': self.parent.nodeID }
         span_rows = 0
@@ -133,6 +135,13 @@ class Screen(QWidget):
         else:
             insts = [i]
         for inst in insts:
+            if not parent_state:
+                # No parent state, set to False or this instrument specific state
+                state =  inst.get('display_state', False)
+            elif inst.get('display_state', False):
+                # This child has a state that overrides the parent
+                state =  inst.get('display_state', False)
+
             # Replacements
             # Convert to YAML string, replace, convert back to dict
             # Seems more effecient than nested recursion
