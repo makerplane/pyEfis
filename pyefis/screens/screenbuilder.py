@@ -97,18 +97,17 @@ class Screen(QWidget):
             if 'span' in inst:
                 if 'rows' in inst['span']:
                     # inst_rows shold be the sum of row + row span
-                    if inst['span']['rows'] > inst_rows + inst['row']: inst_rows = inst['span']['rows'] + inst['row']
+                    if inst['span']['rows'] + inst['row'] > inst_rows: inst_rows = inst['span']['rows'] + inst['row']
                 if 'columns' in inst['span']:
                     # inst_cols should be the sum of colum + column span
-                    if inst['span']['columns'] > inst_cols + inst['column']: inst_cols = inst['span']['columns'] + inst['column']
+                    if inst['span']['columns'] + inst['column'] > inst_cols: inst_cols = inst['span']['columns'] + inst['column']
             else:
                 # This is not spanned
                 if 'include,' in i['type']:
                     # Need to resolve these includes too
                     rows, cols = self.calc_includes(inst)
-                    if rows + inst['row'] > inst_rows + inst['row']: inst_row = rows + inst['row']
-                    if cols + inst['column'] > inst_cols + inst['column']: inst_cols = cols + inst['column']
-
+                    if rows + inst['row'] > inst_rows: inst_row = rows + inst['row']
+                    if cols + inst['column'] > inst_cols: inst_cols = cols + inst['column']
         return [ inst_rows, inst_cols ]
 
     def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0,state=False):
