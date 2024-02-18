@@ -225,8 +225,11 @@ class Screen(QWidget):
         # Init timer if defined
         if self.layout.get('display_state', False):
             scheduler.initialize()
-            #scheduler.timers.append(scheduler.IntervalTimer(self.layout['display_state']['interval']))
-            self.timer = scheduler.scheduler.getTimer(1000) #self.layout['display_state']['interval'])
+            self.timer = scheduler.scheduler.getTimer(self.layout['display_state']['interval'])
+            if not self.timer:
+                scheduler.scheduler.timers.append(scheduler.IntervalTimer(self.layout['display_state']['interval']))
+                scheduler.scheduler.timers[-1].start()
+                self.timer = scheduler.scheduler.getTimer(self.layout['display_state']['interval'])
             self.display_states = self.layout['display_state']['states']
             self.display_state_current = 1
 
