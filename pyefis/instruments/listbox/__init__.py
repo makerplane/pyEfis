@@ -37,6 +37,17 @@ class ListBox(QGraphicsView):
         #self.insertItem(2, "Blue")
         #self.itemDoubleClicked.connect(self.onClicked)
         self.table = QTableWidget(self)
+        stylesheet = """
+        background-color: #000000;
+        color: #FFFFFF;
+        border-color: #FFFFFF;
+        gridline-color: #FFFFFF;
+        """
+        #self.table.horizontalHeader().setStyleSheet(stylesheet)
+
+#        font-family: Titillium;
+#        font-size: 18px;
+
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -45,9 +56,52 @@ class ListBox(QGraphicsView):
         self.table.doubleClicked.connect(self.clicked)
 
     def resizeEvent(self,event):
-        self.font = QFont()
-        self.font.setPixelSize(qRound(self.height() * 7/100)) # TODO, make this configurable and some of the stuff below
-        self.table.setFont(self.font)
+
+        print(self.height())
+        print(qRound(self.height() * 14/100))
+        style_sheet = f"""
+        QTableView {{
+            background-color: black;
+            border: 1px solid white;
+            gridline-color: white;
+            color: white;
+            font-size: {qRound(self.height() * 7/100)}px;
+        }}
+        QTableView::item:selected {{
+            background-color: #87CEFA;
+            color: black;
+        }}
+        QHeaderView::section {{
+            background-color: black;
+            color: white;
+            border: 1px solid white;
+            gridline-color: white;
+            padding: 2px;
+            font-size: {qRound(self.height() * 7/100)}px;
+        }}
+        QHeaderView::section:horizontal {{
+            border-top: 1px solid white;
+        }}
+        QHeaderView::section:vertical {{
+            border-right: 1px solid white;
+        }}
+        QTableView::indicator {{
+            width: 20px;
+            height: 20px;
+        }}
+        QTableView::indicator:checked {{
+            background-color: #87CEFA;
+        }}
+        QTableView::indicator:unchecked {{
+            background-color: black;
+        }}
+        """
+        self.table.setStyleSheet(style_sheet)
+
+        #self.font = QFont()
+        #self.font.setPixelSize(qRound(self.height() * 7/100)) # TODO, make this configurable and some of the stuff below
+        #self.table.setFont(self.font)
+        #self.table.horizontalHeader().setFont(self.font)
         # TODO Render the name of the list above the list
         # Set background color, white text on black backgrund?
         #self.setMinimumSize(QSize(500,500))
