@@ -132,7 +132,7 @@ class ListBox(QGraphicsView):
         self.loadList()
         self.table.selectRow(0)
 
-    def loadList(self):
+    def loadList(self,nearest=False):
         print(f"Loading: {self.active_list}")
         print(f"Current header: {self.header.text}")
         self.table.setRowCount(0)
@@ -142,9 +142,11 @@ class ListBox(QGraphicsView):
 
         self.column_names = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] ]
         self.sort_options = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] if item.get('sort', False) ]
-
+        loc = 0
+        if self.tlists[self.active_list]['display'].get('location',False):
+            loc = 1
         self.table.setColumnCount(self.columns)
-        self.table.setRowCount( self.rows + len( self.sort_options ) + len(self.tlists) - 1 ) 
+        self.table.setRowCount( self.rows + len( self.sort_options ) + len(self.tlists) - 1 + loc) 
         #self.table.setMinimumWidth(500)
         self.table.setHorizontalHeaderLabels( self.column_names )
         #self.table.horizontalHeader().stretchLastSection()
@@ -158,6 +160,11 @@ class ListBox(QGraphicsView):
             self.table.setItem(index,0, QTableWidgetItem("Load List"))
             self.actions.append({'select_list': True})
             index = 1
+        if loc:
+            self.table.setItem(index,0, QTableWidgetItem("Sort by:"))
+            self.table.setItem(index,1, QTableWidgetItem("Nearest"))
+            self.actions.append({'select_nearest': True})
+            index += 1
         for c,o in enumerate(self.sort_options):
             self.table.setItem(index,0, QTableWidgetItem("Sort by:"))
             self.table.setItem(index,1, QTableWidgetItem(o))
@@ -165,7 +172,14 @@ class ListBox(QGraphicsView):
             index += 1
         # Not using the table to sort because we want 
         # some rows to always be at the top
-        if self.sort:
+        if nearest:
+            # TODO Sort by lat/long
+            #
+            # Get LAT LONG values
+            # Can we use the operate to sort based on lat/long distance function?
+            #the_list = sorted(self.tlists[self.active_list]['list'], key=operator.itemgetter(self.sort))
+        elif self.sort:
+            # TODO nearest or text sort?
             the_list = sorted(self.tlists[self.active_list]['list'], key=operator.itemgetter(self.sort))
         else:
             the_list = self.tlists[self.active_list]['list']
@@ -199,6 +213,11 @@ class ListBox(QGraphicsView):
         if self.actions[item.row()].get('select_list', False):
             print("User wants to load different list")
             self.loadListSelector()
+            self.table.selectRow(0)
+        elif self.actions[item.row()].get('select_nearest', False):
+            print("User wants to sort by nearest")
+            # TODO
+            self.loadList(nearest=True)
             self.table.selectRow(0)
         elif self.actions[item.row()].get('load_list', False):
             print(f"User wants to load the list {self.actions[item.row()]['option']}")
