@@ -16,7 +16,7 @@ import operator
 from pyefis.instruments import misc
 
 class ListBox(QGraphicsView):
-    def __init__(self, parent=None, lists=[], replace=None, encoder=None):
+    def __init__(self, parent=None, lists=[], replace=None, encoder=None, button=None):
         super(ListBox, self).__init__(parent)
         self.parent = parent
         self.tlists = dict()
@@ -48,6 +48,17 @@ class ListBox(QGraphicsView):
             self._encoder = fix.db.get_item(encoder)
             print(self._encoder)
             self._encoder.valueChanged[int].connect(self.encoderChanged)
+        if button:
+            print(encoder)
+            self._button = fix.db.get_item(button)
+            print(self._button)
+            self._button.valueChanged[bool].connect(self.buttonChanged)
+
+    def buttonChanged(self,data):
+        if self._button.old or self._button.bad or self._button.fail:
+            return
+        if self._button.value:
+            self.clicked(self.table.currentItem())
 
     def encoderChanged(self,data):
         # If old/bad/fail do nothing
