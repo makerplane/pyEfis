@@ -16,12 +16,18 @@ import operator
 from pyefis.instruments import misc
 
 class ListBox(QGraphicsView):
-    def __init__(self, parent=None, lists=[]):
+    def __init__(self, parent=None, lists=[], replace=None):
         super(ListBox, self).__init__(parent)
         self.parent = parent
         self.tlists = dict()
         for l in lists:
             self.tlists[l["name"]] = yaml.load(open(os.path.join(self.parent.parent.config_path,l['file'])), Loader=yaml.SafeLoader)
+
+        list_str = yaml.dump(self.tlists)
+        if replace:
+            for rep in replace:
+                list_str = list_str.replace(rep,str(replace[rep]))
+        self.tlists = yaml.load(list_str, Loader=yaml.SafeLoader)
 
         self.active_list = list(self.tlists.keys())[0]
         self.header = misc.StaticText(text=self.active_list, color=QColor(Qt.white), parent=self)
@@ -172,7 +178,11 @@ class ListBox(QGraphicsView):
             self.table.selectRow(0)
         elif self.actions[item.row()].get('select', False):
             print(f"User selected the row {self.actions[item.row()]}") 
-
+            for fixid, val in self.actions[item.row()]['option']['set'].items():
+                print(f"{fixid} {val}")
+                f = fix.db.get_item(fixid)
+                f.value = val
+                f.output_value()
 
     def handleEncoder(self):
         print(self.table.currentRow())

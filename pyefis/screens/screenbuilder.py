@@ -31,6 +31,7 @@ from pyefis.instruments import misc
 from pyefis.instruments import button
 from pyefis.instruments import misc
 from pyefis.instruments.ai.VirtualVfr import VirtualVfr
+from pyefis.instruments import listbox
 
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
@@ -184,7 +185,7 @@ class Screen(QWidget):
                     for gi in g['instruments']:
                         gi['type'] = inst['type'].replace('ganged_','')
                         gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
-                        self.setup_instruments(count,gi,ganged=True)
+                        self.setup_instruments(count,gi,ganged=True,replace=this_replacements)
                         if state:
                             self.display_state_inst[state].append(count)
                             if state > 1:
@@ -195,7 +196,7 @@ class Screen(QWidget):
                 if 'include,' in inst['type']:
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
-                    self.setup_instruments(count,inst)
+                    self.setup_instruments(count,inst,replace=this_replacements)
                     if state:
                         self.display_state_inst[state].append(count)
                         if state > 1:
@@ -260,7 +261,7 @@ class Screen(QWidget):
             # STart the timer after all instruments defined
             self.timer.add_callback(self.change_display_states)
 
-    def setup_instruments(self,count,i,ganged=False):
+    def setup_instruments(self,count,i,ganged=False,replace=None):
         if not ganged:
             self.insturment_config[count] = i
         # Get the default items for this instrument
@@ -335,6 +336,9 @@ class Screen(QWidget):
         elif i['type'] == 'virtual_vfr':
             self.instruments[count] = VirtualVfr(self,font_percent=font_percent)
 
+        elif i['type'] == 'listbox':
+            self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'], replace=replace) #,font_percent=font_percent)
+            print(f"ListBox count: {count}")
          # Set options
         if 'options' in i:
             #loop over each option
