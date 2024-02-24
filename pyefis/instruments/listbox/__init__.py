@@ -16,7 +16,7 @@ import operator
 from pyefis.instruments import misc
 
 class ListBox(QGraphicsView):
-    def __init__(self, parent=None, lists=[], replace=None):
+    def __init__(self, parent=None, lists=[], replace=None, encoder=None):
         super(ListBox, self).__init__(parent)
         self.parent = parent
         self.tlists = dict()
@@ -43,6 +43,31 @@ class ListBox(QGraphicsView):
         self.table.verticalHeader().setVisible(False)
 
         self.table.doubleClicked.connect(self.clicked)
+        if encoder:
+            print(encoder)
+            self._encoder = fix.db.get_item(encoder)
+            print(self._encoder)
+            self._encoder.valueChanged[int].connect(self.encoderChanged)
+
+    def encoderChanged(self,data):
+        # If old/bad/fail do nothing
+        print(data)
+        if self._encoder.old or self._encoder.bad or self._encoder.fail:
+            return
+        print(f"{self.table.currentRow()} {self._encoder.value}")
+        val = self.table.currentRow() + self._encoder.value
+        # encoder could have sent enough steps to loop one or more times
+        if val < 0:
+            while val < 0:
+                val = self.table.rowCount() + val
+                print(val)
+        elif val > self.table.rowCount() -1:
+            while val > self.table.rowCount() -1:
+                val = val - self.table.rowCount()
+                print(val)
+        self.table.selectRow(val) 
+
+
 
     def resizeEvent(self,event):
         print(self.height())
@@ -184,13 +209,6 @@ class ListBox(QGraphicsView):
                 f.value = val
                 f.output_value()
 
-    def handleEncoder(self):
-        print(self.table.currentRow())
-        print(self.table.getRowCount())
-
-        # Here we will increase ot decrease the selected row
-        # based on encoder inputs
-        # When bottom is reached move to top and vice versa
 
 #Config:
 #    options:
