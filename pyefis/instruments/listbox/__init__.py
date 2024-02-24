@@ -13,6 +13,7 @@ logger=logging.getLogger(__name__)
 import yaml
 import os
 import operator
+from pyefis.instruments import misc
 
 class ListBox(QGraphicsView):
     def __init__(self, parent=None, lists=[]):
@@ -23,30 +24,12 @@ class ListBox(QGraphicsView):
             self.tlists[l["name"]] = yaml.load(open(os.path.join(self.parent.parent.config_path,l['file'])), Loader=yaml.SafeLoader)
 
         self.active_list = list(self.tlists.keys())[0]
+        self.header = misc.StaticText(text=self.active_list, color=QColor(Qt.white), parent=self)
+        self.selected_row = 0
         self.columns = len(self.tlists[self.active_list]['display']['columns'])
         self.rows = len(self.tlists[self.active_list]['list'])
         self.sort = False
-        #print(self.tlists)
-        #print(self.active_list)
-        #print(self.columns)
-        #print(self.rows)
-        #print(self.width())
-        #self.loadList()
-        #self.insertItem(0, "Red")
-        #self.insertItem(1, "Orange")
-        #self.insertItem(2, "Blue")
-        #self.itemDoubleClicked.connect(self.onClicked)
         self.table = QTableWidget(self)
-        stylesheet = """
-        background-color: #000000;
-        color: #FFFFFF;
-        border-color: #FFFFFF;
-        gridline-color: #FFFFFF;
-        """
-        #self.table.horizontalHeader().setStyleSheet(stylesheet)
-
-#        font-family: Titillium;
-#        font-size: 18px;
 
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
@@ -56,7 +39,6 @@ class ListBox(QGraphicsView):
         self.table.doubleClicked.connect(self.clicked)
 
     def resizeEvent(self,event):
-
         print(self.height())
         print(qRound(self.height() * 14/100))
         style_sheet = f"""
@@ -98,22 +80,23 @@ class ListBox(QGraphicsView):
         """
         self.table.setStyleSheet(style_sheet)
 
-        #self.font = QFont()
-        #self.font.setPixelSize(qRound(self.height() * 7/100)) # TODO, make this configurable and some of the stuff below
-        #self.table.setFont(self.font)
-        #self.table.horizontalHeader().setFont(self.font)
-        # TODO Render the name of the list above the list
-        # Set background color, white text on black backgrund?
-        #self.setMinimumSize(QSize(500,500))
         self.table.setMinimumWidth(self.width())
         self.table.setMinimumHeight(int(self.height() * 90/100))
         self.table.move(0,int(self.height() * 10/100))
+        self.setStyleSheet("background: transparent")
+        self.header.move(0,0)
+        self.header.resize(self.width(),int(self.height() * 10/100))
+        self.header.show()
         self.loadList()
+        self.table.selectRow(0)
 
     def loadList(self):
         print(f"Loading: {self.active_list}")
-
-        self.table.setRowCount(0);
+        print(f"Current header: {self.header.text}")
+        self.table.setRowCount(0)
+        self.header.hide()
+        self.header.text = self.active_list
+        self.header.show()
 
         self.column_names = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] ]
         self.sort_options = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] if item.get('sort', False) ]
@@ -130,7 +113,7 @@ class ListBox(QGraphicsView):
         index = 0
         self.actions = []
         if len(self.tlists) > 1:
-            self.table.setItem(index,0, QTableWidgetItem("Select List:"))
+            self.table.setItem(index,0, QTableWidgetItem("Load List"))
             self.actions.append({'select_list': True})
             index = 1
         for c,o in enumerate(self.sort_options):
@@ -138,6 +121,8 @@ class ListBox(QGraphicsView):
             self.table.setItem(index,1, QTableWidgetItem(o))
             self.actions.append({'sort': True, 'option': c})
             index += 1
+        # Not using the table to sort because we want 
+        # some rows to always be at the top
         if self.sort:
             the_list = sorted(self.tlists[self.active_list]['list'], key=operator.itemgetter(self.sort))
         else:
@@ -168,28 +153,34 @@ class ListBox(QGraphicsView):
         #self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
 
-
-#    def resizeEvent(self,event):
-#        pass
-
     def clicked(self, item):
         if self.actions[item.row()].get('select_list', False):
             print("User wants to load different list")
             self.loadListSelector()
+            self.table.selectRow(0)
         elif self.actions[item.row()].get('load_list', False):
             print(f"User wants to load the list {self.actions[item.row()]['option']}")
             self.active_list = self.actions[item.row()]['option']
+            self.rows = len(self.tlists[self.active_list]['list'])
             self.sort = self.actions[item.row()].get('sort',False)
             self.loadList()
+            self.table.selectRow(0)
         elif self.actions[item.row()].get('sort', False):
             print(f"User wants to sort by {self.sort_options[self.actions[item.row()]['option']]}")
             self.sort = self.sort_options[self.actions[item.row()]['option']]
             self.loadList()
+            self.table.selectRow(0)
         elif self.actions[item.row()].get('select', False):
             print(f"User selected the row {self.actions[item.row()]}") 
 
-    def show_lists(self):
-        pass
+
+    def handleEncoder(self):
+        print(self.table.currentRow())
+        print(self.table.getRowCount())
+
+        # Here we will increase ot decrease the selected row
+        # based on encoder inputs
+        # When bottom is reached move to top and vice versa
 
 #Config:
 #    options:
