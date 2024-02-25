@@ -213,13 +213,19 @@ class ListBox(QGraphicsView):
             self.actions.append({'select_list': True})
             index = 1
         if loc:
-            self.table.setItem(index,0, QTableWidgetItem("Sort by:"))
-            self.table.setItem(index,1, QTableWidgetItem("Nearest"))
+            if self.table.columnCount() > 1:
+                self.table.setItem(index,0, QTableWidgetItem("Sort by:"))
+                self.table.setItem(index,1, QTableWidgetItem("Nearest"))
+            else:
+                self.table.setItem(index,0, QTableWidgetItem("Sort by: Nearest"))
             self.actions.append({'select_nearest': True})
             index += 1
         for c,o in enumerate(self.sort_options):
-            self.table.setItem(index,0, QTableWidgetItem("Sort by:"))
-            self.table.setItem(index,1, QTableWidgetItem(o))
+            if self.table.columnCount() > 1:
+                self.table.setItem(index,0, QTableWidgetItem("Sort by:"))
+                self.table.setItem(index,1, QTableWidgetItem(o))
+            else:
+                self.table.setItem(index,0, QTableWidgetItem(f"Sort by: {o}"))
             self.actions.append({'sort': True, 'option': c})
             index += 1
         # Not using the table to sort because we want 
