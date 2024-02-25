@@ -45,15 +45,70 @@ class ListBox(QGraphicsView):
 
         self.table.doubleClicked.connect(self.clicked)
         if encoder:
-            print(encoder)
             self._encoder = fix.db.get_item(encoder)
-            print(self._encoder)
             self._encoder.valueChanged[int].connect(self.encoderChanged)
         if button:
-            print(encoder)
             self._button = fix.db.get_item(button)
-            print(self._button)
             self._button.valueChanged[bool].connect(self.buttonChanged)
+
+        self.nearest = False
+
+        self.lng_item = fix.db.get_item("LONG")
+        self.lat_item = fix.db.get_item("LAT")
+
+        self.lng = self.lng_item.value
+        self.lat = self.lat_item.value
+
+        self.lng_old = self.lng_item.old
+        self.lng_bad = self.lng_item.bad
+        self.lng_fail = self.lng_item.fail
+
+        self.lat_old = self.lat_item.old
+        self.lat_bad = self.lat_item.bad
+        self.lat_fail = self.lat_item.fail
+
+        self.lng_item.valueChanged[float].connect(self.setLongitude)
+        self.lng_item.badChanged[bool].connect(self.setLngBad)
+        self.lng_item.oldChanged[bool].connect(self.setLngOld)
+        self.lng_item.failChanged[bool].connect(self.setLngFail)
+
+        self.lat_item.valueChanged[float].connect(self.setLatitude)
+        self.lat_item.badChanged[bool].connect(self.setLatBad)
+        self.lat_item.oldChanged[bool].connect(self.setLatOld)
+        self.lat_item.failChanged[bool].connect(self.setLatFail)
+
+    def badLocation(self):
+        return True in ( self.lat_bad, self.lng_bad, self.lat_old, self.lng_old, self.lat_fail, self.lng_fail )
+
+    def setLongitude(self, lng):
+        self.lng = lng
+
+    def setLatitude(self, lat):
+        self.lat = lat
+
+    def setLngBad(self,bad):
+        self.lng_bad = bad
+        self.loadList()
+
+    def setLatBad(self,bad):
+        self.lat_bad = bad
+        self.loadList()
+
+    def setLngFail(self,fail):
+        self.lng_fail = fail
+        self.loadList()
+
+    def setLatFail(self,fail):
+        self.lat_fail = fail
+        self.loadList()
+
+    def setLngOld(self,old):
+        self.lng_old = old
+        self.loadList()
+
+    def setLatOld(self,old):
+        self.lat_old = old
+        self.loadList()
 
     def buttonChanged(self,data):
         if self._button.old or self._button.bad or self._button.fail:
@@ -63,27 +118,22 @@ class ListBox(QGraphicsView):
 
     def encoderChanged(self,data):
         # If old/bad/fail do nothing
-        print(data)
         if self._encoder.old or self._encoder.bad or self._encoder.fail:
             return
-        print(f"{self.table.currentRow()} {self._encoder.value}")
         val = self.table.currentRow() + self._encoder.value
         # encoder could have sent enough steps to loop one or more times
         if val < 0:
             while val < 0:
                 val = self.table.rowCount() + val
-                print(val)
         elif val > self.table.rowCount() -1:
             while val > self.table.rowCount() -1:
                 val = val - self.table.rowCount()
-                print(val)
         self.table.selectRow(val) 
 
 
 
     def resizeEvent(self,event):
-        print(self.height())
-        print(qRound(self.height() * 14/100))
+
         style_sheet = f"""
         QTableView {{
             background-color: black;
@@ -133,9 +183,7 @@ class ListBox(QGraphicsView):
         self.loadList()
         self.table.selectRow(0)
 
-    def loadList(self,nearest=False):
-        print(f"Loading: {self.active_list}")
-        print(f"Current header: {self.header.text}")
+    def loadList(self):
         self.table.setRowCount(0)
         self.header.hide()
         self.header.text = self.active_list
@@ -144,7 +192,7 @@ class ListBox(QGraphicsView):
         self.column_names = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] ]
         self.sort_options = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] if item.get('sort', False) ]
         loc = 0
-        if self.tlists[self.active_list]['display'].get('location',False):
+        if self.tlists[self.active_list]['display'].get('location',False) and not self.badLocation():
             loc = 1
         self.table.setColumnCount(self.columns)
         self.table.setRowCount( self.rows + len( self.sort_options ) + len(self.tlists) - 1 + loc) 
@@ -173,17 +221,8 @@ class ListBox(QGraphicsView):
             index += 1
         # Not using the table to sort because we want 
         # some rows to always be at the top
-        if nearest:
-            # TODO Sort by lat/long
-            #
-            # Get LAT LONG values
-            # Can we use the operate to sort based on lat/long distance function?
-            #the_list = sorted(self.tlists[self.active_list]['list'], key=operator.itemgetter(self.sort))
-            print(self.tlists[self.active_list]['list'])
-            LAT=39.9969467
-            LONG=-82.8921592
-
-            the_list = sorted(self.tlists[self.active_list]['list'], key=lambda x: geopy.distance.geodesic((LAT,LONG), (x['lat'], x['long'])).km if x.get('lat', False) and x.get('long',False) else 9999999999)
+        if self.nearest:
+            the_list = sorted(self.tlists[self.active_list]['list'], key=lambda x: geopy.distance.geodesic((self.lat,self.lng), (x['lat'], x['long'])).km if x.get('lat', False) and x.get('long',False) else 9999999999)
 
         elif self.sort:
             # TODO nearest or text sort?
@@ -217,31 +256,26 @@ class ListBox(QGraphicsView):
         self.table.resizeRowsToContents()
 
     def clicked(self, item):
+        self.nearest = False
         if self.actions[item.row()].get('select_list', False):
-            print("User wants to load different list")
             self.loadListSelector()
             self.table.selectRow(0)
         elif self.actions[item.row()].get('select_nearest', False):
-            print("User wants to sort by nearest")
-            # TODO
-            self.loadList(nearest=True)
+            self.nearest = True
+            self.loadList()
             self.table.selectRow(0)
         elif self.actions[item.row()].get('load_list', False):
-            print(f"User wants to load the list {self.actions[item.row()]['option']}")
             self.active_list = self.actions[item.row()]['option']
             self.rows = len(self.tlists[self.active_list]['list'])
             self.sort = self.actions[item.row()].get('sort',False)
             self.loadList()
             self.table.selectRow(0)
         elif self.actions[item.row()].get('sort', False):
-            print(f"User wants to sort by {self.sort_options[self.actions[item.row()]['option']]}")
             self.sort = self.sort_options[self.actions[item.row()]['option']]
             self.loadList()
             self.table.selectRow(0)
         elif self.actions[item.row()].get('select', False):
-            print(f"User selected the row {self.actions[item.row()]}") 
             for fixid, val in self.actions[item.row()]['option']['set'].items():
-                print(f"{fixid} {val}")
                 f = fix.db.get_item(fixid)
                 f.value = val
                 f.output_value()
