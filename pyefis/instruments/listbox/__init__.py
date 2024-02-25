@@ -14,6 +14,7 @@ import yaml
 import os
 import operator
 from pyefis.instruments import misc
+import geopy.distance
 
 class ListBox(QGraphicsView):
     def __init__(self, parent=None, lists=[], replace=None, encoder=None, button=None):
@@ -178,6 +179,12 @@ class ListBox(QGraphicsView):
             # Get LAT LONG values
             # Can we use the operate to sort based on lat/long distance function?
             #the_list = sorted(self.tlists[self.active_list]['list'], key=operator.itemgetter(self.sort))
+            print(self.tlists[self.active_list]['list'])
+            LAT=39.9969467
+            LONG=-82.8921592
+
+            the_list = sorted(self.tlists[self.active_list]['list'], key=lambda x: geopy.distance.geodesic((LAT,LONG), (x['lat'], x['long'])).km if x.get('lat', False) and x.get('long',False) else 9999999999)
+
         elif self.sort:
             # TODO nearest or text sort?
             the_list = sorted(self.tlists[self.active_list]['list'], key=operator.itemgetter(self.sort))
