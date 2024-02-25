@@ -382,16 +382,16 @@ screens:
   EPFD:
     module: pyefis.screens.epfd
     title: E Primary Flight Display
-    dbpath: ~/.makerplane/pyefis/CIFP/FAACIFP18
-    indexpath: ~/.makerplane/pyefis/CIFP/index.bin
+    dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
+    indexpath: ~/makerplane/pyefis/CIFP/index.bin
     check_engine: [MAP1, TACH1, OILP1, OILT1, FUELQT, FUELF1, CHTMAX1, EGTAVG1]
     update_period: .1
 
   PFD:
     module: pyefis.screens.pfd
     title: Primary Flight Display
-    dbpath: ~/.makerplane/pyefis/CIFP/FAACIFP18
-    indexpath: ~/.makerplane/pyefis/CIFP/index.bin
+    dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
+    indexpath: ~/makerplane/pyefis/CIFP/index.bin
     update_period: .1
 
   EMS:

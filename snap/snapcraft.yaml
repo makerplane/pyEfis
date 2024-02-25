@@ -53,7 +53,7 @@ apps:
 # Needed for strict mode:
 #    extensions: [gnome]
     command: bin/pyefis
-    plugs: [ network, desktop-legacy, desktop, wayland, x11, opengl]
+    plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
@@ -66,7 +66,7 @@ apps:
 # Needed for strict mode:
 #    extensions: [gnome]
     command: bin/makecifpindex
-    plugs: [ network, desktop-legacy, desktop, wayland, x11, opengl]
+    plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
