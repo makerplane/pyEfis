@@ -184,6 +184,9 @@ class ListBox(QGraphicsView):
         self.table.selectRow(0)
 
     def loadList(self):
+        current_rows = self.table.rowCount()
+        current_row = self.table.currentRow()
+
         self.table.setRowCount(0)
         self.header.hide()
         self.header.text = self.active_list
@@ -237,7 +240,16 @@ class ListBox(QGraphicsView):
 
         #self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
+        rows_changed = self.table.rowCount() - current_rows
+        if current_row - rows_changed < 0:
+            self.table.selectRow(0)
+        else:
+            if current_row - rows_changed > self.table.rowCount():
+                self.table.selectRow(self.table.rowCount())
+            else:
+                self.table.selectRow(current_row + rows_changed)
 
+            
     def loadListSelector(self):
         self.table.setRowCount(0);
         self.column_names = ["Select a list"]
