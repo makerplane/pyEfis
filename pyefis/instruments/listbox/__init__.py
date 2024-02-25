@@ -295,6 +295,9 @@ class ListBox(QGraphicsView):
         elif self.actions[item.row()].get('select', False):
             for fixid, val in self.actions[item.row()]['option']['set'].items():
                 f = fix.db.get_item(fixid)
+                if '{' in str(val):
+                    for c, r in enumerate(self.tlists[self.active_list]['display']['columns']):
+                        val = val.replace(f"{{{r['name']}}}", str(self.table.item(self.table.currentRow(), c).text()))
                 f.value = val
                 f.output_value()
 
