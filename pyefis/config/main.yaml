@@ -50,202 +50,6 @@ menu:
   left_margin: 50
   top_margin: 50
 
-disabledbuttonmenu:
-    colors:
-        red: "FF0000"
-        grey: "808080"
-        yellow: "FFFF00"
-        orange: "FFA500"
-        white: "FFFFFF"
-        black: "000000"
-        green: "00FF00"
-    defaults:
-       scale_buttons: true
-       hide_menu: false #Set to true if you want menu hidden by default
-       height: 100
-       width: 100
-       left_margin: 10
-       top_margin: 90
-       button_spacing: 20 # Space between buttons, can be negative to render right to left
-       bg_color: white
-       fg_color: black
-       corner_radius: 15 # or rounded
-       font_size: 25
-       # If a button does not specify x,y then they will be placed from left to right in the order defined starting at the margin defined
-       # IF a button does not specify height or width the default will be used
-    buttons:
-      showhide:
-        title: Hide
-        shortcut: "1" # Binds keyboard shortcut to the button
-        height: 200
-        width: 200
-        order: 1 # Optional, when specified this button will be part of the 'menu'
-        bg_color: orange
-        font_size: 30
-        db_items: BTN1 # A single item or a list, any value you want to use in an expression must be listed here
-        conditions: 
-          - name: "true" # Just a logical name, means nothing
-            expression: "BTN1 eq true" #Pycond expression see https://github.com/axiros/pycond
-            action:
-              internal: togglehide # Show/Hide the menu
-              simulate_click: true # Act as if the button was clicked
-              update_data: # Update one or more pieces of data
-                - type: set # set a static value, later I plan to add increment as an option too
-                  db_item: BTN1 # The name of the value to update
-                  value: false
-          - name: "false"
-            expression: "BTN1 eq false"
-            action:
-              internal: togglehide
-
-      back:
-        title: Back
-        shortcut: "2"
-        width: 200
-        order: 2
-        db_items: BTN2
-        conditions:
-          - name: "true"
-            expression: "BTN2 eq true"
-            action:
-              internal: back
-              simulate_click: true
-              update_data:
-                - type: set
-                  db_item: BTN2
-                  value: false
-          - name: "false"
-            expression: "BTN2 eq false"
-            action:
-              internal: back
-      next:
-        title: Next
-        shortcut: "3"
-        width: 200
-        order: 3
-        fg_color: orange
-        db_items: BTN3
-        conditions:
-          - name: "true"
-            expression: "BTN3 eq true"
-            action:
-              internal: next
-              simulate_click: true
-              update_data:
-                - type: set
-                  db_item: BTN2
-                  value: false
-          - name: "false"
-            expression: "BTN3 eq false"
-            action:
-              internal: next
-      pfd:
-        title: PFD #<- default title
-        titles:
-          PFD: EPFD #<- Titles for a given screen
-          EPFD: PFD
-        shortcut: "4"
-        width: 200
-        order: 4
-        db_items: BTN4
-        conditions:
-          - name: "true"
-            expression: "BTN4 eq true"
-            action:
-              goto:
-                PFD: EPFD
-                EPFD: PFD
-                default: EPFD
-              simulate_click: true
-              update_data:
-                - type: set
-                  db_item: BTN4
-                  value: false
-          - name: "false"
-            expression: "BTN4 eq false"
-            action:
-              goto:
-                PFD: EPFD
-                EPFD: PFD
-                default: EPFD
-
-      exit: #simple button only activated with click or shortcut
-        title: Exit
-        shortcut: "x"
-        order: 6
-        action:
-          internal: exit
-
-      testbutton:
-        title: "Dynamic Button"
-        shortcut: "a"
-        x: 10
-        y: 10
-        width: 140
-        corner_radius: 30
-        font_size: 15
-        db_items: ACID
-        menubutton: False # Optional, when True will hide/show withe the normal menu
-        hide_on:
-          - PFD #This button will be hidden on PFD screen
-        conditions:
-          # Imagine some device also monitors ACID and responds with its own messages
-          # Set ACID to Error to see the error state
-          # When you press the button in this state it will set ACID to Reset
-          - name: "error"
-            expression: "ACID eq 'Error'"
-            action:
-              bg_color: red
-              message: Error
-              update_data:
-                - type: set
-                  db_item: ACID
-                  value: Reset
-          # This condition does nothing when clicked
-          # When you set ACID to Ready it will work again
-          - name: "reset"
-            expression: "ACID eq 'Reset'"
-            action:
-              bg_color: yellow
-              message: Resetting
-          # Now the button will set RequestEnable when you click it
-          - name: "Ready"
-            expression: "ACID eq 'Ready'"
-            action:
-              bg_color: white
-              message: Ready
-              update_data:
-                - type: set
-                  db_item: ACID
-                  value: RequestEnable
-          # This condition does nothing when clicked
-          # set ACID to Enabled 
-          - name: "Request"
-            expression: "ACID eq 'RequestEnable'"
-            action:
-              bg_color: yellow
-              message: Enabling
-          # Clicking the button will set ACID to disabled 
-          - name: "Enabled"
-            expression: "ACID eq 'Enabled'"
-            action:
-              bg_color: green
-              message: Ready
-              update_data:
-                - type: set
-                  db_item: ACID
-                  value: Disabled
-          # Clicking the button will set ACID to Request Enable
-          - name: "disable"
-            expression: "ACID eq 'Disabled'"
-            action:
-              bg_color: white
-              message: "Off"
-              update_data:
-                - type: set
-                  db_item: ACID
-                  value: RequestEnable
-
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more
@@ -317,38 +121,39 @@ keybindings:
 
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
-databindingsdisabled:
-  - key: BTN1
-    condition: True
-    action: Activate Menu Item
-    args: 1
-  - key: BTN2
-    condition: True
-    action: Activate Menu Item
-    args: 2
-  - key: BTN3
-    condition: True
-    action: Activate Menu Item
-    args: 3
-  - key: BTN4
-    condition: True
-    action: Activate Menu Item
-    args: 4
-  - key: BTN5
-    condition: True
-    action: Activate Menu Item
-    args: 5
-  - key: BTN6
-    condition: True
-    action: Activate Menu Item
-    args: 6
-  - key: ENC1
-    action: Menu Encoder
-    args: <VALUE>   # This sends the data value to the action
-  - key: OILP1
-    condition: < 25
-    action: Show Screen
-    args: EMS
+# This has largely been replaced with buttons in screenbuilder
+#databindings:
+#  - key: BTN1
+#    condition: True
+#    action: Activate Menu Item
+#    args: 1
+#  - key: BTN2
+#    condition: True
+#    action: Activate Menu Item
+#    args: 2
+#  - key: BTN3
+#    condition: True
+#    action: Activate Menu Item
+#    args: 3
+#  - key: BTN4
+#    condition: True
+#    action: Activate Menu Item
+#    args: 4
+#  - key: BTN5
+#    condition: True
+#    action: Activate Menu Item
+#    args: 5
+#  - key: BTN6
+#    condition: True
+#    action: Activate Menu Item
+#    args: 6
+#  - key: ENC1
+#    action: Menu Encoder
+#    args: <VALUE>   # This sends the data value to the action
+#  - key: OILP1
+#    condition: < 25
+#    action: Show Screen
+#    args: EMS
 
 
 # This section defines FIX IDs that we'll write out to the
@@ -357,28 +162,31 @@ databindingsdisabled:
 # of the point and send the data at half that interval.
 # OnChange will send when the value is changed and Both will
 # do both.
-outputs:
-  #TAS = Interval
-  BARO: OnChange
-  BTN16: OnChange
-  BTN1: OnChange
-  BTN2: OnChange
-  BTN3: OnChange
-  BTN4: OnChange
-  BTN5: OnChange
-  BTN6: OnChange
-  ACID: OnChange  
-  BTNAP: OnChange
-  BTNHH: OnChange
-  BTNFP: OnChange
-  APREQ: OnChange
+# This is likely no longer needed
+# This hmi class was updated to always output data that is changed
+# This may be removed in a future version
+#outputs:
+#  BARO: interval
+#  BTN16: OnChange
+#  BTN1: OnChange
+
+
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."
 # followed by the name.  The only required configuration is
 # module, which is the module that will be loaded to render
 # the screen
-
+# The preferred way to configure screens is to use the
+# pyefis.screens.screenbuilder module that can be configured
+# with just yaml files.
+# You can still make your own screen modules and use them
+# however instrument classes may change in the future breaking
+# your custom module.
 screens:
+
+#  TODO: Add some example screens with ample examples of the 
+#        various screen builder options
+  
   EPFD:
     module: pyefis.screens.epfd
     title: E Primary Flight Display
@@ -733,7 +541,6 @@ hooks:
 
 
 # Logging configuration - See Python logging.config module documenation
-# Logging configuration - See Python logging.config module documenation
 logging:
   version: 1
   disable_existing_loggers: False
@@ -746,7 +553,7 @@ logging:
       #level: ERROR
       #level: CRITICAL
 
-      handlers: [stderr, file]
+      handlers: [stderr]
       propagate: True
 
   formatters:
