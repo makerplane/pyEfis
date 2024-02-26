@@ -55,8 +55,13 @@ path_options = ['{USER}/makerplane/pyefis/config',
                 '{PREFIX}/local/etc/pyefis',
                 '{PREFIX}/etc/pyefis',
                 '/etc/pyefis',
-                'pyefis/config',
                 '.']
+
+# Add fixgw/config when not running as snap
+# Helpful for development
+if not environ.get('SNAP',False):
+    path_options.append('fixgw/config')
+
 config_path = None
 
 # This function recursively walks the given directory in the installed
@@ -101,11 +106,11 @@ def main():
     for directory in path_options:
         # store the first match that we find
         d = directory.format(USER=user_home, PREFIX=prefix_path)
-        if os.path.isfile("{}/{}".format(d, args.config_file.name if args.config_file else config_filename)):
+        if os.path.isfile("{}/{}".format(d, config_filename)):
             config_path = d
             break
 
-    config_file = "{}/{}".format(config_path, args.config_file.name if args.config_file else config_filename)
+    config_file = "{}/{}".format(config_path, config_filename)
 
     #config_file = args.config_file if args.config_file else os.path.join(os.path.dirname(__file__), 'config/main.yaml')
 
