@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import *
 
 import yaml
 import importlib
+from os import environ
 
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')

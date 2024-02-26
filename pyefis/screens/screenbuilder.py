@@ -338,7 +338,6 @@ class Screen(QWidget):
 
         elif i['type'] == 'listbox':
             self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'],encoder=i['options'].get('encoder',None),button=i['options'].get('button',None), replace=replace) #,font_percent=font_percent)
-            print(f"ListBox count: {count}")
          # Set options
         if 'options' in i:
             #loop over each option
