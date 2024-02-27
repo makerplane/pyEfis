@@ -36,6 +36,8 @@ class AbstractGauge(QWidget):
         self.highRange = 100.0
         self.lowRange = 0.0
         self._dbkey = None
+        self.highlightKey = None
+        self._highlightValue = 0.0
         self._value = 0.0
         self._rawValue = 0.0
         self.peakValue = 0.0
@@ -99,7 +101,10 @@ class AbstractGauge(QWidget):
         h = float(range_)
         l = float(self.lowRange)
         m = float(self.highRange)
-        return ((value - l) / (m - l)) * h
+        if m != l:
+            return ((value - l) / (m - l)) * h
+        else:
+            return 0
 
     def getValue(self):
         return self._value
@@ -129,6 +134,10 @@ class AbstractGauge(QWidget):
             return '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
 
     valueText = property(getValueText)
+
+    def setHighlightValue(self,value):
+        self._highlightValue = value
+        self.update()
 
     def getDbkey(self):
         return self._dbkey
@@ -191,6 +200,24 @@ class AbstractGauge(QWidget):
             item.valueChanged[float].connect(self.setValue)
         elif item.dtype == int:
             item.valueChanged[int].connect(self.setValue)
+
+        if self.highlightKey:
+            highlightItem = fix.db.get_item(self.highlightKey)
+            self.setHighlightValue(highlightItem.value)
+
+            try:
+                highlightItem.valueChanged[float].disconnect(self.setHighlightValue)
+            except:
+                pass # One will probably fail all the time
+            try:
+                highlightItem.valueChanged[int].disconnect(self.setHighlightValue)
+            except:
+                pass # One will probably fail all the time
+
+            if highlightItem.dtype == float:
+                highlightItem.valueChanged[float].connect(self.setHighlightValue)
+            elif highlightItem.dtype == int:
+                highlightItem.valueChanged[int].connect(self.setHighlightValue)
 
 
     def setAuxData(self, auxdata):

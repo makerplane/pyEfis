@@ -18,6 +18,7 @@ import copy
 import math
 import time
 import threading
+import os
 
 from geomag import declination
 
@@ -53,28 +54,52 @@ class VirtualVfr(AI):
     PAPI_YOFFSET = 8
     PAPI_LIGHT_SPACING = 9
     VORTAC_ICON_PATH="vortac.png"
-    def __init__(self, parent=None):
-        super(VirtualVfr, self).__init__(parent)
+    def __init__(self, parent=None, font_percent=None):
+        super(VirtualVfr, self).__init__(parent, font_percent=font_percent)
         self.display_objects = dict()
-        time.sleep(.4)      # Pause to let DB load
+        time.sleep(.6)      # Pause to let DB load
+
+        self.font_percent = font_percent
+        self._VFROld = dict()
+        self._VFRBad = dict()
+        self._VFRFail = dict()
+        for p in ['LAT', 'HEAD', 'ALT', 'LONG']:
+            self._VFROld[p] = True
+            self._VFRBad[p] = True
+            self._VFRFail[p] = True
+
         self.lng_item = fix.db.get_item("LONG")
         self.lat_item = fix.db.get_item("LAT")
         self.head_item = fix.db.get_item("HEAD")
         self.alt_item = fix.db.get_item("ALT")
+        self._VFROld['LONG'] = self.lng_item.old
+        self._VFRBad['LONG'] = self.lng_item.bad
+        self._VFRFail['LONG'] = self.lng_item.fail
+        self.lng = self.lng_item.value
+
+        self._VFROld['LAT'] = self.lat_item.old
+        self._VFRBad['LAT'] = self.lat_item.bad
+        self._VFRFail['LAT'] = self.lat_item.fail
+        self.lat = self.lat_item.value
+
+        self._VFROld['HEAD'] = self.head_item.old
+        self._VFRBad['HEAD'] = self.head_item.bad
+        self._VFRFail['HEAD'] = self.head_item.fail
+        self.head = self.head_item.value
+
+        # BUG: convert magnetic heading
+        self.true_heading = self.head_item.value
+
+        self._VFROld['ALT'] = self.alt_item.old
+        self._VFRBad['ALT'] = self.alt_item.bad
+        self._VFRFail['ALT'] = self.alt_item.fail
+        self.altitude = self.alt_item.value
+
         self.last_mag_update = 0
         self.magnetic_declination = None
         self.missing_lat = True
         self.missing_lng = True
-        self.lat = self.lat_item.value
-        self.lng = self.lng_item.value
-        self.altitude = self.alt_item.value
-        self.rendering_prohibited = \
-            self.lng_item.fail or self.lng_item.bad or self.lng_item.old or \
-            self.lat_item.fail or self.lat_item.bad or self.lat_item.old or \
-            self.head_item.fail or self.head_item.bad or self.head_item.old or \
-            self.alt_item.fail or self.alt_item.bad or self.alt_item.old
-        # BUG: convert magnetic heading
-        self.true_heading = self.head_item.value
+  
         self.myparent = parent
         minfont = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, VirtualVfr.MIN_FONT_SIZE, QFont.Bold)
         t = QGraphicsSimpleTextItem ("9 9")
@@ -84,28 +109,31 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
-        self.pov = PointOfView(self.myparent.get_config_item('dbpath'),
-                               self.myparent.get_config_item('indexpath'),
+        self.pov = PointOfView(os.path.expanduser(self.myparent.get_config_item('dbpath')),
+                               os.path.expanduser(self.myparent.get_config_item('indexpath')),
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
+
+        # Must happen here to prevent race
         self.lng_item.valueChanged[float].connect(self.setLongitude)
-        self.lng_item.badChanged[bool].connect(self.setBlank)
-        self.lng_item.oldChanged[bool].connect(self.setBlank)
-        self.lng_item.failChanged[bool].connect(self.setBlank)
+        self.lng_item.badChanged[bool].connect(self.setLngBad)
+        self.lng_item.oldChanged[bool].connect(self.setLngOld)
+        self.lng_item.failChanged[bool].connect(self.setLngFail)
         self.lat_item.valueChanged[float].connect(self.setLatitude)
-        self.lat_item.badChanged[bool].connect(self.setBlank)
-        self.lat_item.oldChanged[bool].connect(self.setBlank)
-        self.lat_item.failChanged[bool].connect(self.setBlank)
+        self.lat_item.badChanged[bool].connect(self.setLatBad)
+        self.lat_item.oldChanged[bool].connect(self.setLatOld)
+        self.lat_item.failChanged[bool].connect(self.setLatFail)
         self.head_item.valueChanged[float].connect(self.setHeading)
-        self.head_item.badChanged[bool].connect(self.setBlank)
-        self.head_item.oldChanged[bool].connect(self.setBlank)
-        self.head_item.failChanged[bool].connect(self.setBlank)
+        self.head_item.badChanged[bool].connect(self.setHeadBad)
+        self.head_item.oldChanged[bool].connect(self.setHeadOld)
+        self.head_item.failChanged[bool].connect(self.setHeadFail)
         self.alt_item.valueChanged[float].connect(self.setAltitude)
-        self.alt_item.badChanged[bool].connect(self.setBlank)
-        self.alt_item.oldChanged[bool].connect(self.setBlank)
-        self.alt_item.failChanged[bool].connect(self.setBlank)
-        if not self.rendering_prohibited:
+        self.alt_item.badChanged[bool].connect(self.setAltBad)
+        self.alt_item.oldChanged[bool].connect(self.setAltOld)
+        self.alt_item.failChanged[bool].connect(self.setAltFail)
+
+        if not self.rendering_prohibited():
             self.pov.render(self)
 
     def get_largest_font_size(self, width):
@@ -115,7 +143,7 @@ class VirtualVfr(AI):
         ret = (max_size - min_size) / 2
         t = QGraphicsSimpleTextItem ("9 9")
         while True:
-            font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, ret, QFont.Bold)
+            font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, qRound(ret), QFont.Bold)
             t.setFont (font)
             if t.boundingRect().width() * 1.5 > width:
                 max_size = ret
@@ -128,7 +156,7 @@ class VirtualVfr(AI):
         incr = int((max_size - min_size) / 2)
         while incr > 0:
             ret += incr
-            font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, ret, QFont.Bold)
+            font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, qRound(ret), QFont.Bold)
             t.setFont (font)
             if t.boundingRect().width() * 1.1 > width:
                 ret -= incr
@@ -175,12 +203,12 @@ class VirtualVfr(AI):
         key = name+airport_id
         if key in self.display_objects:
             # print ("update existing runway polygon %s"%key)
-            poly = QPolygonF([QPoint(*p11), QPoint(*p12), QPoint(*p21), QPoint(*p22)])
+            poly = QPolygonF([QPointF(*p11), QPointF(*p12), QPointF(*p21), QPointF(*p22)])
             rw = self.display_objects[key]
             rw.setPolygon(poly)
         else:
             # print ("make new runway polygon %s"%key)
-            poly = QPolygonF([QPoint(*p11), QPoint(*p12), QPoint(*p21), QPoint(*p22)])
+            poly = QPolygonF([QPointF(*p11), QPointF(*p12), QPointF(*p21), QPointF(*p22)])
             pen = QPen(QColor(Qt.white))
             brush = QBrush(QColor(Qt.black))
             if label[-1] == "W":
@@ -217,7 +245,7 @@ class VirtualVfr(AI):
             clpoints[bottomi] = (F(bottomy, cline_function), bottomy)
             topy = clpoints[topi][1]+2*VirtualVfr.CENTERLINE_WIDTH
             clpoints[topi] = (F(topy, cline_function), topy)
-            cline = QLineF(QPoint(*clpoints[0]), QPoint(*clpoints[1]))
+            cline = QLineF(QPointF(*clpoints[0]), QPointF(*clpoints[1]))
             if clkey in self.display_objects:
                  centerline = self.display_objects[clkey]
                  centerline.setLine(cline)
@@ -235,7 +263,7 @@ class VirtualVfr(AI):
             if draw_width > self.min_font_width*1.5:
                 #print ("Runway label will fit underneath runway polygon. font size is %d"%font_size)
                 font_size = self.get_largest_font_size(draw_width)
-                font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, font_size, QFont.Bold)
+                font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, qRound(font_size), QFont.Bold)
                 label = label[0] + " " + label[1:]
                 if lkey in self.display_objects:
                     # Update label position
@@ -277,10 +305,10 @@ class VirtualVfr(AI):
         pkey = key + "_p"
         if abs(bottom_intercept) < self.scene.width():
             if clpoints[0][1] > clpoints[1][1]:
-                touchdown_point = QPoint (*clpoints[0])
+                touchdown_point = QPointF (*clpoints[0])
             else:
-                touchdown_point = QPoint (*clpoints[1])
-            extended_point = QPoint(bottom_intercept, self.scene.height()/2)
+                touchdown_point = QPointF (*clpoints[1])
+            extended_point = QPointF(bottom_intercept, self.scene.height()/2)
             eline = QLineF(touchdown_point, extended_point)
             if elkey in self.display_objects:
                  extendedline = self.display_objects[elkey]
@@ -449,7 +477,7 @@ class VirtualVfr(AI):
         self.missing_lat = False
         #print ("New latitude %f"%self.lat)
         self.pov.update_position (self.lat, self.lng)
-        if not self.rendering_prohibited:
+        if not self.rendering_prohibited():
             self.pov.render(self)
 
     def setLongitude(self, lng):
@@ -457,7 +485,7 @@ class VirtualVfr(AI):
         self.missing_lng = False
         #print ("New longitude %f"%self.lng)
         self.pov.update_position (self.lat, self.lng)
-        if not self.rendering_prohibited:
+        if not self.rendering_prohibited():
             self.pov.render(self)
 
     def setAltitude(self, alt):
@@ -475,18 +503,124 @@ class VirtualVfr(AI):
         if md is None:
             md = 0
         self.pov.update_heading (heading + md)
-        if not self.rendering_prohibited:
+        if not self.rendering_prohibited():
             self.pov.render(self)
 
+    def getVfrBad(self):
+        #print(self._VFRBad)
+        return True in self._VFRBad.values()
+
+    def setVfrBad(self, bad, item=None):
+        self._VFRBad[item] = bad
+        self.setBlank(bad)
+        if item in self._AIBad and bad != self._AIBad[item]:
+            self._AIBad[item] = bad
+            if hasattr(self, 'sky_rect'):
+                if self.getAIBad():
+                    self.sky_rect.setBrush (self.gray_sky)
+                    self.land_rect.setBrush (self.gray_land)
+                    #self.bad_text.show()
+                else:
+                    self.sky_rect.setBrush (self.gblue_brush)
+                    self.land_rect.setBrush (self.gbrown_brush)
+                    #self.bad_text.hide()
+                self.redraw()
+
+    def setLngBad(self,bad):
+        self.setVfrBad(bad,'LONG')
+
+    def setLatBad(self,bad):
+        self.setVfrBad(bad,'LAT')
+
+    def setHeadBad(self,bad):
+        self.setVfrBad(bad,'HEAD')
+
+    def setAltBad(self,bad):
+        self.setVfrBad(bad,'ALT')
+
+    def getVfrOld(self):
+        #print(f"VFR getVfrOld {self._VFROld}")
+        return True in self._VFROld.values()
+
+    def setOld(self, old, item=None):
+        #print(f"VFR setOld {self._VFROld}")
+        self._VFROld[item] = old
+        self.setBlank(old)
+        if item in self._AIOld and old != self._AIOld[item]:
+            self._AIOld[item] = old
+            if hasattr(self, 'sky_rect'):
+                if self.getAIOld():
+                    self.sky_rect.setBrush (self.gray_sky)
+                    self.land_rect.setBrush (self.gray_land)
+                    #self.old_text.show()
+                else:
+                    self.sky_rect.setBrush (self.gblue_brush)
+                    self.land_rect.setBrush (self.gbrown_brush)
+                    #self.old_text.hide()
+                self.redraw()
+    def setLngOld(self,old):
+        #print(f"VFR setLngOld {old}")
+        self.setOld(old,'LONG')
+
+    def setLatOld(self,old):
+        self.setOld(old,'LAT')
+
+    def setHeadOld(self,old):
+        self.setOld(old,'HEAD')
+
+    def setAltOld(self,old):
+        self.setOld(old,'ALT')
+
+    def getVfrFail(self):
+        #print(self._VFRFail)
+        return True in self._VFRFail.values()
+
+    def setVfrFail(self, fail, item=None):
+        self._VFRFail[item] = fail
+        self.setBlank(fail)
+        if item in self._AIFail and fail != self._AIFail[item]:
+            self._AIFail[item] = fail
+            if hasattr(self, 'fail_scene'):
+                if self.getAIFail():
+                    self.resetTransform()
+                    self.setScene (self.fail_scene)
+                else:
+                    self.setScene (self.scene)
+                    # Initially set to grey
+                    # we may have old data while recovering
+                    if hasattr(self, 'sky_rect'):
+                        if self.getAIFail():
+                            self.sky_rect.setBrush (self.gray_sky)
+                            self.land_rect.setBrush (self.gray_land)
+                        else:
+                            self.sky_rect.setBrush (self.gblue_brush)
+                            self.land_rect.setBrush (self.gbrown_brush)
+                self.redraw()
+
+    def setLngFail(self,fail):
+        self.setVfrFail(fail,'LONG')
+
+    def setLatFail(self,fail):
+        self.setVfrFail(fail,'LAT')
+
+    def setHeadFail(self,fail):
+        self.setVfrFail(fail,'HEAD')
+
+    def setAltFail(self,fail):
+        self.setVfrFail(fail,'ALT')
+
+    def rendering_prohibited(self):
+        return self.getVfrFail() or self.getVfrBad() or self.getVfrOld()
+
     def setBlank(self, b):
-        self.rendering_prohibited = \
-            self.lng_item.fail or self.lng_item.bad or self.lng_item.old or \
-            self.lat_item.fail or self.lat_item.bad or self.lat_item.old or \
-            self.head_item.fail or self.head_item.bad or self.head_item.old or \
-            self.alt_item.fail or self.alt_item.bad or self.alt_item.old
-        if self.rendering_prohibited and len(self.display_objects) > 0:
+        if self.rendering_prohibited() and len(self.display_objects) > 0:
             for key in self.display_objects.keys():
-                self.scene.removeItem(self.display_objects[key])
+                # The lights seem to be stored in a list 
+                if isinstance(self.display_objects[key],list):
+                    for delobj in self.display_objects[key]:
+                        self.scene.removeItem(delobj)
+                else:
+                    self.scene.removeItem(self.display_objects[key])
             self.display_objects = dict()
 
 VIEWPORT_ANGLE100 = 35.0 / 2.0 * RAD_DEG

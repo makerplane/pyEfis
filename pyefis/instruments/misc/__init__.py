@@ -27,13 +27,13 @@ class StaticText(QWidget):
     def __init__(self, text="", fontsize=1.0, color=QColor(Qt.white), parent=None):
         super(StaticText, self).__init__(parent)
         self.alignment = Qt.AlignCenter
-        self.fontPercent = fontsize
+        self.font_percent = fontsize
         self.text = text
         self.color = color
 
     def resizeEvent(self, event):
         self.Font = QFont()
-        self.Font.setPixelSize(qRound(self.height()*self.fontPercent))
+        self.Font.setPixelSize(qRound(self.height()*self.font_percent))
         self.textRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):

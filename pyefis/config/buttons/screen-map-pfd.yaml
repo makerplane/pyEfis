@@ -1,0 +1,21 @@
+type: simple
+text: ""
+dbkey: BTN5
+conditions:
+  - when: "SCREEN eq 'MAP'"
+    actions:
+      - set text: PFD
+      - set bg color: lightgray
+    continue: true
+  - when: "SCREEN eq 'PFD' or SCREEN eq 'EMS'"
+    actions:
+      - set text: MAP
+      - set bg color: lightgray
+    continue: true
+  - when: "CLICKED eq true and [ SCREEN eq 'PFD' or SCREEN eq 'EMS' ]" 
+    actions:
+      - show screen: MAP
+  - when: "CLICKED eq true and SCREEN eq 'MAP'"
+    actions:
+      - show screen: PFD
+

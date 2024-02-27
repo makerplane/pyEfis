@@ -40,6 +40,10 @@ class VSI_Dial(QWidget):
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
 
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
+
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
         self.r = int(round(min(self.width(), self.height()) *.45))

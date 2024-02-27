@@ -21,7 +21,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-
 import logging
 
 import pyavtools.fix as fix
@@ -49,7 +48,25 @@ class Menu(QWidget):
         # Dangerous. Don't set this to True unless you really know what you're doing
         self.allow_evals = False if 'allow_evals' not in config else bool(config['allow_evals'])
         self.show_time = None if 'show_time' not in config else config['show_time']
-        last_x = self.config['left_margin']
+        # Sizing and moving the box around the buttons allows screen buttons
+        # to be clicked that might be above or to the left of the menu buttons.
+        # If one uses the trick of having a negative button spacing, so the menu can
+        # hide to the right instead of the left buttons that are on the screen under
+        # the menu, even when hidden, cannot be clicked.
+        # Also, with negative button spacing, when hidden the area to the right of the buttons will
+        # block clicking of screen buttons.
+        # Not sure how to improve this without making it more complex.
+        # But it does work as expected if you use positive button spacing.
+        # Only screen buttons under a menu are blocked, when menu is hidden
+        # any screen buttons visible can be clicked.
+
+        if self.config['buttons_spacing'] < 0:
+            self.move(self.config['left_margin'] + (self.config['buttons_spacing'] * (self.config['number_of_buttons'] - 1)),self.config['top_margin'])
+            logger.debug(self.config['left_margin'] + (self.config['buttons_spacing'] * self.config['number_of_buttons']))
+            last_x = (( self.config['number_of_buttons'] -1) * -1) * self.config['buttons_spacing']
+        else:
+            self.move(self.config['left_margin'],self.config['top_margin'])
+            last_x = 0 
         for b in range(self.config['number_of_buttons']):
             self.buttons.append(QPushButton("", self))
             self.button_actions.append(None)
@@ -58,7 +75,7 @@ class Menu(QWidget):
             self.button_blind_performance.append(False)
             button_function = eval("self.button_clicked" + str(b+1))
             self.buttons[-1].clicked.connect(button_function)
-            self.buttons[-1].move (last_x, self.config['top_margin'])
+            self.buttons[-1].move (last_x, 0) 
             last_x += self.config['buttons_spacing']
         self.adjustSize()
         self.register_target("BARO", BaroProxy())
@@ -99,7 +116,7 @@ class Menu(QWidget):
         if self.show_time is not None:
             t = threading.Thread(target=self.hide_menu)
             t.start()
-
+        self.adjustSize()
     def hide_menu(self):
         time.sleep(self.show_time + .1)
         if time.time() - self.show_begin_time >= self.show_time:

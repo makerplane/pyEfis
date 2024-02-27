@@ -27,11 +27,12 @@ from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
     FULL_WIDTH = 400
-    def __init__(self, parent=None, fontsize=20):
+    def __init__(self, parent=None, fontsize=20, bg_color=Qt.black):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
         self.fontsize = fontsize
+        self.bg_color = bg_color
         self._airspeed = 0
         self.item = fix.db.get_item("IAS")
         self.item.valueChanged[float].connect(self.setAirspeed)
@@ -39,6 +40,21 @@ class Airspeed(QWidget):
         self.item.badChanged[bool].connect(self.repaint)
         self.item.failChanged[bool].connect(self.repaint)
 
+        # V Speeds need to be init before paint
+        self.Vs = self.item.get_aux_value('Vs')
+        if self.Vs is None: self.Vs = 0
+        self.Vs0 = self.item.get_aux_value('Vs0')
+        if self.Vs0 is None: self.Vs0 = 0
+        self.Vno = self.item.get_aux_value('Vno')
+        if self.Vno is None: self.Vno = 0
+        self.Vne = self.item.get_aux_value('Vne')
+        if self.Vne is None: self.Vne = 200
+        self.Vfe = self.item.get_aux_value('Vfe')
+        if self.Vfe is None: self.Vfe = 0
+
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 1
 
     def paintEvent(self, event):
         w = self.width()
@@ -47,7 +63,7 @@ class Airspeed(QWidget):
         dial.setRenderHint(QPainter.Antialiasing)
 
         #Draw the Black Background
-        dial.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, QColor(self.bg_color))
 
         # Setup Pens
         f = QFont()
@@ -73,20 +89,13 @@ class Airspeed(QWidget):
         yellowPen.setWidth(4)
 
         # Dial Setup
-        # V Speeds
-        Vs = self.item.get_aux_value('Vs')
-        Vs0 = self.item.get_aux_value('Vs0')
-        Vno = self.item.get_aux_value('Vno')
-        Vne = self.item.get_aux_value('Vne')
-        #Va = 120
-        Vfe = self.item.get_aux_value('Vfe')
 
         # VSpeed to angle for drawArc
-        Vs0_angle = (-(((Vs0 - 30) * 2.5) + 26) + 90) * 16
-        Vs_angle = (-(((Vs - 30) * 2.5) + 26) + 90) * 16
-        Vfe_angle = (-(((Vfe - 30) * 2.5) + 25) + 90) * 16
-        Vno_angle = (-(((Vno - 30) * 2.5) + 25) + 90) * 16
-        Vne_angle = (-(((Vne - 30) * 2.5) + 25) + 90) * 16
+        Vs0_angle = (-(((self.Vs0 - 30) * 2.5) + 26) + 90) * 16
+        Vs_angle = (-(((self.Vs - 30) * 2.5) + 26) + 90) * 16
+        Vfe_angle = (-(((self.Vfe - 30) * 2.5) + 25) + 90) * 16
+        Vno_angle = (-(((self.Vno - 30) * 2.5) + 25) + 90) * 16
+        Vne_angle = (-(((self.Vne - 30) * 2.5) + 25) + 90) * 16
 
         radius = int(round(min(w,h) * .45))
         diameter = radius*2
@@ -200,10 +209,11 @@ class Airspeed(QWidget):
 
 
 class Airspeed_Tape(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_percent=None):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
         self.update_period = None
+        self.font_percent = font_percent
         # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
         self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -235,6 +245,10 @@ class Airspeed_Tape(QGraphicsView):
         self.minorDiv = 5
 
     def resizeEvent(self, event):
+        if self.font_percent:
+            self.fontsize = qRound(self.width() * self.font_percent)
+            self.pph = qRound(self.fontsize * 0.4)
+
         w = self.width()
         h = self.height()
         self.markWidth = w / 5
@@ -296,9 +310,9 @@ class Airspeed_Tape(QGraphicsView):
         l.setOpacity(self.foregroundOpacity)
 
         self.numerical_display = NumericalDisplay(self)
-        nbh = 50
-        self.numerical_display.resize (47, nbh)
-        self.numeric_box_pos = QPoint(qRound(w-48), qRound(h/2-nbh/2))
+        nbh = w/2
+        self.numerical_display.resize (qRound(w/2), qRound(nbh))
+        self.numeric_box_pos = QPoint(qRound(w-w/2), qRound(h/2-nbh/2))
         self.numerical_display.move(self.numeric_box_pos)
         self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
         self.numerical_display.show()
@@ -337,10 +351,10 @@ class Airspeed_Tape(QGraphicsView):
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
-        triangle_size = 11
-        p.drawConvexPolygon(QPolygon([QPoint(0, -triangle_size-3),
-                             QPoint(0, triangle_size-2),
-                             QPoint(-triangle_size, -1)]))
+        triangle_size = w/8
+        p.drawConvexPolygon(QPolygon([QPoint(0, qRound(-triangle_size-3)),
+                             QPoint(0, qRound(triangle_size-2)),
+                             QPoint(qRound(-triangle_size), -1)]))
 
     def getAirspeed(self):
         return self._airspeed
@@ -361,6 +375,14 @@ class Airspeed_Tape(QGraphicsView):
     def setAsFail(self,b):
         self.numerical_display.fail = b
 
+    # We don't want this responding to keystrokes
+    def keyPressEvent(self, event):
+        pass
+
+    # Don't want it acting with the mouse scroll wheel either
+    def wheelEvent(self, event):
+        pass
+
 
 class Airspeed_Box(QWidget):
     """Represents a simple numeric display type gauge.  The benefit of using this
@@ -377,16 +399,16 @@ class Airspeed_Box(QWidget):
 
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
         self.valueAlignment = Qt.AlignRight  | Qt.AlignVCenter
-        self.smallFontPercent = 0.4
+        self.small_font_percent = 0.4
         self.color = Qt.white
         self.modeText = self.modes[self._modeIndicator]
         hmi.actions.setAirspeedMode.connect(self.setMode)
 
     def resizeEvent(self, event):
         self.bigFont = QFont()
-        self.bigFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
+        self.bigFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         self.smallFont = QFont()
-        self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
+        self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         qm = QFontMetrics(self.smallFont)
 
         self.modeTextRect = QRectF(0, 0, self.width()-5, self.height()*0.4)

@@ -18,11 +18,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+import time
 import importlib
 import logging
 import sys
+import os
 from pyefis import hooks
 from pyefis import hmi
+import pyavtools.fix as fix
 
 screens = []
 
@@ -58,12 +61,14 @@ class Main(QMainWindow):
     windowClose = pyqtSignal(QEvent)
     #change_asd_mode = pyqtSignal(QEvent)
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config, config_path, parent=None):
         super(Main, self).__init__(parent)
 
+        self.config_path = config_path
         self.screenWidth = int(config["main"]["screenWidth"])
         self.screenHeight = int(config["main"]["screenHeight"])
         self.screenColor = config["main"]["screenColor"]
+        self.nodeID = config["main"].get('nodeID', 1)
 
         self.setObjectName("EFIS")
         self.resize(self.screenWidth, self.screenHeight)
@@ -79,6 +84,7 @@ class Main(QMainWindow):
         for idx, scr in enumerate(screens):
 
             scr.object = scr.module.Screen(self)
+            setattr(scr.object,'screenName',scr.name)
             log.debug("Loading Screen {0}".format(scr.name))
             # TODO Figure out how to have different size screens
             scr.object.resize(self.width(), self.height())
@@ -119,6 +125,22 @@ class Main(QMainWindow):
         else:
             self.showScreen(self.running_screen-1)
 
+    def getRunningScreen(self, s=""):
+        return screens[self.running_screen].name
+
+    def doExit(self, s=""):
+        # Ensure external processes are terminated before exiting
+        # For example waydroid/weston if they are in use
+        for s in screens:
+            s.object.close()
+        # Close down fix connections
+        # This needs done before the main event loop is stopped below
+        fix.stop()
+        # Allow external processes to exit
+        time.sleep(5)
+        # This termiates the main event loop and can prevent
+        # close events from finishing if called too soon
+        QCoreApplication.quit()
 
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
@@ -165,7 +187,7 @@ def setDefaultScreen(s):
     return found
 
 
-def initialize(config):
+def initialize(config,config_path):
     global mainWindow
     global log
     log = logging.getLogger(__name__)
@@ -188,15 +210,15 @@ def initialize(config):
 
     setDefaultScreen(d)
 
-    mainWindow = Main(config)
+    mainWindow = Main(config,config_path)
     hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)
     hmi.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
     hmi.actions.showScreen.connect(mainWindow.showScreen)
+    hmi.actions.doExit.connect(mainWindow.doExit)
 
     if 'menu' in config:
         menu = hmi.menu.Menu(mainWindow, config["menu"])
         menu.start()
-
 
     if 'FMS' in config:
         sys.path.insert(0, config["FMS"]["module_dir"])

@@ -22,9 +22,10 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge
 
 class VerticalBar(AbstractGauge):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,min_size=True):
         super(VerticalBar, self).__init__(parent)
-        self.setMinimumSize(50, 100)
+        if min_size:
+            self.setMinimumSize(50, 100)
         self.showValue = True
         self.showUnits = True
         self.showName = True
@@ -41,6 +42,10 @@ class VerticalBar(AbstractGauge):
         self._peakMode = False
         self.peakColor = QColor(Qt.magenta)
         self._oldpencolor = self.penGoodColor
+
+    def getRatio(self):
+        # Return X for 1:x specifying the ratio for this instrument
+        return 0.35
 
     def getNormalizeMode(self):
         return self._normalizeMode
@@ -72,6 +77,25 @@ class VerticalBar(AbstractGauge):
 
     peakMode = property(getPeakMode, setPeakMode)
 
+
+    def setMode(self, args):
+        print(f"Seting mode for {self._dbkey}")
+        if args.lower() == "normalize":
+                self.normalizeMode = not self._normalizeMode
+        elif args.lower() == "peak":
+                self.peakMode = not self._peakMode
+        elif args.lower() == "reset peak":
+                self.resetPeak()
+        elif args.lower() == "lean":
+                self.resetPeak()
+                self.normalizeMode = True
+                self.peakMode = True
+        elif args.lower() == "normal":
+                self.normalizeMode = False
+                self.peakMode = False
+
+
+
     def resizeEvent(self, event):
         self.barWidth = self.width() * self.barWidthPercent
         self.lineWidth = self.width() * self.lineWidthPercent
@@ -98,7 +122,7 @@ class VerticalBar(AbstractGauge):
 
         self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
         self.valueTextRect = QRectF(0, self.barBottom + self.textGap, self.width(), self.bigFont.pixelSize())
-        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize())
+        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize() + self.textGap)
         self.ballRadius = self.barWidth * 0.40
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 
@@ -109,6 +133,12 @@ class VerticalBar(AbstractGauge):
         p.drawText(self.valueTextRect, self.valueText, QTextOption(Qt.AlignCenter))
 
     def paintEvent(self, event):
+        if self.highlightKey:
+            if self._highlightValue == self._rawValue:
+                self.highlight = True
+            else:
+                self.highlight = False
+
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
 
@@ -203,7 +233,7 @@ class VerticalBar(AbstractGauge):
                 y = self.barTop + (self.barHeight - self.interpolate(self.peakValue, self.barHeight))
             if y < self.barTop: y = self.barTop
             if y > self.barBottom: y = self.barBottom
-            p.drawRect(self.lineLeft, y-2, self.lineWidth, 4)
+            p.drawRect(qRound(self.lineLeft), qRound(y-2), qRound(self.lineWidth), qRound(4))
 
         # Indicator Line
         brush = QBrush(self.penColor)

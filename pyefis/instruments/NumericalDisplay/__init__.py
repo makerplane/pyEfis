@@ -45,6 +45,21 @@ class NumericalDisplay(QGraphicsView):
         t.setFont (self.f)
         font_width = t.boundingRect().width()
         font_height = t.boundingRect().height()
+        while font_width * (self.total_decimals) >= self.w - 0.1:
+                self.font_size -= 0.1
+                self.f.setPointSizeF(self.font_size)
+                t.setFont (self.f)
+                font_width = t.boundingRect().width()
+                font_height = t.boundingRect().height()
+
+        while font_width * (self.total_decimals) <= self.w - 0.1:
+                self.font_size += 0.1
+                self.f.setPointSizeF(self.font_size) 
+                t.setFont (self.f)
+                font_width = t.boundingRect().width()
+                font_height = t.boundingRect().height()
+        self.font_size = qRound(self.font_size)
+        self.f = QFont(self.font_family, self.font_size)
 
         self.scene = QGraphicsScene(0, 0, self.w, self.h)
         border_width = 1
@@ -67,7 +82,7 @@ class NumericalDisplay(QGraphicsView):
         self.pre_scroll_text = self.scene.addSimpleText (prest, self.f)
         self.pre_scroll_text.setPen(QPen(QColor(Qt.white)))
         self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
-        self.pre_scroll_text.setX (font_width / 2.0)
+        self.pre_scroll_text.setX (0)
         self.pre_scroll_text.setY ((self.h-font_height)/2.0)
 
         x = sax-border_width/2
@@ -117,9 +132,6 @@ class NumericalDisplay(QGraphicsView):
         scroll_value = self._value - (prevalue * (10 ** self.scroll_decimal))
         if self.scroll_decimal > 1:
             scroll_value = (scroll_value / (10 ** (self.scroll_decimal-1)))
-        # Handle special case where prevalue is about to roll over
-        if scroll_value >= 9.6:
-            prevalue += 1
         prest = str(prevalue)
         prelen = self.total_decimals - self.scroll_decimal
         if len(prest) < prelen:
@@ -146,6 +158,7 @@ class NumericalDisplay(QGraphicsView):
             self.scrolling_area.hide()
         else:
             self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
+            self.redraw()
             self.scrolling_area.show()
 
     def getBad(self):

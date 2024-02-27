@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import *
 
 import yaml
 import importlib
+from os import environ
 
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')
@@ -48,7 +49,45 @@ import pyefis.hmi as hmi
 import pyefis.gui as gui
 
 
+config_filename = "main.yaml"
+user_home = environ.get('SNAP_REAL_HOME', os.path.expanduser("~"))
+prefix_path = sys.prefix
+path_options = ['{USER}/makerplane/pyefis/config',
+                '{PREFIX}/local/etc/pyefis',
+                '{PREFIX}/etc/pyefis',
+                '/etc/pyefis',
+                '.']
+
+# Add fixgw/config when not running as snap
+# Helpful for development
+if not environ.get('SNAP',False):
+    path_options.append('fixgw/config')
+
+config_path = None
+
+# This function recursively walks the given directory in the installed
+# package and creates a mirror of it in basedir.
+def create_config_dir(basedir):
+    # Look in the package for the configuration
+    import pkg_resources as pr
+    package = 'pyefis'
+    def copy_dir(d):
+        os.makedirs(basedir + "/" + d, exist_ok=True)
+        for each in pr.resource_listdir(package, d):
+            filename = d + "/" + each
+            if pr.resource_isdir(package, filename):
+                copy_dir(filename)
+            else:
+                s = pr.resource_string(package, filename)
+                with open(basedir + "/" + filename, "wb") as f:
+                    f.write(s)
+    copy_dir('config')
+
+
+
 def main():
+    global config_path
+
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['test', 'normal'],
@@ -64,15 +103,43 @@ def main():
 
     args = parser.parse_args()
 
-    config_file = args.config_file if args.config_file else os.path.join(os.path.dirname(__file__), 'config/main.yaml')
-    log_config_file = args.log_config if args.log_config else config_file
+    # Look for our configuration file in the list of directories
+    for directory in path_options:
+        # store the first match that we find
+        d = directory.format(USER=user_home, PREFIX=prefix_path)
+        if os.path.isfile("{}/{}".format(d, config_filename)):
+            config_path = d
+            break
+
+    config_file = "{}/{}".format(config_path, config_filename)
+
+    #config_file = args.config_file if args.config_file else os.path.join(os.path.dirname(__file__), 'config/main.yaml')
 
     # if we passed in a configuration file on the command line...
     if args.config_file:
         cf = args.config_file
-    else: # otherwise use the default
+        config_file = cf.name
+    elif config_path is not None: # otherwise use the default
         cf = open(config_file)
-    config = yaml.load(cf, Loader=yaml.SafeLoader)
+    else:
+        # If all else fails copy the configuration from the package
+        # to ~/makerplane/fixgw/config
+        create_config_dir("{USER}/makerplane/pyefis".format(USER=user_home))
+        # Reset this stuff like we found it
+        config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
+        cf = open(config_file)
+    config_path = os.path.dirname(cf.name)
+    config = yaml.safe_load(cf)
+
+
+#    # if we passed in a configuration file on the command line...
+#    if args.config_file:
+#        cf = args.config_file
+#    else: # otherwise use the default
+#        cf = open(config_file)
+#    config = yaml.load(cf, Loader=yaml.SafeLoader)
+
+    log_config_file = args.log_config if args.log_config else config_file
 
     # Either load the config file given as a command line argument or
     # look in the configuration for the logging object
@@ -98,7 +165,7 @@ def main():
         fms = importlib.import_module ("FixIntf")
         fms.start(config["FMS"]["aircraft_config"])
 
-    gui.initialize(config)
+    gui.initialize(config,config_path)
     if "keybindings" in config:
         hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])

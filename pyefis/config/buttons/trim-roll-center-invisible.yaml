@@ -1,0 +1,10 @@
+type: repeat
+text: ""
+dbkey: BTNTRIMRC
+transparent: true
+repeat_interval: 5
+repeat_delay: 50
+conditions:
+  - when: "CLICKED eq true" 
+    actions:
+      - set value: TRIMR,0
