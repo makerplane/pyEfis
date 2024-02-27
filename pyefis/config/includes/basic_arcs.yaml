@@ -1,0 +1,33 @@
+instruments:
+  - type: ganged_arc_gauge
+    gang_type: vertical
+    row: 0
+    column: 0
+    span:
+      rows: 110
+      columns: 50
+    groups:
+      - name: Engine
+        common_options:
+          nameLocation: right
+          decimalPlaces: 0
+        instruments:
+          -
+            options:
+              name: RPM
+              dbkey: TACH1
+          -
+            options:
+              name: Coolant
+              temperature: true
+              dbkey: H2OT1
+              showUnits: true
+          -
+            options:
+              name: Oil Press
+              dbkey: OILP1
+          -
+            options:
+              name: Fuel Total
+              dbkey: FUELQT
+

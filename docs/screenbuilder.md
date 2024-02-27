@@ -359,6 +359,9 @@ instruments:
 All of the instruments are defined the same as in the main.yaml
 Currently you cannot use includes inside of includes.
 
+##### Include relative #####
+When defiing includes you can assume that each instrument starts at 0.
+Then within the main config you can define `relative: true` along with row and column and the instruments in the include will be rendered starting at the defined row and column.  This allows you to define something complex such as AHRS with heading and such then reuse that definition on various screens and different locations on the screen.
 
 
 # Instrument List #

@@ -172,38 +172,10 @@ screens:
       columns: 400
     instruments:
       - type: include,includes/side-buttons.yaml
-      - type: ganged_arc_gauge
-        gang_type: vertical
+      - type: include,includes/basic_arcs.yaml
+        relative: true
         row: 0
         column: 25
-        span:
-          rows: 110
-          columns: 50
-        groups:
-          - name: Engine
-            common_options:
-              nameLocation: right
-              decimalPlaces: 0
-            instruments:
-              -
-                options:
-                  name: RPM
-                  dbkey: TACH1
-              -
-                options:
-                  name: Coolant
-                  temperature: true
-                  dbkey: H2OT1
-                  showUnits: true
-              -
-                options:
-                  name: Oil Press
-                  dbkey: OILP1
-              -
-                options:
-                  name: Fuel Total
-                  dbkey: FUELQT
-
       - type: weston
         disabled: true
         row: 0
@@ -574,44 +546,10 @@ screens:
 #                  temperature: true
 #                  dbkey: CHTMAX1
 
-      - type: ganged_arc_gauge
-        gang_type: vertical
+      - type: include,includes/basic_arcs.yaml
+        relative: true
         row: 0
         column: 25
-        span:
-          rows: 110
-          columns: 50
-        groups:
-          - name: Engine
-            common_options:
-              nameLocation: right
-              decimalPlaces: 0
-            instruments:
-              -
-                options:
-                  name: RPM
-                  dbkey: TACH1
-              -
-                options:
-                  name: Coolant
-                  temperature: true
-                  dbkey: H2OT1
-                  showUnits: true
-#              -
-#                options:
-#                  name: Avg EGT
-#                  temperature: true
-#                  dbkey: EGTAVG1
-              -
-                options:
-                  name: Oil Press
-                  dbkey: OILP1
-              -
-                options:
-                  name: Oil Temp
-                  dbkey: OILT1
-                  temperature: true
-                  showUnits: true
       - type: ganged_arc_gauge
         gang_type: vertical
         row: 0
