@@ -59,10 +59,10 @@ class Main(QMainWindow):
     windowClose = pyqtSignal(QEvent)
     #change_asd_mode = pyqtSignal(QEvent)
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config, config_path, parent=None):
         super(Main, self).__init__(parent)
 
-        self.path = os.path.dirname(__file__)
+        self.config_path = config_path
         self.screenWidth = int(config["main"]["screenWidth"])
         self.screenHeight = int(config["main"]["screenHeight"])
         self.screenColor = config["main"]["screenColor"]
@@ -173,7 +173,7 @@ def setDefaultScreen(s):
     return found
 
 
-def initialize(config):
+def initialize(config,config_path):
     global mainWindow
     global log
     log = logging.getLogger(__name__)
@@ -196,7 +196,7 @@ def initialize(config):
 
     setDefaultScreen(d)
 
-    mainWindow = Main(config)
+    mainWindow = Main(config,config_path)
     hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)
     hmi.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
     hmi.actions.showScreen.connect(mainWindow.showScreen)

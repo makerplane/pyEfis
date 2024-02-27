@@ -98,7 +98,7 @@ class Screen(QWidget):
             if 'include,' in i['type']:
                 # Here we will include some instruments defined in another file
                 args = i['type'].split(',')
-                iconfig = yaml.load(open(os.path.join(self.parent.path,args[1])), Loader=yaml.SafeLoader)
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
                 insts = iconfig['instruments']
             else:
                 insts = [i]
@@ -145,7 +145,7 @@ class Screen(QWidget):
 
         # Process the type of instrument this is and create them
         if i['type'] == 'weston':
-            self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
+            self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
         if i['type'] == 'airspeed_dial':
             self.instruments[count] = airspeed.Airspeed(self)
         if i['type'] == 'airspeed_box':
@@ -164,7 +164,7 @@ class Screen(QWidget):
             self.instruments[count] = vsi.Alt_Trend_Tape(self)
         elif i['type'] == 'button':
             if 'options' in i and 'config' in i['options']:
-                self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.path,i['options']['config']))
+                self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.config_path,i['options']['config']))
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':

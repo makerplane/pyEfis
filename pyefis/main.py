@@ -159,7 +159,7 @@ def main():
         fms = importlib.import_module ("FixIntf")
         fms.start(config["FMS"]["aircraft_config"])
 
-    gui.initialize(config)
+    gui.initialize(config,config_path)
     if "keybindings" in config:
         hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
