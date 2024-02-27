@@ -238,16 +238,16 @@ screens:
             instruments:
               -
                 options:
-                  config: config/buttons/egt-Normalize.yaml
+                  config: buttons/egt-Normalize.yaml
               -
                 options:
-                  config: config/buttons/egt-Lean.yaml
+                  config: buttons/egt-Lean.yaml
               -
                 options:
-                  config: config/buttons/egt-Peak.yaml
+                  config: buttons/egt-Peak.yaml
               -
                 options:
-                  config: config/buttons/egt-reset-peak.yaml
+                  config: buttons/egt-reset-peak.yaml
       -
         type: arc_gauge
         row: 0
