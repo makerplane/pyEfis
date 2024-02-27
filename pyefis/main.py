@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import *
 
 import yaml
 import importlib
+from os import environ
 
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')
@@ -49,14 +50,19 @@ import pyefis.gui as gui
 
 
 config_filename = "main.yaml"
-user_home = os.path.expanduser("~")
+user_home = environ.get('SNAP_REAL_HOME', os.path.expanduser("~"))
 prefix_path = sys.prefix
-path_options = ['{USER}/.makerplane/pyefis/config',
+path_options = ['{USER}/makerplane/pyefis/config',
                 '{PREFIX}/local/etc/pyefis',
                 '{PREFIX}/etc/pyefis',
                 '/etc/pyefis',
-                'pyefis/config',
                 '.']
+
+# Add fixgw/config when not running as snap
+# Helpful for development
+if not environ.get('SNAP',False):
+    path_options.append('fixgw/config')
+
 config_path = None
 
 # This function recursively walks the given directory in the installed
@@ -117,10 +123,10 @@ def main():
         cf = open(config_file)
     else:
         # If all else fails copy the configuration from the package
-        # to ~/.makerplane/fixgw/config
-        create_config_dir("{USER}/.makerplane/pyefis".format(USER=user_home))
+        # to ~/makerplane/fixgw/config
+        create_config_dir("{USER}/makerplane/pyefis".format(USER=user_home))
         # Reset this stuff like we found it
-        config_file = "{USER}/.makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
+        config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
         cf = open(config_file)
     config_path = os.path.dirname(cf.name)
     config = yaml.safe_load(cf)

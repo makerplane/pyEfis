@@ -6,7 +6,7 @@ description: |
 base: core22
 
 # The embedded android does not work with strict confinment 
-# Without that it is possible to use strict confinement
+# Without android it is possible to use strict confinement
 confinement: classic
 compression: lzo 
 
@@ -14,8 +14,24 @@ parts:
   pyefis:
     plugin: python
     source: .
+    # Use the OS provided pyqt5 to reduce build issues
+    override-build: |
+      sed -i 's/"PyQt5==5.15.9",//' setup.py
+      sed -i 's/pyavtools==0.1.0/pyavtools @ git+https:\/\/github.com\/makerplane\/pyAvTools\/@b00273a9016e9a4b975f8efe51d63405103d58fb#egg=pyavtools/' setup.py 
+      snapcraftctl build
+      $SNAPCRAFT_PROJECT_DIR/snap/local/patch-ctypes.sh
     stage-packages:
+      - libqt5core5a
+      - libqt5qml5
+      - libqt5qmlmodels5
+      - libqt5quick5
+      - libqt5svg5
+      - libqt5waylandclient5
+      - libqt5waylandcompositor5
+      - libqt5x11extras5
       - python3.10-minimal
+      - libpython3.10-minimal
+      - libpython3.10-stdlib
       - python3-pip
       - python3-setuptools
       - python3-wheel
@@ -23,22 +39,35 @@ parts:
       - python3-minimal
       - python3-distutils
       - python3-pkg-resources
-# Needed for strict mode:
-#      - libgl1
+      - python3-pyqt5
+      - libgl1
     build-attributes:
-     - enable-patchelf
-
+      - enable-patchelf
+    build-environment:
+      - PARTS_PYTHON_INTERPRETER: python3.10
+      - PIP_VERBOSE: 3
+      - PIP_IGNORE_INSTALLED: ''
+      - PARTS_PYTHON_VENV_ARGS: --system-site-packages
 apps:
   pyefis:
 # Needed for strict mode:
 #    extensions: [gnome]
     command: bin/pyefis
-    plugs: [ network]
-# Needed for strict mode:
-#    plugs: [ network, desktop, desktop-legacy, wayland, x11, opengl] 
+    plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
     environment:
-      LANG: C.UTF-8
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      # This is needed for embedded android:
+      QT_QPA_PLATFORM: xcb
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins/ 
 # Needed for strict mode:
 #      LD_LIBRARY_PATH: "" 
+  makecifpindex:
+# Needed for strict mode:
+#    extensions: [gnome]
+    command: bin/makecifpindex
+    plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
+    environment:
+      PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
 

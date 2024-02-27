@@ -19,14 +19,22 @@ import pyavtools.fix as fix
 # Set a value in the FIX database.  arg should be "key,value"
 def setValue(arg):
     args = arg.split(',')
-    fix.db.set_value(args[0].strip(), args[1].strip())
+    i = fix.db.get_item(args[0].strip())
+    i.value = args[1].strip()
+    # Always output values we set
+    # In most cases we are setting a value to trigger some
+    # action and most actions take place outside of pyEFIS
+    i.output_value()
 
 # Change a value in the FIX database by a certain value.  arg should be "key,value"
 def changeValue(arg):
     args = arg.split(',')
     i = fix.db.get_item(args[0])
     i.value += i.dtype(args[1])
+    i.output_value()
 
 def toggleBool(arg):
     bit = fix.db.get_item(arg)
     bit.value = not bit.value
+    bit.output_value()
+

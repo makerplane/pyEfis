@@ -30,10 +30,12 @@ from pyefis.instruments import gauges
 from pyefis.instruments import misc
 from pyefis.instruments import button
 from pyefis.instruments import misc
-
 from pyefis.instruments.ai.VirtualVfr import VirtualVfr
+from pyefis.instruments import listbox
 
 import pyavtools.fix as fix
+import pyavtools.scheduler as scheduler
+
 from collections import defaultdict
 import re
 import pyefis.hmi as hmi
@@ -85,47 +87,168 @@ class Screen(QWidget):
         # vsi_pfd  # Testing to do
 
 
+    def calc_includes(self,i):
+        args = i['type'].split(',')
+        iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        insts = iconfig['instruments']
+        inst_rows = 0
+        inst_cols = 0
+        # Calculate max spans
+        for inst in insts:
+            if 'span' in inst:
+                if 'rows' in inst['span']:
+                    # inst_rows shold be the sum of row + row span
+                    if inst['span']['rows'] + inst['row'] > inst_rows: inst_rows = inst['span']['rows'] + inst['row']
+                if 'columns' in inst['span']:
+                    # inst_cols should be the sum of colum + column span
+                    if inst['span']['columns'] + inst['column'] > inst_cols: inst_cols = inst['span']['columns'] + inst['column']
+            else:
+                # This is not spanned
+                if 'include,' in i['type']:
+                    # Need to resolve these includes too
+                    rows, cols = self.calc_includes(inst)
+                    if rows + inst['row'] > inst_rows: inst_row = rows + inst['row']
+                    if cols + inst['column'] > inst_cols: inst_cols = cols + inst['column']
+        return [ inst_rows, inst_cols ]
+
+    def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0,state=False):
+        # Timed display states
+        # we want to propigate state to all children unless the child has its own setting
+        parent_state = state
+        if not state:
+            state =  i.get('display_state', False)
+            parent_state = state
+        if not replacements:
+            replacements = { '{id}': self.parent.nodeID }
+        span_rows = 0
+        span_cols = 0
+        if 'include,' in i['type']:
+            relative_x = i.get('row', 0)
+            relative_y = i.get('column', 0)
+            inst_rows, inst_cols = self.calc_includes(i)
+            if 'span' in i:
+                span_rows = i['span'].get('rows',0)
+                span_cols = i['span'].get('columns',0)
+            args = i['type'].split(',')
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            insts = iconfig['instruments']
+
+        else:
+            insts = [i]
+        for inst in insts:
+            if not parent_state:
+                # No parent state, set to False or this instrument specific state
+                state =  inst.get('display_state', False)
+            elif inst.get('display_state', False):
+                # This child has a state that overrides the parent
+                state =  inst.get('display_state', False)
+
+            # Replacements
+            # Convert to YAML string, replace, convert back to dict
+            # Seems more effecient than nested recursion
+            inst_str = yaml.dump(inst)
+            this_replacements = replacements
+            # From include definition if we have one
+            if 'replace' in i:
+                logger.debug("This instrument has replacement(s)")
+                for rep in i['replace']:
+                    this_replacements[f"{{{rep}}}"] = str(i['replace'][rep])
+            # This specific instrument
+            if 'replace' in inst:
+                # Replace items specific to this instrument
+                logger.debug("This instrument has replacement(s)")
+                for rep in inst['replace']:
+                    this_replacements[f"{{{rep}}}"] = str(inst['replace'][rep])
+            # Perform replacements
+            for rep in this_replacements:
+                inst_str = inst_str.replace(rep,str(this_replacements[rep]))
+            inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
+            if span_rows > 0 and inst_rows > 0:
+                row_p = ( span_rows / inst_rows )
+            if span_cols > 0 and inst_cols > 0:
+                col_p = ( span_cols / inst_cols )
+            inst['row'] = (inst['row'] * row_p) + relative_x
+            inst['column'] = (inst['column'] * col_p) + relative_y
+            if 'span' in inst:
+                if 'rows' in inst['span']:
+                    if inst['span']['rows'] >= 0:
+                        inst['span']['rows'] = inst['span']['rows'] * row_p
+                if 'columns' in inst['span']:
+                    if inst['span']['columns'] >= 0:
+                        inst['span']['columns'] = inst['span']['columns'] * col_p
+            if 'ganged' in inst['type']:
+                #ganged instrument
+                if 'gang_type' not in inst:
+                    raise Exception(f"Instrument {inst['type']} must also have 'gang_type:' horizontal|vertical specified")
+                self.insturment_config[count] = inst
+                for g in inst['groups']:
+                    for gi in g['instruments']:
+                        gi['type'] = inst['type'].replace('ganged_','')
+                        gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
+                        self.setup_instruments(count,gi,ganged=True,replace=this_replacements)
+                        if state:
+                            self.display_state_inst[state].append(count)
+                            if state > 1:
+                                self.instruments[count].setVisible(False)
+                        count += 1     
+            else:
+                # Check if this is an include, if it is recurse and resolve those instruments
+                if 'include,' in inst['type']:
+                    count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
+                else: 
+                    self.setup_instruments(count,inst,replace=this_replacements)
+                    if state:
+                        self.display_state_inst[state].append(count)
+                        if state > 1:
+                           self.instruments[count].setVisible(False)
+            count += 1
+        return count
+
+    def change_display_states(self):
+        # Verify we have something to do
+        if self.display_states < 2: return
+
+        # Hide all instruments for current state
+        for i in self.display_state_inst[self.display_state_current]:
+            self.instruments[i].setVisible(False)
+
+        if self.display_state_current == self.display_states: 
+            # When at the end loop back to the start
+            self.display_state_current = 1
+        else:
+            # Increment to next state
+            self.display_state_current += 1
+        # Unhide all instruments for the next state
+        for i in self.display_state_inst[self.display_state_current]:
+            self.instruments[i].setVisible(True)
 
     def init_screen(self):
         self.layout = self.parent.get_config_item(self,'layout')
         self.instruments = dict() # Each instrument
         self.insturment_config = dict () # configuration for the instruments
+
+        # Timed display states
+        self.display_timer = None
+        self.display_states = 0
+        self.display_state_current = 0
+        self.display_state_inst = defaultdict(list)
+        # Init timer if defined
+        if self.layout.get('display_state', False):
+            scheduler.initialize()
+            self.timer = scheduler.scheduler.getTimer(self.layout['display_state']['interval'])
+            if not self.timer:
+                scheduler.scheduler.timers.append(scheduler.IntervalTimer(self.layout['display_state']['interval']))
+                scheduler.scheduler.timers[-1].start()
+                self.timer = scheduler.scheduler.getTimer(self.layout['display_state']['interval'])
+            self.display_states = self.layout['display_state']['states']
+            self.display_state_current = 1
+
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
                 continue
-            relative = False
-            if 'include,' in i['type']:
-                # Here we will include some instruments defined in another file
-                args = i['type'].split(',')
-                relative = i.get('relative', False)
-                relative_x = i.get('row', 0)
-                relative_y = i.get('column', 0)
-                
-                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
-                insts = iconfig['instruments']
-            else:
-                insts = [i]
-            for inst in insts:        
-                if relative:
-                  inst['row'] = inst['row'] + relative_x
-                  inst['column'] = inst['column'] + relative_y
-                if 'ganged' in inst['type']:
-                    #ganged instrument
-                    if 'gang_type' not in inst:
-                        raise Exception(f"Instrument {inst['type']} must also have 'gang_type:' horizontal|vertical specified")
-                    self.insturment_config[count] = inst
-                    for g in inst['groups']:
-                        for gi in g['instruments']:
-                            gi['type'] = inst['type'].replace('ganged_','')
-                            gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
-                            self.setup_instruments(count,gi,ganged=True)
-
-                            count += 1     
-                else:
-                    self.setup_instruments(count,inst)
-                count += 1
+            count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
         self.init = True
@@ -134,8 +257,11 @@ class Screen(QWidget):
             self.grid.move(0,0)
             self.grid.resize(self.width(),self.height())
 
+        if self.layout.get('display_state', False):
+            # STart the timer after all instruments defined
+            self.timer.add_callback(self.change_display_states)
 
-    def setup_instruments(self,count,i,ganged=False):
+    def setup_instruments(self,count,i,ganged=False,replace=None):
         if not ganged:
             self.insturment_config[count] = i
         # Get the default items for this instrument
@@ -151,6 +277,10 @@ class Screen(QWidget):
         #    if 'options' in i and 'dbkey' in i['options']:
         #        dbkey = i['options']['dbkey']            
 
+        font_percent = None
+        if 'options' in i:
+            if 'font_percent' in i['options']:
+                font_percent = i['options']['font_percent']
         # Process the type of instrument this is and create them
         if i['type'] == 'weston':
             self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
@@ -159,13 +289,13 @@ class Screen(QWidget):
         if i['type'] == 'airspeed_box':
             self.instruments[count] = airspeed.Airspeed_Box(self)
         if i['type'] == 'airspeed_tape':
-            self.instruments[count] = airspeed.Airspeed_Tape(self)
+            self.instruments[count] = airspeed.Airspeed_Tape(self,font_percent=font_percent)
         if i['type'] == 'airspeed_trend_tape':
             self.instruments[count] = vsi.AS_Trend_Tape(self)
         elif i['type'] == 'altimeter_dial':
             self.instruments[count] = altimeter.Altimeter(self)
         elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self)
+            self.instruments[count] = ai.AI(self,font_percent=font_percent)
         elif i['type'] == 'altimeter_tape':
             self.instruments[count] = altimeter.Altimeter_Tape(self)
         elif i['type'] == 'altimeter_trend_tape':
@@ -176,12 +306,12 @@ class Screen(QWidget):
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
-            self.instruments[count] = hsi.HeadingDisplay(self)
+            self.instruments[count] = hsi.HeadingDisplay(self,font_percent=font_percent)
         elif i['type'] == 'heading_tape':
             self.instruments[count] = hsi.DG_Tape(self)
         elif i['type'] == 'horizontal_situation_indicator':
             #TODO Fix this so cdi/gsi can be enabled/disabled
-            self.instruments[count] = hsi.HSI(self, cdi_enabled=True, gsi_enabled=True)
+            self.instruments[count] = hsi.HSI(self, font_percent=font_percent, cdi_enabled=True, gsi_enabled=True)
         elif i['type'] == 'numeric_display':
             self.instruments[count] = gauges.NumericDisplay(self)
         elif i['type'] == 'value_text':
@@ -204,8 +334,10 @@ class Screen(QWidget):
         elif i['type'] == 'vertical_bar_gauge':
             self.instruments[count] = gauges.VerticalBar(self,min_size=False)
         elif i['type'] == 'virtual_vfr':
-            self.instruments[count] = VirtualVfr(self)
+            self.instruments[count] = VirtualVfr(self,font_percent=font_percent)
 
+        elif i['type'] == 'listbox':
+            self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'],encoder=i['options'].get('encoder',None),button=i['options'].get('button',None), replace=replace) #,font_percent=font_percent)
          # Set options
         if 'options' in i:
             #loop over each option
@@ -330,6 +462,7 @@ class Screen(QWidget):
             if  'ganged' not in c['type'] and hasattr( self.instruments[i], 'getRatio'):
                 #This instrument needs a specific ratio
                 ratio = self.instruments[i].getRatio()
+                ratio = c.get('ratio', ratio)
                 logger.debug(f"Instrument {c['type']} has ratio 1:{ratio}")
                 r_width,r_height,r_x,r_y = self.get_bounding_box(width, height,x,y,ratio)
 
@@ -406,6 +539,7 @@ class Screen(QWidget):
                         g_y = group_y
                         if hasattr( self.instruments[i], 'getRatio'):
                             g_ratio = self.instruments[i].getRatio()
+                            g_ratio = c.get('ratio', g_ratio)
                             logger.debug(f"Ganged Instrument {c['type']} has ratio 1:{g_ratio}")
                             g_width,g_height,g_x,g_y = self.get_bounding_box(g_width, g_height,g_x,g_y,g_ratio)
                         self.move_resize_inst(i + gang_count,qRound(g_x),qRound(g_y),qRound(g_width),qRound(g_height))
@@ -474,10 +608,14 @@ class Screen(QWidget):
         return (r_width,r_height,r_x,r_y)
 
 
-
-
-
-
+    def closeEvent(self, event):
+        if 'instruments' not in self.__dict__:
+            return
+        for inst in self.instruments:
+            try:
+                self.instruments[inst].close()
+            except:
+                pass
 
 
 

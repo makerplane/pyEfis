@@ -52,14 +52,17 @@ class Button(QWidget):
 
         self._title = ""
         self._toggle = False
-
-        self._dbkey = fix.db.get_item(self.config['dbkey'])
+        # Repalce {id} in the dbkey so we can have different 
+        # button names per node without having 
+        # to duplicate all buttons.
+        self._dbkey = fix.db.get_item(self.config['dbkey'].replace('{id}', str(self.parent.parent.nodeID)))
         time.sleep(0.01)
         #self._button.setChecked(self._dbkey.value)
 
         #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
 
         self._repeat = False
+        self.simple_state = False
         if self.config['type'] == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
@@ -181,7 +184,27 @@ class Button(QWidget):
             return
         else:
             logger.debug(f"{self._button.text()}:toggled:data={data}:self._button.isChecked({self._button.isChecked()})")
-            self._button.setChecked(self._dbkey.value)
+            if not self._repeat and not self._toggle:
+                # A simple button
+                # The logic in here is for dealing with physical buttons
+                # Only take action if changing from False to True
+                if not self._dbkey.value: 
+                    logger.debug(f"Data is: {data}")
+                    # Always save current state when it is false
+                    self.simple_state = False
+                    return
+                # Only take action if we are visible
+                if not self.isVisible(): return
+
+                logger.debug(f"data:{data} self._dbkey.value:{self._dbkey.value}")
+                # If we are already True, nothing new to do, we need to become false before performing another action.
+                if self.simple_state: return
+                # Save current state
+                self.simple_state = self._dbkey.value
+                # Set value back to false to prevent recursive calls
+                # Physical buttons should not repeat sending True for simple buttons
+                self._dbkey.value = False
+            self._button.setChecked(self._dbkey.value) 
             self.processConditions(True)
             if self._repeat:
                 # Send press even while true, send release event when false
@@ -200,12 +223,13 @@ class Button(QWidget):
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.screenName
         self._db_data['CLICKED'] = clicked
+        logger.debug(f"{self._dbkey.key}:{self._dbkey.value}")
         for cond in self._conditions:
             if 'when' in cond:
                 if type(cond['when']) == str:
                     expr = pc.to_struct(pc.tokenize(cond['when'], sep=' ', brkts='[]'))
                     if pc.pycond(expr)(state=self._db_data) == True:
-                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{cond['when']}")
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} = True")
                         self.processActions(cond['actions'])
                         if not cond.get('continue', False): return
                 elif type(cond['when']) == bool:
@@ -223,11 +247,12 @@ class Button(QWidget):
         for act in actions:
             for action,args in act.items():
                 try:
-                    logger.debug(f"{self.parent.parent.getRunningScreen()}:HMI:{action}:{args}")
+                    logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Tried")
                     hmi.actions.trigger(action, args)
+                    logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Success")
                 except:
                     self.setStyle(action,args)
-                    logger.debug(f"{self.parent.parent.getRunningScreen()}:STYLE:{action}:{args}")
+                    logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:STYLE:{action}:{args}")
 
     def setStyle(self,action='',args=None):
 

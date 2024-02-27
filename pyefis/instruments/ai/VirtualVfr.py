@@ -18,6 +18,7 @@ import copy
 import math
 import time
 import threading
+import os
 
 from geomag import declination
 
@@ -53,11 +54,12 @@ class VirtualVfr(AI):
     PAPI_YOFFSET = 8
     PAPI_LIGHT_SPACING = 9
     VORTAC_ICON_PATH="vortac.png"
-    def __init__(self, parent=None):
-        super(VirtualVfr, self).__init__(parent)
+    def __init__(self, parent=None, font_percent=None):
+        super(VirtualVfr, self).__init__(parent, font_percent=font_percent)
         self.display_objects = dict()
-        time.sleep(.4)      # Pause to let DB load
+        time.sleep(.6)      # Pause to let DB load
 
+        self.font_percent = font_percent
         self._VFROld = dict()
         self._VFRBad = dict()
         self._VFRFail = dict()
@@ -107,8 +109,8 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
-        self.pov = PointOfView(self.myparent.get_config_item('dbpath'),
-                               self.myparent.get_config_item('indexpath'),
+        self.pov = PointOfView(os.path.expanduser(self.myparent.get_config_item('dbpath')),
+                               os.path.expanduser(self.myparent.get_config_item('indexpath')),
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)

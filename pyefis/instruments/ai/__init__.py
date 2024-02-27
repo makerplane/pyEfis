@@ -36,13 +36,16 @@ log = logging.getLogger(__name__)
 #   Add configuration for bank angle tick sizes
 
 class AI(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,font_percent=None):
         super(AI, self).__init__(parent)
         self.myparent = parent
-
         # The following information is meant to be configurable from the screen
         # definition file
-        self.fontSize = 30
+        self.font_percent = font_percent
+        if self.font_percent:
+            self.fontSize = qRound(self.width() * self.font_percent)
+        else:
+            self.fontSize = 30
         # Number of degrees shown from top to bottom
         self.pitchDegreesShown = 60
         # Pitch tick mark configurations
@@ -119,6 +122,12 @@ class AI(QGraphicsView):
         self.pitchItems = []
 
     def resizeEvent(self, event):
+        if self.font_percent:
+            self.fontSize = qRound(self.width() * self.font_percent)
+            self.minorDivWidth = qRound(self.fontSize * 0.3)
+            self.majorDivWidth = self.minorDivWidth * 4
+            self.numberedDivWidth = self.minorDivWidth * 5
+            self.bankMarkSize = qRound(self.fontSize * 0.3 )
         #Setup the scene that we use for the background of the AI
         sceneHeight = self.height() * 4.5
         sceneWidth = math.sqrt(self.width() * self.width() +
@@ -178,7 +187,7 @@ class AI(QGraphicsView):
 
         #Draw the main horizontal line
         pen = QPen(QColor(Qt.white))
-        pen.setWidth(2)
+        pen.setWidth(qRound(self.fontSize * 0.05))
         self.scene.addLine(0, sceneHeight / 2, sceneWidth, sceneHeight / 2, pen)
         # draw the degree hash marks
         pen.setColor(Qt.white)
@@ -295,7 +304,7 @@ class AI(QGraphicsView):
         p.drawImage(self.rect(), self.overlay)
 
         pen = QPen(Qt.white)
-        pen.setWidth(1)
+        pen.setWidth(qRound(self.fontSize * 0.025))
         p.setPen(pen)
         p.setBrush(QColor(Qt.white))
         marks = QPen(Qt.white)
@@ -309,7 +318,7 @@ class AI(QGraphicsView):
 
         p.rotate(self._rollAngle * -1.0)
         # Add moving Bank Angle Markers
-        marks.setWidth(2)
+        marks.setWidth(qRound(self.fontSize * 0.05))
         p.setPen(marks)
         p.setBrush(QColor(Qt.white))
         smallMarks = [10, 20, 45]

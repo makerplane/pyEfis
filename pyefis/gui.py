@@ -18,12 +18,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+import time
 import importlib
 import logging
 import sys
 import os
 from pyefis import hooks
 from pyefis import hmi
+import pyavtools.fix as fix
 
 screens = []
 
@@ -66,6 +68,7 @@ class Main(QMainWindow):
         self.screenWidth = int(config["main"]["screenWidth"])
         self.screenHeight = int(config["main"]["screenHeight"])
         self.screenColor = config["main"]["screenColor"]
+        self.nodeID = config["main"].get('nodeID', 1)
 
         self.setObjectName("EFIS")
         self.resize(self.screenWidth, self.screenHeight)
@@ -126,6 +129,17 @@ class Main(QMainWindow):
         return screens[self.running_screen].name
 
     def doExit(self, s=""):
+        # Ensure external processes are terminated before exiting
+        # For example waydroid/weston if they are in use
+        for s in screens:
+            s.object.close()
+        # Close down fix connections
+        # This needs done before the main event loop is stopped below
+        fix.stop()
+        # Allow external processes to exit
+        time.sleep(5)
+        # This termiates the main event loop and can prevent
+        # close events from finishing if called too soon
         QCoreApplication.quit()
 
     # We send signals for these events so everybody can play.
