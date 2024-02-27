@@ -1,15 +1,18 @@
 name: pyefis
-version: "0.1"
-summary: makerplane EFIS
+version: "0.5"
+summary: Makerplane EFIS
 description: |
     EFIS display
 base: core22
 
 # The embedded android does not work with strict confinment 
 # Without android it is possible to use strict confinement
-confinement: classic
+confinement: strict
 compression: lzo 
-
+architectures:
+  - build-on: arm64
+  - build-on: armhf
+  - build-on: amd64
 parts:
   pyefis:
     plugin: python
@@ -19,7 +22,7 @@ parts:
       sed -i 's/"PyQt5==5.15.9",//' setup.py
       sed -i 's/pyavtools==0.1.0/pyavtools @ git+https:\/\/github.com\/makerplane\/pyAvTools\/@b00273a9016e9a4b975f8efe51d63405103d58fb#egg=pyavtools/' setup.py 
       snapcraftctl build
-      $SNAPCRAFT_PROJECT_DIR/snap/local/patch-ctypes.sh
+#      $SNAPCRAFT_PROJECT_DIR/snap/local/patch-ctypes.sh
     stage-packages:
       - libqt5core5a
       - libqt5qml5
@@ -41,11 +44,11 @@ parts:
       - python3-pkg-resources
       - python3-pyqt5
       - libgl1
-    build-attributes:
-      - enable-patchelf
+#    build-attributes:
+#      - enable-patchelf
     build-environment:
       - PARTS_PYTHON_INTERPRETER: python3.10
-      - PIP_VERBOSE: 3
+#      - PIP_VERBOSE: 3
       - PIP_IGNORE_INSTALLED: ''
       - PARTS_PYTHON_VENV_ARGS: --system-site-packages
 apps:
@@ -58,7 +61,7 @@ apps:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       # This is needed for embedded android:
-      QT_QPA_PLATFORM: xcb
+#      QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins/ 
 # Needed for strict mode:
 #      LD_LIBRARY_PATH: "" 
@@ -70,4 +73,5 @@ apps:
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+#      LD_LIBRARY_PATH: ""
 
