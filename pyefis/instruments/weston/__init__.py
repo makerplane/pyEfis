@@ -16,7 +16,6 @@ class Weston(QGraphicsView):
 
         self.weston = QProcess(self)
         westenv = QProcessEnvironment.systemEnvironment()
-        env = QProcessEnvironment.systemEnvironment()
             
         self.weston.setProcessEnvironment(westenv)
         self.weston.start('weston', [f"-c{ini}",'-Bx11-backend.so',f"-S{socket}"])
@@ -30,10 +29,6 @@ class Weston(QGraphicsView):
                 wid = QWidget.createWindowContainer(win, self, Qt.FramelessWindowHint)
                 self.layout().addWidget(wid)
                 break
-        self.waydroid = QProcess(self)
-        env.insert("WAYLAND_DISPLAY",socket)
-        self.waydroid.setProcessEnvironment(env)
-        #self.waydroid.start(command,args)
 
     def closeEvent(self, event):
         self.waydroid.terminate()

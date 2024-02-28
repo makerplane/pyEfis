@@ -1,0 +1,34 @@
+# Place this in $HOME/.config/systemd/user/
+#
+# Edit the paths on the ExecStart line below to match your environment
+#
+#
+# Enable it:
+#    systemctl --user enable waydroid-monitor.service
+# Start it:
+#    systemctl --user start waydroid-monitor.service
+#
+# Disable it:
+#    systemctl --user disable waydroid-monitor.service
+# Stop it:
+#    systemctl --user stop waydroid-monitor.service
+#
+#
+# If it crashes or exits systemd will restart it
+# systemd will start it when you log in too
+# Simple way to ensure it always stays running
+# Not tested but should work with automatic login too
+#
+[Unit]
+Description=waydroid-monitor.service
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=exec
+Restart=always
+RestartSec=1s
+ExecStart=%h/makerplane/scripts/waydroid_monitor.sh
+
+[Install]
+WantedBy=graphical-session.target
