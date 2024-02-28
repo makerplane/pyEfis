@@ -15,11 +15,13 @@ class Weston(QGraphicsView):
         self.setLayout(layout)
 
         self.weston = QProcess(self)
+        del os.environ['LIBGL_DRIVERS_PATH']
         westenv = QProcessEnvironment.systemEnvironment()
         env = QProcessEnvironment.systemEnvironment()
         if os.getenv('SNAP_INSTANCE_NAME') == 'pyefis':
-            westenv.insert("LD_LIBRARY_PATH","")
-            env.insert("LD_LIBRARY_PATH","")
+            #westenv.insert("LD_LIBRARY_PATH","")
+            #env.insert("LD_LIBRARY_PATH","")
+            
             self.weston.setProcessEnvironment(westenv)
         self.weston.start('weston', [f"-c{ini}",'-Bx11-backend.so',f"-S{socket}"])
         time.sleep(1)
@@ -35,7 +37,7 @@ class Weston(QGraphicsView):
         self.waydroid = QProcess(self)
         env.insert("WAYLAND_DISPLAY",socket)
         self.waydroid.setProcessEnvironment(env)
-        self.waydroid.start(command,args)
+        #self.waydroid.start(command,args)
 
     def closeEvent(self, event):
         self.waydroid.terminate()

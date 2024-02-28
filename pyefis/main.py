@@ -28,6 +28,8 @@ import yaml
 import importlib
 from os import environ
 
+os.environ['QT_QPA_PLATFORM'] = 'xcb'
+
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')
     if os.path.isdir(neighbor_tools):
