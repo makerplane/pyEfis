@@ -31,8 +31,6 @@ class Weston(QGraphicsView):
                 break
 
     def closeEvent(self, event):
-        self.waydroid.terminate()
-        self.waydroid.waitForFinished(4000)
         self.weston.terminate()
         self.weston.waitForFinished(4000)
 

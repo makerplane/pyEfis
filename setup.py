@@ -38,14 +38,14 @@ setup(
     python_requires=">=3.7, <4",
     install_requires=[
         "geomag==0.9.2015",
-        "PyYAML==6.0",
+        "PyYAML==6.0.1",
         "pyavtools==0.1.0",
         "PyQt5==5.15.9",
         "pycond==20230212",
         "geopy==2.4.1"
     ],
     extras_require={
-        "build": ["build==0.10.0"],
+        "build": ["build==1.0.3"],
     },
     include_package_data= True,
     entry_points={
