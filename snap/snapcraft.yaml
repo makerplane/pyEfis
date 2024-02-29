@@ -1,6 +1,6 @@
 name: pyefis
-version: "0.6"
-grade: devel
+version: "0.7"
+grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
 description: |
@@ -14,24 +14,28 @@ base: core22
 confinement: strict
 compression: lzo 
 architectures:
-  - build-on: arm64
-  - build-on: armhf
-  - build-on: amd64
+  - arm64
+  - armhf
+  - amd64
 layout:
   /usr/share/X11:
     bind: $SNAP/usr/share/X11
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libweston-9:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libweston-9
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/weston:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/weston
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/weston-desktop-shell:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/weston-desktop-shell
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/weston-keyboard:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/weston-keyboard
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-9:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-9
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston-desktop-shell:
+    symlink: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston-desktop-shell
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston-keyboard:
+    symlink: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston-keyboard
   /usr/share/weston:
     bind: $SNAP/usr/share/weston
 
 parts:
+  extras:
+    source: ./extras
+    plugin: dump
+
   pyefis:
     plugin: python
     source: .
@@ -92,7 +96,7 @@ apps:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
-      QT_PLUGIN_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins/ 
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/ 
 
   makecifpindex:
     command: bin/makecifpindex

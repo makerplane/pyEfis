@@ -1,6 +1,11 @@
 #!/bin/bash
 
 pid=0
+
+# Stop waydroid on exit if running
+trap "exit" INT TERM
+trap "kill 0" EXIT
+
 while :
 do
   if [ -S ${XDG_RUNTIME_DIR}/snap.pyefis/pyefis-waydroid-1 ]; then

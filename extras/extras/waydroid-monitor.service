@@ -28,7 +28,7 @@ After=graphical-session.target
 Type=exec
 Restart=always
 RestartSec=1s
-ExecStart=%h/makerplane/scripts/waydroid_monitor.sh
+ExecStart=/snap/pyefis/current/extras/waydroid_monitor.sh
 
 [Install]
 WantedBy=graphical-session.target
