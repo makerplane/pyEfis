@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.7"
+version: "0.7.1"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -14,9 +14,10 @@ base: core22
 confinement: strict
 compression: lzo 
 architectures:
-  - arm64
-  - armhf
-  - amd64
+  - build-on: arm64
+  - build-on: armhf
+  - build-on: amd64
+
 layout:
   /usr/share/X11:
     bind: $SNAP/usr/share/X11
