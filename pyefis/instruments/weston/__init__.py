@@ -18,7 +18,7 @@ class Weston(QGraphicsView):
         westenv = QProcessEnvironment.systemEnvironment()
             
         self.weston.setProcessEnvironment(westenv)
-        self.weston.start('weston', [f"-c{ini}",'-Bx11-backend.so',f"-S{socket}"])
+        self.weston.start('weston', [f"-c{ini}",'-i0','-Bx11-backend.so',f"-S{socket}"])
         time.sleep(1)
         p = subprocess.run(['xprop', '-root'], stdout=subprocess.PIPE)
         for line in p.stdout.decode().splitlines():
