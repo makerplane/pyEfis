@@ -84,6 +84,8 @@ parts:
       - python3-pyqt5
       - x11-utils
       - weston
+      - fonts-ubuntu
+      - fonts-dseg
 
     build-environment:
       - PARTS_PYTHON_INTERPRETER: python3.10
