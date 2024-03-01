@@ -80,7 +80,7 @@ def create_config_dir(basedir):
             if pr.resource_isdir(package, filename):
                 copy_dir(filename)
             else:
-                if not os.path.exists(filename):
+                if not os.path.exists(basedir + "/" + filename):
                     # Only copy the file if it is missing
                     s = pr.resource_string(package, filename)
                     with open(basedir + "/" + filename, "wb") as f:
