@@ -86,6 +86,7 @@ parts:
       - weston
       - fonts-ubuntu
       - fonts-dseg
+      - libglu1-mesa
 
     build-environment:
       - PARTS_PYTHON_INTERPRETER: python3.10

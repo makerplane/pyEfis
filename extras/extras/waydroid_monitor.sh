@@ -13,7 +13,7 @@ do
       echo "starting waydroid"
       # Wait a couple seconds to ensure weston is ready
       sleep 2
-      WAYLAND_DISPLAY=pyefis-waydroid-1 
+      export WAYLAND_DISPLAY=pyefis-waydroid-1
       XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}/snap.pyefis waydroid show-full-ui &
       pid=$!
     fi
