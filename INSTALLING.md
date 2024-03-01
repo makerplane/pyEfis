@@ -163,15 +163,15 @@ fixgateway configs: ~/makerplane/fixgw/config
 flight data recorder logs: ~/makerplane/pyefis/fdr
 
 Commands:
-stop fixgateway: `systemctl --user stop fixgateway.service` 
-start fixgateway: `systemctl --user start fixgateway.service`
-stop pyefis: `systemctl --user stop pyefis.service`
-start pyefis: `systemctl --user start pyefis.service`
-While stopped you can run them manually to see real time debug output:
-pyefis: `pyefis --config-file=$HOME/makerplane/pyefis/config/main.yaml --debug`
-fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
-fixgateway client: `fixgatewa.client`
-CIFP index builder: `pyefis.makecifpindex`
+* stop fixgateway: `systemctl --user stop fixgateway.service` 
+* start fixgateway: `systemctl --user start fixgateway.service`
+* stop pyefis: `systemctl --user stop pyefis.service`
+* start pyefis: `systemctl --user start pyefis.service`
+* While stopped you can run them manually to see real time debug output:
+* pyefis: `pyefis --config-file=$HOME/makerplane/pyefis/config/main.yaml --debug`
+* fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
+* fixgateway client: `fixgatewa.client`
+* CIFP index builder: `pyefis.makecifpindex`
 
 
 ### Setup Android
