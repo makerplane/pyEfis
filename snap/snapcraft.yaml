@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.7.2"
+version: "0.7.3"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -84,6 +84,8 @@ parts:
       - python3-pyqt5
       - x11-utils
       - weston
+      - fonts-ubuntu
+      - fonts-dseg
 
     build-environment:
       - PARTS_PYTHON_INTERPRETER: python3.10
