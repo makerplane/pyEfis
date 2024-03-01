@@ -173,6 +173,14 @@ Commands:
 * fixgateway client: `fixgatewa.client`
 * CIFP index builder: `pyefis.makecifpindex`
 
+Installing pyefis and fixgateway updates:
+```
+systemctl --user stop fixgateway.service
+systemctl --user stop pyefis.service
+snap refresh
+systemctl --user start fixgateway.service
+systemctl --user start pyefis.service
+```
 
 ### Setup Android
 If you want to use the Android feature you can find directions to setup Android [Here](ANDROID.md)
