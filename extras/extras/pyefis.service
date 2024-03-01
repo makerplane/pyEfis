@@ -28,7 +28,7 @@ After=graphical-session.target
 Type=exec
 Restart=always
 RestartSec=1s
-ExecStart=/path/to/your/bin/python /path/to/your/pyEfis.py
+ExecStart=/snap/bin/pyefis --config-file=%h/makerplane/pyefis/config/main.yaml
 
 [Install]
 WantedBy=graphical-session.target

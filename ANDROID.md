@@ -10,8 +10,9 @@ sudo apt dist-upgrade -y
 ```
 
 ### Install required software
+This is likely already installed:
 ```
-sudo apt install -y git weston raspi-config 
+sudo apt install -y weston raspi-config 
 ```
 
 ### Change some settings
@@ -106,7 +107,9 @@ Reboot before proceeding
 
 ### Install required services
 After you have installed the pyefis snap you need to copy a file and run a few commands
+How to install pyefis can be found [Here](INSTALLING.md)
 
+ 
 #### Copy the systemd unit file to start android
 You might need to first create a directory:
 ```
