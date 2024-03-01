@@ -77,9 +77,9 @@ snap interface serial-port --attrs
 ```
 
 In the output you are looking for the name of your serial port.
-Now run command using that name replacing serial_name_here:
+Now run command using that name replacing serial-name-here:
 ```
-sudo snap connect fixgateway:serial-port snapd:serial_name_here
+sudo snap connect fixgateway:serial-port snapd:serial-name-here
 ```
 
 ### Setup auto start
@@ -127,6 +127,33 @@ Start pyefis:
 systemctl --user start pyefis.service
 ```
 
+### Get data needed for Virtual VFR
+The virtual VFR feature uses FAA data to display runways and glide slop indicators in the atitude indicator.
+
+#### Create directory for the CIFP data
+```
+mkdir ~/makerplane/pyefis/CIFP/
+cd ~/makerplane/pyefis/CIFP/
+```
+
+#### Download the CIFP Data
+Visit https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/ and copy the link to the latest data.
+
+Download the latest data using the link you copied and unzip it
+```
+wget https://aeronav.faa.gov/Upload_313-d/cifp/CIFP_231228.zip
+unzip CIFP_231228.zip
+```
+
+Create the index:
+```
+pyefis.makecifpindex FAACIFP18
+```
+
+When updating in the future just delete the CIFP directory and start over at the beginning of this section
+
+
+### Important information:
 NOTE: Upon starting a folder named makerplane will be created in your home folder and default configs copied into that folder.<br>
 It will not overwrite any file that currently exists so your customizations are safe. If you would like to get updated default configs you could delete the old configs and then start pyefis and fixgateway.<br>
 
@@ -134,6 +161,17 @@ Directories you need to know:
 pyefis configs: ~/makerplane/pyefis/config
 fixgateway configs: ~/makerplane/fixgw/config
 flight data recorder logs: ~/makerplane/pyefis/fdr
+
+Commands:
+stop fixgateway: `systemctl --user stop fixgateway.service` 
+start fixgateway: `systemctl --user start fixgateway.service`
+stop pyefis: `systemctl --user stop pyefis.service`
+start pyefis: `systemctl --user start pyefis.service`
+While stopped you can run them manually to see real time debug output:
+pyefis: `pyefis --config-file=$HOME/makerplane/pyefis/config/main.yaml --debug`
+fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
+fixgateway client: `fixgatewa.client`
+CIFP index builder: `pyefis.makecifpindex`
 
 
 ### Setup Android

@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.7.3"
+version: "0.7.4"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -8,7 +8,7 @@ description: |
 
   It uses the FiX Gateway plug-in to communicate to and from the CAN-FiX protocol to sensors and other instruments. pyEFIS can be installed on low-cost single board computers such as the Raspberry Pi or Beaglebone with many screen size options to fit different aircraft panel requirements. Resolution of the display is also a configuration option and is not a limitation within the software.
 
-  pyefis also requires a running FIS-Gateway: https://snapcraft.io/fixgateway
+  Installation guide: https://github.com/makerplane/pyEfis/blob/master/INSTALL.md
 
   Release Notes:
   This is a beta release and has not seen much testing, if you find any bugs please report them here: https://github.com/makerplane/pyEfis/issues
