@@ -64,6 +64,11 @@ Enable hotplug option in snapd:
 sudo snap set system experimental.hotplug=true
 ```
 
+Enable user-daemon mode: 
+```
+sudo snap set system experimental.user-daemons=true
+```
+
 Restart snapd to apply the hotplug change:
 ```
 sudo systemctl restart snapd.service

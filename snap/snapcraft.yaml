@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.7.6"
+version: "0.8.0"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -9,6 +9,9 @@ description: |
   It uses the FiX Gateway plug-in to communicate to and from the CAN-FiX protocol to sensors and other instruments. pyEFIS can be installed on low-cost single board computers such as the Raspberry Pi or Beaglebone with many screen size options to fit different aircraft panel requirements. Resolution of the display is also a configuration option and is not a limitation within the software.
 
   Installation guide: https://github.com/makerplane/pyEfis/blob/master/INSTALL.md
+
+  This snap requires enabling experimental.user-daemons features:
+  sudo snap set system experimental.user-daemons=true
 
   Release Notes:
   This is a beta release and has not seen much testing, if you find any bugs please report them here: https://github.com/makerplane/pyEfis/issues
@@ -109,10 +112,11 @@ parts:
 
 
 apps:
-  pyefis:
+  daemon:
     extensions: [gnome]
     command: bin/pyefis
     daemon: simple
+    daemon-scope: user 
     # Woud be nice to also support options: https://snapcraft.io/docs/adding-snap-configuration
     restart-condition: always
     plugs: 
@@ -132,6 +136,27 @@ apps:
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/ 
+
+  server:
+    extensions: [gnome]
+    command: bin/pyefis
+    plugs:
+      - home
+      - network
+      - desktop-legacy
+      - desktop
+      - wayland
+      - x11
+      - opengl
+      - pulseaudio
+      - audio-playback
+      - audio-record
+
+    environment:
+      PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      QT_QPA_PLATFORM: xcb
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/
 
   makecifpindex:
     command: bin/makecifpindex
