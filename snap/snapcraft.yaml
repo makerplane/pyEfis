@@ -92,6 +92,7 @@ parts:
       - fonts-ubuntu
       - fonts-dseg
       - libglu1-mesa
+      - libegl-mesa0
 
     build-environment:
       - PARTS_PYTHON_INTERPRETER: python3.10
@@ -121,6 +122,7 @@ apps:
     daemon-scope: user 
     # Woud be nice to also support options: https://snapcraft.io/docs/adding-snap-configuration
     restart-condition: always
+#    install-mode: disable
     plugs: 
       - home 
       - network 
