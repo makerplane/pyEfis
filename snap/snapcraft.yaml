@@ -113,6 +113,7 @@ apps:
     extensions: [gnome]
     command: bin/pyefis
     daemon: simple
+    daemon-scope: user 
     # Woud be nice to also support options: https://snapcraft.io/docs/adding-snap-configuration
     restart-condition: always
     plugs: 
