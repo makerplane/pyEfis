@@ -112,7 +112,18 @@ apps:
   pyefis:
     extensions: [gnome]
     command: bin/pyefis
-    plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
+    plugs: 
+      - home 
+      - network 
+      - desktop-legacy
+      - desktop
+      - wayland
+      - x11
+      - opengl
+      - pulseaudio
+      - audio-playback
+      - audio-record
+
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
