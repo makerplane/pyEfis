@@ -10,6 +10,9 @@ description: |
 
   Installation guide: https://github.com/makerplane/pyEfis/blob/master/INSTALL.md
 
+  This snap requires enabling experimental.user-daemons features:
+  sudo snap set system experimental.user-daemons=true
+
   Release Notes:
   This is a beta release and has not seen much testing, if you find any bugs please report them here: https://github.com/makerplane/pyEfis/issues
   This release includes many new features including:
