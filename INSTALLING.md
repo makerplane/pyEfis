@@ -47,7 +47,7 @@ Snaps run in an isolated container and do not have un-restricted access to your 
 #### CAN bus
 If you are using CAN, allow fixgateway access to CAN:
 ```
-snap connect fixgateway:can-bus snapd
+sudo snap connect fixgateway:can-bus snapd
 ```
 
 #### Serial ports
