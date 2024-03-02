@@ -1,6 +1,6 @@
 name: pyefis
-version: "0.8.0"
-grade: stable
+version: "0.8.9"
+grade: devel
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
 description: |
@@ -29,8 +29,8 @@ donation: https://www.paypal.com/donate/?hosted_button_id=VGHHNUG3LRPYL
 source-code: https://github.com/makerplane/pyEfis
 website: https://makerplane.org/
 
-base: core22
-
+base: core24
+build-base: devel
 confinement: strict
 compression: lzo 
 architectures:
@@ -39,10 +39,12 @@ architectures:
   - build-on: amd64
 
 layout:
-  /usr/share/X11:
-    bind: $SNAP/usr/share/X11
+  /usr/share/X11/xkb:
+    bind: $SNAP/usr/share/X11/xkb
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-9:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-9
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-13:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-13
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston-desktop-shell:
@@ -51,7 +53,20 @@ layout:
     symlink: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston-keyboard
   /usr/share/weston:
     bind: $SNAP/usr/share/weston
-
+  /usr/libexec:
+    bind: $SNAP/usr/libexec
+  /usr/share/libdrm:
+    bind: $SNAP/graphics/libdrm
+  /usr/share/drirc.d:
+    symlink: $SNAP/graphics/drirc.d
+  /usr/share/X11/XErrorDB:
+    symlink: $SNAP/graphics/X11/XErrorDB
+  /usr/share/X11/locale:
+    symlink: $SNAP/graphics/X11/locale
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
+  /usr/share/fonts:
+    bind: $SNAP/usr/share/fonts
 parts:
   extras:
     source: ./extras
@@ -74,9 +89,9 @@ parts:
       - libqt5waylandclient5
       - libqt5waylandcompositor5
       - libqt5x11extras5
-      - python3.10-minimal
-      - libpython3.10-minimal
-      - libpython3.10-stdlib
+      - python3.12-minimal
+      - libpython3.12-minimal
+      - libpython3.12-stdlib
       - python3-pip
       - python3-setuptools
       - python3-wheel
@@ -90,35 +105,44 @@ parts:
       - fonts-ubuntu
       - fonts-dseg
       - libglu1-mesa
-
+      - libegl-mesa0
+      - libegl1
+      - libdrm2
+      - libva-drm2
+      - x11-xkb-utils
+      - xkb-data
     build-environment:
-      - PARTS_PYTHON_INTERPRETER: python3.10
+      - PARTS_PYTHON_INTERPRETER: python3.12
 #      - PIP_VERBOSE: 3
       - PIP_IGNORE_INSTALLED: ''
       - PARTS_PYTHON_VENV_ARGS: --system-site-packages
 
-  # Find files provided by the base and platform snap and ensure they aren't
-  # duplicated in this snap
-  # gtk-common-themes and gnome-42-2204 are from the gnome extension
-  cleanup:
+  graphics-core24:
     after: [pyefis]
-    plugin: nil
-    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
+    source: https://github.com/MirServer/graphics-core.git
+    plugin: dump
     override-prime: |
-      set -eux
-      for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
-        cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
-      done
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/graphics-core24-cleanup mesa-core24 nvidia-core24
+    prime:
+    - bin/graphics-core24-wrapper
 
+plugs:
+  graphics-core24:
+    interface: content
+    target: $SNAP/graphics
+      #    default-provider: mesa-core24
 
 apps:
   daemon:
-    extensions: [gnome]
+    command-chain:
+      - bin/graphics-core24-wrapper
     command: bin/pyefis
     daemon: simple
     daemon-scope: user 
     # Woud be nice to also support options: https://snapcraft.io/docs/adding-snap-configuration
     restart-condition: always
+#    install-mode: disable
     plugs: 
       - home 
       - network 
@@ -127,18 +151,18 @@ apps:
       - wayland
       - x11
       - opengl
-      - pulseaudio
       - audio-playback
       - audio-record
 
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/ 
 
   server:
-    extensions: [gnome]
+    command-chain:
+      - bin/graphics-core24-wrapper
     command: bin/pyefis
     plugs:
       - home
@@ -148,13 +172,12 @@ apps:
       - wayland
       - x11
       - opengl
-      - pulseaudio
       - audio-playback
       - audio-record
 
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/
 
@@ -163,5 +186,5 @@ apps:
     plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
 

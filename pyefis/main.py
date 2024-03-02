@@ -135,6 +135,11 @@ def main():
     config_path = os.path.dirname(cf.name)
     config = yaml.safe_load(cf)
 
+    # If running under systemd
+    if environ.get('INVOCATION_ID', False):
+        # and autostart is not true, exit
+        if not config.get('auto start', False): os._exit(0)
+
 
 #    # if we passed in a configuration file on the command line...
 #    if args.config_file:
