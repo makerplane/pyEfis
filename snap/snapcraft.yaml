@@ -112,7 +112,7 @@ parts:
 
 
 apps:
-  pyefis:
+  daemon:
     extensions: [gnome]
     command: bin/pyefis
     daemon: simple
@@ -136,6 +136,27 @@ apps:
       PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/ 
+
+  server:
+    extensions: [gnome]
+    command: bin/pyefis
+    plugs:
+      - home
+      - network
+      - desktop-legacy
+      - desktop
+      - wayland
+      - x11
+      - opengl
+      - pulseaudio
+      - audio-playback
+      - audio-record
+
+    environment:
+      PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      QT_QPA_PLATFORM: xcb
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/
 
   makecifpindex:
     command: bin/makecifpindex
