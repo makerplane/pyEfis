@@ -31,4 +31,4 @@ RestartSec=1s
 ExecStart=/snap/pyefis/current/extras/waydroid_monitor.sh
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=default.target

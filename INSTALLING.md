@@ -94,7 +94,7 @@ mkdir -p ~/.config/systemd/user/
 
 Copy the fixgateway systemd unit file:
 ```
-cp /snap/fixgateway/current/extras/fixgateway.service ~/.config/systemd/user/
+ln -s /snap/fixgateway/current/extras/fixgateway.service ~/.config/systemd/user/fixgateway.service
 ```
 
 If you want to change the config file used edit the file you just copied and make that change.<br>
@@ -112,7 +112,7 @@ systemctl --user start fixgateway.service
 #### Auto start pyefis
 Copy the pyefis systemd unit file:
 ```
-cp /snap/pyefis/current/extras/pyefis.service ~/.config/systemd/user/
+ln -s /snap/pyefis/current/extras/pyefis.service ~/.config/systemd/user/pyefis.service 
 ```
 
 If you want to change the config file used edit the file you just copied and make that change.<br>

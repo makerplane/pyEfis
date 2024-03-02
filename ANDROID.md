@@ -118,7 +118,7 @@ mkdir -p ~/.config/systemd/user/
 
 Then copy the file:
 ```
-cp /snap/pyefis/current/extras/waydroid-monitor.service ~/.config/systemd/user/
+ln -s /snap/pyefis/current/extras/waydroid-monitor.service ~/.config/systemd/user/waydroid-monitor.service
 ```
 
 #### Enable and start the monitor
