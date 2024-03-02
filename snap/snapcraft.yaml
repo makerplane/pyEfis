@@ -110,11 +110,36 @@ parts:
         cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
       done
 
-
+  desktop-glib-only:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: glib-only
+  qt5:
+    source: .
+    source-subdir: qt
+    plugin: make
+    make-parameters: ["FLAVOR=qt5"]
+    build-packages:
+      - qtbase5-dev
+      - dpkg-dev
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5 # for loading icon themes which are svg
+      - try: [appmenu-qt5] # not available on core18
+      - locales-all
 apps:
   daemon:
     extensions: [gnome]
-    command: bin/pyefis
+    after:
+      - desktop-glib-only
+    command: desktop-launch bin/pyefis
     daemon: simple
     daemon-scope: user 
     # Woud be nice to also support options: https://snapcraft.io/docs/adding-snap-configuration
@@ -127,7 +152,6 @@ apps:
       - wayland
       - x11
       - opengl
-      - pulseaudio
       - audio-playback
       - audio-record
 
@@ -139,7 +163,9 @@ apps:
 
   server:
     extensions: [gnome]
-    command: bin/pyefis
+    after:
+      - desktop-glib-only
+    command: desktop-launch bin/pyefis
     plugs:
       - home
       - network
@@ -148,7 +174,6 @@ apps:
       - wayland
       - x11
       - opengl
-      - pulseaudio
       - audio-playback
       - audio-record
 
