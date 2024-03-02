@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.7.5"
+version: "0.7.6"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -112,6 +112,9 @@ apps:
   pyefis:
     extensions: [gnome]
     command: bin/pyefis
+    daemon: simple
+    # Woud be nice to also support options: https://snapcraft.io/docs/adding-snap-configuration
+    restart-condition: always
     plugs: 
       - home 
       - network 

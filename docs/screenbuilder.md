@@ -344,7 +344,7 @@ This will include the file config/includes/side-buttons.yaml:
 ```
 If You wanted to use those same buttons on every screen just include them in every screen.
 
-Include files are made just like the main.yaml file except the top level is `instruments:`
+Include files are made just like the default.yaml file except the top level is `instruments:`
 ```
 instruments:
   - type: button
@@ -356,7 +356,7 @@ instruments:
     options:
       config: config/buttons/screen-ems-pfd.yaml
 ```
-All of the instruments are defined the same as in the main.yaml
+All of the instruments are defined the same as in the default.yaml
 Currently you cannot use includes inside of includes.
 
 ##### Include relative #####

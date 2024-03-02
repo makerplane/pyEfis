@@ -168,7 +168,7 @@ Commands:
 * stop pyefis: `systemctl --user stop pyefis.service`
 * start pyefis: `systemctl --user start pyefis.service`
 * While stopped you can run them manually to see real time debug output:
-* pyefis: `pyefis --config-file=$HOME/makerplane/pyefis/config/main.yaml --debug`
+* pyefis: `pyefis --config-file=$HOME/makerplane/pyefis/config/default.yaml --debug`
 * fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
 * fixgateway client: `fixgatewa.client`
 * CIFP index builder: `pyefis.makecifpindex`
