@@ -51,7 +51,7 @@ import pyefis.hmi as hmi
 import pyefis.gui as gui
 
 
-config_filename = "main.yaml"
+config_filename = "default.yaml"
 user_home = environ.get('SNAP_REAL_HOME', os.path.expanduser("~"))
 prefix_path = sys.prefix
 path_options = ['{USER}/makerplane/pyefis/config',
@@ -117,7 +117,7 @@ def main():
 
     config_file = "{}/{}".format(config_path, config_filename)
 
-    #config_file = args.config_file if args.config_file else os.path.join(os.path.dirname(__file__), 'config/main.yaml')
+    #config_file = args.config_file if args.config_file else os.path.join(os.path.dirname(__file__), 'config/default.yaml')
 
     # if we passed in a configuration file on the command line...
     if args.config_file:
