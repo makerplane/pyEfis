@@ -87,50 +87,56 @@ Now run command using that name replacing serial-name-here:
 sudo snap connect fixgateway:serial-port snapd:serial-name-here
 ```
 
-### Setup auto start
-This will setup automatic start for pyefis and fixgateway.
+### Managing auto start
+By default fixgateway and pyefis will auto start on reboot.<br>
+To disable this edit the config files and change `auto start` to `false`
 
-#### Auto start fixgateway
-
-You may need to first create the systemd/user directory:
+pyefis config:
 ```
-mkdir -p ~/.config/systemd/user/
-```
-
-Copy the fixgateway systemd unit file:
-```
-ln -s /snap/fixgateway/current/extras/fixgateway.service ~/.config/systemd/user/fixgateway.service
+~/makerplane/pyefis/config/default.yaml
 ```
 
-If you want to change the config file used edit the file you just copied and make that change.<br>
-
-Enable automatic start of fixgateway
+fixgateway config:
 ```
-systemctl --user enable fixgateway.service
+~/makerplane/fixgw/config/default.yaml
 ```
 
-Start Fix Gateway:
+Below are commands to start/stop pyefis and fixgateway
+#### Stop pyefis
 ```
-systemctl --user start fixgateway.service
-```
-
-#### Auto start pyefis
-Copy the pyefis systemd unit file:
-```
-ln -s /snap/pyefis/current/extras/pyefis.service ~/.config/systemd/user/pyefis.service 
+sudo snap stop pyefis.daemon
 ```
 
-If you want to change the config file used edit the file you just copied and make that change.<br>
-
-Enable automatic start of pyefis
+#### Start pyefis:
 ```
-systemctl --user enable pyefis.service
+sudo snap start pyefis.daemon
 ```
 
-Start pyefis:
+#### Stop fixgateway.daemon
 ```
-systemctl --user start pyefis.service
+sudo snap stop fixgateway.daemon
 ```
+
+#### Start fixgateway.daemon:
+```
+sudo snap start fixgateway.daemon
+```
+
+### Customizing or using different configuration file
+Currently it is not possible to change the configuration filename with the auto start feature.<br>
+You can edit the default, your changes will not be overwritten when the system is updated.<br>
+In my case I have a `left.yaml` and `right.yaml` file for the left and right screens. I simply created a `default.yaml` symlink to the correct file on each side.
+
+On the left side I did:
+```
+cd ~/makerplane/pyefis/config
+rm default.yaml
+ln -s left.yaml default.yaml
+```
+
+Now when it auto starts it uses the `left.yaml` config
+
+
 
 ### Get data needed for Virtual VFR
 The virtual VFR feature uses FAA data to display runways and glide slop indicators in the atitude indicator.
@@ -168,23 +174,19 @@ fixgateway configs: ~/makerplane/fixgw/config
 flight data recorder logs: ~/makerplane/pyefis/fdr
 
 Commands:
-* stop fixgateway: `systemctl --user stop fixgateway.service` 
-* start fixgateway: `systemctl --user start fixgateway.service`
-* stop pyefis: `systemctl --user stop pyefis.service`
-* start pyefis: `systemctl --user start pyefis.service`
+* stop fixgateway: `sudo snap stop fixgateway.daemon` 
+* start fixgateway: `sudo snap start fixgateway.daemon`
+* stop pyefis: `sudo snap stop pyefis.daemon`
+* start pyefis: `sudo snap start pyefis.daemon`
 * While stopped you can run them manually to see real time debug output:
-* pyefis: `pyefis --config-file=$HOME/makerplane/pyefis/config/default.yaml --debug`
+* pyefis: `pyefis.server --config-file=$HOME/makerplane/pyefis/config/default.yaml --debug`
 * fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
-* fixgateway client: `fixgatewa.client`
+* fixgateway client: `fixgateway.client`
 * CIFP index builder: `pyefis.makecifpindex`
 
 Installing pyefis and fixgateway updates:
 ```
-systemctl --user stop fixgateway.service
-systemctl --user stop pyefis.service
 snap refresh
-systemctl --user start fixgateway.service
-systemctl --user start pyefis.service
 ```
 
 ### Setup Android

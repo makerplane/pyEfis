@@ -1,3 +1,5 @@
+auto start: True
+
 main:
   # IP information for network adapter
   FixServer: 127.0.0.1
