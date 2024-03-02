@@ -41,6 +41,8 @@ architectures:
 layout:
   /usr/share/X11/xkb:
     bind: $SNAP/usr/share/X11/xkb
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-9:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-9
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-13:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libweston-13
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/weston:
