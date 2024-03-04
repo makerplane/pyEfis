@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.8.9"
+version: "0.9.0"
 grade: devel
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -22,14 +22,16 @@ description: |
   * Technology Preview - run Android inside pyEFIS for access to your favorite aviation apps
 
   You can find the instructions to install Android here: https://github.com/makerplane/pyEfis/blob/master/ANDROID.md
-  Known limitations: No pinch zoom 
+  Known Issues for Android: 
+  * No pinch zoom 
+  * No graphics acceleration on the PI5, will resolve once core24 becomes stable
 
 issues: https://github.com/makerplane/pyEfis/issues
 donation: https://www.paypal.com/donate/?hosted_button_id=VGHHNUG3LRPYL
 source-code: https://github.com/makerplane/pyEfis
 website: https://makerplane.org/
 
-base: core24
+base: core22
 build-base: devel
 confinement: strict
 compression: lzo 
@@ -89,9 +91,9 @@ parts:
       - libqt5waylandclient5
       - libqt5waylandcompositor5
       - libqt5x11extras5
-      - python3.12-minimal
-      - libpython3.12-minimal
-      - libpython3.12-stdlib
+      - python3.10-minimal
+      - libpython3.10-minimal
+      - libpython3.10-stdlib
       - python3-pip
       - python3-setuptools
       - python3-wheel
@@ -112,31 +114,31 @@ parts:
       - x11-xkb-utils
       - xkb-data
     build-environment:
-      - PARTS_PYTHON_INTERPRETER: python3.12
+      - PARTS_PYTHON_INTERPRETER: python3.10
 #      - PIP_VERBOSE: 3
       - PIP_IGNORE_INSTALLED: ''
       - PARTS_PYTHON_VENV_ARGS: --system-site-packages
 
-  graphics-core24:
+  graphics-core22:
     after: [pyefis]
     source: https://github.com/MirServer/graphics-core.git
     plugin: dump
     override-prime: |
       craftctl default
-      ${CRAFT_PART_SRC}/bin/graphics-core24-cleanup mesa-core24 nvidia-core24
+      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
     prime:
-    - bin/graphics-core24-wrapper
+    - bin/graphics-core22-wrapper
 
 plugs:
-  graphics-core24:
+  graphics-core22:
     interface: content
     target: $SNAP/graphics
-      #    default-provider: mesa-core24
+      #    default-provider: mesa-core22
 
 apps:
   daemon:
     command-chain:
-      - bin/graphics-core24-wrapper
+      - bin/graphics-core22-wrapper
     command: bin/pyefis
     daemon: simple
     daemon-scope: user 
@@ -156,13 +158,13 @@ apps:
 
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/ 
 
   server:
     command-chain:
-      - bin/graphics-core24-wrapper
+      - bin/graphics-core22-wrapper
     command: bin/pyefis
     plugs:
       - home
@@ -177,7 +179,7 @@ apps:
 
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
       QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/
 
@@ -186,5 +188,5 @@ apps:
     plugs: [ home, network, desktop-legacy, desktop, wayland, x11, opengl]
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
 
