@@ -1,16 +1,14 @@
 ## Running Android inside pyEFIS
-The following instructions are specific to the latest 64bit Raspbian bullseye and may not work on other versions or operating systems.
+The following instructions are specific to the latest 64bit Raspbian bullseye and may not work on other versions or operating systems.<br>
+If you have already made customizations please ensure none of these changes will conflict with your existing changes.
 
+### Known limitations
+* Can only use Android on a single screen within pyEFIS
+* No hardware graphics acceleration on Raspberry PI5, this will be resolved once snap core24 becomes stable
 
-### Install the latest updates
-Open a terminal window and run:
-```
-sudo apt update
-sudo apt dist-upgrade -y
-```
 
 ### Install required software
-This is likely already installed:
+Make sure required software is installed:
 ```
 sudo apt install -y weston raspi-config 
 ```
@@ -93,14 +91,15 @@ In another terminal window or tab open up the waydroid shell:
 sudo waydroid shell
 ```
 
-Once the shell is open run this command:
+Run this command inside the waydroid shell:
 ```
 ANDROID_RUNTIME_ROOT=/apex/com.android.runtime ANDROID_DATA=/data ANDROID_TZDATA_ROOT=/apex/com.android.tzdata ANDROID_I18N_ROOT=/apex/com.android.i18n sqlite3 /data/data/com.google.android.gsf/databases/gservices.db "select * from main where name = \"android_id\";"
 ```
 
 Use the string of numbers printed by the command to register the device on your Google Account navigate to [https://www.google.com/android/uncertified](https://www.google.com/android/uncertified) login with you Google Account and enter in the code that was output in the previous command.
 
-After registering the Play store will work once you log into it with your account.
+After registering the Play store will work once you log into it with your account.<br>
+Sometimes it can take Android a long time to stop complaining about uncertified and recognize it should let you log in, so be patient.
 
 #### Reboot
 Reboot before proceeding
@@ -110,13 +109,15 @@ After you have installed the pyefis snap you need to copy a file and run a few c
 How to install pyefis can be found [Here](INSTALLING.md)
 
  
-#### Copy the systemd unit file to start android
+#### Link the systemd unit file to start android
+Since the snap is confined it cannot directly start Android since it runs outside of the snap. We will setup a service that monitors for the conditions required to start/stop Android to work around this limitation.<br>
+
 You might need to first create a directory:
 ```
 mkdir -p ~/.config/systemd/user/
 ```
 
-Then copy the file:
+Then link the systemd unit file:
 ```
 ln -s /snap/pyefis/current/extras/waydroid-monitor.service ~/.config/systemd/user/waydroid-monitor.service
 ```
