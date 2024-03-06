@@ -53,6 +53,7 @@ import pyefis.gui as gui
 
 config_filename = "default.yaml"
 user_home = environ.get('SNAP_REAL_HOME', os.path.expanduser("~"))
+os.environ["HOME"] = user_home
 prefix_path = sys.prefix
 path_options = ['{USER}/makerplane/pyefis/config',
                 '{PREFIX}/local/etc/pyefis',
