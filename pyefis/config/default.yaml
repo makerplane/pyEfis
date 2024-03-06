@@ -570,12 +570,12 @@ logging:
       formatter: standard
       stream: ext://sys.stderr
 
-    file:
-      class: logging.FileHandler
-      formatter: standard
-      filename: fixgw.log
-      mode: w
-      #mode: a
+#    file:
+#      class: logging.FileHandler
+#      formatter: standard
+#      filename: fixgw.log
+#      mode: w
+#      #mode: a
 
     syslog:
       class: logging.handlers.SysLogHandler
