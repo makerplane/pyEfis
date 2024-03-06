@@ -14,6 +14,16 @@ Install snapd
 sudo apt install -y snapd
 ```
 
+Enable hotplug option in snapd:
+```
+sudo snap set system experimental.hotplug=true
+```
+
+Enable user-daemon mode:
+```
+sudo snap set system experimental.user-daemons=true
+```
+
 ### Reboot
 You must reboot before proceeding
 ```
@@ -26,16 +36,16 @@ Install core snap to update snapd
 sudo snap install core
 ```
 
-### Install pyEFIS
-Install the pyefis snap
-```
-sudo snap install pyefis
-```
-
 ### Install FIX-Gateway
 Install the fixgateway snap
 ```
 sudo snap install fixgateway
+```
+
+### Install pyEFIS
+Install the pyefis snap
+```
+sudo snap install pyefis
 ```
 
 ### Requirements for some hardware
@@ -57,21 +67,6 @@ Add yourself to the dialout group:
 ```
 sudo usermod -a -G dialout ${USER}
 newgrp dialout
-```
-
-Enable hotplug option in snapd:
-```
-sudo snap set system experimental.hotplug=true
-```
-
-Enable user-daemon mode: 
-```
-sudo snap set system experimental.user-daemons=true
-```
-
-Restart snapd to apply the hotplug change:
-```
-sudo systemctl restart snapd.service
 ```
 
 These next few steps are specific to your system so you will need to run commands to get some data and then use that data in other commands.
