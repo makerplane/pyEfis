@@ -4,6 +4,9 @@ pyEfis
 Getting Started
 ---------------
 
+We have recently started distributing pyEFIS and FiX Gateway as snaps on snapcraft.io.
+If you are only interested in installing and using pyEFIS follow the installation guide here: https://github.com/makerplane/pyEfis/blob/master/INSTALLING.md
+If you are interested in modifying pyEFIS see below.
 For more detailed documentation see: https://github.com/makerplane/Documentation
 
 It is recommende that you work in a virtual environment. To use the global interpreter, skip the below step.
