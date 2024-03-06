@@ -781,14 +781,23 @@ class PointOfView:
                             rwsearchnum = i
                             #print ("Search match for %s"%str(o))
                         else:
-                            if rwsearch.match(o):
-                                rwdelete = i
-                                rwdeleteblock = block
-                                rwsearch = None
-                                break
-                            else:
-                                #print ("Mis match for %s"%str(o))
-                                pass
+                            try:
+                                # Try is hack to prevent exception
+                                # Sometimes the runway is empty string
+                                # pyavtools/CIFPObjects.py", line 258, in match
+                                #  rwnum = int(label)
+                                # ValueError: invalid literal for int() with base 10: ''                          
+
+                                if rwsearch.match(o):
+                                    rwdelete = i
+                                    rwdeleteblock = block
+                                    rwsearch = None
+                                    break
+                                else:
+                                    #print ("Mis match for %s"%str(o))
+                                    pass
+                            except:
+                              pass
                 if rwdeleteblock is not None:
                     break
             if rwdeleteblock is not None:
