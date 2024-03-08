@@ -48,9 +48,9 @@ EARTH_RADIUS=EARTH_RADIUS_M * FEET_METER
 class VirtualVfr(AI):
     CENTERLINE_WIDTH = 3
     MIN_FONT_SIZE=7
-    RUNWAY_LABEL_FONT_FAMILY="Courier"
+    RUNWAY_LABEL_FONT_FAMILY="Sans" #"Courier"
     AIRPORT_FONT_FAMILY="Sans"
-    AIRPORT_FONT_SIZE=9
+    AIRPORT_FONT_SIZE=10
     PAPI_YOFFSET = 8
     PAPI_LIGHT_SPACING = 9
     VORTAC_ICON_PATH="vortac.png"
@@ -59,6 +59,7 @@ class VirtualVfr(AI):
         self.display_objects = dict()
         time.sleep(.6)      # Pause to let DB load
 
+        self.gsi = False
         self.font_percent = font_percent
         self._VFROld = dict()
         self._VFRBad = dict()
@@ -72,6 +73,7 @@ class VirtualVfr(AI):
         self.lat_item = fix.db.get_item("LAT")
         self.head_item = fix.db.get_item("HEAD")
         self.alt_item = fix.db.get_item("ALT")
+        self.gsi_item = fix.db.get_item("GSI")
         self._VFROld['LONG'] = self.lng_item.old
         self._VFRBad['LONG'] = self.lng_item.bad
         self._VFRFail['LONG'] = self.lng_item.fail
@@ -109,6 +111,12 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
+        VirtualVfr.CENTERLINE_WIDTH = int(self.height() * 0.005)
+        VirtualVfr.MIN_FONT_SIZE=int(self.height() * 0.023)
+        VirtualVfr.AIRPORT_FONT_SIZE=int(self.height() * 0.03)
+        VirtualVfr.PAPI_YOFFSET = int(self.height() * 0.03)
+        VirtualVfr.PAPI_LIGHT_SPACING = int(self.height() * 0.02)
+
         self.pov = PointOfView(os.path.expanduser(self.myparent.get_config_item('dbpath')),
                                os.path.expanduser(self.myparent.get_config_item('indexpath')),
                                self.myparent.get_config_item('refresh_period'))
@@ -137,7 +145,7 @@ class VirtualVfr(AI):
             self.pov.render(self)
 
     def get_largest_font_size(self, width):
-        max_size = 25
+        max_size = self.height() * 0.08 #25
         min_size = VirtualVfr.MIN_FONT_SIZE
         incr = (max_size - min_size) / 4
         ret = (max_size - min_size) / 2
@@ -315,7 +323,7 @@ class VirtualVfr(AI):
                  extendedline.setLine(eline)
             else:
                 extendedline = self.scene.addLine (eline,
-                    QPen(QColor(Qt.white), 1, Qt.DashLine))
+                    QPen(QColor(Qt.white), int(self.width() * 0.003), Qt.DashLine))
                 extendedline.setX(self.scene.width()/2)
                 extendedline.setY(self.scene.height()/2)
                 extendedline.setZValue(0)
@@ -329,6 +337,14 @@ class VirtualVfr(AI):
             self.approach_slightly_low = 2.8
             self.approach_slightly_high = 3.2
             self.approach_very_high = 3.5
+            gsi = ( approach_angle - 3 )
+            if self.gsi: 
+                if gsi > 1:
+                    gsi = 1
+                elif gsi < -1:
+                    gsi = -1
+                self.gsi_item.value = gsi
+                self.gsi_item.output_value()
             if approach_angle < self.approach_low:
                 papi_redcount = 4
             elif approach_angle < self.approach_slightly_low:
@@ -353,7 +369,8 @@ class VirtualVfr(AI):
             else:
                 lights = list()
             for i in range(4):
-                rect = QRectF (QPointF(-2,-2), QPointF(2,2))
+                pls = int(self.height() * 0.008)
+                rect = QRectF (QPointF(- pls,- pls), QPointF(pls,pls))
                 pen,bsh = (rpen,rbsh) if papi_redcount > 0 else (wpen,wbsh)
                 light = self.scene.addEllipse (rect, pen, bsh)
                 light.setX(x)
@@ -491,6 +508,9 @@ class VirtualVfr(AI):
     def setAltitude(self, alt):
         self.altitude = alt
         self.pov.update_altitude (alt)
+        self.pov.update_position (self.lat, self.lng)
+        if not self.rendering_prohibited():
+            self.pov.render(self)
 
     def setHeading(self, heading):
         curtime = time.time()
