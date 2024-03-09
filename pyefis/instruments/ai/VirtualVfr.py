@@ -90,6 +90,16 @@ class VirtualVfr(AI):
         self.head = self.head_item.value
 
         # BUG: convert magnetic heading
+        # The line above is from a pervious author
+        # It seems like the declination is not added to the heading at first
+        # The commit changes made along with this comment helped to improve that
+        # but it is still an issue.
+        # I'm not sure if this is all rendered correctly.
+        # When using flightgrear the runways in flightgear do not match what is rendered here
+        # CMH 28R is a 281 heading
+        # I can simulate a landing staying at exactly 281.8 heading the whole time.
+        # So with that test this code does seem to be correct.
+         
         self.true_heading = self.head_item.value
 
         self._VFROld['ALT'] = self.alt_item.old
@@ -99,8 +109,8 @@ class VirtualVfr(AI):
 
         self.last_mag_update = 0
         self.magnetic_declination = None
-        self.missing_lat = True
-        self.missing_lng = True
+        self.missing_lat = self.lat == 0.0
+        self.missing_lng = self.lng == 0.0
   
         self.myparent = parent
         minfont = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, VirtualVfr.MIN_FONT_SIZE, QFont.Bold)
@@ -122,6 +132,8 @@ class VirtualVfr(AI):
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
+
+        self.setHeading(self.head_item.value)
 
         # Must happen here to prevent race
         self.lng_item.valueChanged[float].connect(self.setLongitude)
@@ -496,6 +508,7 @@ class VirtualVfr(AI):
         self.pov.update_position (self.lat, self.lng)
         if not self.rendering_prohibited():
             self.pov.render(self)
+            self.update()
 
     def setLongitude(self, lng):
         self.lng = lng
@@ -504,6 +517,7 @@ class VirtualVfr(AI):
         self.pov.update_position (self.lat, self.lng)
         if not self.rendering_prohibited():
             self.pov.render(self)
+            self.update()
 
     def setAltitude(self, alt):
         self.altitude = alt
@@ -511,20 +525,26 @@ class VirtualVfr(AI):
         self.pov.update_position (self.lat, self.lng)
         if not self.rendering_prohibited():
             self.pov.render(self)
-
+            self.update()
     def setHeading(self, heading):
         curtime = time.time()
+        #log.debug(f"setHeading( {heading} ): curtime:{curtime} self.last_mag_update:{self.last_mag_update} self.magnetic_declination:{self.magnetic_declination}")
         if curtime - self.last_mag_update > 60 or self.magnetic_declination is None:
             # update every minute at the most
+            #log.debug(f"self.missing_lat:{self.missing_lat} self.missing_lng:{self.missing_lng}")
             if not (self.missing_lat or self.missing_lng):
+                #log.debug("Updated declination")
                 self.last_mag_update = curtime
                 self.magnetic_declination = declination (self.lat, self.lng, self.altitude)
         md = self.magnetic_declination
         if md is None:
             md = 0
+        #log.debug(f"heading:{heading} md:{md}")
         self.pov.update_heading (heading + md)
         if not self.rendering_prohibited():
+            #log.debug("Rendering")
             self.pov.render(self)
+            self.update()
 
     def getVfrBad(self):
         #print(self._VFRBad)
@@ -817,6 +837,7 @@ class PointOfView:
                                     #print ("Mis match for %s"%str(o))
                                     pass
                             except:
+                              #log.debug("runway empty catch")
                               pass
                 if rwdeleteblock is not None:
                     break
