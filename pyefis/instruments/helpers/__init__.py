@@ -20,7 +20,7 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8):
 
     # IF needed, shrink until it fits
     while (text_width + units_width >= width) and font_size > 0.5:
-        font_size -= 0.1
+        font_size -= 0.2
         text_font.setPointSizeF(font_size)
         t.setFont(text_font)
         text_width = t.boundingRect().width()
@@ -33,7 +33,7 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8):
 
     # If needed, grow until it fills
     while text_width + units_width <= width:
-        font_size += 0.1
+        font_size += 0.2
         text_font.setPointSizeF(font_size)
         t.setFont(text_font)
         text_width = t.boundingRect().width()
@@ -46,7 +46,7 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8):
 
     # The above took care of the width, this addresses the height:
     while (text_height >= height) and font_size > 0.5:
-        font_size -= 0.1
+        font_size -= 0.2
         text_font.setPointSizeF(font_size)
         t.setFont(text_font)
         text_width = t.boundingRect().width()

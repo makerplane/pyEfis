@@ -53,7 +53,7 @@ instruments:
     row: 5
     column: 0
     span:
-      rows: 105
+      rows: 100
       columns: 15
     options:
       font_percent: 0.25
