@@ -150,6 +150,7 @@ screens:
         options:
           gsi_enabled: true
           cdi_enabled: true
+          font_percent: 0.07
       -
         type: heading_display
         column: 86
