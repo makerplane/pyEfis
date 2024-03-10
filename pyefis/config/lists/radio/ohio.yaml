@@ -1,0 +1,104 @@
+display:
+  # The column names must be single word
+  # The exact name defined here is used for the key names 
+  # in the list below
+  columns:
+    - name: Name
+      size: 15
+      sort: true
+    - name: Identifier
+      size: 4
+      sort: true
+    - name: Frequency
+      size: 11
+      sort: false #False is the default
+# Enables nearest selector where it will
+# sort by distance from your current location
+# Requires LONG and LAT keys on each entry to work.
+
+  location: true
+list:
+  - Name: Akron-Canton Reg Tower
+    Identifier: KCAK
+    Frequency:  134.750 Mhz
+    lat: 40.9150556
+    long: -81.4436389    
+    set:
+      COMACTFREQSET{radio_id}: 134750 
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Akron-Canton Reg ATIS
+    Identifier: KCAK
+    Frequency:  121.050 Mhz
+    lat: 40.9150556
+    long: -81.4436389
+    set:
+      COMACTFREQSET{radio_id}: 121050
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Cleveland-Hopkins Int Tower 
+    Identifier: KCLE
+    Frequency:  124.500 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 124500
+      COMACTNAMESET{radio_id}: "{Name}"
+    lat: 41.4094069
+    long: -81.8546911
+  - Name: Cleveland-Hopkins Int ATIS
+    Identifier: KCLE
+    Frequency: 127.850 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 127850
+      COMACTNAMESET{radio_id}: "{Name}"
+    lat: 41.4094069
+    long: -81.8546911
+
+  - Name: John Glenn Int. Tower
+    Identifier: KCMH
+    Frequency:  132.700 Mhz
+    lat: 39.9969467
+    long: -82.8921592
+    set:
+      COMACTFREQSET{radio_id}: 132700
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: John Glenn Int. Ground
+    Identifier: KCMH
+    Frequency:  121.900 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 121900
+      COMACTNAMESET{radio_id}: "{Name}"
+    lat: 39.9969467
+    long: -82.8921592
+  - Name: John Glenn Int. ASOS
+    Identifier: KCMH
+    Frequency:  124.600 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 124600
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Rickenbacker Int Tower
+    Identifier: KLCK
+    Frequency:  120.050 Mhz
+    lat: 39.8137881
+    long: -82.9278164
+    set:
+      COMACTFREQSET{radio_id}: 12050
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Rickenbacker Int ASOS
+    Identifier: KLCK
+    Frequency: 132.75 Mhz
+    lat: 39.8137881
+    long: -82.9278164
+    set:
+      COMACTFREQSET{radio_id}: 132750
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Chapman Memorial
+    Identifier: K6CM
+    Frequency: 122.900 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122.900 
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Marion Municipal
+    Identifier: KMNN
+    Frequency: 122.800 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122.800
+      COMACTNAMESET{radio_id}: "{Name}"
+

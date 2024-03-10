@@ -1,0 +1,15 @@
+type: simple
+text: "RX"
+dbkey: TSBTN{id}18
+condition_keys:
+  - COMACTRX1
+conditions:
+  - when: "COMACTRX1 eq true"
+    actions:
+      - button: disable
+      - set bg color: green
+  - when: "COMACTRX1 eq false"
+    actions:
+      - button: disable
+      - set bg color: white
+

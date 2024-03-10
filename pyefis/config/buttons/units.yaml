@@ -1,6 +1,6 @@
 type: simple
 text: "Units"
-dbkey: BTN6
+dbkey: TSBTN{id}14
 conditions:
   - when: "CLICKED eq true"
     actions:

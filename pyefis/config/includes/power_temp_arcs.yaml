@@ -1,0 +1,37 @@
+instruments:
+  - type: ganged_arc_gauge
+    gang_type: vertical
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 30
+    groups:
+      - name: Power and Temp
+        common_options:
+          nameLocation: right
+          decimalPlaces: 0
+        instruments:
+          -
+            options:
+              name: Volts
+              dbkey: VOLT
+              decimapPlaces: 1
+          -
+            options:
+              name: Amps
+              dbkey: CURRNT
+              decimapPlaces: 1
+          -
+            options:
+              name: OAT
+              dbkey: OAT
+              temperature: true
+              showUnits: true
+          -
+            options:
+              name: CAT
+              temperature: true
+              dbkey: CAT
+              showUnits: true
+

@@ -11,24 +11,24 @@ condition_keys:
   - EGT13
   - EGT14
 conditions:
-  - when: "SCREEN eq 'EMS'"
+  - when: "SCREEN eq 'EMS2'"
     actions:
       - set text: PFD
       - set bg color: lightgray
     continue: true
-  - when: "SCREEN ne 'EMS'"
+  - when: "SCREEN ne 'EMS2'"
     actions:
-      - set text: EMS
+      - set text: EMS2
       - set bg color: lightgray
     continue: true
-  - when: "SCREEN ne 'EMS' and [ CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate ]"
+  - when: "SCREEN ne 'EMS2' and [ CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate ]"
     actions:
       - set bg color: red
     continue: true
-  - when: "CLICKED eq true and SCREEN ne 'EMS'"
+  - when: "CLICKED eq true and SCREEN ne 'EMS2'"
     actions:
-      - show screen: EMS
-  - when: "CLICKED eq true and SCREEN eq 'EMS'"
+      - show screen: EMS2
+  - when: "CLICKED eq true and SCREEN eq 'EMS2'"
     actions:
       - show screen: PFD
 

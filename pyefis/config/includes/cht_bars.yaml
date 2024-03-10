@@ -1,0 +1,40 @@
+instruments:
+  - type: ganged_vertical_bar_gauge
+    gang_type: horizontal
+    ratio: 0.2
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 30 
+    groups:
+      - name: CHT
+        gap: 0
+        common_options:
+          temperature: true
+          highlightKey: CHTMAX1
+          decimalPlaces: 0
+          showUnits: true
+          smallFontPercent: 0.060
+          bigFontPercent: 0.085
+          barWidthPercent: 0.5
+          lineWidthPercent: 0.7
+          textGap: 8
+        instruments:
+              -
+                options:
+                  name: "CHT 1"
+                  dbkey: CHT11
+              -
+                options:
+                  name: "CHT 2"
+                  dbkey: CHT12
+              -
+                options:
+                  name: "CHT 3"
+                  dbkey: CHT13
+              -
+                options:
+                  name: "CHT 4"
+                  dbkey: CHT14
+

@@ -1,6 +1,6 @@
 type: repeat
 text: "-"
-dbkey: BTN9
+dbkey: TSBTN{id}1
 transparent: true
 repeat_interval: 100
 repeat_delay: 300
@@ -8,3 +8,4 @@ conditions:
   - when: "CLICKED eq true" 
     actions:
       - change value: "BARO, -0.01"
+

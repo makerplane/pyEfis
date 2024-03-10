@@ -1,0 +1,29 @@
+display:
+  # The column names must be single word
+  # The exact name defined here is used for the key names 
+  # in the list below
+  columns:
+    - name: Name
+      size: 15
+      sort: true
+    - name: Identifier
+      size: 4
+      sort: true
+    - name: Frequency
+      size: 11
+      sort: false #False is the default
+list:
+  - Name: Chapman Memorial
+    Identifier: K6CM
+    Frequency: 122.900 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122900 
+      COMACTNAMESET{radio_id}: "{Name}"
+
+  - Name: Knox County
+    Identifier: K4I3
+    Frequency: 122.800 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122800
+      COMACTNAMESET{radio_id}: "{Name}"
+

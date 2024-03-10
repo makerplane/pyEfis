@@ -5,13 +5,16 @@ main:
   FixServer: 127.0.0.1
   FixPort: 3490
   # Screen Geometry
+  #screenWidth: 1280
+  #screenHeight: 720
   #screenWidth: 1024
   #screenHeight: 768
-  #screenWidth: 1920
+  screenWidth: 1920
+  #screenHeight: 540
   #screenHeight: 550
-  #screenHeight: 1080
-  screenWidth: 800
-  screenHeight: 480
+  screenHeight: 1080
+  #screenWidth: 640
+  #screenHeight: 480
   #screenWidth: 3840
   #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
@@ -21,42 +24,19 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: PFD
+  defaultScreen: SIXPACK
 
-menu:
-  menus:
-  # The button configuration is ['button text', 'action', 'argument']
-  # Currently limited to 6 buttons.  Comment out this entire section to hide menus if you are using real buttons.
-      PFDMenu:
-          - ['Hide', 'activate menu', 'ShowMenu']
-          - ['Back', 'Show Previous Screen','']
-          - ['Next', 'Show Next Screen','']
-          - ['EMS', 'Show Screen','EMS']
-          - ['Units', 'Set Instrument Units', 'OAT,OILT1,Temperature,Altitude,Pressure:Toggle']
-          - ['Basic', 'activate menu','BasicMenu']
-      BasicMenu:
-          - ['Hide', 'activate menu', 'ShowMenu2']
-          - ['PFD', 'Show Screen','PFD']
-          - ['EPFD', 'Show Screen','EPFD']
-          - ['EMS', 'Show Screen','EMS']
-          - ['Six', 'Show Screen','SixPack']
-          - ['Main', 'activate menu','PFDMenu']
-      ShowMenu:
-          - ['Show', 'activate menu','PFDMenu']
-      ShowMenu2:
-          - ['Show', 'activate menu','BasicMenu']
-  start_menu: PFDMenu
-#  show_time: 3  # hides the menu after 3 seconds.  However cannot show again.  Don't use.  Here for reference only.
-  number_of_buttons: 6
-  buttons_spacing: 120
-  left_margin: 50
-  top_margin: 50
-
+  # nodeID, currently only used in touchscreen buttons
+  # the value will replace {id} in the button's dbkey
+  nodeID: 1
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more
 # information about key sequences and actions.
 keybindings:
+  - key: X
+    action: exit
+
   - key: A
     action: Show Previous Screen
 
@@ -69,44 +49,6 @@ keybindings:
 
   - key: M
     action: Set Airspeed Mode
-
-  - key: Q
-    action: Set Value
-    args: BTN6, True
-    direction: DN
-  - key: Q
-    action: Set Value
-    args: BTN6, False
-    direction: UP
-  - key: U
-    action: Set Instrument Units
-    args: OAT,OILT1,Temperature,Pressure,Altitude:Toggle
-
-  - key: F1
-    action: Activate Menu Item
-    args: 1
-  - key: F2
-    action: Activate Menu Item
-    args: 2
-  - key: F3
-    action: Activate Menu Item
-    args: 3
-  - key: F4
-    action: Activate Menu Item
-    args: 4
-  - key: F5
-    action: Activate Menu Item
-    args: 5
-  - key: F6
-    action: Activate Menu Item
-    args: 6
-
-  - key: ']'
-    action: Change Value
-    args: BARO,0.01
-  - key: '['
-    action: Change Value
-    args: BARO,-0.01
 
   - key: "1"
     action: Set EGT Mode
@@ -123,39 +65,7 @@ keybindings:
 
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
-# This has largely been replaced with buttons in screenbuilder
 #databindings:
-#  - key: BTN1
-#    condition: True
-#    action: Activate Menu Item
-#    args: 1
-#  - key: BTN2
-#    condition: True
-#    action: Activate Menu Item
-#    args: 2
-#  - key: BTN3
-#    condition: True
-#    action: Activate Menu Item
-#    args: 3
-#  - key: BTN4
-#    condition: True
-#    action: Activate Menu Item
-#    args: 4
-#  - key: BTN5
-#    condition: True
-#    action: Activate Menu Item
-#    args: 5
-#  - key: BTN6
-#    condition: True
-#    action: Activate Menu Item
-#    args: 6
-#  - key: ENC1
-#    action: Menu Encoder
-#    args: <VALUE>   # This sends the data value to the action
-#  - key: OILP1
-#    condition: < 25
-#    action: Show Screen
-#    args: EMS
 
 
 # This section defines FIX IDs that we'll write out to the
@@ -164,79 +74,451 @@ keybindings:
 # of the point and send the data at half that interval.
 # OnChange will send when the value is changed and Both will
 # do both.
-# This is likely no longer needed
-# This hmi class was updated to always output data that is changed
-# This may be removed in a future version
-#outputs:
-#  BARO: interval
-#  BTN16: OnChange
-#  BTN1: OnChange
-
+outputs:
+  BARO: onchange
+  TRIMP: onchange
+  TRIMR: onchange
+  TRIMY: onchange
+  APREQ: onchange
+# I'm not entirely sure if the AP buttons need output or not
+  BTNHH: onchange
+  APADJ: onchange
+  BTNFP: onchange
 
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."
 # followed by the name.  The only required configuration is
 # module, which is the module that will be loaded to render
 # the screen
-# The preferred way to configure screens is to use the
-# pyefis.screens.screenbuilder module that can be configured
-# with just yaml files.
-# You can still make your own screen modules and use them
-# however instrument classes may change in the future breaking
-# your custom module.
+
 screens:
+  SIXPACK:
+    module: pyefis.screens.screenbuilder
+    title: Standard Instrument Panel New
+    layout:
+      type: grid
+      rows: 110
+      columns: 200
+      draw_grid: false
+    instruments:
+      - type: include,includes/side-buttons.yaml
+        relative: true
+        row: 0
+        column: 186
+      -
+        type: airspeed_dial
+        row: 0
+        column: 0
+        span:
+          rows: 50
+          columns: 62
+        options:
+          bg_color: "#00000000"
+      - type: atitude_indicator
+        row: 0
+        column: 62
+        span:
+          rows: 50
+          columns: 62
+      -
+        type: altimeter_dial
+        row: 0
+        column: 124
+        span:
+          rows: 50
+          columns: 62
+        options:
+          altitude: true
+      -
+        type: turn_coordinator
+        row: 50
+        column: 0
+        span:
+          rows: 50
+          columns: 62
+      - 
+        type: horizontal_situation_indicator
+        row: 50
+        column: 62
+        span:
+          rows: 50
+          columns: 62
+        move:
+          shrink: 11
+          justify:
+            - bottom
+        options:
+          gsi_enabled: true
+          cdi_enabled: true
+      -
+        type: heading_display
+        column: 86
+        row: 50
+        span:
+          rows: 5
+          columns: 14
+        options:
+          font_percent: 0.9
+      -
+        type: vsi_dial
+        row: 50
+        column: 124
+        span:
+          rows: 50
+          columns: 62
+      - type: value_text
+        row: 100
+        column: 60
+        span:
+          rows: 10
+          columns: 140
+        options:
+          _dbkey: APMSG
+          font_percent: 0.9
 
-#  TODO: Add some example screens with ample examples of the 
-#        various screen builder options
-  
-  EPFD:
-    module: pyefis.screens.epfd
-    title: E Primary Flight Display
+
+  ANDROID:
     dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
-    check_engine: [MAP1, TACH1, OILP1, OILT1, FUELQT, FUELF1, CHTMAX1, EGTAVG1]
-    update_period: .1
+    module: pyefis.screens.screenbuilder
+    title: Screen Builder
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      #draw_grid: true
+      rows: 110
+      columns: 200
+    instruments:
+      - type: value_text
+        row: 100
+        column: 0
+        span:
+          rows: 10
+          columns: 155
+        options:
+          _dbkey: APMSG
+          font_percent: 0.9
+      - type: weston
+        #disabled: true
+        row: 0
+        column: 0
+        span:
+          rows: 100
+          columns: 155
+        options:
+          socket: pyefis-waydroid-1
+          ini: weston.ini
+          command: waydroid
+          args:
+            - show-full-ui
+      - type: include,includes/basic_arcs.yaml
+        relative: true
+        row: 0
+        column: 155
+      - type: include,includes/side-buttons.yaml
+        relative: true
+        row: 0
+        column: 186
+      - type: include,includes/fuel_gauges.yaml
+        relative: true
+        row: 70
+        column: 155
 
+      
   PFD:
-    module: pyefis.screens.pfd
-    title: Primary Flight Display
     dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
-    update_period: .1
+      #refresh_period: 0.25
+    module: pyefis.screens.screenbuilder
+    title: Screen Builder
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      #draw_grid: true
+      rows: 110
+      columns: 200
+      display_state:
+        interval: 3000
+        states: 2
+    instruments:
+      - type: include,includes/virtual_vfr.yaml
+        relative: true
+        row: 0
+        column: 0
+      - type: include,includes/basic_arcs.yaml
+        relative: true
+        row: 0
+        column: 155
+      - type: include,includes/side-buttons.yaml
+        relative: true
+        row: 0
+        column: 186
+      - type: include,includes/fuel_gauges.yaml
+        relative: true
+        row: 70
+        column: 155
+        display_state: 1
+      - type: include,includes/mgl/v16/active-display.yaml
+        #relative: true
+        row: 70
+        column: 155
+        span:
+          rows: 40
+          columns: 55
+        display_state: 2
+        replace:
+          radio_id: 1 
 
+  RADIO:
+    dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
+    indexpath: ~/makerplane/pyefis/CIFP/index.bin
+    module: pyefis.screens.screenbuilder
+    title: Radio Screen
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 110
+      columns: 200
+      draw_grid: false
+    instruments:
+      - type: value_text
+        row: 101
+        column: 30
+        span:
+          rows: 9
+          columns: 60
+        options:
+          _dbkey: APMSG
+          font_percent: 0.9
+      - type: include,includes/virtual_vfr.yaml
+        disabled: false
+        relative: true
+        row: 0
+        column: 0
+        span:
+          rows: 70
+          columns: 125
+      - type: include,includes/basic_arcs.yaml
+        relative: true
+        row: 0
+        column: 155
+      - type: include,includes/power_temp_arcs.yaml
+        relative: true
+        row: 0
+        column: 125
+      - type: include,includes/side-buttons.yaml
+        relative: true
+        row: 0
+        column: 186
+      - type: include,includes/fuel_gauges.yaml
+        relative: true
+        row: 70
+        column: 155
+      - type: include,includes/mgl/v16/radio-display.yaml
+        replace:
+          radio_id: 1 # {radio_id} is replaced anywhere it appears in the included config
+                      # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
+        relative: true
+        row: 70
+        column: 0
+      - type: include,includes/mgl/v16/radio-display.yaml
+        disabled: true
+        replace:
+          radio_id: 2 # {radio_id} is replaced anywhere it appears in the included config
+                      # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
+        relative: true
+        row: 0
+        column: 0
+        span:
+          rows: 18
+          columns: 75 
   EMS:
-    module: pyefis.screens.ems_sm
-    title: Engine Management
-
-  EMSNew:
+    dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
+    indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Engine Management New
     layout:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
-      rows: 16
-      columns: 27
+      rows: 110
+      columns: 200
+      draw_grid: false
     instruments:
-      - type: static_text
+      - type: value_text
+        row: 100
+        column: 00
+        span:
+          rows: 10
+          columns: 80
+        options:
+          _dbkey: APMSG
+          font_percent: 0.9
+      - type: include,includes/virtual_vfr.yaml
+        #relative: true
         row: 0
         column: 0
         span:
-          rows: 1
-          columns: 20
-        options:
-          text: "Screen Builder"
+          rows: 70
+          columns: 125
+      - type: include,includes/basic_arcs.yaml
+        relative: true
+        row: 0
+        column: 155
+      - type: include,includes/power_temp_arcs.yaml
+        relative: true
+        row: 0
+        column: 125
+      - type: include,includes/side-buttons.yaml
+        relative: true
+        row: 0
+        column: 186
+      - type: include,includes/fuel_gauges.yaml
+        relative: true
+        row: 70
+        column: 155
+      - type: include,includes/cht_bars.yaml
+        relative: true
+        row: 70
+        column: 123
+      - type: include,includes/egt_bars.yaml
+        relative: true
+        row: 70
+        column: 91
       - type: ganged_button
-        gang_type: horizontal
-        row: 13
-        column: 3.75
-        move:
-          shrink: 25
-          justify: top
+        #disabled: true
+        gang_type: vertical
+        row: 74
+        column: 80
+        #move:
+        #  shrink: 25
+        #  justify: top
         span:
-          rows: 1
-          columns: 7.5
+          rows: 30
+          columns: 10
         groups:
           - name: Buttons
-            gap: 1
+            gap: 12
+            instruments:
+              -
+                options:
+                  config: buttons/egt-Normalize.yaml
+              -
+                options:
+                  config: buttons/egt-Lean.yaml
+              -
+                options:
+                  config: buttons/egt-Peak.yaml
+              -
+                options:
+                  config: buttons/egt-reset-peak.yaml
+      -
+        type: ganged_vertical_bar_gauge
+        gang_type: horizontal
+        row: 70
+        column: 0
+        span:
+          rows: 30
+          columns: 80
+        groups:
+          - name: RPM
+            gap: 0
+            common_options:
+              showUnits: false
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
+            instruments:
+              -
+                options:
+                  name: RPM
+                  decimalPlaces: 0
+                  dbkey: TACH1
+              -
+                options:
+                  name: TPS
+                  decimalPlaces: 2
+                  dbkey: THR1
+                  showUnits: True
+          - name: Engine
+            gap: 0
+            common_options:
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
+              showUnits: False
+            instruments:
+              -
+                options:
+                  name: MAP
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: IT
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: AFR
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: AFRT
+                  decimalPlaces: 0
+                  dbkey: MAP1
+              -
+                options:
+                  name: EGO
+                  decimalPlaces: 0
+                  dbkey: MAP1
+          - name: Temps
+            gap: 0
+            common_options:
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
+            instruments:
+              -
+                options:
+                  name: IAT
+                  decimalPlaces: 0
+                  dbkey: CAT
+                  temperature: true
+
+  EMS2:
+    module: pyefis.screens.screenbuilder
+    title: Engine Management New
+    layout:
+      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
+      rows: 110
+      columns: 200
+      draw_grid: false
+    instruments:
+      - type: value_text
+        row: 100
+        column: 80
+        span:
+          rows: 10
+          columns: 140
+        options:
+          _dbkey: APMSG
+          font_percent: 0.9
+      - type: ganged_button
+        gang_type: horizontal
+        row: 103
+        column: 35
+#        move:
+#          shrink: 25
+#          justify: top
+        span:
+          rows: 4
+          columns: 45
+        groups:
+          - name: Buttons
+            gap: 4
             instruments:
               -
                 options:
@@ -255,8 +537,8 @@ screens:
         row: 0
         column: 0
         span:
-          rows: 4
-          columns: 10
+          rows: 45
+          columns: 70
         options:
           name: RPM
           decimalPlaces: 0
@@ -264,22 +546,22 @@ screens:
       -
         type: arc_gauge
         row: 0
-        column: 10
+        column: 71
         span:
-          rows: 4
-          columns: 10
+          rows: 45
+          columns: 70
         options:
           name: MAP
-          decimalPlaces: 1          
+          decimalPlaces: 1
           dbkey: MAP1
       -
         type: ganged_horizontal_bar_gauge
         gang_type: vertical
         row: 0
-        column: 20
+        column: 142
         span:
-          rows: 5
-          columns: 7
+          rows: 50
+          columns: 40
         groups:
           - name: Oil
             instruments:
@@ -290,58 +572,61 @@ screens:
               -
                 options:
                   name: Oil Temp
-                  dbkey: OILT1 
+                  dbkey: OILT1
                   temperature: true
       -
         type: static_text
-        row: 5
-        column: 1
+        row: 45
+        column: 6
         span:
-          columns: 4
+          columns: 15
+          rows: 5
         options:
           text: Power
-        move:
-          shrink: 10
       -
         type: static_text
-        row: 5
-        column: 5
+        row: 45
+        column: 53
         span:
-          columns: 7
+          columns: 10
+          rows: 5
         options:
           text: EGT
-        move:
-          shrink: 10
       -
         type: static_text
-        row: 5
-        column: 13
+        row: 45
+        column: 110
         span:
-          columns: 7
+          columns: 10
+          rows: 5
         options:
           text: CHT
-        move:
-          shrink: 10
       -
         type: static_text
-        row: 5
-        column: 22
+        row: 45
+        column: 160
         span:
-          columns: 4
+          columns: 12
+          rows: 5
         options:
           text: FUEL
-        move:
-          shrink: 10
       -
         type: ganged_vertical_bar_gauge
         gang_type: horizontal
-        row: 6
+        ratio: 0.2
+        row: 51
         column: 0
         span:
-          rows: 7
-          columns: 27
+          rows: 50
+          columns: 186
         groups:
           - name: Power
+            common_options:
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
             instruments:
               -
                 options:
@@ -355,11 +640,15 @@ screens:
                   showUnits: false
                   dbkey: CURRNT
           - name: EGT
-            #options:
-            #  ???? highlight max?
             common_options:
               egt_mode_switching: true
               normalizeRange: 400
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
+              decimalPlaces: 0
             instruments:
               -
                 options:
@@ -386,6 +675,13 @@ screens:
                   showUnits: false
                   dbkey: EGT14
           - name: CHT
+            common_options:
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
+              decimalPlaces: 0
             instruments:
               -
                 options:
@@ -412,6 +708,12 @@ screens:
                   showUnits: false
                   dbkey: CHT14
           - name: FUEL
+            common_options:
+              smallFontPercent: 0.060
+              bigFontPercent: 0.085
+              barWidthPercent: 0.5
+              lineWidthPercent: 0.7
+              textGap: 8
             instruments:
               -
                 options:
@@ -431,104 +733,10 @@ screens:
                   decPlaces: 0
                   showUnits: false
                   dbkey: FUELQ1
-
-
-
-  SixPack:
-    module: pyefis.screens.sixpack
-    title: Standard Instrument Panel
-
-
-
-  SixPackNew:
-    module: pyefis.screens.screenbuilder
-    title: Standard Instrument Panel New
-    layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
-      rows: 2
-      columns: 3
-    instruments:
-      # Add mapping feature
-      # Some instruments need multiple inputs, how would one know what values/mapping is needed?
-      # span
-      #  rows: 2
-      #  columns: 3
-      -
-        type: airspeed_dial
+      - type: include,includes/side-buttons.yaml
+        relative: true
         row: 0
-        column: 0
-        options:
-          bg_color: "#00000000"
-      - type: atitude_indicator
-        row: 0
-        column: 1
-      -
-        type: altimeter_dial
-        row: 0
-        column: 2
-        options:
-          altitude: true
-      -
-        type: turn_coordinator
-        row: 1
-        column: 0
-      - 
-        type: horizontal_situation_indicator
-        row: 1             # Row where this grid starts vertical, 1 is top
-        column: 1          # Column where this grid starts horizontal, 1 is left
-                           # Span is not yet implemented
-        #span:             # Defines if this grid should span multiple columns or rows making it larger
-          #rows: 2         # This grid will occupuy row 2 and 3, 2 rows
-          #columns: 2      # This grid will occupy columns 2 and 3, 2 columns
-        move:              # Everything maintains aspect ratio of the grid you defined, 
-                           # with row, column and span but you can make things smaller by percentages
-                           # The default is for the object to occupy the whole space
-          shrink: 21       # This will reduce the size by 10 percent
-                           # When shrinking the default is for the object to be centered horizontal and vertically
-          justify:         # If you want to move it you can use 'top', 'bottom', 'left' or 'right'
-            - bottom       # If you decide to configure top and bottom or right and left
-                           # Only one of the mutually exclusive options will be used
-                           # While this might seem limiting, keep in mind that you can make a high number of initial grids
-                           # Then use span along with shrink and justify to get items precisely placed.
-                           # Hopefully one day all the widgets will be updated to scale fonts and such based on the size of the space they occupy
-                           # This would make it very simple to resize, just change the size of the window and all items will be proportionally 
-                           # moved and sized to fit. If you go wider gauges might have more space between them horizontally
-                           # However, the screen would still be usable without having to change any other setting.
-        options:
-          gsi_enabled: true
-          cdi_enabled: true
-      -
-        type: heading_display
-        column: 1
-        row: 1
-        move:
-          shrink: 80
-          justify:
-            - top
-
-      -
-        type: vsi_dial
-        row: 1
-        column: 2
-      - type: static_text
-        row: 1.6
-        column: 0
-        span:
-          rows: 1
-          columns: 3
-        move:
-          shrink: 90
-            
-        options:
-          text: "Screen Builder"
-
-  PFDSM:
-    module: pyefis.screens.pfd_sm
-    title: PFD Small
-
-  #Test:
-  #  module: pyefis.screens.test
-  #  title: Test Screen
+        column: 186
 
 # Hooks are user defined modules that are loaded at specific points
 # in the programs execution.  Right now their is only one place and
@@ -543,6 +751,7 @@ hooks:
 
 
 # Logging configuration - See Python logging.config module documenation
+# Logging configuration - See Python logging.config module documenation
 logging:
   version: 1
   disable_existing_loggers: False
@@ -555,7 +764,7 @@ logging:
       #level: ERROR
       #level: CRITICAL
 
-      handlers: [stderr]
+      handlers: [stderr ] #, file]
       propagate: True
 
   formatters:
@@ -575,7 +784,7 @@ logging:
 #      formatter: standard
 #      filename: fixgw.log
 #      mode: w
-#      #mode: a
+      #mode: a
 
     syslog:
       class: logging.handlers.SysLogHandler

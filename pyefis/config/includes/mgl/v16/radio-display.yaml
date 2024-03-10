@@ -1,0 +1,62 @@
+instruments:
+  - type: include,includes/mgl/v16/volumes.yaml
+    relative: true
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 29
+  - type: ganged_static_text
+    gang_type: horizontal
+    row: 0
+    column: 29
+    span:
+      rows: 5
+      columns: 70
+    groups:
+      - name: Freq Desc
+        gap: 35
+        common_options:
+          font_percent: 0.90
+        instruments:
+          -
+            options:
+              text: "Active:"
+          -
+            options:
+              text: "Standby:"
+  - type: include,includes/mgl/v16/active-display.yaml
+    relative: true
+    row: 5
+    column: 29
+#    span:
+#      rows: 27
+#      columns: 42
+  - type: include,includes/mgl/v16/standby-display.yaml
+    relative: true
+    row: 5
+    column: 68
+  - type: button
+    row: 5
+    column: 59
+    span:
+      rows: 8
+      columns: 10
+    move:
+      shrink: 12
+    options:
+      config: buttons/mgl/v16/swap-active-standby.yaml
+  - type: listbox
+    row: 0
+    column: 100
+    span:
+      rows: 40
+      columns: 55
+    options:
+      encoder: ENC5
+      button: BTN30
+      lists:
+        - name: Favorites
+          file: lists/radio/favorites.yaml
+        - name: Ohio
+          file: lists/radio/ohio.yaml

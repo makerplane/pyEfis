@@ -1,0 +1,38 @@
+instruments:
+  - type: ganged_vertical_bar_gauge
+    gang_type: horizontal
+    ratio: 0.2
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 30
+    groups:
+      - name: Volume
+        gap: 0
+        common_options:
+          showValue: false
+          showUnits: false
+          smallFontPercent: 0.060
+          bigFontPercent: 0.085
+          barWidthPercent: 0.5
+          lineWidthPercent: 0.7
+          textGap: 8
+        instruments:
+          -
+            options:
+              name: "RX Vol"
+              decimalPlaces: 0
+              dbkey: COMRXVOL{radio_id}
+          -
+            options:
+              name: "Int Vol"
+              decimalPlaces: 0
+              dbkey: COMINTVOL{radio_id}
+          -
+            options:
+              name: "Aux Vol"
+              decimalPlaces: 0
+              dbkey: COMAUDVOL{radio_id}
+# Aux Volume might not exist
+# The intention was to show volume for the audio input
