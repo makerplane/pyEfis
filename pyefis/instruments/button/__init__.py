@@ -35,12 +35,14 @@ import pathlib
 import re
 from pyefis import hmi
 import time
+from pyefis.instruments import helpers
 
 class Button(QWidget):
     def __init__(self, parent=None, config_file=None):
         super(Button, self).__init__(parent)
 
         self.parent = parent
+        self.font_mask = None
         config = yaml.load(open(config_file), Loader=yaml.SafeLoader)
         self._conditions = config.get('conditions', [])
         self.config = config
@@ -272,9 +274,13 @@ class Button(QWidget):
             elif args.lower() == 'unchecked':
                 self._button.setChecked(False)
 
-        self.font = QFont()
-        self.font.setPixelSize(qRound(self.height() * 38/100))
         self._style['border_size'] = qRound(self._button.height() * 6/100)
+        self.font = QFont()
+        if self.font_mask:
+            self.font_size = helpers.fit_to_mask(self.width()-self._style['border_size']*2,self.height()-self._style['border_size']*2,self.font_mask,"Sans")
+            self.font.setPointSizeF(self.font_size)
+        else:
+            self.font.setPixelSize(qRound(self.height() * 38/100))
         if self._style['transparent']:
             self._button.setStyleSheet(f"QPushButton {{border: 1px solid {self._style['bg'].name()}; background: transparent;border-radius: 6px}}")# border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
         else:
