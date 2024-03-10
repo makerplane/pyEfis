@@ -9,12 +9,12 @@ main:
   #screenHeight: 720
   #screenWidth: 1024
   #screenHeight: 768
-  #screenWidth: 1920
+  screenWidth: 1920
   #screenHeight: 540
   #screenHeight: 550
-  #screenHeight: 1080
-  screenWidth: 640
-  screenHeight: 480
+  screenHeight: 1080
+  #screenWidth: 640
+  #screenHeight: 480
   #screenWidth: 3840
   #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
