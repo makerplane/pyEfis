@@ -43,6 +43,7 @@ class Button(QWidget):
 
         self.parent = parent
         self.font_mask = None
+        self.font_size = None
         config = yaml.load(open(config_file), Loader=yaml.SafeLoader)
         self._conditions = config.get('conditions', [])
         self.config = config
@@ -139,6 +140,7 @@ class Button(QWidget):
 
     def resizeEvent(self,event):
         self._button.resize(self.width(), self.height())
+        self.font_size = None
         self.setStyle()
 
     def setTitle(self, title):
@@ -277,7 +279,8 @@ class Button(QWidget):
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont()
         if self.font_mask:
-            self.font_size = helpers.fit_to_mask(self.width()-self._style['border_size']*2,self.height()-self._style['border_size']*2,self.font_mask,"Sans")
+            if not self.font_size:
+                self.font_size = helpers.fit_to_mask(self.width()-(self._style['border_size']*2),self.height()-(self._style['border_size']*2),self.font_mask,"Sans")
             self.font.setPointSizeF(self.font_size)
         else:
             self.font.setPixelSize(qRound(self.height() * 38/100))
