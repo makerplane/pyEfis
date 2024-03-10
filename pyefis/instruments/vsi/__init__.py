@@ -196,11 +196,11 @@ class VSI_Dial(QWidget):
 
 
 class VSI_PFD(QWidget):
-    def __init__(self, parent=None, fontsize=15):
+    def __init__(self, parent=None, font_percent=0.4):
         super(VSI_PFD, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontSize = fontsize
+        self.fontSize = int(self.width() * font_percent)
         self.marks = [(500,""),(1000,"1"),(1500,""),(2000,"2")]
         self.scaleRoot = 0.7
         self._value = 0
@@ -224,7 +224,7 @@ class VSI_PFD(QWidget):
         p.setRenderHint(QPainter.Antialiasing)
         p.setFont(f)
         pen = QPen(QColor(Qt.white))
-        pen.setWidth(1)
+        pen.setWidth(int(self.width() * 0.03))
         p.setPen(pen)
         p.setBrush(QColor(Qt.white))
         pixelsWidth = fm.width("0")
@@ -262,6 +262,7 @@ class VSI_PFD(QWidget):
         p.drawPixmap(0, 0, self.background)
 
         #p.drawEllipse(QPointF(w+4, h/2), 4.0, 4.0)
+        dot_size = int(self.width() * 0.4)
         try:
             if self._value >= 0:
                 y = h/2 - (self._value**self.scaleRoot / self.max**self.scaleRoot) * self.dy
@@ -271,11 +272,11 @@ class VSI_PFD(QWidget):
                 if y > h: y = h
             p.setPen(Qt.magenta)
             p.setBrush(Qt.magenta)
-            p.drawEllipse(QRectF(2,y-5,10,10))
+            p.drawEllipse(QRectF(2,y-int(dot_size/2),dot_size,dot_size))
         except ZeroDivisionError:
             p.setPen(Qt.gray)
             p.setBrush(Qt.gray)
-            p.drawEllipse(QRectF(2,h/2,10,10))
+            p.drawEllipse(QRectF(2,h/2,dot_size,dot_size))
 
     def getValue(self):
         return self._value

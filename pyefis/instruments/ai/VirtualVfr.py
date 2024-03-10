@@ -121,11 +121,11 @@ class VirtualVfr(AI):
 
     def resizeEvent(self, event):
         super(VirtualVfr, self).resizeEvent(event)
-        VirtualVfr.CENTERLINE_WIDTH = int(self.height() * 0.005)
+        VirtualVfr.CENTERLINE_WIDTH = int(self.width() * 0.005)
         VirtualVfr.MIN_FONT_SIZE=int(self.height() * 0.023)
         VirtualVfr.AIRPORT_FONT_SIZE=int(self.height() * 0.03)
-        VirtualVfr.PAPI_YOFFSET = int(self.height() * 0.03)
-        VirtualVfr.PAPI_LIGHT_SPACING = int(self.height() * 0.02)
+        VirtualVfr.PAPI_YOFFSET = int(self.width() * 0.03)
+        VirtualVfr.PAPI_LIGHT_SPACING = int(self.width() * 0.02)
 
         self.pov = PointOfView(os.path.expanduser(self.myparent.get_config_item('dbpath')),
                                os.path.expanduser(self.myparent.get_config_item('indexpath')),
@@ -381,7 +381,7 @@ class VirtualVfr(AI):
             else:
                 lights = list()
             for i in range(4):
-                pls = int(self.height() * 0.008)
+                pls = int(self.width() * 0.008)
                 rect = QRectF (QPointF(- pls,- pls), QPointF(pls,pls))
                 pen,bsh = (rpen,rbsh) if papi_redcount > 0 else (wpen,wbsh)
                 light = self.scene.addEllipse (rect, pen, bsh)

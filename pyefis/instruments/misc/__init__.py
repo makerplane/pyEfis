@@ -56,6 +56,7 @@ class StaticText(QWidget):
 class ValueDisplay(QWidget):
     def __init__(self, parent=None):
         super(ValueDisplay, self).__init__(parent)
+        self.font_percent = 0.9
         self.name = None
         self._dbkey = None
         self._value = 0.0
@@ -91,7 +92,7 @@ class ValueDisplay(QWidget):
 
     def resizeEvent(self, event):
         self.font = QFont()
-        self.font.setPixelSize(self.height())
+        self.font.setPixelSize(qRound(self.height() * self.font_percent))
         self.valueRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):
@@ -99,7 +100,7 @@ class ValueDisplay(QWidget):
         p.setRenderHint(QPainter.Antialiasing)
 
         pen = QPen()
-        pen.setWidth(1)
+        pen.setWidth(int(self.height() * 0.01))
         pen.setCapStyle(Qt.FlatCap)
         p.setPen(pen)
 
