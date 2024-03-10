@@ -9,12 +9,12 @@ main:
   #screenHeight: 720
   #screenWidth: 1024
   #screenHeight: 768
-  screenWidth: 1920
+  #screenWidth: 1920
   #screenHeight: 540
   #screenHeight: 550
-  screenHeight: 1080
-  #screenWidth: 640
-  #screenHeight: 480
+  #screenHeight: 1080
+  screenWidth: 640
+  screenHeight: 480
   #screenWidth: 3840
   #screenHeight: 1100
   # Set EFIS to occupy the entire screen without system border / menu
@@ -24,7 +24,7 @@ main:
   screenColor: (0,0,0)
 
   # If left out the first defined screen will be default
-  defaultScreen: SIXPACK
+  defaultScreen: PFD
 
   # nodeID, currently only used in touchscreen buttons
   # the value will replace {id} in the button's dbkey
@@ -157,8 +157,6 @@ screens:
         span:
           rows: 5
           columns: 14
-        options:
-          font_percent: 0.9
       -
         type: vsi_dial
         row: 50
@@ -276,7 +274,7 @@ screens:
       type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
-      draw_grid: false
+      #draw_grid: true
     instruments:
       - type: value_text
         row: 101
@@ -394,6 +392,8 @@ screens:
         groups:
           - name: Buttons
             gap: 12
+            common_options:
+              font_mask: Normalize
             instruments:
               -
                 options:
@@ -577,36 +577,36 @@ screens:
       -
         type: static_text
         row: 45
-        column: 6
+        column: 3
         span:
-          columns: 15
+          columns: 21
           rows: 5
         options:
           text: Power
       -
         type: static_text
         row: 45
-        column: 53
+        column: 52
         span:
-          columns: 10
+          columns: 12
           rows: 5
         options:
           text: EGT
       -
         type: static_text
         row: 45
-        column: 110
+        column: 109
         span:
-          columns: 10
+          columns: 12
           rows: 5
         options:
           text: CHT
       -
         type: static_text
         row: 45
-        column: 160
+        column: 159
         span:
-          columns: 12
+          columns: 14
           rows: 5
         options:
           text: FUEL

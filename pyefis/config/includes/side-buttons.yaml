@@ -9,6 +9,8 @@ instruments:
     groups:
       - name: Side Buttons
         gap: 6
+        common_options:
+            font_mask: "ANDROID"
         instruments:
           -
             options:
