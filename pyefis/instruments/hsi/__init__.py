@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import *
 from pyefis import common
 import pyavtools.fix as fix
 from pyefis import common
+from pyefis.instruments import helpers
 
 # TODO: Add CDI and Glide Slope indicators and tick marks but make them
 #       configurable.
@@ -440,14 +441,9 @@ class HSI(QGraphicsView):
 
 
 class HeadingDisplay(QWidget):
-    def __init__(self, parent=None, font_size=15, fgcolor=Qt.gray, bgcolor=Qt.black, font_percent=None):
+    def __init__(self, parent=None, fgcolor=Qt.gray, bgcolor=Qt.black ):
         super(HeadingDisplay, self).__init__(parent)
         self.setFocusPolicy(Qt.NoFocus)
-        self.font_percent = font_percent
-        if self.font_percent:
-            font_size = qRound(self.font_percent * self.height())
-        self.fontSize = font_size
-        
         self.fg_color = fgcolor
         self.bg_color = bgcolor
 
@@ -469,16 +465,17 @@ class HeadingDisplay(QWidget):
         self.font = QFont()
         self.font.setBold(True)
         self.font.setFamily ("Sans")
-        self.font.setPixelSize(self.fontSize)
-        t = QGraphicsSimpleTextItem ("999")
-        t.setFont (self.font)
-        br = t.boundingRect()
-        self.resize(qRound(br.width()*1.2), qRound(br.height()*1.2))
+        self.font_mask = "999"
+        self.font_percent = 0.80
+        self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,"Sans")
+        self.font.setPointSizeF(self.font_size)
+
+    def resizeEvent(self, event):
+        self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,"Sans")
+        self.font.setPointSizeF(self.font_size)
 
     def paintEvent(self, event):
-        if self.font_percent:
-            self.fontSize = qRound(self.font_percent * self.height())
-        self.font.setPixelSize(self.fontSize)
+        self.font.setPointSizeF(self.font_size)
         c = QPainter(self)
         compassPen = QPen(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
