@@ -196,7 +196,7 @@ class VSI_Dial(QWidget):
 
 
 class VSI_PFD(QWidget):
-    def __init__(self, parent=None, font_percent=0.4):
+    def __init__(self, parent=None, font_percent=0.15):
         super(VSI_PFD, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.setFocusPolicy(Qt.NoFocus)

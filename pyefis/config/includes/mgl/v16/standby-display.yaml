@@ -7,6 +7,7 @@ instruments:
       rows: 8
       columns: 30
     options:
+      font_mask: "100.000"
       decimalPlaces: 3
       dbkey: COMSTDFREQ{radio_id}
   - type: value_text

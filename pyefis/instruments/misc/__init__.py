@@ -19,6 +19,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 import pyavtools.fix as fix
+from pyefis.instruments import helpers
 
 class StaticText(QWidget):
     """Represents a simple static text display.  This is very simple and is
@@ -26,14 +27,19 @@ class StaticText(QWidget):
        a painter object and a redraw event handler"""
     def __init__(self, text="", fontsize=1.0, color=QColor(Qt.white), parent=None):
         super(StaticText, self).__init__(parent)
-        self.alignment = Qt.AlignCenter
+        self.alignment = "AlignCenter"
         self.font_percent = fontsize
         self.text = text
         self.color = color
+        self.font_mask = None
 
     def resizeEvent(self, event):
         self.Font = QFont()
-        self.Font.setPixelSize(qRound(self.height()*self.font_percent))
+        if self.font_mask:
+            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,"Sans")
+            self.Font.setPointSizeF(self.font_size)
+        else:
+            self.Font.setPixelSize(qRound(self.height()*self.font_percent))
         self.textRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):
@@ -49,7 +55,8 @@ class StaticText(QWidget):
         pen.setColor(self.color)
         p.setPen(pen)
         p.setFont(self.Font)
-        opt = QTextOption(self.alignment)
+        self.align = getattr(Qt, self.alignment)
+        opt = QTextOption(self.align)
         p.drawText(self.textRect, self.text, opt)
 
 
@@ -64,7 +71,7 @@ class ValueDisplay(QWidget):
         self.bad = False
         self.old = False
         self.annunciate = False
-        self.alignment = Qt.AlignLeft | Qt.AlignVCenter
+        self.alignment = "AlignLeft"
         self.conversionFunction = lambda x: x
 
         # These properties can be modified by the parent
@@ -90,9 +97,14 @@ class ValueDisplay(QWidget):
         self.textColor = self.textGoodColor # Non value text like units
         self.highlightColor = self.highlightGoodColor
 
+        self.font_mask = None
     def resizeEvent(self, event):
         self.font = QFont()
-        self.font.setPixelSize(qRound(self.height() * self.font_percent))
+        if self.font_mask:
+            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,"Sans")
+            self.font.setPointSizeF(self.font_size)
+        else:
+            self.font.setPixelSize(qRound(self.height() * self.font_percent))
         self.valueRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):
@@ -108,7 +120,8 @@ class ValueDisplay(QWidget):
         pen.setColor(self.textColor)
         p.setPen(pen)
         p.setFont(self.font)
-        opt = QTextOption(self.alignment)
+        self.align = getattr(Qt, self.alignment)
+        opt = QTextOption(self.align)
         p.drawText(self.valueRect, self.valueText, opt)
 
 

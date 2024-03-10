@@ -9,7 +9,7 @@ conditions:
     continue: true
   - when: "SCREEN ne 'SIXPACK'"
     actions:
-      - set text: SIX PACK
+      - set text: "SIX\nPACK"
       - set bg color: lightgray
     continue: true
   - when: "CLICKED eq true and [ SCREEN ne 'SIXPACK' ]"

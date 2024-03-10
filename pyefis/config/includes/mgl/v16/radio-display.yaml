@@ -6,25 +6,26 @@ instruments:
     span:
       rows: 40
       columns: 29
-  - type: ganged_static_text
-    gang_type: horizontal
+  - type: static_text
     row: 0
     column: 29
     span:
       rows: 5
-      columns: 70
-    groups:
-      - name: Freq Desc
-        gap: 35
-        common_options:
-          font_percent: 0.90
-        instruments:
-          -
-            options:
-              text: "Active:"
-          -
-            options:
-              text: "Standby:"
+      columns: 20
+    options:
+      text: "Active:"
+      font_mask: "XXXXXXX:"
+      alignment: AlignLeft
+  - type: static_text
+    row: 0
+    column: 68
+    span:
+      rows: 5
+      columns: 20
+    options:
+      text: "Standby:"
+      font_mask: "XXXXXXX:"
+      alignment: AlignLeft
   - type: include,includes/mgl/v16/active-display.yaml
     relative: true
     row: 5
@@ -38,14 +39,15 @@ instruments:
     column: 68
   - type: button
     row: 5
-    column: 59
+    column: 58
     span:
       rows: 8
-      columns: 10
+      columns: 9
     move:
       shrink: 12
     options:
       config: buttons/mgl/v16/swap-active-standby.yaml
+      font_mask: "SWAP"
   - type: listbox
     row: 0
     column: 100

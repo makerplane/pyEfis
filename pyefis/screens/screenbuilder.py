@@ -306,7 +306,7 @@ class Screen(QWidget):
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
-            self.instruments[count] = hsi.HeadingDisplay(self,font_percent=font_percent)
+            self.instruments[count] = hsi.HeadingDisplay(self)
         elif i['type'] == 'heading_tape':
             self.instruments[count] = hsi.DG_Tape(self)
         elif i['type'] == 'horizontal_situation_indicator':

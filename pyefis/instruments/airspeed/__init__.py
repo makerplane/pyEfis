@@ -27,11 +27,11 @@ from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 class Airspeed(QWidget):
     FULL_WIDTH = 400
-    def __init__(self, parent=None, fontsize=20, bg_color=Qt.black):
+    def __init__(self, parent=None, font_percent=0.07, bg_color=Qt.black):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.setFocusPolicy(Qt.NoFocus)
-        self.fontsize = fontsize
+        self.font_percent = font_percent
         self.bg_color = bg_color
         self._airspeed = 0
         self.item = fix.db.get_item("IAS")
@@ -59,6 +59,9 @@ class Airspeed(QWidget):
     def paintEvent(self, event):
         w = self.width()
         h = self.height()
+        s = w
+        if w > h:
+            s = h
         dial = QPainter(self)
         dial.setRenderHint(QPainter.Antialiasing)
 
@@ -67,26 +70,26 @@ class Airspeed(QWidget):
 
         # Setup Pens
         f = QFont()
-        fs = int(round(self.fontsize * w / self.FULL_WIDTH))
+        fs = int(round(self.font_percent * s))
         f.setPixelSize(fs)
         fontMetrics = QFontMetricsF(f)
 
         dialPen = QPen(QColor(Qt.white))
-        dialPen.setWidth(2)
+        dialPen.setWidthF(s*0.01)
 
         needleBrush = QBrush(QColor(Qt.white))
 
         vnePen = QPen(QColor(Qt.red))
-        vnePen.setWidth(6)
+        vnePen.setWidthF(s*0.025)
 
         vsoPen = QPen(QColor(Qt.white))
-        vsoPen.setWidth(4)
+        vsoPen.setWidthF(s*0.015)
 
         vnoPen = QPen(QColor(Qt.green))
-        vnoPen.setWidth(4)
+        vnoPen.setWidthF(s*0.015)
 
         yellowPen = QPen(QColor(Qt.yellow))
-        yellowPen.setWidth(4)
+        yellowPen.setWidthF(s*0.015)
 
         # Dial Setup
 
@@ -110,7 +113,7 @@ class Airspeed(QWidget):
         dial.drawArc(dial_rect, qRound(Vs_angle), qRound(-(Vs_angle - Vno_angle)))
         dial.setPen(vsoPen)
         inner_rect = QRectF(center_x-radius+inner_offset, center_y-radius+inner_offset,
-                            diameter-inner_offset*2, diameter-inner_offset*2)
+                            diameter-inner_offset*3, diameter-inner_offset*3)
         dial.drawArc(inner_rect,
                             qRound(Vs0_angle), qRound(-(Vs0_angle - Vfe_angle)))
         dial.setPen(yellowPen)

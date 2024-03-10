@@ -7,6 +7,7 @@ instruments:
       rows: 8
       columns: 30
     options:
+      font_mask: "100.000"
       decimalPlaces: 3
       dbkey: COMACTFREQ{radio_id}
   - type: value_text
@@ -16,6 +17,7 @@ instruments:
       rows: 5
       columns: 35
     options:
+      font_mask: "XXXXXXXXXXXXX"
       _dbkey: COMACTNAME{radio_id}
   - type: button
     row: 14

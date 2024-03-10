@@ -30,8 +30,8 @@ instruments:
       columns: 15
     options:
       #fontsize: 28
-      font_percent: 0.25
-      number_font_size: 40
+      font_percent: 0.24
+      #number_font_size: 40
       altitude: true
   - type: vsi_pfd
     row: 0
@@ -46,13 +46,14 @@ instruments:
       rows: 5
       columns: 12
     options:
+      font_mask: "0000"
       decimalPlaces: 0
       dbkey: VS
   - type: airspeed_tape
-    row: 0
+    row: 5
     column: 0
     span:
-      rows: 110
+      rows: 100
       columns: 15
     options:
       font_percent: 0.25
@@ -66,15 +67,17 @@ instruments:
       bg_color: "#00000000"
       fg_color: "#FFFFFF"
       #fontSize: 5 #47
-      font_percent: 0.65
+      #font_percent: 0.65
   - type: static_text
     row: 0
     column: 0
     span:
       rows: 5
-      columns: 27
+      columns: 20
     options:
       text: "Auto Pilot:"
+      alignment: AlignRight
+      font_mask: "Auto Pilot:"
   - type: value_text
     row: 0
     column: 97
@@ -83,6 +86,7 @@ instruments:
       columns: 35
     options:
       _dbkey: TIMEZ
+      font_mask: "HH:MM:SS ZZZ"
       #fontName: DSEG14 Modern Mini, Bold
   - type: value_text
     row: 5
@@ -92,14 +96,16 @@ instruments:
       columns: 35
     options:
       _dbkey: TIMEL
+      font_mask: "HH:MM:SS ZZZ"
   - type: value_text
     row: 0
-    column: 27
+    column: 21
     span:
       rows: 5
       columns: 50
     options:
       _dbkey: APMSG
+      font_mask: "12345678901234567890"
   - type: static_text
     row: 90
     column: 118
@@ -108,6 +114,8 @@ instruments:
       columns: 10
     options:
       text: "Baro:"
+      font_mask: "Baro:"
+      alignment: AlignRight
   - type: numeric_display
     row: 90
     column: 129
@@ -115,6 +123,7 @@ instruments:
       rows: 4
       columns: 12
     options:
+      font_mask: "00.00"
       dbkey: BARO
       decimalPlaces: 2
       pressure: true
@@ -142,6 +151,8 @@ instruments:
       columns: 10
     options:
       text: "DALT:"
+      font_mask: "DALT:"
+      alignment: AlignRight
   - type: numeric_display
     row: 95
     column: 129
@@ -149,6 +160,7 @@ instruments:
       rows: 4
       columns: 15
     options:
+      font_mask: "10000"
       dbkey: DALT
       decimalPlaces: 0
       altitude: true
@@ -160,6 +172,8 @@ instruments:
       columns: 10
     options:
       text: "PALT:"
+      font_mask: "PALT:"
+      alignment: AlignRight
   - type: numeric_display
     row: 100
     column: 129
@@ -167,6 +181,7 @@ instruments:
       rows: 4
       columns: 15
     options:
+      font_mask: "10000"
       dbkey: PALT
       decimalPlaces: 0
       altitude: true
@@ -178,6 +193,8 @@ instruments:
       columns: 10
     options:
       text: "OAT:"
+      font_mask: "OAT:"
+      alignment: AlignRight
   - type: numeric_display
     row: 105
     column: 129
@@ -185,11 +202,13 @@ instruments:
       rows: 4
       columns: 10
     options:
+      font_mask: "100"
+      units_font_mask: "oF"
       dbkey: OAT
       temperature: true
       showUnits: true
       decimalPlaces: 0
-      showValue: false
+      #showValue: false
   - type: button
     row: 0
     column: 150

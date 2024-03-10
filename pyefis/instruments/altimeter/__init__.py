@@ -205,7 +205,7 @@ class Altimeter_Tape(QGraphicsView):
         self.font_percent = font_percent
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
-            self.pph = qRound(self.fontsize * 0.4)
+            self.pph = self.fontsize / 50
         else:
             self.fontsize = fontsize
             self.pph = 0.3
@@ -230,7 +230,7 @@ class Altimeter_Tape(QGraphicsView):
     def resizeEvent(self, event):
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
-            self.pph = qRound(self.fontsize * 0.02)
+            self.pph = self.fontsize / 50
 
         w = self.width()
         w_2 = w/2
@@ -240,7 +240,7 @@ class Altimeter_Tape(QGraphicsView):
         self.height_pixel = self.maxalt*self.pph + h
 
         dialPen = QPen(QColor(Qt.white))
-        dialPen.setWidth(2)
+        dialPen.setWidth(int(self.height() * 0.005))
 
         self.scene = QGraphicsScene(0, 0, w, self.height_pixel)
         x = self.scene.addRect(0, 0, w, self.height_pixel,

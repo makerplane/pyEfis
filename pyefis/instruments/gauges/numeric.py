@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import *
 
 
 from .abstract import AbstractGauge
+from pyefis.instruments import helpers
 
 class NumericDisplay(AbstractGauge):
     """Represents a simple numeric display type gauge.  The benefit of using this
@@ -31,16 +32,23 @@ class NumericDisplay(AbstractGauge):
         self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
         self.showUnits = False
         self.smallFontPercent = 0.4
+        self.font_mask = None
+        self.units_font_mask = None
 
     def resizeEvent(self, event):
+        self.font_size = self.height()
+        
+        if self.font_mask:
+            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,"Sans",self.units_font_mask,self.smallFontPercent)
         self.bigFont = QFont()
-        self.bigFont.setPixelSize(self.height())
+        self.bigFont.setPointSizeF(self.font_size)
         self.smallFont = QFont()
-        self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
+        self.smallFont.setPointSizeF(qRound(self.font_size * self.smallFontPercent))
         qm = QFontMetrics(self.smallFont)
         unitsWidth = qm.width(self.units)
 
         if self.showUnits:
+            # TODO Edit to get the units closer to the value 
             self.valueTextRect = QRectF(0, 0, self.width()-unitsWidth-5, self.height())
             self.unitsTextRect = QRectF(self.valueTextRect.width(), 0,
                                         self.width()-self.valueTextRect.width(), self.height())
