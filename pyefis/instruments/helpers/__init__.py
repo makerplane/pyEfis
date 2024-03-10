@@ -26,7 +26,7 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8):
         text_width = t.boundingRect().width()
         text_height = t.boundingRect().height()
         if units_mask:
-            units_font = QFont(font, font_size * units_ratio)
+            units_font.setPointSizeF(font_size * units_ratio)
             u.setFont(units_font)
             units_width = u.boundingRect().width()
             units_height = u.boundingRect().height()
@@ -39,7 +39,7 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8):
         text_width = t.boundingRect().width()
         text_height = t.boundingRect().height()
         if units_mask:
-            units_font = QFont(font, font_size * units_ratio)
+            units_font.setPointSizeF(font_size * units_ratio)
             u.setFont(units_font)
             units_width = u.boundingRect().width()
             units_height = u.boundingRect().height()
@@ -53,3 +53,5 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8):
         text_height = t.boundingRect().height()
 
     return(font_size)
+
+

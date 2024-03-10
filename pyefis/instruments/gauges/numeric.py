@@ -48,6 +48,7 @@ class NumericDisplay(AbstractGauge):
         unitsWidth = qm.width(self.units)
 
         if self.showUnits:
+            # TODO Edit to get the units closer to the value 
             self.valueTextRect = QRectF(0, 0, self.width()-unitsWidth-5, self.height())
             self.unitsTextRect = QRectF(self.valueTextRect.width(), 0,
                                         self.width()-self.valueTextRect.width(), self.height())
