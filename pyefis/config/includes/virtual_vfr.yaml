@@ -1,0 +1,203 @@
+instruments:
+  - type: virtual_vfr
+    row: 0
+    column: 0
+    span:
+      rows: 110
+      columns: 155
+    options: 
+      font_percent: 0.025
+  - type: horizontal_situation_indicator
+    row: 0
+    column: 0
+    span:
+      rows: 110
+      columns: 155
+    move:
+      shrink: 12
+    options:
+      #fontSize: 48
+      font_percent: 0.05
+      fgcolor: "#aaaaaa"
+      bgcolor: "#aaaaaa"
+      cdi_enabled: true
+      gsi_enabled: true
+  - type: altimeter_tape
+    row: 0
+    column: 140
+    span:
+      rows: 110
+      columns: 15
+    options:
+      #fontsize: 28
+      font_percent: 0.25
+      number_font_size: 40
+      altitude: true
+  - type: vsi_pfd
+    row: 0
+    column: 130
+    span:
+      rows: 50
+      columns: 10
+  - type: numeric_display
+    row: 50
+    column: 128.5
+    span:
+      rows: 5
+      columns: 12
+    options:
+      decimalPlaces: 0
+      dbkey: VS
+  - type: airspeed_tape
+    row: 0
+    column: 0
+    span:
+      rows: 110
+      columns: 15
+    options:
+      font_percent: 0.25
+  - type: heading_display
+    row: 0
+    column: 72.5
+    span:
+      rows: 7
+      columns: 10
+    options:
+      bg_color: "#00000000"
+      fg_color: "#FFFFFF"
+      #fontSize: 5 #47
+      font_percent: 0.65
+  - type: static_text
+    row: 0
+    column: 0
+    span:
+      rows: 5
+      columns: 27
+    options:
+      text: "Auto Pilot:"
+  - type: value_text
+    row: 0
+    column: 97
+    span:
+      rows: 5
+      columns: 35
+    options:
+      _dbkey: TIMEZ
+      #fontName: DSEG14 Modern Mini, Bold
+  - type: value_text
+    row: 5
+    column: 97
+    span:
+      rows: 5
+      columns: 35
+    options:
+      _dbkey: TIMEL
+  - type: value_text
+    row: 0
+    column: 27
+    span:
+      rows: 5
+      columns: 50
+    options:
+      _dbkey: APMSG
+  - type: static_text
+    row: 90
+    column: 118
+    span:
+      rows: 4
+      columns: 10
+    options:
+      text: "Baro:"
+  - type: numeric_display
+    row: 90
+    column: 129
+    span:
+      rows: 4
+      columns: 12
+    options:
+      dbkey: BARO
+      decimalPlaces: 2
+      pressure: true
+  - type: button
+    row: 83
+    column: 118
+    span:
+      rows: 7
+      columns: 10
+    options:
+      config: buttons/baro-down-invisible.yaml
+  - type: button
+    row: 83
+    column: 129
+    span:
+      rows: 7
+      columns: 10
+    options:
+      config: buttons/baro-up-invisible.yaml
+  - type: static_text
+    row: 95
+    column: 118
+    span:
+      rows: 4
+      columns: 10
+    options:
+      text: "DALT:"
+  - type: numeric_display
+    row: 95
+    column: 129
+    span:
+      rows: 4
+      columns: 15
+    options:
+      dbkey: DALT
+      decimalPlaces: 0
+      altitude: true
+  - type: static_text
+    row: 100
+    column: 118
+    span:
+      rows: 4
+      columns: 10
+    options:
+      text: "PALT:"
+  - type: numeric_display
+    row: 100
+    column: 129
+    span:
+      rows: 4
+      columns: 15
+    options:
+      dbkey: PALT
+      decimalPlaces: 0
+      altitude: true
+  - type: static_text
+    row: 105
+    column: 118
+    span:
+      rows: 4
+      columns: 10
+    options:
+      text: "OAT:"
+  - type: numeric_display
+    row: 105
+    column: 129
+    span:
+      rows: 4
+      columns: 10
+    options:
+      dbkey: OAT
+      temperature: true
+      showUnits: true
+      decimalPlaces: 0
+      showValue: false
+  - type: button
+    row: 0
+    column: 150
+    span:
+      rows: 5
+      columns: 5
+    options:
+      config: buttons/leader.yaml
+
+
+

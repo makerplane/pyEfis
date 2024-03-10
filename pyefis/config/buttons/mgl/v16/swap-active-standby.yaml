@@ -1,0 +1,7 @@
+type: simple
+text: "Swap"
+dbkey: TSBTN{id}17
+conditions:
+  - when: "CLICKED eq true"
+    actions:
+      - change value: "BARO, -0.01"

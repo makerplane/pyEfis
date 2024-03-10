@@ -1,0 +1,41 @@
+instruments:
+  - type: ganged_vertical_bar_gauge
+    gang_type: horizontal
+    ratio: 0.2
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 30 
+    groups:
+      - name: EGT
+        gap: 0
+        common_options:
+          egt_mode_switching: true
+          normalizeRange: 400
+          temperature: true
+          highlightKey: EGTMAX1
+          decimalPlaces: 0
+          showUnits: true
+          smallFontPercent: 0.060
+          bigFontPercent: 0.085
+          barWidthPercent: 0.5
+          lineWidthPercent: 0.7
+          textGap: 8
+        instruments:
+          -
+            options:
+              name: "EGT 1"
+              dbkey: EGT11
+          -
+            options:
+              name: "EGT 2"
+              dbkey: EGT12
+          -
+            options:
+              name: "EGT 3"
+              dbkey: EGT13
+          -
+            options:
+              name: "EGT 4"
+              dbkey: EGT14

@@ -1,0 +1,21 @@
+type: simple
+text: ""
+dbkey: TSBTN{id}13
+conditions:
+  - when: "SCREEN eq 'RADIO'"
+    actions:
+      - set text: PFD
+      - set bg color: lightgray
+    continue: true
+  - when: "SCREEN ne 'RADIO'"
+    actions:
+      - set text: RADIO
+      - set bg color: lightgray
+    continue: true
+  - when: "CLICKED eq true and [ SCREEN ne 'RADIO' ]"
+    actions:
+      - show screen: RADIO
+  - when: "CLICKED eq true and SCREEN eq 'RADIO'"
+    actions:
+      - show screen: PFD
+

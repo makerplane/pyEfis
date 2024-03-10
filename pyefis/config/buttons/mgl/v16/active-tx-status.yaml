@@ -1,0 +1,15 @@
+type: simple
+text: "TX"
+dbkey: TSBTN{id}18
+condition_keys:
+  - COMACTTX1
+conditions:
+  - when: "COMACTTX1 eq true"
+    actions:
+      - button: disable
+      - set bg color: green
+  - when: "COMACTTX1 eq false"
+    actions:
+      - button: disable
+      - set bg color: white
+
