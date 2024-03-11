@@ -42,6 +42,8 @@ class VerticalBar(AbstractGauge):
         self._peakMode = False
         self.peakColor = QColor(Qt.magenta)
         self._oldpencolor = self.penGoodColor
+        self.segments = 0
+        self.segment_gap_percent = 0.02
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
@@ -209,6 +211,17 @@ class VerticalBar(AbstractGauge):
                               self.barWidth,
                               self.barHeight - self.interpolate(self.highAlarm, self.barHeight)))
 
+        # Draw black bars to create segments
+        if self.segments > 0:
+            segment_gap = self.barHeight * self.segment_gap_percent
+            segment_size = (self.barHeight - (segment_gap * (self.segments - 1)))/self.segments
+            p.setRenderHint(QPainter.Antialiasing, False)
+            pen.setColor(Qt.black)
+            p.setPen(pen)
+            p.setBrush(Qt.black)
+            for segment in range(self.segments - 1):
+                seg_top = self.barTop + ((segment + 1) * segment_size) + (segment * segment_gap)
+                p.drawRect(QRectF(self.barLeft, seg_top, self.barWidth, segment_gap))
         # Highlight Ball
         if self.highlight:
             pen.setColor(Qt.black)
@@ -251,4 +264,12 @@ class VerticalBar(AbstractGauge):
             x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
         if x < self.barTop: x = self.barTop
         if x > self.barBottom: x = self.barBottom
-        p.drawRect(QRectF(self.lineLeft, x-2,self.lineWidth, 4))
+        if not self.segments > 0:
+            p.drawRect(QRectF(self.lineLeft, x-2,self.lineWidth, 4))
+        else:
+            # IF segmented, darken the top part of the bars from the line up
+            pen.setColor(QColor(0, 0, 0, 200))
+            p.setPen(pen)
+            p.setBrush(QColor(0, 0, 0, 200))
+            p.drawRect(QRectF(self.barLeft, self.barTop, self.barWidth, x - self.barTop))
+
