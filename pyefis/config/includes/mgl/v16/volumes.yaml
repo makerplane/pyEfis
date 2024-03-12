@@ -18,6 +18,7 @@ instruments:
           barWidthPercent: 0.5
           lineWidthPercent: 0.7
           textGap: 8
+          segments: 22
         instruments:
           -
             options:

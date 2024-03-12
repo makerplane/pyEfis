@@ -43,7 +43,8 @@ class VerticalBar(AbstractGauge):
         self.peakColor = QColor(Qt.magenta)
         self._oldpencolor = self.penGoodColor
         self.segments = 0
-        self.segment_gap_percent = 0.02
+        self.segment_gap_percent = 0.012
+        self.segment_alpha = 210
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
@@ -268,8 +269,8 @@ class VerticalBar(AbstractGauge):
             p.drawRect(QRectF(self.lineLeft, x-2,self.lineWidth, 4))
         else:
             # IF segmented, darken the top part of the bars from the line up
-            pen.setColor(QColor(0, 0, 0, 220))
+            pen.setColor(QColor(0, 0, 0, self.segment_alpha))
             p.setPen(pen)
-            p.setBrush(QColor(0, 0, 0, 220))
+            p.setBrush(QColor(0, 0, 0, self.segment_alpha))
             p.drawRect(QRectF(self.barLeft, self.barTop, self.barWidth, x - self.barTop))
 

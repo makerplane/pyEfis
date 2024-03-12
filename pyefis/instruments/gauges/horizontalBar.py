@@ -30,8 +30,8 @@ class HorizontalBar(AbstractGauge):
         self.showUnits = True
         self.showName = True
         self.segments = 0 
-        self.segment_gap_percent = 0.02
-
+        self.segment_gap_percent = 0.01
+        self.segment_alpha = 210
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
         return 2
@@ -128,8 +128,8 @@ class HorizontalBar(AbstractGauge):
             p.drawRect(QRectF(x-2, self.barTop-4, 4, self.barHeight+8))
         else:
             # IF segmented, darken the top part of the bars from the line up
-            pen.setColor(QColor(0, 0, 0, 220))
+            pen.setColor(QColor(0, 0, 0, self.segment_alpha))
             p.setPen(pen)
-            p.setBrush(QColor(0, 0, 0, 220))
+            p.setBrush(QColor(0, 0, 0, self.segment_alpha))
             p.drawRect(QRectF(x, self.barTop, self.width() - x, self.barHeight))
 
