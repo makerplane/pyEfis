@@ -30,6 +30,8 @@ class ArcGauge(AbstractGauge):
         self.sweepAngle = 180 - 45
         self.showUnits = False
         self.nameLocation = 'top' # can also be 'right' above the value
+        self.segments = 0
+        self.segment_gap_percent = 0.01
 
     def get_height(self, width):
         return width/ 2
@@ -71,8 +73,8 @@ class ArcGauge(AbstractGauge):
         self.arrow = QPolygonF()
         self.arrow.append(QPointF(0,self.arcRadius * .4))
         self.arrow.append(QPointF(self.pointer_width,self.pointer_width+self.arcRadius * .5))
-        self.arrow.append(QPointF(1, self.arcRadius))
-        self.arrow.append(QPointF(-1, self.arcRadius))
+        self.arrow.append(QPointF(1, self.arcRadius * 1.1))
+        self.arrow.append(QPointF(-1, self.arcRadius * 1.1))
         self.arrow.append(QPointF(-self.pointer_width,self.pointer_width+self.arcRadius * .5))
         self.arrow.append(QPointF(0,self.arcRadius * .4))
 
@@ -106,7 +108,7 @@ class ArcGauge(AbstractGauge):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
         pen = QPen()
-        pen.setWidth(qRound(self.r_height * 0.1))
+        pen.setWidth(qRound(self.r_height * 0.18))
         pen.setCapStyle(Qt.FlatCap)
 
         # Red Arcs
@@ -131,17 +133,39 @@ class ArcGauge(AbstractGauge):
         drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
         start + (sweep - highWarnAngle), highWarnAngle-lowWarnAngle)
 
+        # Draw segments
+        if self.segments > 0:
+            pen.setWidth(qRound(self.r_height * 0.2))
+            segment_gap = (sweep) * self.segment_gap_percent
+            segment_size = ((sweep) - (segment_gap * (self.segments - 1)))/self.segments
+            pen.setColor(Qt.black)
+            p.setPen(pen)
+            for segment in range(self.segments - 1):
+                ds = start + ((segment + 1) * segment_size) + (segment * segment_gap)
+                drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
+                ds, segment_gap)
         # Now we draw the line pointer
-        brush = QBrush(self.penColor)
-        pen.setColor(QColor(Qt.black))
-        pen.setWidth(1)
-        p.setPen(pen)
-        p.setBrush(brush)
         valAngle = 90 + self.interpolate(self._value, sweep)
         t = QTransform()
         t.translate(self.arcCenter.x(), self.arcCenter.y())
         t.rotate(valAngle)
         arrow = t.map(self.arrow)
+        #if not self.segments > 0:
+        if self.segments > 0:
+            pen.setWidth(qRound(self.r_height * 0.2))
+            pen.setCapStyle(Qt.FlatCap)
+            pen.setColor(QColor(0, 0, 0, 220))
+            p.setPen(pen)
+            p.setBrush(QColor(0, 0, 0, 220))
+            drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
+            180+90-valAngle,-(180+90-valAngle-45+1))
+
+
+        brush = QBrush(self.penColor)
+        pen.setColor(QColor(Qt.black))
+        pen.setWidth(1)
+        p.setPen(pen)
+        p.setBrush(brush)
         p.drawPolygon(arrow)
 
         # Draw Text
