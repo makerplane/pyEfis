@@ -32,7 +32,7 @@ class ArcGauge(AbstractGauge):
         self.nameLocation = 'top' # can also be 'right' above the value
         self.segments = 0
         self.segment_gap_percent = 0.01
-
+        self.segment_alpha = 210
     def get_height(self, width):
         return width/ 2
 
@@ -154,9 +154,9 @@ class ArcGauge(AbstractGauge):
         if self.segments > 0:
             pen.setWidth(qRound(self.r_height * 0.2))
             pen.setCapStyle(Qt.FlatCap)
-            pen.setColor(QColor(0, 0, 0, 220))
+            pen.setColor(QColor(0, 0, 0, self.segment_alpha))
             p.setPen(pen)
-            p.setBrush(QColor(0, 0, 0, 220))
+            p.setBrush(QColor(0, 0, 0, self.segment_alpha))
             drawCircle(p, self.arcCenter.x(), self.arcCenter.y(), r,
             180+90-valAngle,-(180+90-valAngle-45+1))
 

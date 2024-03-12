@@ -40,6 +40,7 @@ instruments:
       showUnits: false
       showValue: false
       dbkey: COMACTRXLEVEL{radio_id}
+      segments: 22
   - type: horizontal_bar_gauge
     ratio: 3
     row: 16.5
@@ -53,6 +54,7 @@ instruments:
       showUnits: false
       showValue: false
       dbkey: COMSQUELCH{radio_id}
+      segments: 22
   - type: button
     row: 21.5
     column: 0
@@ -74,6 +76,7 @@ instruments:
       showUnits: false
       showValue: false
       dbkey: COMTXPWR{radio_id}
+      segments: 22
   - type: horizontal_bar_gauge
     ratio: 3
     row: 23.5
@@ -87,4 +90,4 @@ instruments:
       showUnits: false
       showValue: false
       dbkey: COMVSWR{radio_id}
-
+      segments: 22

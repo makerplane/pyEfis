@@ -39,4 +39,4 @@ instruments:
       showUnits: false
       showValue: false
       dbkey: COMSTDRXLEVEL{radio_id}
-
+      segments: 22
