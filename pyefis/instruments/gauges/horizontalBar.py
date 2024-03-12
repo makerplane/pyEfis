@@ -128,8 +128,8 @@ class HorizontalBar(AbstractGauge):
             p.drawRect(QRectF(x-2, self.barTop-4, 4, self.barHeight+8))
         else:
             # IF segmented, darken the top part of the bars from the line up
-            pen.setColor(QColor(0, 0, 0, 200))
+            pen.setColor(QColor(0, 0, 0, 220))
             p.setPen(pen)
-            p.setBrush(QColor(0, 0, 0, 200))
+            p.setBrush(QColor(0, 0, 0, 220))
             p.drawRect(QRectF(x, self.barTop, self.width() - x, self.barHeight))
 

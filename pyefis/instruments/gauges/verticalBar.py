@@ -268,8 +268,8 @@ class VerticalBar(AbstractGauge):
             p.drawRect(QRectF(self.lineLeft, x-2,self.lineWidth, 4))
         else:
             # IF segmented, darken the top part of the bars from the line up
-            pen.setColor(QColor(0, 0, 0, 200))
+            pen.setColor(QColor(0, 0, 0, 220))
             p.setPen(pen)
-            p.setBrush(QColor(0, 0, 0, 200))
+            p.setBrush(QColor(0, 0, 0, 220))
             p.drawRect(QRectF(self.barLeft, self.barTop, self.barWidth, x - self.barTop))
 
