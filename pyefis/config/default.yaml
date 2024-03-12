@@ -657,6 +657,7 @@ screens:
               lineWidthPercent: 0.7
               textGap: 8
               decimalPlaces: 0
+              temperature: true
             instruments:
               -
                 options:
@@ -692,6 +693,7 @@ screens:
               lineWidthPercent: 0.7
               textGap: 8
               decimalPlaces: 0
+              temperature: true
             instruments:
               -
                 options:
