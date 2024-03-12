@@ -541,6 +541,7 @@ screens:
           rows: 45
           columns: 70
         options:
+          segments: 28
           name: RPM
           decimalPlaces: 0
           dbkey: TACH1
@@ -552,6 +553,7 @@ screens:
           rows: 45
           columns: 70
         options:
+          segments: 28
           name: MAP
           decimalPlaces: 1
           dbkey: MAP1
@@ -566,7 +568,7 @@ screens:
         groups:
           - name: Oil
             common_options:
-              segments: 16
+              segments: 20
             instruments:
               -
                 options:
@@ -625,7 +627,7 @@ screens:
         groups:
           - name: Power
             common_options:
-              segments: 16
+              segments: 20
               smallFontPercent: 0.060
               bigFontPercent: 0.085
               barWidthPercent: 0.5
@@ -645,7 +647,7 @@ screens:
                   dbkey: CURRNT
           - name: EGT
             common_options:
-              segments: 16
+              segments: 20
               egt_mode_switching: true
               normalizeRange: 400
               smallFontPercent: 0.060
@@ -681,7 +683,7 @@ screens:
                   dbkey: EGT14
           - name: CHT
             common_options:
-              segments: 16
+              segments: 20
               smallFontPercent: 0.060
               bigFontPercent: 0.085
               barWidthPercent: 0.5
@@ -715,7 +717,7 @@ screens:
                   dbkey: CHT14
           - name: FUEL
             common_options:
-              segments: 16
+              segments: 20
               smallFontPercent: 0.060
               bigFontPercent: 0.085
               barWidthPercent: 0.5
