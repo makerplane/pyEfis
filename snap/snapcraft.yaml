@@ -105,7 +105,6 @@ parts:
       - weston
       - fonts-ubuntu
       - fonts-dseg
-      - fonts-open-sans
       - libglu1-mesa
       - libegl-mesa0
       - libegl1
