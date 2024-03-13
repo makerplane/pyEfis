@@ -19,9 +19,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 class NumericalDisplay(QGraphicsView):
-    def __init__(self, parent=None, total_decimals=3, scroll_decimal=1, font_family="Sans", font_size=15):
+    def __init__(self, parent=None, total_decimals=3, scroll_decimal=1, font_family="DejaVu Sans Condensed", font_size=15):
         super(NumericalDisplay, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -99,7 +100,7 @@ class NumericalDisplay(QGraphicsView):
         # Get a failure scene ready in case it's needed
         self.fail_scene = QGraphicsScene(0, 0, self.w, self.h)
         self.fail_scene.addRect(0,0, self.w, self.h, QPen(QColor(Qt.white)), QBrush(QColor(50,50,50)))
-        warn_font = QFont("FixedSys", 10, QFont.Bold)
+        warn_font = QFont(self.font_family, 10, QFont.Bold)
         t = self.fail_scene.addSimpleText("XXX", warn_font)
         t.setPen (QPen(QColor(Qt.red)))
         t.setBrush (QBrush(QColor(Qt.red)))

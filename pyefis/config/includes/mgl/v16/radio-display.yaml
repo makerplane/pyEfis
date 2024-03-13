@@ -29,20 +29,20 @@ instruments:
   - type: include,includes/mgl/v16/active-display.yaml
     relative: true
     row: 5
-    column: 29
+    column: 28
 #    span:
 #      rows: 27
 #      columns: 42
   - type: include,includes/mgl/v16/standby-display.yaml
     relative: true
     row: 5
-    column: 68
+    column: 65
   - type: button
     row: 5
     column: 58
     span:
-      rows: 8
-      columns: 9
+      rows: 6
+      columns: 7
     move:
       shrink: 12
     options:
@@ -50,10 +50,10 @@ instruments:
       font_mask: "SWAP"
   - type: listbox
     row: 0
-    column: 100
+    column: 101
     span:
       rows: 40
-      columns: 55
+      columns: 54
     options:
       encoder: ENC5
       button: BTN30

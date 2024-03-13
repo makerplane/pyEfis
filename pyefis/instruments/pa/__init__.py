@@ -22,9 +22,10 @@ from PyQt5.QtWidgets import *
 
 
 class Panel_Annunciator(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(Panel_Annunciator, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -35,7 +36,7 @@ class Panel_Annunciator(QGraphicsView):
     def resizeEvent(self, event):
         self.w = self.width()
         self.h = self.height()
-        self.f = QFont()
+        self.f = QFont(self.font_family)
         self.f.setBold(True)
         self.f.setPixelSize(16)
 

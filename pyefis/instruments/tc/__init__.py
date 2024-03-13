@@ -24,9 +24,10 @@ import pyavtools.fix as fix
 import pyavtools.filters as filters
 
 class TurnCoordinator(QWidget):
-    def __init__(self, parent=None, dial=True, ss_only=False, filter_depth=0):
+    def __init__(self, parent=None, dial=True, ss_only=False, filter_depth=0, font_family="DejaVu Sans Condensed"):
         super(TurnCoordinator, self).__init__(parent)
         self.myparent = parent
+        self.font_family = font_family
         self.slip_skid_only = ss_only
         self.render_as_dial = dial
         if dial:
@@ -164,7 +165,7 @@ class TurnCoordinator(QWidget):
         center = QPointF(centerball,
                          self.boxTop + ball_rad)
         if self.alat_item.fail:
-            warn_font = QFont("FixedSys", qRound(self.boxHeight), QFont.Bold)
+            warn_font = QFont(self.font_family, qRound(self.boxHeight), QFont.Bold)
             p.setPen (QPen(QColor(Qt.red)))
             p.setBrush (QBrush(QColor(Qt.red)))
             p.setFont (warn_font)
@@ -191,7 +192,7 @@ class TurnCoordinator(QWidget):
             self._rate = -5
         x = self.r - length - thickness / 2
         if self.rot_item.fail:
-            warn_font = QFont("FixedSys", 20, QFont.Bold)
+            warn_font = QFont(self.font_family, 20, QFont.Bold)
             p.setPen (QPen(QColor(Qt.red)))
             p.setBrush (QBrush(QColor(Qt.red)))
             p.setFont (warn_font)

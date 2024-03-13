@@ -278,66 +278,69 @@ class Screen(QWidget):
         #        dbkey = i['options']['dbkey']            
 
         font_percent = None
+        font_family = "DejaVu Sans Condensed"
         if 'options' in i:
             if 'font_percent' in i['options']:
                 font_percent = i['options']['font_percent']
+            if 'font_family' in i['options']:
+                font_family = i['options']['font_family']
         # Process the type of instrument this is and create them
         if i['type'] == 'weston':
             self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
         if i['type'] == 'airspeed_dial':
-            self.instruments[count] = airspeed.Airspeed(self)
+            self.instruments[count] = airspeed.Airspeed(self,font_family=font_family)
         if i['type'] == 'airspeed_box':
-            self.instruments[count] = airspeed.Airspeed_Box(self)
+            self.instruments[count] = airspeed.Airspeed_Box(self,font_family=font_family)
         if i['type'] == 'airspeed_tape':
             self.instruments[count] = airspeed.Airspeed_Tape(self,font_percent=font_percent)
         if i['type'] == 'airspeed_trend_tape':
-            self.instruments[count] = vsi.AS_Trend_Tape(self)
+            self.instruments[count] = vsi.AS_Trend_Tape(self,font_family=font_family)
         elif i['type'] == 'altimeter_dial':
-            self.instruments[count] = altimeter.Altimeter(self)
+            self.instruments[count] = altimeter.Altimeter(self,font_family=font_family)
         elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self,font_percent=font_percent)
+            self.instruments[count] = ai.AI(self,font_percent=font_percent,font_family=font_family)
         elif i['type'] == 'altimeter_tape':
-            self.instruments[count] = altimeter.Altimeter_Tape(self)
+            self.instruments[count] = altimeter.Altimeter_Tape(self,font_family=font_family)
         elif i['type'] == 'altimeter_trend_tape':
-            self.instruments[count] = vsi.Alt_Trend_Tape(self)
+            self.instruments[count] = vsi.Alt_Trend_Tape(self,font_family=font_family)
         elif i['type'] == 'button':
             if 'options' in i and 'config' in i['options']:
-                self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.config_path,i['options']['config']))
+                self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.config_path,i['options']['config']), font_family=font_family)
             else:
                 logger.warn("button must specify options: config:") 
         elif i['type'] == 'heading_display':
-            self.instruments[count] = hsi.HeadingDisplay(self)
+            self.instruments[count] = hsi.HeadingDisplay(self,font_family=font_family)
         elif i['type'] == 'heading_tape':
-            self.instruments[count] = hsi.DG_Tape(self)
+            self.instruments[count] = hsi.DG_Tape(self,font_family=font_family)
         elif i['type'] == 'horizontal_situation_indicator':
             #TODO Fix this so cdi/gsi can be enabled/disabled
-            self.instruments[count] = hsi.HSI(self, font_percent=font_percent, cdi_enabled=True, gsi_enabled=True)
+            self.instruments[count] = hsi.HSI(self, font_percent=font_percent, cdi_enabled=True, gsi_enabled=True,font_family=font_family)
         elif i['type'] == 'numeric_display':
-            self.instruments[count] = gauges.NumericDisplay(self)
+            self.instruments[count] = gauges.NumericDisplay(self,font_family=font_family)
         elif i['type'] == 'value_text':
-            self.instruments[count] = misc.ValueDisplay(self)
+            self.instruments[count] = misc.ValueDisplay(self, font_family=font_family)
         elif i['type'] == 'static_text':
             #print(i['options']['text'])
-            self.instruments[count] = misc.StaticText(text=i['options']['text'], parent=self)
+            self.instruments[count] = misc.StaticText(text=i['options']['text'], parent=self, font_family=font_family)
         elif i['type'] == 'turn_coordinator':
-            self.instruments[count] = tc.TurnCoordinator(self)
+            self.instruments[count] = tc.TurnCoordinator(self,font_family=font_family)
         elif i['type'] == 'vsi_dial':
-            self.instruments[count] = vsi.VSI_Dial(self)
+            self.instruments[count] = vsi.VSI_Dial(self,font_family=font_family)
         elif i['type'] == 'vsi_pfd':
-            self.instruments[count] = vsi.VSI_PFD(self)
+            self.instruments[count] = vsi.VSI_PFD(self,font_family=font_family)
 
         # Gauges
         elif i['type'] == 'arc_gauge':
-            self.instruments[count] = gauges.ArcGauge(self,min_size=False)
+            self.instruments[count] = gauges.ArcGauge(self,min_size=False,font_family=font_family)
         elif i['type'] == 'horizontal_bar_gauge':
-            self.instruments[count] = gauges.HorizontalBar(self,min_size=False)
+            self.instruments[count] = gauges.HorizontalBar(self,min_size=False,font_family=font_family)
         elif i['type'] == 'vertical_bar_gauge':
-            self.instruments[count] = gauges.VerticalBar(self,min_size=False)
+            self.instruments[count] = gauges.VerticalBar(self,min_size=False,font_family=font_family)
         elif i['type'] == 'virtual_vfr':
-            self.instruments[count] = VirtualVfr(self,font_percent=font_percent)
+            self.instruments[count] = VirtualVfr(self,font_percent=font_percent,font_family=font_family)
 
         elif i['type'] == 'listbox':
-            self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'],encoder=i['options'].get('encoder',None),button=i['options'].get('button',None), replace=replace) #,font_percent=font_percent)
+            self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'],encoder=i['options'].get('encoder',None),button=i['options'].get('button',None), replace=replace,font_family=font_family) #,font_percent=font_percent)
          # Set options
         if 'options' in i:
             #loop over each option

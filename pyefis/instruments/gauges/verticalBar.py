@@ -22,8 +22,9 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge
 
 class VerticalBar(AbstractGauge):
-    def __init__(self, parent=None,min_size=True):
+    def __init__(self, parent=None,min_size=True, font_family="DejaVu Sans Condensed"):
         super(VerticalBar, self).__init__(parent)
+        self.font_family = font_family
         if min_size:
             self.setMinimumSize(50, 100)
         self.showValue = True
@@ -102,9 +103,9 @@ class VerticalBar(AbstractGauge):
     def resizeEvent(self, event):
         self.barWidth = self.width() * self.barWidthPercent
         self.lineWidth = self.width() * self.lineWidthPercent
-        self.bigFont = QFont()
+        self.bigFont = QFont(self.font_family)
         self.bigFont.setPixelSize(qRound(self.height() * self.bigFontPercent))
-        self.smallFont = QFont()
+        self.smallFont = QFont(self.font_family)
         self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
         #self.barHeight = self.height() / 6
         if self.showName:

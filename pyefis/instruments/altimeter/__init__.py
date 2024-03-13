@@ -24,12 +24,14 @@ import pyavtools.fix as fix
 
 from pyefis.instruments.NumericalDisplay import NumericalDisplay
 import pyefis.hmi as hmi 
+from pyefis.instruments import helpers
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None, bg_color=Qt.black):
+    def __init__(self, parent=None, bg_color=Qt.black, font_family="DejaVu Sans Condensed"):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self._altimeter = 0
         self.bg_color = bg_color
@@ -64,7 +66,7 @@ class Altimeter(QWidget):
 
         # Setup Pens
         if self.item.old or self.item.bad:
-            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Bold)
             dialPen = QPen(QColor(Qt.gray))
             dialBrush = QBrush(QColor(Qt.gray))
         else:
@@ -76,7 +78,7 @@ class Altimeter(QWidget):
         dial.setPen(dialPen)
         dial.drawEllipse(QRectF(center_x-radius, center_y-radius, diameter, diameter))
 
-        f = QFont()
+        f = QFont(self.font_family)
         fs = int(round(20 * w / self.FULL_WIDTH))
         f.setPixelSize(fs)
         fontMetrics = QFontMetricsF(f)
@@ -108,7 +110,7 @@ class Altimeter(QWidget):
             count += 7.2
 
         if self.item.fail:
-            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Bold)
             dial.resetTransform()
             dial.setPen (QPen(QColor(Qt.red)))
             dial.setBrush (QBrush(QColor(Qt.red)))
@@ -195,9 +197,11 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None, maxalt=50000, fontsize=15,font_percent=None):
+    def __init__(self, parent=None, maxalt=50000, fontsize=15,font_percent=None,font_family="DejaVu Sans Condensed"):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background: transparent")
+        self.font_family = font_family
+        self.font_mask = "00000"
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -235,8 +239,12 @@ class Altimeter_Tape(QGraphicsView):
         w = self.width()
         w_2 = w/2
         h = self.height()
-        f = QFont()
-        f.setPixelSize(self.fontsize)
+        f = QFont(self.font_family)
+        if self.font_mask:
+            self.font_size = helpers.fit_to_mask(self.width()*.55,self.height()*0.05,self.font_mask,self.font_family)
+            f.setPointSizeF(self.font_size)
+        else:
+            f.setPixelSize(self.fontsize)
         self.height_pixel = self.maxalt*self.pph + h
 
         dialPen = QPen(QColor(Qt.white))

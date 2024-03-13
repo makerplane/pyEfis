@@ -26,23 +26,23 @@ class NumericDisplay(AbstractGauge):
     """Represents a simple numeric display type gauge.  The benefit of using this
        over a normal text display is that this will change colors properly when
        limits are reached or when failures occur"""
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(NumericDisplay, self).__init__(parent)
+        self.font_family = font_family
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
         self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
         self.showUnits = False
         self.smallFontPercent = 0.4
-        self.font_mask = None
         self.units_font_mask = None
 
     def resizeEvent(self, event):
         self.font_size = self.height()
         
         if self.font_mask:
-            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,"Sans",self.units_font_mask,self.smallFontPercent)
-        self.bigFont = QFont()
+            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family,self.units_font_mask,self.smallFontPercent)
+        self.bigFont = QFont(self.font_family)
         self.bigFont.setPointSizeF(self.font_size)
-        self.smallFont = QFont()
+        self.smallFont = QFont(self.font_family)
         self.smallFont.setPointSizeF(qRound(self.font_size * self.smallFontPercent))
         qm = QFontMetrics(self.smallFont)
         unitsWidth = qm.width(self.units)
@@ -65,10 +65,17 @@ class NumericDisplay(AbstractGauge):
         p.setPen(pen)
 
         # Draw Value
-        pen.setColor(self.valueColor)
-        p.setPen(pen)
         p.setFont(self.bigFont)
         opt = QTextOption(self.alignment)
+        if self.font_ghost_mask:
+            alpha = self.valueColor.alpha()
+            self.valueColor.setAlpha(self.font_ghost_alpha)
+            pen.setColor(self.valueColor)
+            p.setPen(pen)
+            p.drawText(self.valueTextRect, self.font_ghost_mask, opt)
+            self.valueColor.setAlpha(alpha)
+        pen.setColor(self.valueColor)
+        p.setPen(pen)
         p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draw Units
