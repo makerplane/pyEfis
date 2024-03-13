@@ -24,12 +24,14 @@ from PyQt5.QtWidgets import *
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
 from pyefis.instruments.NumericalDisplay import NumericalDisplay
+from pyefis.instruments import helpers
 
 class Airspeed(QWidget):
     FULL_WIDTH = 400
-    def __init__(self, parent=None, font_percent=0.07, bg_color=Qt.black):
+    def __init__(self, parent=None, font_percent=0.07, bg_color=Qt.black, font_family="DejaVu Sans Condensed"):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self.font_percent = font_percent
         self.bg_color = bg_color
@@ -69,7 +71,7 @@ class Airspeed(QWidget):
         dial.fillRect(0, 0, w, h, QColor(self.bg_color))
 
         # Setup Pens
-        f = QFont()
+        f = QFont(self.font_family)
         fs = int(round(self.font_percent * s))
         f.setPixelSize(fs)
         fontMetrics = QFontMetricsF(f)
@@ -146,7 +148,7 @@ class Airspeed(QWidget):
             count += 0.5
 
         if self.item.fail:
-            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Bold)
             dial.resetTransform()
             dial.setPen (QPen(QColor(Qt.red)))
             dial.setBrush (QBrush(QColor(Qt.red)))
@@ -156,7 +158,7 @@ class Airspeed(QWidget):
             return
 
         if self.item.old or self.item.bad:
-            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Bold)
             dial.setPen(QPen(QColor(Qt.gray)))
             dial.setBrush(QBrush(QColor(Qt.gray)))
         else:
@@ -212,9 +214,11 @@ class Airspeed(QWidget):
 
 
 class Airspeed_Tape(QGraphicsView):
-    def __init__(self, parent=None, font_percent=None):
+    def __init__(self, parent=None, font_percent=None,font_family="DejaVu Sans Condensed"):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
+        self.font_family = font_family
+        self.font_mask = "000"
         self.update_period = None
         self.font_percent = font_percent
         # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
@@ -255,8 +259,12 @@ class Airspeed_Tape(QGraphicsView):
         w = self.width()
         h = self.height()
         self.markWidth = w / 5
-        f = QFont()
-        f.setPixelSize(self.fontsize)
+        f = QFont(self.font_family)
+        if self.font_mask:
+            self.fontsize = helpers.fit_to_mask(self.width()*.50,self.height()*0.05,self.font_mask,self.font_family)
+            f.setPointSizeF(self.fontsize)
+        else:
+            f.setPixelSize(self.fontsize)
         tape_height = self.max * self.pph + h
         tape_start = self.max * self.pph + h/2
 
@@ -391,8 +399,9 @@ class Airspeed_Box(QWidget):
     """Represents a simple numeric display type gauge.  The benefit of using this
        over a normal text display is that this will change colors properly when
        limits are reached or when failures occur"""
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(Airspeed_Box, self).__init__(parent)
+        self.font_family = font_family
         self.modes = ["TAS", "GS", "IAS"]
         self._modeIndicator = 0
         self.fix_items = [fix.db.get_item(mode) for mode in self.modes]
@@ -408,9 +417,9 @@ class Airspeed_Box(QWidget):
         hmi.actions.setAirspeedMode.connect(self.setMode)
 
     def resizeEvent(self, event):
-        self.bigFont = QFont()
+        self.bigFont = QFont(self.font_family)
         self.bigFont.setPixelSize(qRound(self.height() * self.small_font_percent))
-        self.smallFont = QFont()
+        self.smallFont = QFont(self.font_family)
         self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         qm = QFontMetrics(self.smallFont)
 

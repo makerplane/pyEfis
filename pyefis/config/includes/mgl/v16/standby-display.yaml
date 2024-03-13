@@ -7,6 +7,8 @@ instruments:
       rows: 8
       columns: 30
     options:
+      font_ghost_mask: "~~~~~~~"
+      font_family: "DSEG14 Classic"
       font_mask: "100.000"
       decimalPlaces: 3
       dbkey: COMSTDFREQ{radio_id}
@@ -17,6 +19,9 @@ instruments:
       rows: 5
       columns: 35
     options:
+      font_family: "DSEG14 Classic"
+      font_ghost_mask: "~~~~~~~~~~~~~"
+      font_mask:       "XXXXXXXXXXXXX"
       _dbkey: COMSTDNAME{radio_id}
   - type: button
     row: 14

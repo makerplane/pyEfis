@@ -38,10 +38,11 @@ import time
 from pyefis.instruments import helpers
 
 class Button(QWidget):
-    def __init__(self, parent=None, config_file=None):
+    def __init__(self, parent=None, config_file=None, font_family="DejaVu Sans Condensed"):
         super(Button, self).__init__(parent)
 
         self.parent = parent
+        self.font_family = font_family
         self.font_mask = None
         self.font_size = None
         config = yaml.load(open(config_file), Loader=yaml.SafeLoader)
@@ -277,10 +278,10 @@ class Button(QWidget):
                 self._button.setChecked(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
-        self.font = QFont()
+        self.font = QFont(self.font_family)
         if self.font_mask:
             if not self.font_size:
-                self.font_size = helpers.fit_to_mask(self.width()-(self._style['border_size']*2),self.height()-(self._style['border_size']*2),self.font_mask,"Sans")
+                self.font_size = helpers.fit_to_mask(self.width()-(self._style['border_size']*2.5),self.height()-(self._style['border_size']*2.5),self.font_mask,self.font_family)
             self.font.setPointSizeF(self.font_size)
         else:
             self.font.setPixelSize(qRound(self.height() * 38/100))

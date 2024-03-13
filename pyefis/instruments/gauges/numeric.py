@@ -26,8 +26,9 @@ class NumericDisplay(AbstractGauge):
     """Represents a simple numeric display type gauge.  The benefit of using this
        over a normal text display is that this will change colors properly when
        limits are reached or when failures occur"""
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(NumericDisplay, self).__init__(parent)
+        self.font_family = font_family
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
         self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
         self.showUnits = False

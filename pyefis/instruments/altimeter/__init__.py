@@ -28,7 +28,7 @@ from pyefis.instruments import helpers
 
 class Altimeter(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None, bg_color=Qt.black, font_family="Ubuntu Regular"):
+    def __init__(self, parent=None, bg_color=Qt.black, font_family="DejaVu Sans Condensed"):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
@@ -197,7 +197,7 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None, maxalt=50000, fontsize=15,font_percent=None,font_family="Ubuntu Regular"):
+    def __init__(self, parent=None, maxalt=50000, fontsize=15,font_percent=None,font_family="DejaVu Sans Condensed"):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background: transparent")
         self.font_family = font_family

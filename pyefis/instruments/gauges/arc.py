@@ -22,8 +22,9 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge, drawCircle
 
 class ArcGauge(AbstractGauge):
-    def __init__(self, parent=None,min_size=True):
+    def __init__(self, parent=None,min_size=True, font_family="DejaVu Sans Condensed"):
         super(ArcGauge, self).__init__(parent)
+        self.font_family = font_family
         if min_size:
             self.setMinimumSize(100, 50)
         self.startAngle = 45
@@ -172,7 +173,7 @@ class ArcGauge(AbstractGauge):
         pen.setColor(self.textColor)
         pen.setWidth(1)
         p.setPen(pen)
-        f = QFont()
+        f = QFont(self.font_family)
         f.setPixelSize(qRound(self.r_height / 2))
         y = f.pixelSize()
         f.setPixelSize(qRound(self.r_height / 6))

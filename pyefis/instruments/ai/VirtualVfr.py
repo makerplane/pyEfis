@@ -48,17 +48,15 @@ EARTH_RADIUS=EARTH_RADIUS_M * FEET_METER
 class VirtualVfr(AI):
     CENTERLINE_WIDTH = 3
     MIN_FONT_SIZE=7
-    RUNWAY_LABEL_FONT_FAMILY="Sans" #"Courier"
-    AIRPORT_FONT_FAMILY="Sans"
     AIRPORT_FONT_SIZE=10
     PAPI_YOFFSET = 8
     PAPI_LIGHT_SPACING = 9
     VORTAC_ICON_PATH="vortac.png"
-    def __init__(self, parent=None, font_percent=None):
+    def __init__(self, parent=None, font_percent=None, font_family="DejaVu Sans Condensed"):
         super(VirtualVfr, self).__init__(parent, font_percent=font_percent)
         self.display_objects = dict()
         time.sleep(.6)      # Pause to let DB load
-
+        self.font_family = font_family
         self.gsi = False
         self.font_percent = font_percent
         self._VFROld = dict()
@@ -113,7 +111,7 @@ class VirtualVfr(AI):
         self.missing_lng = self.lng == 0.0
   
         self.myparent = parent
-        minfont = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, VirtualVfr.MIN_FONT_SIZE, QFont.Bold)
+        minfont = QFont(self.font_family, VirtualVfr.MIN_FONT_SIZE, QFont.Bold)
         t = QGraphicsSimpleTextItem ("9 9")
         t.setFont (minfont)
         self.min_font_width = t.boundingRect().width()
@@ -163,7 +161,7 @@ class VirtualVfr(AI):
         ret = (max_size - min_size) / 2
         t = QGraphicsSimpleTextItem ("9 9")
         while True:
-            font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, qRound(ret), QFont.Bold)
+            font = QFont(self.font_family, qRound(ret), QFont.Bold)
             t.setFont (font)
             if t.boundingRect().width() * 1.5 > width:
                 max_size = ret
@@ -176,7 +174,7 @@ class VirtualVfr(AI):
         incr = int((max_size - min_size) / 2)
         while incr > 0:
             ret += incr
-            font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, qRound(ret), QFont.Bold)
+            font = QFont(self.font_family, qRound(ret), QFont.Bold)
             t.setFont (font)
             if t.boundingRect().width() * 1.1 > width:
                 ret -= incr
@@ -283,7 +281,7 @@ class VirtualVfr(AI):
             if draw_width > self.min_font_width*1.5:
                 #print ("Runway label will fit underneath runway polygon. font size is %d"%font_size)
                 font_size = self.get_largest_font_size(draw_width)
-                font = QFont(VirtualVfr.RUNWAY_LABEL_FONT_FAMILY, qRound(font_size), QFont.Bold)
+                font = QFont(self.font_family, qRound(font_size), QFont.Bold)
                 label = label[0] + " " + label[1:]
                 if lkey in self.display_objects:
                     # Update label position
@@ -440,7 +438,7 @@ class VirtualVfr(AI):
         if akey in self.display_objects:
             ap = self.display_objects[akey]
         else:
-            font = QFont(VirtualVfr.AIRPORT_FONT_FAMILY, VirtualVfr.AIRPORT_FONT_SIZE, QFont.Bold)
+            font = QFont(self.font_family, VirtualVfr.AIRPORT_FONT_SIZE, QFont.Bold)
             ap = self.scene.addSimpleText(airport_id, font)
             ap.setPen(QPen(QColor(Qt.blue)))
             ap.setBrush(QBrush(QColor(Qt.white)))
@@ -472,7 +470,7 @@ class VirtualVfr(AI):
             vtlabel = self.display_objects[vlkey]
             vticon = self.display_objects[vkey]
         else:
-            font = QFont(VirtualVfr.AIRPORT_FONT_FAMILY, VirtualVfr.AIRPORT_FONT_SIZE-2, QFont.Bold)
+            font = QFont(self.font_family, VirtualVfr.AIRPORT_FONT_SIZE-2, QFont.Bold)
             vtlabel = self.scene.addSimpleText(navaid_id, font)
             vtlabel.setPen(QPen(QColor(Qt.blue)))
             vtlabel.setBrush(QBrush(QColor(Qt.white)))

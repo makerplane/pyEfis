@@ -26,9 +26,10 @@ import pyavtools.fix as fix
 
 class VSI_Dial(QWidget):
     FULL_WIDTH = 300
-    def __init__(self, parent=None, fontsize=20):
+    def __init__(self, parent=None, fontsize=20, font_family="DejaVu Sans Condensed"):
         super(VSI_Dial, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = fontsize
         self._roc = 0
@@ -47,7 +48,7 @@ class VSI_Dial(QWidget):
     def resizeEvent(self, event):
         self.background = QPixmap(self.width(), self.height())
         self.r = int(round(min(self.width(), self.height()) *.45))
-        f = QFont()
+        f = QFont(self.font_family)
         fs = int(round(self.fontSize * self.width() / self.FULL_WIDTH))
         f.setPixelSize(fs)
         fm = QFontMetrics(f)
@@ -134,11 +135,11 @@ class VSI_Dial(QWidget):
         dial.drawPixmap(0, 0, self.background)
 
         # Setup Pens
-        f = QFont()
+        f = QFont(self.font_family)
         f.setPixelSize(self.fontSize)
 
         if self.item.old or self.item.bad:
-            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Bold)
             dialPen = QPen(QColor(Qt.gray))
             dialBrush = QBrush(QColor(Qt.gray))
         else:
@@ -150,7 +151,7 @@ class VSI_Dial(QWidget):
         dial.setBrush(dialBrush)
 
         if self.item.fail:
-            warn_font = QFont("FixedSys", 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Bold)
             dial.resetTransform()
             dial.setPen (QPen(QColor(Qt.red)))
             dial.setBrush (QBrush(QColor(Qt.red)))
@@ -196,9 +197,10 @@ class VSI_Dial(QWidget):
 
 
 class VSI_PFD(QWidget):
-    def __init__(self, parent=None, font_percent=0.15):
+    def __init__(self, parent=None, font_percent=0.15, font_family="DejaVu Sans Condensed"):
         super(VSI_PFD, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
+        self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = int(self.width() * font_percent)
         self.marks = [(500,""),(1000,"1"),(1500,""),(2000,"2")]
@@ -217,7 +219,7 @@ class VSI_PFD(QWidget):
         # We use a pixmap for the static background
         self.background = QPixmap(self.width(), self.height())
         self.background.fill(Qt.transparent)
-        f = QFont()
+        f = QFont(self.font_family)
         f.setPixelSize(self.fontSize)
         fm = QFontMetrics(f)
         p = QPainter(self.background)
@@ -299,9 +301,10 @@ class VSI_PFD(QWidget):
 
 
 class AS_Trend_Tape(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(AS_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -371,9 +374,10 @@ class AS_Trend_Tape(QGraphicsView):
 class Alt_Trend_Tape(QGraphicsView):
     RIGHT_MARGIN = 5
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(Alt_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -401,9 +405,9 @@ class Alt_Trend_Tape(QGraphicsView):
         w_2 = w / 2
         h = self.height()
 
-        f = QFont()
+        f = QFont(self.font_family)
         f.setPixelSize(self.fontsize)
-        bf = QFont()
+        bf = QFont(self.font_family)
         bf.setPixelSize(self.fontsize + 2)
         bf.setBold(True)
 

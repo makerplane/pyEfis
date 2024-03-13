@@ -26,7 +26,7 @@ def drawCircle(p, x, y, r, start, end):
     p.drawArc(rect, qRound(start * 16), qRound(end * 16))
 
 class AbstractGauge(QWidget):
-    def __init__(self, parent=None, font_family="Ubuntu Regular"):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(AbstractGauge, self).__init__(parent)
         self.font_family = font_family
         self.font_ghost_mask = None

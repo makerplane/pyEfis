@@ -32,9 +32,10 @@ from pyefis.instruments import helpers
 
 
 class HSI(QGraphicsView):
-    def __init__(self, parent=None, font_size=15, font_percent=None, fgcolor=Qt.white, bgcolor=Qt.black, gsi_enabled=False, cdi_enabled=False):
+    def __init__(self, parent=None, font_size=15, font_percent=None, fgcolor=Qt.white, bgcolor=Qt.black, gsi_enabled=False, cdi_enabled=False, font_family="DejaVu Sans Condensed"):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
+        self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -156,8 +157,7 @@ class HSI(QGraphicsView):
         headingPen.setWidth(1)
 
 
-        f = QFont()
-        f.setFamily ("Sans")
+        f = QFont(self.font_family)
         f.setPixelSize(self.fontSize)
 
         for count in range(0, 360, 5):
@@ -441,8 +441,9 @@ class HSI(QGraphicsView):
 
 
 class HeadingDisplay(QWidget):
-    def __init__(self, parent=None, fgcolor=Qt.gray, bgcolor=Qt.black ):
+    def __init__(self, parent=None, fgcolor=Qt.gray, bgcolor=Qt.black, font_family="DejaVu Sans Condensed" ):
         super(HeadingDisplay, self).__init__(parent)
+        self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self.fg_color = fgcolor
         self.bg_color = bgcolor
@@ -462,9 +463,8 @@ class HeadingDisplay(QWidget):
 
         self._heading = self.item.value
 
-        self.font = QFont()
+        self.font = QFont(self.font_family)
         self.font.setBold(True)
-        self.font.setFamily ("Sans")
         self.font_mask = "999"
         self.font_percent = 0.80
         self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,"Sans")
@@ -527,9 +527,10 @@ class HeadingDisplay(QWidget):
         self.update()
 
 class DG_Tape(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(DG_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
+        self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
@@ -557,7 +558,7 @@ class DG_Tape(QGraphicsView):
         headingPen = QPen(QColor(Qt.red))
         headingPen.setWidth(8)
 
-        f = QFont()
+        f = QFont(self.font_family)
         f.setPixelSize(self.fontsize)
 
         self.scene = QGraphicsScene(0, 0, 5000, h)

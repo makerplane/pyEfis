@@ -73,11 +73,11 @@ instruments:
     column: 0
     span:
       rows: 5
-      columns: 20
+      columns: 21
     options:
       text: "Auto Pilot:"
       alignment: AlignRight
-      font_mask: "Auto Pilot:"
+      font_mask: "Auto_Pilot:"
   - type: value_text
     row: 0
     column: 97
@@ -99,7 +99,7 @@ instruments:
       font_mask: "HH:MM:SS ZZZ"
   - type: value_text
     row: 0
-    column: 21
+    column: 22
     span:
       rows: 5
       columns: 50

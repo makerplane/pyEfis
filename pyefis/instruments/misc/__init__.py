@@ -25,12 +25,12 @@ class StaticText(QWidget):
     """Represents a simple static text display.  This is very simple and is
        really just here to keep the individual screens from having to have
        a painter object and a redraw event handler"""
-    def __init__(self, text="", fontsize=1.0, color=QColor(Qt.white), parent=None, font_family="Ubuntu Regular"):
+    def __init__(self, text="", fontsize=1.0, color=QColor(Qt.white), parent=None, font_family="DejaVu Sans Condensed"):
         super(StaticText, self).__init__(parent)
         self.font_family = font_family
         self.font_ghost_mask = None
         self.font_ghost_alpha = 50
-        self.alignment = "AlignCenter"
+        self.alignment = "AlignLeft"
         self.font_percent = fontsize
         self.text = text
         self.color = color

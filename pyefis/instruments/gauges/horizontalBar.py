@@ -22,8 +22,9 @@ from PyQt5.QtWidgets import *
 from .abstract import AbstractGauge
 
 class HorizontalBar(AbstractGauge):
-    def __init__(self, parent=None, min_size=True):
+    def __init__(self, parent=None, min_size=True, font_family="DejaVu Sans Condensed"):
         super(HorizontalBar, self).__init__(parent)
+        self.font_family = font_family
         if min_size:
             self.setMinimumSize(100, 50)
         self.showValue = True
@@ -37,9 +38,9 @@ class HorizontalBar(AbstractGauge):
         return 2
 
     def resizeEvent(self, event):
-        self.bigFont = QFont()
+        self.bigFont = QFont(self.font_family)
         self.bigFont.setPixelSize(qRound(self.height() / 2))
-        self.smallFont = QFont()
+        self.smallFont = QFont(self.font_family)
         self.smallFont.setPixelSize(qRound(self.height() / 5))
         self.barHeight = self.height() / 6
         self.barTop = self.height() / 5 + 4

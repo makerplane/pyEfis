@@ -17,9 +17,10 @@ from pyefis.instruments import misc
 import geopy.distance
 
 class ListBox(QGraphicsView):
-    def __init__(self, parent=None, lists=[], replace=None, encoder=None, button=None):
+    def __init__(self, parent=None, lists=[], replace=None, encoder=None, button=None, font_family="DejaVu Sans Condensed"):
         super(ListBox, self).__init__(parent)
         self.parent = parent
+        self.font_family = font_family
         self.tlists = dict()
         for l in lists:
             self.tlists[l["name"]] = yaml.load(open(os.path.join(self.parent.parent.config_path,l['file'])), Loader=yaml.SafeLoader)
@@ -40,6 +41,7 @@ class ListBox(QGraphicsView):
 
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        #self.table.horizontalHeader().setFont(QFont(self.font_family))
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.verticalHeader().setVisible(False)
 
@@ -140,6 +142,7 @@ class ListBox(QGraphicsView):
             border: 1px solid white;
             gridline-color: white;
             color: white;
+            font-family: "{self.font_family}";
             font-size: {qRound(self.height() * 7/100)}px;
         }}
         QTableView::item:selected {{
@@ -152,6 +155,7 @@ class ListBox(QGraphicsView):
             border: 1px solid white;
             gridline-color: white;
             padding: 2px;
+            font-family: "{self.font_family}";
             font-size: {qRound(self.height() * 7/100)}px;
         }}
         QHeaderView::section:horizontal {{
@@ -172,7 +176,7 @@ class ListBox(QGraphicsView):
         }}
         """
         self.table.setStyleSheet(style_sheet)
-
+        #self.table.setDefaultFont(QFont(self.font_family))
         self.table.setMinimumWidth(self.width())
         self.table.setMinimumHeight(int(self.height() * 90/100))
         self.table.move(0,int(self.height() * 10/100))
@@ -201,11 +205,14 @@ class ListBox(QGraphicsView):
         self.table.setRowCount( self.rows + len( self.sort_options ) + len(self.tlists) - 1 + loc) 
         #self.table.setMinimumWidth(500)
         self.table.setHorizontalHeaderLabels( self.column_names )
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         #self.table.horizontalHeader().stretchLastSection()
+        self.table.horizontalHeader().setMaximumSectionSize(int(self.width() * 36/100))
+        self.table.horizontalHeader().setMinimumSectionSize(int(self.width() * 26/100))
         self.table.horizontalHeader().setStretchLastSection(True) 
         #self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setMaximumSectionSize(int(self.width() * 35/100)) 
+        #self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        #self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         index = 0
         self.actions = []
         if len(self.tlists) > 1:

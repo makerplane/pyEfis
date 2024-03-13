@@ -36,9 +36,10 @@ log = logging.getLogger(__name__)
 #   Add configuration for bank angle tick sizes
 
 class AI(QGraphicsView):
-    def __init__(self, parent=None,font_percent=None):
+    def __init__(self, parent=None,font_percent=None, font_family="DejaVu Sans Condensed"):
         super(AI, self).__init__(parent)
         self.myparent = parent
+        self.font_family = font_family
         # The following information is meant to be configurable from the screen
         # definition file
         self.font_percent = font_percent
@@ -140,7 +141,7 @@ class AI(QGraphicsView):
         # Get a failure scene ready in case it's needed
         self.fail_scene = QGraphicsScene(0, 0, sceneWidth, sceneHeight)
         self.fail_scene.addRect(0,0, sceneWidth, sceneHeight, QPen(QColor(Qt.white)), QBrush(QColor(50,50,50)))
-        font = QFont("FixedSys", 80, QFont.Bold)
+        font = QFont(self.font_family, 80, QFont.Bold)
         t = self.fail_scene.addSimpleText("XXX", font)
         t.setPen (QPen(QColor(Qt.red)))
         t.setBrush (QBrush(QColor(Qt.red)))
@@ -193,7 +194,7 @@ class AI(QGraphicsView):
         pen.setColor(Qt.white)
         w = self.scene.width()
         h = self.scene.height()
-        f = QFont()
+        f = QFont(self.font_family)
         f.setPixelSize(self.fontSize)
 
         # Draw the tick mark lines on the scene
