@@ -32,7 +32,7 @@ class HorizontalBar(AbstractGauge):
         self.showName = True
         self.segments = 0 
         self.segment_gap_percent = 0.01
-        self.segment_alpha = 210
+        self.segment_alpha = 180
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
         return 2

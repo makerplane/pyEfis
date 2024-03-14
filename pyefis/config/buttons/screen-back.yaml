@@ -1,7 +1,0 @@
-type: simple
-text: "Back"
-dbkey: BTN5
-conditions:
-  - when: "CLICKED eq true" 
-    actions:
-      - show previous screen: true

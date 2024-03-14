@@ -45,7 +45,7 @@ class VerticalBar(AbstractGauge):
         self._oldpencolor = self.penGoodColor
         self.segments = 0
         self.segment_gap_percent = 0.012
-        self.segment_alpha = 210
+        self.segment_alpha = 180
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument

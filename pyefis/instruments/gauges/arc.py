@@ -33,7 +33,7 @@ class ArcGauge(AbstractGauge):
         self.nameLocation = 'top' # can also be 'right' above the value
         self.segments = 0
         self.segment_gap_percent = 0.01
-        self.segment_alpha = 210
+        self.segment_alpha = 180
     def get_height(self, width):
         return width/ 2
 
