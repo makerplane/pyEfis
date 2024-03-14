@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import *
 
 
 import pyavtools.fix as fix
-
+from pyefis.instruments import helpers
 
 class VSI_Dial(QWidget):
     FULL_WIDTH = 300
@@ -203,7 +203,8 @@ class VSI_PFD(QWidget):
         self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self.fontSize = int(self.width() * font_percent)
-        self.marks = [(500,""),(1000,"1"),(1500,""),(2000,"2")]
+        self.font_mask = "1000"
+        self.marks = [(500,"500"),(1000,"1000"),(1500,"1500"),(2000,"2000")]
         self.scaleRoot = 0.7
         self._value = 0
         self.item = fix.db.get_item("VS")
@@ -220,7 +221,11 @@ class VSI_PFD(QWidget):
         self.background = QPixmap(self.width(), self.height())
         self.background.fill(Qt.transparent)
         f = QFont(self.font_family)
-        f.setPixelSize(self.fontSize)
+        if self.font_mask:
+            self.fontSize = helpers.fit_to_mask(self.width()*.60,self.height()*0.05,self.font_mask,self.font_family)
+            f.setPointSizeF(self.fontSize)
+        else:
+            f.setPixelSize(self.fontSize)
         fm = QFontMetrics(f)
         p = QPainter(self.background)
         p.setRenderHint(QPainter.Antialiasing)
@@ -229,7 +234,7 @@ class VSI_PFD(QWidget):
         pen.setWidth(int(self.width() * 0.03))
         p.setPen(pen)
         p.setBrush(QColor(Qt.white))
-        pixelsWidth = fm.width("0")
+        pixelsWidth = fm.width("0000")
         pixelsHigh = fm.height()
 
         # find max
