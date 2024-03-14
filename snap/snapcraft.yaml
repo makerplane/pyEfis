@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.10.0"
+version: "0.10.1"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
