@@ -19,7 +19,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 class NumericalDisplay(QGraphicsView):
-    def __init__(self, parent=None, total_decimals=3, scroll_decimal=1, font_family="DejaVu Sans Condensed", font_size=15):
+    def __init__(self, parent=None, total_decimals=3, scroll_decimal=1, font_family="DejaVu Sans Mono", font_size=15):
         super(NumericalDisplay, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
@@ -83,6 +83,7 @@ class NumericalDisplay(QGraphicsView):
         self.pre_scroll_text = self.scene.addSimpleText (prest, self.f)
         self.pre_scroll_text.setPen(QPen(QColor(Qt.white)))
         self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
+        
         self.pre_scroll_text.setX (0)
         self.pre_scroll_text.setY ((self.h-font_height)/2.0)
 
@@ -135,8 +136,10 @@ class NumericalDisplay(QGraphicsView):
             scroll_value = (scroll_value / (10 ** (self.scroll_decimal-1)))
         prest = str(prevalue)
         prelen = self.total_decimals - self.scroll_decimal
-        if len(prest) < prelen:
-            prest = '0' * (prelen - len(prest)) + prest
+        prest = "{1:0{0}d}".format(prelen,prevalue)
+        if self._value < 0 and scroll_value < 0:
+            scroll_value = abs(scroll_value)
+            prest = "-{1:0{0}d}".format(prelen-1,prevalue)
         if self._bad or self._old:
             prest = ''
         self.pre_scroll_text.setText(prest)

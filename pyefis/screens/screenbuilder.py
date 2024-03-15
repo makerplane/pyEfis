@@ -300,7 +300,10 @@ class Screen(QWidget):
         elif i['type'] == 'atitude_indicator':
             self.instruments[count] = ai.AI(self,font_percent=font_percent,font_family=font_family)
         elif i['type'] == 'altimeter_tape':
-            self.instruments[count] = altimeter.Altimeter_Tape(self,font_family=font_family)
+            dbkey = "ALT"
+            if 'options' in i and 'dbkey' in i['options']:
+                dbkey = i['options']['dbkey']
+            self.instruments[count] = altimeter.Altimeter_Tape(self,font_family=font_family,dbkey=dbkey)
         elif i['type'] == 'altimeter_trend_tape':
             self.instruments[count] = vsi.Alt_Trend_Tape(self,font_family=font_family)
         elif i['type'] == 'button':
@@ -349,7 +352,10 @@ class Screen(QWidget):
                     hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
                     next
                 if 'dbkey' in option: 
-                    self.instruments[count].setDbkey(value)
+                    try:
+                        self.instruments[count].setDbkey(value)
+                    except:
+                        pass
                     next
                 if 'temperature' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
                     self.instruments[count].conversionFunction1 = funcTempF

@@ -205,7 +205,7 @@ class VSI_PFD(QWidget):
         self.fontSize = int(self.width() * font_percent)
         self.font_mask = "1000"
         self.marks = [(500,"500"),(1000,"1000"),(1500,"1500"),(2000,"2000")]
-        self.scaleRoot = 0.7
+        self.scaleRoot = 0.8
         self._value = 0
         self.item = fix.db.get_item("VS")
         self.item.valueChanged[float].connect(self.setValue)

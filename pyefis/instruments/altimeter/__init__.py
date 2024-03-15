@@ -197,7 +197,7 @@ class Altimeter(QWidget):
 
 
 class Altimeter_Tape(QGraphicsView):
-    def __init__(self, parent=None, maxalt=50000, fontsize=15,font_percent=None,font_family="DejaVu Sans Condensed"):
+    def __init__(self, parent=None, dbkey="ALT", maxalt=50000, fontsize=15,font_percent=None,font_family="DejaVu Sans Condensed"):
         super(Altimeter_Tape, self).__init__(parent)
         self.setStyleSheet("background: transparent")
         self.font_family = font_family
@@ -214,7 +214,7 @@ class Altimeter_Tape(QGraphicsView):
             self.fontsize = fontsize
             self.pph = 0.3
 
-        self.item = fix.db.get_item("ALT")
+        self.item = fix.db.get_item(dbkey)
         self._altimeter = self.item.value
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
@@ -224,6 +224,7 @@ class Altimeter_Tape(QGraphicsView):
 
         self.maxalt = maxalt
         self._maxalt = maxalt
+        self.total_decimals = 5
         self.myparent = parent
 
         self.conversionFunction1 = lambda x: x
@@ -234,7 +235,7 @@ class Altimeter_Tape(QGraphicsView):
     def resizeEvent(self, event):
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
-            self.pph = self.fontsize / 50
+        self.pph = self.fontsize / ( self.height() / 20)
 
         w = self.width()
         w_2 = w/2
@@ -245,7 +246,7 @@ class Altimeter_Tape(QGraphicsView):
             f.setPointSizeF(self.font_size)
         else:
             f.setPixelSize(self.fontsize)
-        self.height_pixel = self.maxalt*self.pph + h
+        self.height_pixel = (self.maxalt*2*self.pph + h ) #+ abs(self.minalt*self.pph)
 
         dialPen = QPen(QColor(Qt.white))
         dialPen.setWidth(int(self.height() * 0.005))
@@ -255,12 +256,12 @@ class Altimeter_Tape(QGraphicsView):
                            QPen(QColor(32, 32, 32)), QBrush(QColor(32, 32, 32)))
         x.setOpacity(self.backgroundOpacity)
 
-        for i in range(self.maxalt, -1, -self.minorDiv):
+        for i in range(self.maxalt * 2, -1, -self.minorDiv):
             y = self.y_offset(i)
-            if i % self.majorDiv == 0:
+            if (i - self.maxalt) % self.majorDiv == 0:
                 l = self.scene.addLine(w_2 + 15, y, w, y, dialPen)
                 l.setOpacity(self.foregroundOpacity)
-                t = self.scene.addText(str(i))
+                t = self.scene.addText(str(i-self.maxalt))
                 t.setFont(f)
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
@@ -273,7 +274,7 @@ class Altimeter_Tape(QGraphicsView):
                 l.setOpacity(self.foregroundOpacity)
         self.setScene(self.scene)
 
-        self.numerical_display = NumericalDisplay(self, total_decimals=5, scroll_decimal=2)
+        self.numerical_display = NumericalDisplay(self, total_decimals=self.total_decimals, scroll_decimal=2)
         nbh=w/1.20
         self.numerical_display.resize (qRound(w/1.20), qRound(nbh/1.45))
         self.numeric_box_pos = QPoint(0, qRound(h/2-(nbh/1.45)/2))
@@ -282,7 +283,7 @@ class Altimeter_Tape(QGraphicsView):
         self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+(nbh/1.45)/2)+1)
         self.numerical_display.show()
         self.numerical_display.value = self._altimeter
-        self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
+        self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter+self.maxalt))
         self.setAltOld(self.item.old)
         self.setAltBad(self.item.bad)
         self.setAltFail(self.item.fail)
@@ -292,11 +293,11 @@ class Altimeter_Tape(QGraphicsView):
         self.item.failChanged[bool].connect(self.setAltFail)
 
     def y_offset(self, alt):
-        return self.height_pixel - (alt*self.pph) - self.height()/2
+        return self.height_pixel - (alt*self.pph) - self.height() 
 
     def redraw(self):
         self.resetTransform()
-        self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter))
+        self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter+self.maxalt))
         self.numerical_display.value = self._altimeter
 
     #  Index Line that doesn't move to make it easy to read the altimeter.
