@@ -350,7 +350,6 @@ class Altimeter_Tape(QGraphicsView):
         cvalue = self.conversionFunction(altimeter)
         if cvalue != self._altimeter:
             self._altimeter = cvalue
-            self.maxalt = self.conversionFunction(self._maxalt) 
             self.redraw()
 
     altimeter = property(getAltimeter, setAltimeter)
