@@ -137,8 +137,10 @@ class NumericalDisplay(QGraphicsView):
         prest = str(prevalue)
         prelen = self.total_decimals - self.scroll_decimal
         prest = "{1:0{0}d}".format(prelen,prevalue)
-        if self._value < 0 and scroll_value < 0:
+        if scroll_value < 0:
             scroll_value = abs(scroll_value)
+        if self._value < 0 and prevalue >= 0:
+            # IF negative ensure the sign it displayed
             prest = "-{1:0{0}d}".format(prelen-1,prevalue)
         if self._bad or self._old:
             prest = ''
