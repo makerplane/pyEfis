@@ -33,20 +33,22 @@ class HorizontalBar(AbstractGauge):
         self.segments = 0 
         self.segment_gap_percent = 0.01
         self.segment_alpha = 180
+        self.bar_divisor = 4.5
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
         return 2
 
     def resizeEvent(self, event):
         self.bigFont = QFont(self.font_family)
-        self.bigFont.setPixelSize(qRound(self.height() / 2))
+        self.section_size = self.height() / 12
+        self.bigFont.setPixelSize( qRound(self.section_size * 4))
         self.smallFont = QFont(self.font_family)
-        self.smallFont.setPixelSize(qRound(self.height() / 5))
-        self.barHeight = self.height() / 6
-        self.barTop = self.height() / 5 + 4
-        self.nameTextRect = QRectF(1, 1, self.width(), self.height() / 5 + 10)
-        self.valueTextRect = QRectF(1, self.barTop + self.barHeight + 4,
-                                    self.width()-5, self.height() / 2)
+        self.smallFont.setPixelSize(qRound(self.section_size * 2))
+        self.barHeight = self.section_size * self.bar_divisor
+        self.barTop = self.section_size * 2.7
+        self.nameTextRect = QRectF(1, 0, self.width(), self.section_size * 2.4)
+        self.valueTextRect = QRectF(1, self.section_size * 8,
+                                    self.width()-5, self.section_size * 4)
 
     def paintEvent(self, event):
         p = QPainter(self)

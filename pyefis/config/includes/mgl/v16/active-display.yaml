@@ -40,6 +40,7 @@ instruments:
       columns: 24
     options:
       name: RX
+      bar_divisor: 2.5
       decimapPlaces: 0
       showUnits: false
       showValue: false
@@ -54,6 +55,7 @@ instruments:
       columns: 24
     options:
       name: Squelch
+      bar_divisor: 2.5
       decimapPlaces: 0
       showUnits: false
       showValue: false
@@ -76,6 +78,7 @@ instruments:
       columns: 24
     options:
       name: TX
+      bar_divisor: 2.5
       decimapPlaces: 0
       showUnits: false
       showValue: false
@@ -90,6 +93,7 @@ instruments:
       columns: 24
     options:
       name: SWR
+      bar_divisor: 2.5
       decimapPlaces: 0
       showUnits: false
       showValue: false
