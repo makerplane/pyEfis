@@ -750,10 +750,15 @@ class Screen(QWidget):
             if self.encoder_control:
                 # We update encoder_control becasue instrument might want to relenquish control
                 self.encoder_control = self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_clicked()
-                # Create new timestamp
-                self.encoder_timestamp = time.time_ns() // 1000000
-                # start timer
-                self.encoder_timer.start(self.encoder_timeout + 500)
+                if self.encoder_control:
+                    # Create new timestamp
+                    self.encoder_timestamp = time.time_ns() // 1000000
+                    # start timer
+                    self.encoder_timer.start(self.encoder_timeout + 500)
+                else:
+                    self.encoder_timer.stop()
+                    self.encoder_timestamp = 0
+                    self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
             else:
                 # screen has control of encoder, let instrument know the user selected it
                 self.encoder_control = self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_select()
