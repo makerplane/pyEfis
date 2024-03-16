@@ -313,12 +313,7 @@ class Button(QWidget):
 
     # Trigger a press of this button
     def enc_select(self):
-        pass
+        self.processConditions(clicked=True)
         # Will trigger as if the button was selected
         # Will return control back to the caller
         
-    # 
-    def enc_timeout(self):
-        pass
-        # Will unhighlight the item
-        # Also called when changing the selection to another item

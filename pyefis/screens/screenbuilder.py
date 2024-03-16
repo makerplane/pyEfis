@@ -679,6 +679,10 @@ class Screen(QWidget):
                 self.encoder_timer.stop()
             return
 
+        # Only highlight if we are visible
+        if not self.isVisible(): 
+            print("Not Visible")
+            return
         # TODO Are we incrementing the selected item or passing the increment to the currently selected item?
 
         #Handle encoder input changes here
@@ -723,7 +727,10 @@ class Screen(QWidget):
 
 
     def encoderButtonChanged(self,value):
-        pass
+        if not self.isVisible(): return
+        if value and not ((time.time_ns() // 1000000) - self.encoder_timeout >= self.encoder_timestamp):
+            print("Perform action on selected item")
+            self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_select()
         #Handle encoder button input changes here
 
 
