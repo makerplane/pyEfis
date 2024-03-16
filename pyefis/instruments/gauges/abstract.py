@@ -59,6 +59,7 @@ class AbstractGauge(QWidget):
         self.encoder_multiplier = 1
         self.encoder_start_value = None
         self.encoder_revert = False
+        self.encoder_item = None
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -162,6 +163,8 @@ class AbstractGauge(QWidget):
         self._dbkey = key
         if not self.encoder_set_key:
             self.encoder_set_key = key
+        self.encoder_item = fix.db.get_item(self.encoder_set_key)
+
         self.setupGauge()
 
     dbkey = property(getDbkey, setDbkey)
@@ -340,21 +343,27 @@ class AbstractGauge(QWidget):
         else:
             self.selectColor = None
             if self.encoder_revert:
-                self.value = self.encoder_start_value
+                self.encoder_item.value = self.encoder_start_value
         self.setColors()
         self.update()
 
     def enc_select(self):
         # Save current value so it can be reverted
-        self.encoder_start_value = self.value
+        self.encoder_start_value = self.encoder_item.value
         self.encoder_revert = True
+        self.encoder_item = fix.db.get_item(self.encoder_set_key)
         return True
 
 
     def enc_changed(self,data):
         # TODO Change the value
         # TODO Need to change the correct key
-        self.value = self.value + (self.encoder_multiplier * data)
+        print(self.encoder_set_key)
+        print(self.encoder_item.value)
+        self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
+        self.encoder_item.output_value()
+        print(self.encoder_item.value)
+
         return True
 
     def enc_clicked(self):
