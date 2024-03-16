@@ -17,7 +17,7 @@ from pyefis.instruments import misc
 import geopy.distance
 
 class ListBox(QGraphicsView):
-    def __init__(self, parent=None, lists=[], replace=None, encoder=None, button=None, font_family="DejaVu Sans Condensed"):
+    def __init__(self, parent=None, lists=[], replace=None, font_family="DejaVu Sans Condensed"):
         super(ListBox, self).__init__(parent)
         self.parent = parent
         self.font_family = font_family
@@ -46,12 +46,6 @@ class ListBox(QGraphicsView):
         self.table.verticalHeader().setVisible(False)
 
         self.table.doubleClicked.connect(self.clicked)
-        if encoder:
-            self._encoder = fix.db.get_item(encoder)
-            self._encoder.valueChanged[int].connect(self.encoderChanged)
-        if button:
-            self._button = fix.db.get_item(button)
-            self._button.valueChanged[bool].connect(self.buttonChanged)
 
         self.nearest = False
 
@@ -112,17 +106,24 @@ class ListBox(QGraphicsView):
         self.lat_old = old
         self.loadList()
 
-    def buttonChanged(self,data):
-        if self._button.old or self._button.bad or self._button.fail:
-            return
-        if self._button.value:
-            self.clicked(self.table.currentItem())
+    # This instrument is selectable
+    def enc_selectable(self):
+        return True
 
-    def encoderChanged(self,data):
-        # If old/bad/fail do nothing
-        if self._encoder.old or self._encoder.bad or self._encoder.fail:
-            return
-        val = self.table.currentRow() + self._encoder.value
+    # Highlight this instrument to show it is the current selection
+    def enc_highlight(self,onoff):
+        if onoff:
+            self.header.color = QColor('yellow')
+        else:
+            self.header.color = QColor(Qt.white)
+        self.update()
+
+    def enc_clicked(self):
+        self.clicked(self.table.currentItem())
+        return True
+
+    def enc_changed(self,data):
+        val = self.table.currentRow() + data
         # encoder could have sent enough steps to loop one or more times
         if val < 0:
             while val < 0:
@@ -131,8 +132,10 @@ class ListBox(QGraphicsView):
             while val > self.table.rowCount() -1:
                 val = val - self.table.rowCount()
         self.table.selectRow(val) 
+        return True
 
-
+    def enc_select(self):
+        return True
 
     def resizeEvent(self,event):
 
