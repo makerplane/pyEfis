@@ -302,7 +302,7 @@ class Button(QWidget):
     # Highlight this instrument to show it is the current selection
     def enc_highlight(self,onoff):
         if onoff:
-            self._style['bg_override'] = QColor('yellow') 
+            self._style['bg_override'] = QColor('orange') 
         else:
             self._style['bg_override'] = None 
         self.setStyle()

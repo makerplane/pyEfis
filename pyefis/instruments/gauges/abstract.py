@@ -55,7 +55,11 @@ class AbstractGauge(QWidget):
         self.__unitSwitching = False
         self.unitGroup = ""
 
-
+        self.encoder_set_key = None
+        self.encoder_multiplier = 1
+        self.encoder_start_value = None
+        self.encoder_revert = False
+        self.encoder_item = None
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -91,6 +95,7 @@ class AbstractGauge(QWidget):
         # These are set real time based on changes in different states
         # like data quality, selected units or modes
         self.bgColor = self.bgGoodColor
+        self.selectColor = None
         self.safeColor = self.safeGoodColor
         self.warnColor = self.warnGoodColor
         self.alarmColor = self.alarmGoodColor
@@ -156,6 +161,10 @@ class AbstractGauge(QWidget):
         item.failChanged.connect(self.failFlag)
 
         self._dbkey = key
+        if not self.encoder_set_key:
+            self.encoder_set_key = key
+        self.encoder_item = fix.db.get_item(self.encoder_set_key)
+
         self.setupGauge()
 
     dbkey = property(getDbkey, setDbkey)
@@ -242,22 +251,22 @@ class AbstractGauge(QWidget):
     def setColors(self):
         if self.bad or self.fail or self.old:
             self.bgColor = self.bgBadColor
-            self.safeColor = self.safeBadColor
+            self.safeColor = self.selectColor or self.safeBadColor
             self.warnColor = self.warnBadColor
             self.alarmColor = self.alarmBadColor
-            self.textColor = self.textBadColor
+            self.textColor = self.selectColor or self.textBadColor
             self.penColor = self.penBadColor
             self.highlightColor = self.highlightBadColor
         else:
-            self.bgColor = self.bgGoodColor
-            self.safeColor = self.safeGoodColor
+            self.bgColor = self.selectColor or self.bgGoodColor
+            self.safeColor = self.selectColor or self.safeGoodColor
             self.warnColor = self.warnGoodColor
             self.alarmColor = self.alarmGoodColor
-            self.textColor = self.textGoodColor
+            self.textColor = self.selectColor or self.textGoodColor
             self.penColor = self.penGoodColor
             self.highlightColor = self.highlightGoodColor
         if self.annunciate and not self.fail:
-            self.textColor = self.textAnnunciateColor
+            self.textColor = self.selectColor or self.textAnnunciateColor
 
         self.valueColor = self.textColor
         if self.lowWarn != None and self.value < self.lowWarn:
@@ -320,3 +329,45 @@ class AbstractGauge(QWidget):
                     self.__currentUnits = 1
             self.setAuxData(item.aux) # Trigger conversion for aux data
             self.value = item.value # Trigger the conversion for value
+
+
+    # This instrument is selectable
+    def enc_selectable(self):
+        return True
+
+
+    # Highlight this instrument to show it is the current selection
+    def enc_highlight(self,onoff):
+        if onoff:
+            self.selectColor = QColor('orange')
+        else:
+            self.selectColor = None
+            if self.encoder_revert:
+                self.encoder_item.value = self.encoder_start_value
+        self.setColors()
+        self.update()
+
+    def enc_select(self):
+        # Save current value so it can be reverted
+        self.encoder_start_value = self.encoder_item.value
+        self.encoder_revert = True
+        self.encoder_item = fix.db.get_item(self.encoder_set_key)
+        return True
+
+
+    def enc_changed(self,data):
+        # TODO Change the value
+        # TODO Need to change the correct key
+        print(self.encoder_set_key)
+        print(self.encoder_item.value)
+        self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
+        self.encoder_item.output_value()
+        print(self.encoder_item.value)
+
+        return True
+
+    def enc_clicked(self):
+        # TODO Make selection permenant
+        # Return control back to caller
+        self.encoder_revert = False
+        return False

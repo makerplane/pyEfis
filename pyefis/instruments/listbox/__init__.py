@@ -113,7 +113,7 @@ class ListBox(QGraphicsView):
     # Highlight this instrument to show it is the current selection
     def enc_highlight(self,onoff):
         if onoff:
-            self.header.color = QColor('yellow')
+            self.header.color = QColor('orange')
         else:
             self.header.color = QColor(Qt.white)
         self.update()
