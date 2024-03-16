@@ -683,6 +683,7 @@ class Screen(QWidget):
             # Encoder data needs sent to the controlled instrument so it can process it
             self.encoder_control = self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_changed(value)
             if self.encoder_control:
+                self.encoder_timestamp = curr_time
                 # instrument retains control of encoder
                 self.encoder_timer.start(self.encoder_timeout + 500)
             else:
@@ -740,7 +741,6 @@ class Screen(QWidget):
             self.encoder_timestamp = curr_time
             # Start timer
             self.encoder_timer.start(self.encoder_timeout + 500)
-
 
     def encoderButtonChanged(self,value):
         if not self.isVisible(): return
