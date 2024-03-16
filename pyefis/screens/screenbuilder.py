@@ -199,7 +199,7 @@ class Screen(QWidget):
                     for gi in g['instruments']:
                         gi['type'] = inst['type'].replace('ganged_','')
                         gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
-                        self.setup_instruments(count,gi,ganged=True,replace=this_replacements)
+                        self.setup_instruments(count,gi,ganged=True,replace=this_replacements,state=state)
                         if state:
                             self.display_state_inst[state].append(count)
                             if state > 1:
@@ -210,7 +210,7 @@ class Screen(QWidget):
                 if 'include,' in inst['type']:
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
-                    self.setup_instruments(count,inst,replace=this_replacements)
+                    self.setup_instruments(count,inst,replace=this_replacements,state=state)
                     if state:
                         self.display_state_inst[state].append(count)
                         if state > 1:
@@ -295,7 +295,7 @@ class Screen(QWidget):
                 self.encoder_timer.timeout.connect(self.encoderChanged)
 
             
-    def setup_instruments(self,count,i,ganged=False,replace=None):
+    def setup_instruments(self,count,i,ganged=False,replace=None,state=False):
         if not ganged:
             self.insturment_config[count] = i
         # Get the default items for this instrument
@@ -382,7 +382,7 @@ class Screen(QWidget):
         if 'options' in i:
             #loop over each option
             for option,value in i['options'].items():
-                if 'encoder_order' == option:
+                if 'encoder_order' == option and not state:
                     if callable(getattr(self.instruments[count], 'enc_selectable', None)):
                         self.encoder_list.append({'inst': count, 'order': i['options']['encoder_order']})
                     next
