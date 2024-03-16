@@ -72,7 +72,7 @@ class Screen(QWidget):
         self.encoder_list_sorted = list()
         self.encoder_current_selection = None
         self.encoder_timestamp = 0
-        self.encoder_timeout = 50000
+        self.encoder_timeout = 10000
         self.encoder_timer = QTimer(self)
         self.encoder_control = False
         if self.screenColor:
