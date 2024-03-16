@@ -344,30 +344,25 @@ class AbstractGauge(QWidget):
             self.selectColor = None
             if self.encoder_revert:
                 self.encoder_item.value = self.encoder_start_value
+                self.encoder_item.output_value()
         self.setColors()
         self.update()
 
     def enc_select(self):
+        self.encoder_item = fix.db.get_item(self.encoder_set_key)
         # Save current value so it can be reverted
         self.encoder_start_value = self.encoder_item.value
         self.encoder_revert = True
-        self.encoder_item = fix.db.get_item(self.encoder_set_key)
         return True
 
 
     def enc_changed(self,data):
-        # TODO Change the value
-        # TODO Need to change the correct key
-        print(self.encoder_set_key)
-        print(self.encoder_item.value)
         self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
         self.encoder_item.output_value()
-        print(self.encoder_item.value)
 
         return True
 
     def enc_clicked(self):
-        # TODO Make selection permenant
         # Return control back to caller
         self.encoder_revert = False
         return False
