@@ -302,10 +302,8 @@ class Button(QWidget):
     # Highlight this instrument to show it is the current selection
     def enc_highlight(self,onoff):
         if onoff:
-            print("Change background color of button")
             self._style['bg_override'] = QColor('yellow') 
         else:
-            print("Revert bg color")
             self._style['bg_override'] = None 
         self.setStyle()
         # Change the bg color to the value passed in color
@@ -316,4 +314,4 @@ class Button(QWidget):
         self.processConditions(clicked=True)
         # Will trigger as if the button was selected
         # Will return control back to the caller
-        
+        return False 
