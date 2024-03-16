@@ -95,6 +95,8 @@ class Button(QWidget):
         self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
         self.processConditions()
 
+    def isEnabled(self):
+        return self._button.isEnabled()
 
     def initDB(self):
         
@@ -285,10 +287,38 @@ class Button(QWidget):
             self.font.setPointSizeF(self.font_size)
         else:
             self.font.setPixelSize(qRound(self.height() * 38/100))
+        bg_color = self._style.get('bg_override', None) or self._style['bg']
         if self._style['transparent']:
-            self._button.setStyleSheet(f"QPushButton {{border: 1px solid {self._style['bg'].name()}; background: transparent;border-radius: 6px}}")# border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
+            self._button.setStyleSheet(f"QPushButton {{border: 1px solid {bg_color.name()}; background: transparent;border-radius: 6px}}")# border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
         else:
-            self._button.setStyleSheet(f"QPushButton {{border: 2px solid {self._style['bg'].darker(130).name()};border-radius: 6px; background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].lighter(110).name()}, stop: 1 {self._style['bg'].name()});border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
+            self._button.setStyleSheet(f"QPushButton {{border: 2px solid {bg_color.darker(130).name()};border-radius: 6px; background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.lighter(110).name()}, stop: 1 {bg_color.name()});border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.name()}, stop: 1 {bg_color.lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.name()}, stop: 1 {bg_color.lighter(110).name()});border-style:inset}}")
 
         self._button.setFont(self.font)
 
+    # This instrument is selectable
+    def enc_selectable(self):
+        return True
+
+    # Highlight this instrument to show it is the current selection
+    def enc_highlight(self,onoff):
+        if onoff:
+            print("Change background color of button")
+            self._style['bg_override'] = QColor('yellow') 
+        else:
+            print("Revert bg color")
+            self._style['bg_override'] = None 
+        self.setStyle()
+        # Change the bg color to the value passed in color
+        # Will save old color so it can be returned to normal
+
+    # Trigger a press of this button
+    def enc_select(self):
+        pass
+        # Will trigger as if the button was selected
+        # Will return control back to the caller
+        
+    # 
+    def enc_timeout(self):
+        pass
+        # Will unhighlight the item
+        # Also called when changing the selection to another item

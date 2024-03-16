@@ -43,6 +43,8 @@ import pyefis.hmi as hmi
 import logging
 import os
 import yaml
+from operator import itemgetter
+import time
 
 logger=logging.getLogger(__name__)
 
@@ -62,12 +64,24 @@ class Screen(QWidget):
         self.parent = parent
         p = self.parent.palette()
         self.screenColor = (0, 0, 0)
+        self.encoder = None
+        self.encoder_input = None
+        self.encoder_button = None
+        self.encoder_button_input = None
+        self.encoder_list = list()
+        self.encoder_list_sorted = list()
+        self.encoder_current_selection = None
+        self.encoder_timestamp = 0
+        self.encoder_timeout = 5000
+        self.encoder_timer = QTimer(self)
+
         if self.screenColor:
             p.setColor(self.backgroundRole(), QColor(*self.screenColor))
             self.setPalette(p)
             self.setAutoFillBackground(True)
 
         self.init= False
+
 
         # list of dial types supported so far:
         # airspeed_dial
@@ -223,7 +237,11 @@ class Screen(QWidget):
             self.instruments[i].setVisible(True)
 
     def init_screen(self):
-        self.layout = self.parent.get_config_item(self,'layout')
+        self.layout = self.get_config_item('layout')
+        self.encoder = self.get_config_item('encoder')
+        self.encoder_button = self.get_config_item('encoder_button')
+        self.encoder_timeout = self.get_config_item('encoder_timeout') or self.encoder_timeout
+
         self.instruments = dict() # Each instrument
         self.insturment_config = dict () # configuration for the instruments
 
@@ -261,6 +279,25 @@ class Screen(QWidget):
             # STart the timer after all instruments defined
             self.timer.add_callback(self.change_display_states)
 
+        if len(self.encoder_list) > 0:
+            print(f"self.encoder:{self.encoder}, self.encoder_button:{self.encoder_button}")
+            if self.encoder and self.encoder_button:
+                # We do have encoder list items, lets sort them
+                self.encoder_list_sorted = [ inst['inst'] for inst in sorted(self.encoder_list, key=itemgetter('order')) ]
+                self.encoder_current_selection = 0
+                # Setup the encoder db key input
+                self.encoder_input = fix.db.get_item(self.encoder)
+                self.encoder_input.valueChanged[int].connect(self.encoderChanged)
+                #self.encoder_input.oldChanged.connect(self.encoderOld)
+                # Setup the button db key input
+                self.encoder_button_input = fix.db.get_item(self.encoder_button)
+                self.encoder_button_input.valueChanged[bool].connect(self.encoderButtonChanged)
+
+                self.encoder_timer.timeout.connect(self.encoderChanged)
+
+                print("Setup dbkeys")
+            print(f"sorted encoder list: {self.encoder_list_sorted}")
+            
     def setup_instruments(self,count,i,ganged=False,replace=None):
         if not ganged:
             self.insturment_config[count] = i
@@ -344,10 +381,16 @@ class Screen(QWidget):
 
         elif i['type'] == 'listbox':
             self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'],encoder=i['options'].get('encoder',None),button=i['options'].get('button',None), replace=replace,font_family=font_family) #,font_percent=font_percent)
+
          # Set options
         if 'options' in i:
             #loop over each option
             for option,value in i['options'].items():
+                if 'encoder_order' == option:
+                    if callable(getattr(self.instruments[count], 'enc_selectable', None)):
+                        print(f"Instrument[{count}] is selectable and has order: {i['options']['encoder_order']}")
+                        self.encoder_list.append({'inst': count, 'order': i['options']['encoder_order']})
+                    next
                 if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
                     hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
                     next
@@ -626,6 +669,62 @@ class Screen(QWidget):
             except:
                 pass
 
+    def encoderChanged(self,value=0):
+        print(value)
+        curr_time = time.time_ns() // 1000000
+        if value == 0:
+            # we can get here from the timer or from dbkey change
+            if curr_time - self.encoder_timeout >= self.encoder_timestamp:
+                self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
+                self.encoder_timer.stop()
+            return
+
+        # TODO Are we incrementing the selected item or passing the increment to the currently selected item?
+
+        #Handle encoder input changes here
+        # Whenever non zero value log current timestamp
+        # Whenever zero value check if logged timestamp is is older than timeout, if so then call timeout operation.
+        val = self.encoder_current_selection
+        if not (curr_time - self.encoder_timeout >= self.encoder_timestamp):
+            val = self.encoder_current_selection + value
+
+        # encoder could have sent enough steps to loop one or more times
+        if val < 0:
+            while val < 0:
+                val = len(self.encoder_list_sorted) + val
+        elif val > len(self.encoder_list_sorted) -1:
+            while val > len(self.encoder_list_sorted) -1:
+                val = val - len(self.encoder_list_sorted)
+        print(f"Unselect {self.encoder_current_selection}, select {val}, isEnabled:{self.instruments[self.encoder_list_sorted[val]].isEnabled()}")
+        #print(dir(self.instruments[self.encoder_list_sorted[val]]))
+        loop = 0
+        if not self.instruments[self.encoder_list_sorted[val]].isEnabled():
+            print(f"Button {val} is disabled")
+            while not self.instruments[self.encoder_list_sorted[val]].isEnabled() and loop < 2:
+                adder = -1
+                if value > 0:
+                    adder = 1
+                val = val + adder
+                if val < 0:
+                    val = len(self.encoder_list_sorted) -1
+                    loop += 1
+                elif val + 1 == len(self.encoder_list_sorted):
+                    val = 0
+                    loop += 1
+           
+        self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
+        self.encoder_current_selection = val
+        if loop < 2:
+            # If loop is greater than 1 then nothing is selectable
+            self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(True)
+            # Create new timestamp
+            self.encoder_timestamp = curr_time
+            self.encoder_timer.start(self.encoder_timeout + 500)
+
+
+    def encoderButtonChanged(self,value):
+        pass
+        #Handle encoder button input changes here
 
 
 class GridOverlay(QWidget):
