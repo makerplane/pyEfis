@@ -701,7 +701,7 @@ Options:
 
 Options:
   * font_family - default 'DejaVu Sans Condensed'
-  * dial
+  * dial - default True
 
 ## value_text
 
@@ -722,21 +722,23 @@ Supports encoder selection and modification
 
 Options:
   * segments - default 0 options: any integer, defines the number of segments to create
-  * segment_gap_percent - default 0.01, defines size of gaps in segments
+  * segment_gap_percent - default 0.012, defines size of gaps in segments
   * segment_alpha - default 180, 0-255, higher is darker
   * temperature
   * highlight_key
   * decimal_places
-  * show_units
-  * small_font_percent
-  * big_font_percent
-  * bar_width_percent
-  * line_width_percent
-  * text_gap
+  * show_units - default True
+  * show_value - default True
+  * show_name - default True
+  * small_font_percent - default 0.08
+  * big_font_percent - default 0.10
+  * bar_width_percent - default 0.3
+  * line_width_percent - dfault 0.5
+  * text_gap - default 3
   * dbkey
   * name
   * egt_mode_switching
-  * normalize_range
+  * normalize_range - default 0
   * font_family - default 'DejaVu Sans Condensed'
 
 ## virtual_vfr
