@@ -565,10 +565,12 @@ disabeling a button does not prevent it from evaluating conditions and performin
 
 ## heading_display
 Analog heading display
+
 ![Heading Display](/docs/images/heading_display.png)
 
 ## heading_tape
 Horizontal Heading Tape
+
 ![Heading Tape](/docs/images/heading_tape.png)
 
 ## horizontal_bar_gauge
