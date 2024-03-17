@@ -27,7 +27,7 @@ class HorizontalBar(AbstractGauge):
         self.font_family = font_family
         if min_size:
             self.setMinimumSize(100, 50)
-        self.showValue = True
+        self.show_value = True
         self.show_units = True
         self.show_name = True
         self.segments = 0 
@@ -71,7 +71,7 @@ class HorizontalBar(AbstractGauge):
         pen.setColor(self.valueColor)
         p.setPen(pen)
         opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
-        if self.showValue: p.drawText(self.valueTextRect, self.valueText, opt)
+        if self.show_value: p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)

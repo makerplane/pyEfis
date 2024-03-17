@@ -208,7 +208,7 @@ instruments:
       temperature: true
       show_units: true
       decimal_places: 0
-      #showValue: false
+      #show_value: false
   - type: button
     row: 0
     column: 150

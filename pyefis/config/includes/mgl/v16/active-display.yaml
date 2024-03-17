@@ -43,7 +43,7 @@ instruments:
       bar_divisor: 2.5
       decimapPlaces: 0
       show_units: false
-      showValue: false
+      show_value: false
       dbkey: COMACTRXLEVEL{radio_id}
       segments: 22
   - type: horizontal_bar_gauge
@@ -58,7 +58,7 @@ instruments:
       bar_divisor: 2.5
       decimapPlaces: 0
       show_units: false
-      showValue: false
+      show_value: false
       dbkey: COMSQUELCH{radio_id}
       segments: 22
   - type: button
@@ -81,7 +81,7 @@ instruments:
       bar_divisor: 2.5
       decimapPlaces: 0
       show_units: false
-      showValue: false
+      show_value: false
       dbkey: COMTXPWR{radio_id}
       segments: 22
   - type: horizontal_bar_gauge
@@ -96,6 +96,6 @@ instruments:
       bar_divisor: 2.5
       decimapPlaces: 0
       show_units: false
-      showValue: false
+      show_value: false
       dbkey: COMVSWR{radio_id}
       segments: 22

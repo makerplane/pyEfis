@@ -27,7 +27,7 @@ class VerticalBar(AbstractGauge):
         self.font_family = font_family
         if min_size:
             self.setMinimumSize(50, 100)
-        self.showValue = True
+        self.show_value = True
         self.show_units = True
         self.show_name = True
         self.bar_width_percent = 0.3
@@ -113,7 +113,7 @@ class VerticalBar(AbstractGauge):
         else:
             self.barTop = 1
         self.barBottom = self.height()
-        if self.showValue:
+        if self.show_value:
             self.barBottom -= (self.bigFont.pixelSize() + self.textGap)
         if self.show_units:
             self.barBottom -= (self.smallFont.pixelSize() + self.textGap)
@@ -156,7 +156,7 @@ class VerticalBar(AbstractGauge):
             p.setPen(pen)
             p.setFont(self.smallFont)
             p.drawText(self.nameTextRect, self.name, opt)
-        if self.showValue:
+        if self.show_value:
             if self.peakMode:
                 dv = self.value - self.peakValue
                 if dv <= -10:

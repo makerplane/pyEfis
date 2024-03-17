@@ -43,6 +43,6 @@ instruments:
       bar_divisor: 2.5
       decimapPlaces: 0
       show_units: false
-      showValue: false
+      show_value: false
       dbkey: COMSTDRXLEVEL{radio_id}
       segments: 22

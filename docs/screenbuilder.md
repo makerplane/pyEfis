@@ -627,7 +627,7 @@ Options:
   * segment_gap_percent
   * segment_alpha
   * bar_divisor
-  * showValue
+  * show_value
   * show_units
   * show_name
   * font_family

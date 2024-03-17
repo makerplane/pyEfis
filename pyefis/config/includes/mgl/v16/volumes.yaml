@@ -11,7 +11,7 @@ instruments:
       - name: Volume
         gap: 0
         common_options:
-          showValue: false
+          show_value: false
           show_units: false
           smallFontPercent: 0.060
           big_font_percent: 0.085
