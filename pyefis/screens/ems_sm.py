@@ -91,7 +91,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"FUELQ1",
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":width - 200,
@@ -102,7 +102,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"FUELQ2",
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":width - 150,
@@ -113,7 +113,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"FUELF" + ENGINE_NUMBER,
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":width - 100,
@@ -124,7 +124,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"FUELP" + ENGINE_NUMBER,
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":width - 50,
@@ -135,8 +135,8 @@ def gauge_list(width, height):
             "type":gauges.NumericDisplay,
             "key":"FUELQT",
             "decPlaces":1,
-            "showUnits":True,
-            "showName":False,
+            "show_units":True,
+            "show_name":False,
             "width":90,
             "height":30,
             "x":width - 195,
@@ -147,7 +147,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"VOLT",
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":0,
@@ -158,7 +158,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"CURRNT",
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":50,
@@ -170,7 +170,7 @@ def gauge_list(width, height):
             "engine": ENGINE_NUMBER,
             "cylinderCount": CYLINDER_COUNT,
             "decPlaces":0,
-            "showUnits":False,
+            "show_units":False,
             "width":200,
             "height":150,
             "x":150,
@@ -224,9 +224,9 @@ class Screen(QWidget):
             else:
                 i = item["type"](self)
             i.name = item["name"]
-            if "decPlaces" in item: i.decimalPlaces = item["decPlaces"]
-            if "showUnits" in item: i.showUnits = item["showUnits"]
-            if "showName" in item: i.showName = item["showName"]
+            if "decPlaces" in item: i.decimal_places = item["decPlaces"]
+            if "show_units" in item: i.show_units = item["show_units"]
+            if "show_name" in item: i.show_name = item["show_name"]
             if "units1" in item: i.unitsOverride1 = item["units1"]
             if "units2" in item: i.unitsOverride2 = item["units2"]
             if "unitFunction1" in item: i.conversionFunction1 = item["unitFunction1"]
@@ -243,14 +243,14 @@ class Screen(QWidget):
             cht = gauges.VerticalBar(self)
 
             cht.name = str(x+1)
-            cht.decimalPlaces = 0
+            cht.decimal_places = 0
             cht.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
             cht.conversionFunction2 = lambda x: x
             #cht.unitsOverride1 = u'\N{DEGREE SIGN}F'
             #cht.unitsOverride2 = u'\N{DEGREE SIGN}C'
             cht.unitGroup = "Temperature"
             cht.setUnitSwitching()
-            cht.showUnits = False
+            cht.show_units = False
             cht.dbkey = "CHT1{}".format(x+1)
             self.chts.append(cht)
             item = fix.db.get_item(cht.dbkey)
@@ -260,7 +260,7 @@ class Screen(QWidget):
 
         self.chtmax = gauges.NumericDisplay(self)
         self.chtmax.name = "CHT Max"
-        self.chtmax.decimalPlaces = 0
+        self.chtmax.decimal_places = 0
         self.chtmax.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
         self.chtmax.conversionFunction2 = lambda x: x
         self.chtmax.unitsOverride1 = u'\N{DEGREE SIGN}F'
@@ -276,27 +276,27 @@ class Screen(QWidget):
         #
         # self.hobbs = gauges.NumericDisplay(self)
         # self.hobbs.name = "Hobbs"
-        # self.hobbs.decimalPlaces = 1
+        # self.hobbs.decimal_places = 1
         # self.hobbs.dbkey = "HOBBS1"
         # self.hobbs.alignment = Qt.AlignRight | Qt.AlignVCenter
-        # self.hobbs.showUnits = True
-        # self.hobbs.smallFontPercent = 0.6
+        # self.hobbs.show_units = True
+        # self.hobbs.small_font_percent = 0.6
         #
         # self.oatlabel = misc.StaticText("OAT", parent=self)
         # self.oatlabel.alignment = Qt.AlignLeft | Qt.AlignVCenter
         #
         # self.oat = gauges.NumericDisplay(self)
         # self.oat.name = "OAT"
-        # self.oat.decimalPlaces = 1
+        # self.oat.decimal_places = 1
         # self.oat.dbkey = "OAT"
         # self.oat.alignment = Qt.AlignLeft | Qt.AlignVCenter
         # self.oat.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
         # self.oat.conversionFunction2 = lambda x: x
         # self.oat.unitsOverride1 = u'\N{DEGREE SIGN}F'
         # self.oat.unitsOverride2 = u'\N{DEGREE SIGN}C'
-        # self.oat.showUnits = True
+        # self.oat.show_units = True
         # self.oat.setUnitSwitching()
-        # self.oat.smallFontPercent = 0.6
+        # self.oat.small_font_percent = 0.6
         #
         # self.timez = misc.ValueDisplay(self)
         # self.timez.dbkey = "TIMEZ"

@@ -35,8 +35,8 @@ class EGTGroup(QWidget):
         for i in range(cylinders):
             bar = VerticalBar(self)
             bar.name = str(i+1)
-            bar.decimalPlaces = 0
-            bar.showUnits = False
+            bar.decimal_places = 0
+            bar.show_units = False
             bar.peakMode = False
             bar.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
             bar.conversionFunction2 = lambda x: x
@@ -45,10 +45,10 @@ class EGTGroup(QWidget):
             bar.setUnitSwitching()
             bar.unitGroup = "Temperature"
             bar.dbkey = dbkeys[i]
-            bar.normalizeRange = 400
+            bar.normalize_range = 400
             self.bars.append(bar)
-        self.smallFontPercent = 0.08
-        self.bigFontPercent = 0.10
+        self.small_font_percent = 0.08
+        self.big_font_percent = 0.10
         hmi.actions.setEgtMode.connect(self.setMode)
 
     def setMode(self, args):

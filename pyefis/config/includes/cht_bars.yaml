@@ -12,14 +12,14 @@ instruments:
         gap: 0
         common_options:
           temperature: true
-          highlightKey: CHTMAX1
-          decimalPlaces: 0
-          showUnits: true
-          smallFontPercent: 0.060
-          bigFontPercent: 0.085
-          barWidthPercent: 0.5
-          lineWidthPercent: 0.7
-          textGap: 8
+          highlight_key: CHTMAX1
+          decimal_places: 0
+          show_units: true
+          small_font_percent: 0.060
+          big_font_percent: 0.085
+          bar_width_percent: 0.5
+          line_width_percent: 0.7
+          text_gap: 8
         instruments:
               -
                 options:

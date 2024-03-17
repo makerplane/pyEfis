@@ -10,8 +10,9 @@ instruments:
       font_ghost_mask: "~~~~~~~"
       font_family: "DSEG14 Classic"
       font_mask: "000.000"
-      decimalPlaces: 3
+      decimal_places: 3
       dbkey: COMACTFREQ{radio_id}
+      encoder_order: 24
   - type: value_text
     row: 8
     column: 0
@@ -22,7 +23,7 @@ instruments:
       font_family: "DSEG14 Classic"
       font_ghost_mask: "~~~~~~~~~~~~~"
       font_mask:       "XXXXXXXXXXXXX"
-      _dbkey: COMACTNAME{radio_id}
+      dbkey: COMACTNAME{radio_id}
   - type: button
     row: 14
     column: 0
@@ -42,8 +43,8 @@ instruments:
       name: RX
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
-      showValue: false
+      show_units: false
+      show_value: false
       dbkey: COMACTRXLEVEL{radio_id}
       segments: 22
   - type: horizontal_bar_gauge
@@ -57,10 +58,11 @@ instruments:
       name: Squelch
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
-      showValue: false
+      show_units: false
+      show_value: false
       dbkey: COMSQUELCH{radio_id}
       segments: 22
+      encoder_order: 25
   - type: button
     row: 21.5
     column: 0
@@ -80,8 +82,8 @@ instruments:
       name: TX
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
-      showValue: false
+      show_units: false
+      show_value: false
       dbkey: COMTXPWR{radio_id}
       segments: 22
   - type: horizontal_bar_gauge
@@ -95,7 +97,7 @@ instruments:
       name: SWR
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
-      showValue: false
+      show_units: false
+      show_value: false
       dbkey: COMVSWR{radio_id}
       segments: 22

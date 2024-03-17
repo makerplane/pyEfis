@@ -95,14 +95,14 @@ screens:
   SIXPACK:
     module: pyefis.screens.screenbuilder
     title: Standard Instrument Panel New
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
-      type: grid
       rows: 110
       columns: 200
       draw_grid: false
     instruments:
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       -
@@ -172,7 +172,7 @@ screens:
           rows: 10
           columns: 140
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
 
 
@@ -181,8 +181,9 @@ screens:
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Screen Builder
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       #draw_grid: true
       rows: 110
       columns: 200
@@ -194,7 +195,7 @@ screens:
           rows: 10
           columns: 155
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: weston
         #disabled: true
@@ -210,15 +211,12 @@ screens:
           args:
             - show-full-ui
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
 
@@ -229,8 +227,9 @@ screens:
       #refresh_period: 0.25
     module: pyefis.screens.screenbuilder
     title: Screen Builder
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       #draw_grid: true
       rows: 110
       columns: 200
@@ -239,24 +238,19 @@ screens:
         states: 2
     instruments:
       - type: include,includes/virtual_vfr.yaml
-        relative: true
         row: 0
         column: 0
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
         display_state: 1
       - type: include,includes/mgl/v16/active-display.yaml
-        #relative: true
         row: 70
         column: 156
         span:
@@ -271,8 +265,9 @@ screens:
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Radio Screen
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
       #draw_grid: true
@@ -284,37 +279,31 @@ screens:
           rows: 9
           columns: 60
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: include,includes/virtual_vfr.yaml
         disabled: false
-        relative: true
         row: 0
         column: 0
         span:
           rows: 70
           columns: 125
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/power_temp_arcs.yaml
-        relative: true
         row: 0
         column: 125
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
       - type: include,includes/mgl/v16/radio-display.yaml
         replace:
           radio_id: 1 # {radio_id} is replaced anywhere it appears in the included config
                       # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
-        relative: true
         row: 70
         column: 0
       - type: include,includes/mgl/v16/radio-display.yaml
@@ -322,7 +311,6 @@ screens:
         replace:
           radio_id: 2 # {radio_id} is replaced anywhere it appears in the included config
                       # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
-        relative: true
         row: 0
         column: 0
         span:
@@ -333,8 +321,9 @@ screens:
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Engine Management New
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
       draw_grid: false
@@ -346,37 +335,30 @@ screens:
           rows: 10
           columns: 80
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: include,includes/virtual_vfr.yaml
-        #relative: true
         row: 0
         column: 0
         span:
           rows: 70
           columns: 125
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/power_temp_arcs.yaml
-        relative: true
         row: 0
         column: 125
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
       - type: include,includes/cht_bars.yaml
-        relative: true
         row: 70
         column: 123
       - type: include,includes/egt_bars.yaml
-        relative: true
         row: 70
         column: 91
       - type: ganged_button
@@ -399,15 +381,19 @@ screens:
               -
                 options:
                   config: buttons/egt-Normalize.yaml
+                  encoder_order: 31
               -
                 options:
                   config: buttons/egt-Lean.yaml
+                  encoder_order: 32
               -
                 options:
                   config: buttons/egt-Peak.yaml
+                  encoder_order: 33
               -
                 options:
                   config: buttons/egt-reset-peak.yaml
+                  encoder_order: 34
       -
         type: ganged_vertical_bar_gauge
         gang_type: horizontal
@@ -420,80 +406,81 @@ screens:
           - name: RPM
             gap: 0
             common_options:
-              showUnits: false
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
+              show_units: false
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
             instruments:
               -
                 options:
                   name: RPM
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: TACH1
               -
                 options:
                   name: TPS
-                  decimalPlaces: 2
+                  decimal_places: 2
                   dbkey: THR1
-                  showUnits: True
+                  show_units: True
           - name: Engine
             gap: 0
             common_options:
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
-              showUnits: False
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
+              show_units: False
             instruments:
               -
                 options:
                   name: MAP
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: IT
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: AFR
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: AFRT
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: EGO
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
           - name: Temps
             gap: 0
             common_options:
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
             instruments:
               -
                 options:
                   name: IAT
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: CAT
                   temperature: true
 
   EMS2:
     module: pyefis.screens.screenbuilder
     title: Engine Management New
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
       draw_grid: false
@@ -505,7 +492,7 @@ screens:
           rows: 10
           columns: 140
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: ganged_button
         gang_type: horizontal
@@ -543,7 +530,7 @@ screens:
         options:
           segments: 28
           name: RPM
-          decimalPlaces: 0
+          decimal_places: 0
           dbkey: TACH1
           #font_family: "DSEG14 Classic"
       -
@@ -556,7 +543,7 @@ screens:
         options:
           segments: 28
           name: MAP
-          decimalPlaces: 1
+          decimal_places: 1
           dbkey: MAP1
       -
         type: ganged_horizontal_bar_gauge
@@ -630,126 +617,125 @@ screens:
           - name: Power
             common_options:
               segments: 22
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
             instruments:
               -
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
+                  show_units: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
+                  show_units: false
                   dbkey: CURRNT
           - name: EGT
             common_options:
               segments: 22
               egt_mode_switching: true
-              normalizeRange: 400
-              highlightKey: EGTMAX1
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
-              decimalPlaces: 0
+              normalize_range: 400
+              highlight_key: EGTMAX1
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
+              decimal_places: 0
               temperature: true
             instruments:
               -
                 options:
                   name: "1"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT11
               -
                 options:
                   name: "2"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT12
               -
                 options:
                   name: "3"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT13
               -
                 options:
                   name: "4"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT14
           - name: CHT
             common_options:
               segments: 22
-              highlightKey: CHTMAX1
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
-              decimalPlaces: 0
+              highlight_key: CHTMAX1
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
+              decimal_places: 0
               temperature: true
             instruments:
               -
                 options:
                   name: "1"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT11
               -
                 options:
                   name: "2"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT12
               -
                 options:
                   name: "3"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT13
               -
                 options:
                   name: "4"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT14
           - name: FUEL
             common_options:
               segments: 22
-              smallFontPercent: 0.060
-              bigFontPercent: 0.085
-              barWidthPercent: 0.5
-              lineWidthPercent: 0.7
-              textGap: 8
+              small_font_percent: 0.060
+              big_font_percent: 0.085
+              bar_width_percent: 0.5
+              line_width_percent: 0.7
+              text_gap: 8
             instruments:
               -
                 options:
                   name: "Left"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: FUELQ1
               -
                 options:
                   name: "Center"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: FUELQ2
               -
                 options:
                   name: "Right"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: FUELQ1
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
 

@@ -18,8 +18,8 @@ instruments:
     options:
       #fontSize: 48
       font_percent: 0.05
-      fgcolor: "#aaaaaa"
-      bgcolor: "#aaaaaa"
+      fg_color: "#aaaaaa"
+      bg_color: "#aaaaaa"
       cdi_enabled: true
       gsi_enabled: true
   - type: altimeter_tape
@@ -47,7 +47,7 @@ instruments:
       columns: 12
     options:
       font_mask: "0000"
-      decimalPlaces: 0
+      decimal_places: 0
       dbkey: VS
   - type: airspeed_tape
     row: 5
@@ -85,7 +85,7 @@ instruments:
       rows: 5
       columns: 35
     options:
-      _dbkey: TIMEZ
+      dbkey: TIMEZ
       font_mask: "HH:MM:SS ZZZ"
       #fontName: DSEG14 Modern Mini, Bold
   - type: value_text
@@ -95,7 +95,7 @@ instruments:
       rows: 5
       columns: 35
     options:
-      _dbkey: TIMEL
+      dbkey: TIMEL
       font_mask: "HH:MM:SS ZZZ"
   - type: value_text
     row: 0
@@ -104,7 +104,7 @@ instruments:
       rows: 5
       columns: 50
     options:
-      _dbkey: APMSG
+      dbkey: APMSG
       font_mask: "12345678901234567890"
   - type: static_text
     row: 90
@@ -125,7 +125,7 @@ instruments:
     options:
       font_mask: "00.00"
       dbkey: BARO
-      decimalPlaces: 2
+      decimal_places: 2
       pressure: true
   - type: button
     row: 83
@@ -162,7 +162,7 @@ instruments:
     options:
       font_mask: "10000"
       dbkey: DALT
-      decimalPlaces: 0
+      decimal_places: 0
       altitude: true
   - type: static_text
     row: 100
@@ -183,7 +183,7 @@ instruments:
     options:
       font_mask: "10000"
       dbkey: PALT
-      decimalPlaces: 0
+      decimal_places: 0
       altitude: true
   - type: static_text
     row: 105
@@ -206,9 +206,9 @@ instruments:
       units_font_mask: "oF"
       dbkey: OAT
       temperature: true
-      showUnits: true
-      decimalPlaces: 0
-      #showValue: false
+      show_units: true
+      decimal_places: 0
+      #show_value: false
   - type: button
     row: 0
     column: 150

@@ -20,7 +20,8 @@ The first column and row is 0
 For a Six Pack using `rows: 2` and `columns: 3` makes sense.
 If you are doing more complex layouts you can make the number of grids really high.
 For example if your screen is 640 x 480, you could set `columns: 640` and `rows: 480`, now you can place gauges by the pixel.
-Also consider that if you want to share your screen with others they might need a different resolution. Selecting a grid size that is easy to calculate might make more sense such as 600x400, the center if the screen would be `column: 300` and `row:200` sightly easier to calaulate than `320/220`
+Also consider that if you want to share your screen with others they might need a different resolution. Selecting a grid size that is easy to calculate might make more sense such as 600x400, the center if the screen would be `column: 300` and `row:200` sightly easier to calaulate than `320/220`<br>
+To make sharing and exchanging screens with other users all screens and includes distributed with pyEFIS are defined with `columns: 200` and `rows: 110` This is close to 16:9 ratio matching the majority of screens on the market today. Typically any screen will work, un-modified, at any resoltion but somtimes it is necessary to specify `font_mask` option to ensure text will be sized to always fit the amount of text in the mask. 
 ```
 screens:
   SixPackNew:
@@ -210,7 +211,7 @@ Here is an example instrument for a tachometer:
           options:
             name: RPM
             dbkey: TACH1
-            decimalPlaces: 0
+            decimal_places: 0
 ``` 
 
 ### Ganged Instruments
@@ -254,12 +255,12 @@ You can give the group a name, tho currently nothing is done with the name inter
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
+                  show_units: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
+                  show_units: false
                   dbkey: CURRNT
 
 ```
@@ -274,7 +275,7 @@ If you have a group of EGT instruments you should specify these common_options t
           - name: EGT
             common_options:
               egt_mode_switching: true
-              normalizeRange: 400
+              normalize_range: 400
             instruments:
 
 ```
@@ -296,41 +297,41 @@ Following along with the example, here are the two groups for Power and EGT for 
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
+                  show_units: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
+                  show_units: false
                   dbkey: CURRNT
           - name: EGT
             common_options:
               egt_mode_switching: true
-              normalizeRange: 400
+              normalize_range: 400
             instruments:
               -
                 options:
                   name: "1"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT11
               -
                 options:
                   name: "2"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT12
               -
                 options:
                   name: "3"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT13
               -
                 options:
                   name: "4"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT14
 
 ```
@@ -361,14 +362,13 @@ Currently you cannot use includes inside of includes.
 
 ##### Include relative #####
 When defining includes you can assume that each instrument starts at 0.
-Then within the main config you can define `relative: true` along with row and column and the instruments in the include will be rendered starting at the defined row and column.  This allows you to define something complex such as AHRS with heading and such then reuse that definition on various screens and different locations on the screen.
+Then within the main config you can define a row and column and the instruments in the include will be rendered starting at the defined row and column.  This allows you to define something complex such as AHRS with heading and such then reuse that definition on various screens and different locations on the screen.
 
 ##### Include scaling #####
 If you want to use use an include but want it to be a different size simply specify `span` with the row and columns you want the include to occupy.
 ```
     instruments:
       - type: include,includes/virtual_vfr.yaml
-        relative: true
         row: 0
         column: 0
         span:
@@ -376,55 +376,167 @@ If you want to use use an include but want it to be a different size simply spec
           columns: 77.5
 ```
 
+# Encoder control
+pyEFIS can be controlled using a single rotary encoder with button. When the encoder is rotated an item on the screen will turn orange to indicate the selected item. While an item is selected if you rotate the encoder the selection will move to the next item. Pressing the button will either perform the action that is selected, such as a touchscreen button, or pass control over the encoder to the selected item such as a listbox. Once control is passed over to an item the behavior will depend on the specific item. after a period of time thetimeout will cause the screen to revert its default state with nothing selected<br>
+
+## listbox control
+To select the listbox rotate the encoder until the title of the listbox is orange. Then press the button.  Now when you rotate the encoder the selected row in the listbox will change, pressing the button will perform the action of the selected row in the listbox. The listbox is unique in that it never relenquishes control unless you allow theinput to timeout.
+
+## arc_gauge, horizontal_bar_gauge, vertical_bar_gauge and numeric_display
+All four of these items behave the same, once you select an item by highlighting it and pressing the button the item will take control over the encoder. Rotating the encoder will change the value of the dbkey defined. Once you have the desired setting press the button and the value will be saved and the screen will revert to its default tate of nothing selected. If you decide to not change the value, do not press the button, let the timeout expire. When it times out the value will be reverted to its previous value and the screen will return to its default state.
+
+## button
+The buttons are simple, if you press the button while a on-screen button is highlighted, the action associated with that button will be performed. Since buttons can b disabled based on various conditions it is not possible to select disabled button.
+
+## Controlling the order.
+To control the order of slections you ned to specify an `encoder_order` for each instrument you want selectable. The recommended approach is to assign a range to each include config that has selectable items. The default configs included with pyEFIS use 11-20 for the touchscreen buttons, 21-30 for the radio components and 31-40 for the EGT mode buttons.<br>
+
+here is an example of the buttons on the side of the screen being enabled for this feature and defining the order.<br>
+pyefis/config/includes/side-buttons.yaml:
+```
+instruments:
+  - type: ganged_button
+    gang_type: vertical
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 14.5
+    groups:
+      - name: Side Buttons
+        gap: 6
+        common_options:
+            font_mask: "ANDROID"
+        instruments:
+          -
+            options:
+              config: buttons/screen-ems-pfd.yaml
+              encoder_order: 11
+          -
+            options:
+              config: buttons/screen-ems2-pfd.yaml
+              encoder_order: 12
+          -
+            options:
+              config: buttons/screen-android-pfd.yaml
+              encoder_order: 13
+          -
+            options:
+              config: buttons/screen-radio-pfd.yaml
+```
+
+## Defining what encoder and button to use
+Each screen needs to have the values `encoder` and `encoder_button` defined to enable this feature on the screen. These should be set to the dbkey for the encoder and button you want to use for controlling the screen.
+
+Example from default.yaml file:
+```
+screens:
+  SIXPACK:
+    module: pyefis.screens.screenbuilder
+    title: Standard Instrument Panel New
+    encoder: ENC9
+    encoder_button: BTN9
+```
+
+
 # Instrument List #
 Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. Currenlty not many options have common names, one instrument might use font_size where another is fontsize or fontSize. Hopefully the community can decide on some common naming and update the code to make maintaining the list here much easier.
 
-To add a button you need to spcify the option `config:` that points to the yaml file with the configuration for the button:
-```
-      - type: button
-        row: 70
-        column: 75
-        span:
-          rows: 15
-          columns: 10
-        options:
-          config: config/buttons/trim-up-invisible.yaml
-```
-
 
 ## airspeed_dial
+An analog airspeed dial.
 
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
+Options:
+  * bg_color - default black, example '#00000000'
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_percent - default 0.07
+
 ## airspeed_box
+A box that displays airspeed value, it can be switched between IAS, GS and TAS. Will change colors based on limits and status
+
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+
 
 ## airspeed_tape
+Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe
 
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
+Options:
+  * font_percent - default None
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_mask - default '000'
+
 ## airspeed_trend_tape
 
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+
 ## altimeter_dial
+Analog altimeter dial
 
 ![Altimeter Dial](/docs/images/altimeter_dial.png)
 
+Options:
+  * altitude
+  * font_family - default 'DejaVu Sans Condensed'
+  * bg_color - default black
+
 ## altimeter_tape
+Vertical airspeed tape
 
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
+
+Options:
+  * font_percent - default None
+  * altitude
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_mask - default 00000
+  * dbkey - default 'ALT'
+  * maxalt - default 50000
 
 ## altimeter_trend_tape
 
 ![Altimeter Trend Tape](/docs/images/altimeter_trend_tape.png)
 
+Options
+  * font_family - default 'DejaVu Sans Condensed'
+
+
 ## atitude_indicator
+Digital atitude indicator
 
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
+Options:
+  * font_percent - default None
+  * font_family - default 'DejaVu Sans Condensed'
+
 ## arc_gauge
+Digital arc gauge
+Supports encoder selection and modification
 
 ![Arc Gauge](/docs/images/arc_gauge.png)
+![Arc Gauge](/docs/images/arc_gauge_segmented.png)
+
+Options:
+  * segments - default 0 options: any integer, defines the number of segments to create
+  * segment_gap_percent - default 0.01, defines size of gaps in segments
+  * segment_alpha - default 180, 0-255, higher is darker
+  * name_location - default 'top', options 'top', 'right'
+  * decimal_places
+  * name
+  * dbkey
+  * temperature
+  * show_units - default False
+  * font_family - default 'DejaVu Sans Condensed'
+  * min_size - default True
 
 ## button
+Supports encoder selection and modification
 
 Buttons should not be confused with the menu tho one could replace the menu with buttons if desired. The idea behind buttons is to provide an interactive instrument that can display data, change state such as color in response to data and perform actions within the system. The motivation to create this was because I wanted to place some physical buttons along each side of the screen so the pilot and co-pilot would have easy access to the buttons. Next to each physical button on the screen would be a button that shows the status of some option. For example, while viewing the Primary Flight Display screen if an engine item annunciates the button labeled EMS will turn red to indicate an alert condition. Pressing the button will take you to the EMS screen.  While viewing the EMS screen the button text changed to PFD, pressing it will take you back to the PFD screen.
 <br>
@@ -444,6 +556,11 @@ To add a button you need to spcify the option `config:` that points to the yaml 
         options:
           config: config/buttons/trim-up-invisible.yaml
 ```
+
+Options:
+  * config
+  * font_mask
+  * font_family
 
 ### Button configuration
 Every button needs to have `type:` `text:` and `dbkey:` defined.i
@@ -549,44 +666,173 @@ disabeling a button does not prevent it from evaluating conditions and performin
 
 
 ## heading_display
+Analog heading display
 
 ![Heading Display](/docs/images/heading_display.png)
 
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+  * bg_color - default black
+  * fg_color - default gray
+
 ## heading_tape
+Horizontal Heading Tape
+
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+
 
 ![Heading Tape](/docs/images/heading_tape.png)
 
 ## horizontal_bar_gauge
+Digital horizontal bar gauge
+Supports encoder selection and modification
 
 ![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
+![Horizontal Bar Gauge Segmented](/docs/images/horizontal_bar_gauge_segmented.png)
+
+Options:
+  * segments - default 0 options: any integer, defines the number of segments to create
+  * segment_gap_percent - default 0.01, defines size of gaps in segments
+  * segment_alpha - default 180, 0-255, higher is darker
+  * bar_divisor - default 4.5, changes how tall the bar is
+  * show_value
+  * show_units
+  * show_name
+  * font_family - default 'DejaVu Sans Condensed'
+  * min_size - default True
 
 ## horizontal_situation_indicator
+Analog or digital situation indicator
 
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
+Options:
+  * gsi_enabled: default False
+  * cdi_enabled: default False
+  * font_percent: - default None 
+  * font_family - default 'DejaVu Sans Condensed'
+  * fg_color - default white
+  * bg_color - default black
+
+
+## listbox
+Displays and loads user-defined lists. Supports various sort options and can set values when items are selected. Useful for frequently needed items like radio frquencies or waypoints.
+Supports encoder selection and modification
+
+![Listbox](/docs/images/listbox.png)
+
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+  * lists
+
 ## numeric_display
+Displays numeric values, changes colors based on limits and status.
+Supports encoder selection and modification
+
+![Numeric Display](/docs/images/numeric_display.png)
+
+![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
+
+Options:
+  * decimal_places
+  * font_mask
+  * font_family - default 'DejaVu Sans Condensed'
+  * units_font_mask
+  * dbkey
+  * pressure - Defines value as pressure for unit switching
+  * altitude - Defines value as altitude for unit switching
+  * temperature - Defines value as temperature for unit switching
+  * show_units - true/false 
 
 ## static_text
+
+![Static Text](/docs/images/static_text.png)
+
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_percent
+  * font_mask
+  * font_ghost_mask
+  * font_ghost_alpha
+  * text
+  * alignment
 
 ## turn_coordinator
 
 ![Turn Coordinator](/docs/images/turn_coordinator.png)
 
-## value_display
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+  * dial - default True
+
+## value_text
+
+![Value Text](/docs/images/value_text.png)
+
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_ghost_mask
+  * font_mask
+  * dbkey
+  * font_percent
 
 ## vertical_bar_gauge
+Supports encoder selection and modification
 
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
+![Vertical Bar Gauge](/docs/images/vertical_bar_gauge_segmented.png)
+
+Options:
+  * segments - default 0 options: any integer, defines the number of segments to create
+  * segment_gap_percent - default 0.012, defines size of gaps in segments
+  * segment_alpha - default 180, 0-255, higher is darker
+  * temperature
+  * highlight_key
+  * decimal_places
+  * show_units - default True
+  * show_value - default True
+  * show_name - default True
+  * small_font_percent - default 0.08
+  * big_font_percent - default 0.10
+  * bar_width_percent - default 0.3
+  * line_width_percent - dfault 0.5
+  * text_gap - default 3
+  * dbkey
+  * name
+  * egt_mode_switching
+  * normalize_range - default 0
+  * font_family - default 'DejaVu Sans Condensed'
 
 ## virtual_vfr
 
 ![Virtual VFR](/docs/images/virtual_vfr.png)
 
+Options:
+  * font_percent
+  * font_family - default 'DejaVu Sans Condensed'
+  * gsi
+
 ## vsi_dial
 
 ![VSI Dial](/docs/images/vsi_dial.png)
+
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
 
 ## vsi_pfd
 
 ![VSI PFD](/docs/images/vsi_pfd.png)
 
+Options:
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_percent
+
+## weston
+Runs weston compositor inside pyEFIS and starts waydroid to display within it
+
+Options:
+  * socket
+  * ini
+  * command
+  * args

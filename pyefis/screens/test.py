@@ -40,7 +40,7 @@ class Screen(QWidget):
 
         self.test = gauges.ArcGauge(self)
         self.test.name = "OILP"
-        self.test.decimalPlaces = 1
+        self.test.decimal_places = 1
         self.test.dbkey = "OILP1"
 
     def resizeEvent(self, event):

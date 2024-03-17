@@ -11,40 +11,40 @@ instruments:
       - name: FUEL
         gap: 0 
         common_options:
-          showUnits: true
-          smallFontPercent: 0.060
-          bigFontPercent: 0.085
-          barWidthPercent: 0.5
-          lineWidthPercent: 0.7
-          textGap: 8
+          show_units: true
+          small_font_percent: 0.060
+          big_font_percent: 0.085
+          bar_width_percent: 0.5
+          line_width_percent: 0.7
+          text_gap: 8
         instruments:
           -
             options:
               name: "Fuel"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: FUELP1
           -   
             options:
               name: "Flow"
-              decimalPlaces: 1
+              decimal_places: 1
               dbkey: FUELF1
           - 
             options:
               name: "Total"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: FUELQT
           -
             options:
               name: "Left"
-              decimalPlaces: 1
+              decimal_places: 1
               dbkey: FUELQ1
           -
             options:
               name: "Center"
-              decimalPlaces: 1
+              decimal_places: 1
               dbkey: FUELQ2
           -
             options:
               name: "Right"
-              decimalPlaces: 1
+              decimal_places: 1
               dbkey: FUELQ3

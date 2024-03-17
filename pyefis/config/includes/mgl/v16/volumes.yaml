@@ -11,29 +11,32 @@ instruments:
       - name: Volume
         gap: 0
         common_options:
-          showValue: false
-          showUnits: false
-          smallFontPercent: 0.060
-          bigFontPercent: 0.085
-          barWidthPercent: 0.5
-          lineWidthPercent: 0.7
-          textGap: 8
+          show_value: false
+          show_units: false
+          small_font_percent: 0.060
+          big_font_percent: 0.085
+          bar_width_percent: 0.5
+          line_width_percent: 0.7
+          text_gap: 8
           segments: 22
         instruments:
           -
             options:
               name: "RX Vol"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: COMRXVOL{radio_id}
+              encoder_order: 21
           -
             options:
               name: "Int Vol"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: COMINTVOL{radio_id}
+              encoder_order: 22
           -
             options:
               name: "Aux Vol"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: COMAUDVOL{radio_id}
+              encoder_order: 23
 # Aux Volume might not exist
 # The intention was to show volume for the audio input

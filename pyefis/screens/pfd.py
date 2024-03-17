@@ -57,13 +57,13 @@ class Screen(QWidget):
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
 
         # HSI
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#00C911")
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=10, fgcolor="#00C911")
+        self.hsi = hsi.HSI(self, font_size=12, fg_color="#00C911")
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=10, fg_color="#00C911")
 
         # barometric pressure numeric display
         self.alt_setting = gauges.NumericDisplay(self)
         self.alt_setting.dbkey = "BARO"
-        self.alt_setting.decimalPlaces = 2
+        self.alt_setting.decimal_places = 2
 
         # turn coordinator dial on/off
         self.tc = tc.TurnCoordinator(self, dial=False)
@@ -71,19 +71,19 @@ class Screen(QWidget):
         # manifold pressure gauge
         self.map_g = gauges.ArcGauge(self)
         self.map_g.name = "MAP"
-        self.map_g.decimalPlaces = 1
+        self.map_g.decimal_places = 1
         self.map_g.dbkey = "MAP1"
 
         # RPM gauge
         self.rpm = gauges.ArcGauge(self)
         self.rpm.name = "RPM"
-        self.rpm.decimalPlaces = 0
+        self.rpm.decimal_places = 0
         self.rpm.dbkey = "TACH1"
 
         # oil pressure gauge
         self.op = gauges.HorizontalBar(self)
         self.op.name = "Oil Press"
-        self.op.decimalPlaces = 1
+        self.op.decimal_places = 1
         self.op.dbkey = "OILP1"
 
         # oil temperature gauge
@@ -101,13 +101,13 @@ class Screen(QWidget):
         # fuel quantity gauge
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
-        self.fuel.decimalPlaces = 1
+        self.fuel.decimal_places = 1
         self.fuel.dbkey = "FUELQT"
 
         # fuel flow gauge
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
-        self.ff.decimalPlaces = 1
+        self.ff.decimal_places = 1
         self.ff.dbkey = "FUELF1"
 
         # cht gauge
@@ -134,7 +134,7 @@ class Screen(QWidget):
         self.egt.unitsOverride2 = u'\N{DEGREE SIGN}C'
         self.egt.unitGroup = "Temperature"
         self.egt.setUnitSwitching()
-        self.egt.decimalPlaces = 0
+        self.egt.decimal_places = 0
         self.egt.dbkey = "EGTAVG1"
 
 

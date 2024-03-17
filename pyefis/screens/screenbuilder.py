@@ -389,11 +389,11 @@ class Screen(QWidget):
                 if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
                     hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
                     next
-                if 'dbkey' in option: 
-                    try:
+                if 'dbkey' in option:
+                    if callable(getattr(self.instruments[count], 'setDbkey', None)): 
                         self.instruments[count].setDbkey(value)
-                    except:
-                        pass
+                    else:
+                        setattr(self.instruments[count], option, value)
                     next
                 if 'temperature' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
                     self.instruments[count].conversionFunction1 = funcTempF
@@ -673,6 +673,7 @@ class Screen(QWidget):
                 # reset control
                 self.encoder_control = False
                 self.encoder_timer.stop()
+                self.encoder_timestamp = 0
             return
 
         # Only highlight if we are visible
@@ -689,6 +690,7 @@ class Screen(QWidget):
             else:
                 # Instrument has relenquished control of encoder
                 self.encoder_timer.stop()
+                self.encoder_timestamp = 0
                 self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
 
             return
@@ -771,6 +773,7 @@ class Screen(QWidget):
                 else:
                     # Instrument performed action and is done, nothing more to do so reset interface
                     self.encoder_timer.stop()
+                    self.encoder_timestamp = 0
                     self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False) 
 
 class GridOverlay(QWidget):

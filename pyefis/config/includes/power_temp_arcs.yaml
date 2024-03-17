@@ -9,8 +9,8 @@ instruments:
     groups:
       - name: Power and Temp
         common_options:
-          nameLocation: right
-          decimalPlaces: 0
+          name_location: right
+          decimal_places: 0
         instruments:
           -
             options:
@@ -27,11 +27,11 @@ instruments:
               name: OAT
               dbkey: OAT
               temperature: true
-              showUnits: true
+              show_units: true
           -
             options:
               name: CAT
               temperature: true
               dbkey: CAT
-              showUnits: true
+              show_units: true
 

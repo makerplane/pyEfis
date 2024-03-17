@@ -27,16 +27,16 @@ class VerticalBar(AbstractGauge):
         self.font_family = font_family
         if min_size:
             self.setMinimumSize(50, 100)
-        self.showValue = True
-        self.showUnits = True
-        self.showName = True
-        self.barWidthPercent = 0.3
-        self.lineWidthPercent = 0.5
-        self.textGap = 3
-        self.smallFontPercent = 0.08
-        self.bigFontPercent = 0.10
+        self.show_value = True
+        self.show_units = True
+        self.show_name = True
+        self.bar_width_percent = 0.3
+        self.line_width_percent = 0.5
+        self.text_gap = 3
+        self.small_font_percent = 0.08
+        self.big_font_percent = 0.10
         self.normalizePenColor = QColor(Qt.blue)
-        self.normalizeRange = 0
+        self.normalize_range = 0
         self.normalizeReference = 0
         self._normalizeMode = False
         self.peakValue = 0.0
@@ -101,22 +101,22 @@ class VerticalBar(AbstractGauge):
 
 
     def resizeEvent(self, event):
-        self.barWidth = self.width() * self.barWidthPercent
-        self.lineWidth = self.width() * self.lineWidthPercent
+        self.barWidth = self.width() * self.bar_width_percent
+        self.lineWidth = self.width() * self.line_width_percent
         self.bigFont = QFont(self.font_family)
-        self.bigFont.setPixelSize(qRound(self.height() * self.bigFontPercent))
+        self.bigFont.setPixelSize(qRound(self.height() * self.big_font_percent))
         self.smallFont = QFont(self.font_family)
-        self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
+        self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         #self.barHeight = self.height() / 6
-        if self.showName:
-            self.barTop = self.smallFont.pixelSize() + self.textGap
+        if self.show_name:
+            self.barTop = self.smallFont.pixelSize() + self.text_gap
         else:
             self.barTop = 1
         self.barBottom = self.height()
-        if self.showValue:
-            self.barBottom -= (self.bigFont.pixelSize() + self.textGap)
-        if self.showUnits:
-            self.barBottom -= (self.smallFont.pixelSize() + self.textGap)
+        if self.show_value:
+            self.barBottom -= (self.bigFont.pixelSize() + self.text_gap)
+        if self.show_units:
+            self.barBottom -= (self.smallFont.pixelSize() + self.text_gap)
 
         self.barLeft = (self.width() - self.barWidth) / 2
         self.barRight = self.barLeft + self.barWidth
@@ -125,8 +125,8 @@ class VerticalBar(AbstractGauge):
         self.barHeight = self.barBottom - self.barTop
 
         self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
-        self.valueTextRect = QRectF(0, self.barBottom + self.textGap, self.width(), self.bigFont.pixelSize())
-        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize() + self.textGap)
+        self.valueTextRect = QRectF(0, self.barBottom + self.text_gap, self.width(), self.bigFont.pixelSize())
+        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.text_gap, self.width(), self.smallFont.pixelSize() + self.text_gap)
         self.ballRadius = self.barWidth * 0.40
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 
@@ -137,7 +137,7 @@ class VerticalBar(AbstractGauge):
         p.drawText(self.valueTextRect, self.valueText, QTextOption(Qt.AlignCenter))
 
     def paintEvent(self, event):
-        if self.highlightKey:
+        if self.highlight_key:
             if self._highlightValue == self._rawValue:
                 self.highlight = True
             else:
@@ -151,12 +151,12 @@ class VerticalBar(AbstractGauge):
         pen.setCapStyle(Qt.FlatCap)
         p.setPen(pen)
         opt = QTextOption(Qt.AlignCenter)
-        if self.showName:
+        if self.show_name:
             pen.setColor(self.textColor)
             p.setPen(pen)
             p.setFont(self.smallFont)
             p.drawText(self.nameTextRect, self.name, opt)
-        if self.showValue:
+        if self.show_value:
             if self.peakMode:
                 dv = self.value - self.peakValue
                 if dv <= -10:
@@ -169,7 +169,7 @@ class VerticalBar(AbstractGauge):
             else:
                 # Draw Value
                 self.drawValue(p, pen)
-        if self.showUnits:
+        if self.show_units:
             # Units
             pen.setColor(self.textColor)
             p.setPen(pen)
@@ -243,7 +243,7 @@ class VerticalBar(AbstractGauge):
             if self.normalizeMode:
                 nval = self.peakValue - self.normalizeReference
                 start = self.barTop + self.barHeight / 2
-                y = start - (nval * self.barHeight / self.normalizeRange)
+                y = start - (nval * self.barHeight / self.normalize_range)
             else:
                 y = self.barTop + (self.barHeight - self.interpolate(self.peakValue, self.barHeight))
             if y < self.barTop: y = self.barTop
@@ -259,7 +259,7 @@ class VerticalBar(AbstractGauge):
             p.setPen(pen)
             nval = self._value - self.normalizeReference
             start = self.barTop + self.barHeight / 2
-            x = start - (nval * self.barHeight / self.normalizeRange)
+            x = start - (nval * self.barHeight / self.normalize_range)
         else:
             pen.setColor(QColor(Qt.darkGray))
             p.setPen(pen)

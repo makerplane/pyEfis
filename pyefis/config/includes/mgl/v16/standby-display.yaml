@@ -10,8 +10,9 @@ instruments:
       font_ghost_mask: "~~~~~~~"
       font_family: "DSEG14 Classic"
       font_mask: "100.000"
-      decimalPlaces: 3
+      decimal_places: 3
       dbkey: COMSTDFREQ{radio_id}
+      encoder_order: 27
   - type: value_text
     row: 8
     column: 0
@@ -22,7 +23,7 @@ instruments:
       font_family: "DSEG14 Classic"
       font_ghost_mask: "~~~~~~~~~~~~~"
       font_mask:       "XXXXXXXXXXXXX"
-      _dbkey: COMSTDNAME{radio_id}
+      dbkey: COMSTDNAME{radio_id}
   - type: button
     row: 14
     column: 0
@@ -42,7 +43,7 @@ instruments:
       name: RX
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
-      showValue: false
+      show_units: false
+      show_value: false
       dbkey: COMSTDRXLEVEL{radio_id}
       segments: 22
