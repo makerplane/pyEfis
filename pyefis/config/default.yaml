@@ -96,13 +96,11 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Standard Instrument Panel New
     layout:
-      type: grid
       rows: 110
       columns: 200
       draw_grid: false
     instruments:
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       -
@@ -182,7 +180,6 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Screen Builder
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       #draw_grid: true
       rows: 110
       columns: 200
@@ -210,15 +207,12 @@ screens:
           args:
             - show-full-ui
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
 
@@ -230,7 +224,6 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Screen Builder
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       #draw_grid: true
       rows: 110
       columns: 200
@@ -239,24 +232,19 @@ screens:
         states: 2
     instruments:
       - type: include,includes/virtual_vfr.yaml
-        relative: true
         row: 0
         column: 0
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
         display_state: 1
       - type: include,includes/mgl/v16/active-display.yaml
-        #relative: true
         row: 70
         column: 156
         span:
@@ -272,7 +260,6 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Radio Screen
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
       #draw_grid: true
@@ -288,33 +275,27 @@ screens:
           font_percent: 0.9
       - type: include,includes/virtual_vfr.yaml
         disabled: false
-        relative: true
         row: 0
         column: 0
         span:
           rows: 70
           columns: 125
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/power_temp_arcs.yaml
-        relative: true
         row: 0
         column: 125
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
       - type: include,includes/mgl/v16/radio-display.yaml
         replace:
           radio_id: 1 # {radio_id} is replaced anywhere it appears in the included config
                       # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
-        relative: true
         row: 70
         column: 0
       - type: include,includes/mgl/v16/radio-display.yaml
@@ -322,7 +303,6 @@ screens:
         replace:
           radio_id: 2 # {radio_id} is replaced anywhere it appears in the included config
                       # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
-        relative: true
         row: 0
         column: 0
         span:
@@ -334,7 +314,6 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Engine Management New
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
       draw_grid: false
@@ -349,34 +328,27 @@ screens:
           _dbkey: APMSG
           font_percent: 0.9
       - type: include,includes/virtual_vfr.yaml
-        #relative: true
         row: 0
         column: 0
         span:
           rows: 70
           columns: 125
       - type: include,includes/basic_arcs.yaml
-        relative: true
         row: 0
         column: 155
       - type: include,includes/power_temp_arcs.yaml
-        relative: true
         row: 0
         column: 125
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
       - type: include,includes/fuel_gauges.yaml
-        relative: true
         row: 70
         column: 155
       - type: include,includes/cht_bars.yaml
-        relative: true
         row: 70
         column: 123
       - type: include,includes/egt_bars.yaml
-        relative: true
         row: 70
         column: 91
       - type: ganged_button
@@ -493,7 +465,6 @@ screens:
     module: pyefis.screens.screenbuilder
     title: Engine Management New
     layout:
-      type: grid #Splits the screen into evenly sized grids where each grid can contain a single insturment
       rows: 110
       columns: 200
       draw_grid: false
@@ -749,7 +720,6 @@ screens:
                   showUnits: false
                   dbkey: FUELQ1
       - type: include,includes/side-buttons.yaml
-        relative: true
         row: 0
         column: 186
 

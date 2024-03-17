@@ -1,6 +1,5 @@
 instruments:
   - type: include,includes/mgl/v16/volumes.yaml
-    relative: true
     row: 0
     column: 0
     span:
@@ -27,14 +26,12 @@ instruments:
       font_mask: "XXXXXXX:"
       alignment: AlignLeft
   - type: include,includes/mgl/v16/active-display.yaml
-    relative: true
     row: 5
     column: 28
 #    span:
 #      rows: 27
 #      columns: 42
   - type: include,includes/mgl/v16/standby-display.yaml
-    relative: true
     row: 5
     column: 65
   - type: button

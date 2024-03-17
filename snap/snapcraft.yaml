@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.11.3"
+version: "0.11.4"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -19,6 +19,7 @@ description: |
   * Config driven screen creation
   * Programable touchscreen buttons
   * Listbox widget
+  * Control pyEFIS with a single rotary encoder and button
   * Technology Preview - run Android inside pyEFIS for access to your favorite aviation apps
 
   You can find the instructions to install Android here: https://github.com/makerplane/pyEfis/blob/master/ANDROID.md

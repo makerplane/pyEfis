@@ -20,7 +20,8 @@ The first column and row is 0
 For a Six Pack using `rows: 2` and `columns: 3` makes sense.
 If you are doing more complex layouts you can make the number of grids really high.
 For example if your screen is 640 x 480, you could set `columns: 640` and `rows: 480`, now you can place gauges by the pixel.
-Also consider that if you want to share your screen with others they might need a different resolution. Selecting a grid size that is easy to calculate might make more sense such as 600x400, the center if the screen would be `column: 300` and `row:200` sightly easier to calaulate than `320/220`
+Also consider that if you want to share your screen with others they might need a different resolution. Selecting a grid size that is easy to calculate might make more sense such as 600x400, the center if the screen would be `column: 300` and `row:200` sightly easier to calaulate than `320/220`<br>
+To make sharing and exchanging screens with other users all screens and includes distributed with pyEFIS are defined with `columns: 200` and `rows: 110` This is close to 16:9 ratio matching the majority of screens on the market today. Typically any screen will work, un-modified, at any resoltion but somtimes it is necessary to specify `font_mask` option to ensure text will be sized to always fit the amount of text in the mask. 
 ```
 screens:
   SixPackNew:
@@ -361,14 +362,13 @@ Currently you cannot use includes inside of includes.
 
 ##### Include relative #####
 When defining includes you can assume that each instrument starts at 0.
-Then within the main config you can define `relative: true` along with row and column and the instruments in the include will be rendered starting at the defined row and column.  This allows you to define something complex such as AHRS with heading and such then reuse that definition on various screens and different locations on the screen.
+Then within the main config you can define a row and column and the instruments in the include will be rendered starting at the defined row and column.  This allows you to define something complex such as AHRS with heading and such then reuse that definition on various screens and different locations on the screen.
 
 ##### Include scaling #####
 If you want to use use an include but want it to be a different size simply specify `span` with the row and columns you want the include to occupy.
 ```
     instruments:
       - type: include,includes/virtual_vfr.yaml
-        relative: true
         row: 0
         column: 0
         span:
@@ -379,37 +379,26 @@ If you want to use use an include but want it to be a different size simply spec
 # Instrument List #
 Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. Currenlty not many options have common names, one instrument might use font_size where another is fontsize or fontSize. Hopefully the community can decide on some common naming and update the code to make maintaining the list here much easier.
 
-To add a button you need to spcify the option `config:` that points to the yaml file with the configuration for the button:
-```
-      - type: button
-        row: 70
-        column: 75
-        span:
-          rows: 15
-          columns: 10
-        options:
-          config: config/buttons/trim-up-invisible.yaml
-```
-
 
 ## airspeed_dial
-
+An analog airspeed dial.
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
 ## airspeed_box
+A box that displays airspeed value, it can be switched between IAS, GS and TAS. Will change colors based on limits and status
 
 ## airspeed_tape
-
+Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
 ## airspeed_trend_tape
 
 ## altimeter_dial
-
+Analog altimeter dial
 ![Altimeter Dial](/docs/images/altimeter_dial.png)
 
 ## altimeter_tape
-
+Vertical airspeed tape
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
 
 ## altimeter_trend_tape
@@ -417,14 +406,17 @@ To add a button you need to spcify the option `config:` that points to the yaml 
 ![Altimeter Trend Tape](/docs/images/altimeter_trend_tape.png)
 
 ## atitude_indicator
-
+Digital atitude indicator
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
 ## arc_gauge
-
+Digital arc gauge
+Supports encoder selection and modification
 ![Arc Gauge](/docs/images/arc_gauge.png)
+![Arc Gauge](/docs/images/arc_gauge_segmented.png)
 
 ## button
+Supports encoder selection and modification
 
 Buttons should not be confused with the menu tho one could replace the menu with buttons if desired. The idea behind buttons is to provide an interactive instrument that can display data, change state such as color in response to data and perform actions within the system. The motivation to create this was because I wanted to place some physical buttons along each side of the screen so the pilot and co-pilot would have easy access to the buttons. Next to each physical button on the screen would be a button that shows the status of some option. For example, while viewing the Primary Flight Display screen if an engine item annunciates the button labeled EMS will turn red to indicate an alert condition. Pressing the button will take you to the EMS screen.  While viewing the EMS screen the button text changed to PFD, pressing it will take you back to the PFD screen.
 <br>
@@ -549,34 +541,55 @@ disabeling a button does not prevent it from evaluating conditions and performin
 
 
 ## heading_display
-
+Analog heading display
 ![Heading Display](/docs/images/heading_display.png)
 
 ## heading_tape
-
+Horizontal Heading Tape
 ![Heading Tape](/docs/images/heading_tape.png)
 
 ## horizontal_bar_gauge
-
+Digital horizontal bar gauge
+Supports encoder selection and modification
 ![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
+![Horizontal Bar Gauge Segmented](/docs/images/horizontal_bar_gauge_segmented.png)
+
 
 ## horizontal_situation_indicator
-
+Analog or digital situation indicator
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
+
+## listbox
+Displays and loads user-defined lists. Supports various sort options and can set values when items are selected. Useful for frequently needed items like radio frquencies or waypoints.
+Supports encoder selection and modification
+
+![Listbox](/docs/images/listbox.png)
+
 ## numeric_display
+Displays numeric values, changes colors based on limits and status.
+Supports encoder selection and modification
+![Numeric Display](/docs/images/numeric_display.png)
+
+![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
 
 ## static_text
+
+![Static Text](/docs/images/static_text.png)
 
 ## turn_coordinator
 
 ![Turn Coordinator](/docs/images/turn_coordinator.png)
 
-## value_display
+## value_text
+
+![Value Text](/docs/images/value_text.png)
 
 ## vertical_bar_gauge
+Supports encoder selection and modification
 
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
+![Vertical Bar Gauge](/docs/images/vertical_bar_gauge_segmented.png)
 
 ## virtual_vfr
 
