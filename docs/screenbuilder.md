@@ -386,15 +386,15 @@ An analog airspeed dial.
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
 Options:
-  * bg_color
-  * font_family
-  * font_percent
+  * bg_color - default black, example '#00000000'
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_percent - default 0.07
 
 ## airspeed_box
 A box that displays airspeed value, it can be switched between IAS, GS and TAS. Will change colors based on limits and status
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
 
 
 ## airspeed_tape
@@ -403,14 +403,14 @@ Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne an
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
 Options:
-  * font_percent
-  * font_family
-  * font_mask
+  * font_percent - default None
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_mask - default '000'
 
 ## airspeed_trend_tape
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
 
 ## altimeter_dial
 Analog altimeter dial
@@ -419,25 +419,29 @@ Analog altimeter dial
 
 Options:
   * altitude
-  * font_family
-  * bg_color
+  * font_family - default 'DejaVu Sans Condensed'
+  * bg_color - default black
+
 ## altimeter_tape
 Vertical airspeed tape
 
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
 
 Options:
-  * font_percent
+  * font_percent - default None
   * altitude
-  * font_family
-  * font_mask
-  * font_percent
-  * dbkey
-  * maxalt
+  * font_family - default 'DejaVu Sans Condensed'
+  * font_mask - default 00000
+  * dbkey - default 'ALT'
+  * maxalt - default 50000
 
 ## altimeter_trend_tape
 
 ![Altimeter Trend Tape](/docs/images/altimeter_trend_tape.png)
+
+Options
+  * font_family - default 'DejaVu Sans Condensed'
+
 
 ## atitude_indicator
 Digital atitude indicator
@@ -445,8 +449,8 @@ Digital atitude indicator
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
 Options:
-  * font_percent
-  * font_family
+  * font_percent - default None
+  * font_family - default 'DejaVu Sans Condensed'
 
 ## arc_gauge
 Digital arc gauge
@@ -456,16 +460,18 @@ Supports encoder selection and modification
 ![Arc Gauge](/docs/images/arc_gauge_segmented.png)
 
 Options:
-  * segments
-  * segment_gap_percent
-  * segment_alpha
-  * name_location
+  * segments - default 0 options: any integer, defines the number of segments to create
+  * segment_gap_percent - default 0.01, defines size of gaps in segments
+  * segment_alpha - default 180, 0-255, higher is darker
+  * name_location - default 'top', options 'top', 'right'
   * decimal_places
   * name
   * dbkey
   * temperature
-  * show_units
-  * font_family
+  * show_units - default False
+  * font_family - default 'DejaVu Sans Condensed'
+  * min_size - default True
+
 ## button
 Supports encoder selection and modification
 
@@ -602,15 +608,15 @@ Analog heading display
 ![Heading Display](/docs/images/heading_display.png)
 
 Options:
-  * font_family
-  * bg_color
-  * fg_color
+  * font_family - default 'DejaVu Sans Condensed'
+  * bg_color - default black
+  * fg_color - default gray
 
 ## heading_tape
 Horizontal Heading Tape
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
 
 
 ![Heading Tape](/docs/images/heading_tape.png)
@@ -623,14 +629,15 @@ Supports encoder selection and modification
 ![Horizontal Bar Gauge Segmented](/docs/images/horizontal_bar_gauge_segmented.png)
 
 Options:
-  * segments
-  * segment_gap_percent
-  * segment_alpha
-  * bar_divisor
+  * segments - default 0 options: any integer, defines the number of segments to create
+  * segment_gap_percent - default 0.01, defines size of gaps in segments
+  * segment_alpha - default 180, 0-255, higher is darker
+  * bar_divisor - default 4.5, changes how tall the bar is
   * show_value
   * show_units
   * show_name
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
+  * min_size - default True
 
 ## horizontal_situation_indicator
 Analog or digital situation indicator
@@ -638,12 +645,14 @@ Analog or digital situation indicator
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
 Options:
-  * gsi_enabled: true/false
-  * cdi_enabled: true/false
-  * font_percent: 
-  * font_family
-  * fg_color
-  * bg_color
+  * gsi_enabled: default False
+  * cdi_enabled: default False
+  * font_percent: - default None 
+  * font_family - default 'DejaVu Sans Condensed'
+  * fg_color - default white
+  * bg_color - default black
+
+
 ## listbox
 Displays and loads user-defined lists. Supports various sort options and can set values when items are selected. Useful for frequently needed items like radio frquencies or waypoints.
 Supports encoder selection and modification
@@ -651,7 +660,7 @@ Supports encoder selection and modification
 ![Listbox](/docs/images/listbox.png)
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * lists
 
 ## numeric_display
@@ -665,19 +674,20 @@ Supports encoder selection and modification
 Options:
   * decimal_places
   * font_mask
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * units_font_mask
   * dbkey
   * pressure - Defines value as pressure for unit switching
   * altitude - Defines value as altitude for unit switching
   * temperature - Defines value as temperature for unit switching
   * show_units - true/false 
+
 ## static_text
 
 ![Static Text](/docs/images/static_text.png)
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * font_percent
   * font_mask
   * font_ghost_mask
@@ -690,7 +700,7 @@ Options:
 ![Turn Coordinator](/docs/images/turn_coordinator.png)
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * dial
 
 ## value_text
@@ -698,7 +708,7 @@ Options:
 ![Value Text](/docs/images/value_text.png)
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * font_ghost_mask
   * font_mask
   * _dbkey
@@ -711,9 +721,9 @@ Supports encoder selection and modification
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge_segmented.png)
 
 Options:
-  * segments
-  * segment_gap_percent
-  * segment_alpha
+  * segments - default 0 options: any integer, defines the number of segments to create
+  * segment_gap_percent - default 0.01, defines size of gaps in segments
+  * segment_alpha - default 180, 0-255, higher is darker
   * temperature
   * highlight_key
   * decimal_places
@@ -727,7 +737,7 @@ Options:
   * name
   * egt_mode_switching
   * normalize_range
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
 
 ## virtual_vfr
 
@@ -735,7 +745,7 @@ Options:
 
 Options:
   * font_percent
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * gsi
 
 ## vsi_dial
@@ -743,14 +753,14 @@ Options:
 ![VSI Dial](/docs/images/vsi_dial.png)
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
 
 ## vsi_pfd
 
 ![VSI PFD](/docs/images/vsi_pfd.png)
 
 Options:
-  * font_family
+  * font_family - default 'DejaVu Sans Condensed'
   * font_percent
 
 ## weston
