@@ -57,8 +57,8 @@ class Screen(QWidget):
         #self.parent.change_asd_mode.connect(self.change_asd_mode)
 
         # HSI
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor="#00C911")
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=10, fgcolor="#00C911")
+        self.hsi = hsi.HSI(self, font_size=12, fg_color="#00C911")
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=10, fg_color="#00C911")
 
         # barometric pressure numeric display
         self.alt_setting = gauges.NumericDisplay(self)

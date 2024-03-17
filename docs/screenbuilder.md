@@ -604,7 +604,7 @@ Analog heading display
 Options:
   * font_family
   * bg_color
-  * fgcolor
+  * fg_color
 
 ## heading_tape
 Horizontal Heading Tape
@@ -642,7 +642,7 @@ Options:
   * cdi_enabled: true/false
   * font_percent: 
   * font_family
-  * fgcolor
+  * fg_color
   * bg_color
 ## listbox
 Displays and loads user-defined lists. Supports various sort options and can set values when items are selected. Useful for frequently needed items like radio frquencies or waypoints.

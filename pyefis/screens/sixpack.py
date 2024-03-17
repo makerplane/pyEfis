@@ -50,8 +50,8 @@ class Screen(QWidget):
 
         self.tc = tc.TurnCoordinator(self)
 
-        self.hsi = hsi.HSI(self, font_size=12, fgcolor=Qt.white)
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fgcolor=Qt.white)
+        self.hsi = hsi.HSI(self, font_size=12, fg_color=Qt.white)
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fg_color=Qt.white)
 
         self.vsi = vsi.VSI_Dial(self)
 
