@@ -527,10 +527,10 @@ Options:
   * segment_gap_percent - default 0.01, defines size of gaps in segments
   * segment_alpha - default 180, 0-255, higher is darker
   * name_location - default 'top', options 'top', 'right'
-  * decimal_places
+  * decimal_places - How may decimals to display
   * name
   * dbkey
-  * temperature
+  * temperature - Defines value as temperature for unit switching
   * show_units - default False
   * font_family - default 'DejaVu Sans Condensed'
   * min_size - default True
@@ -764,8 +764,8 @@ Supports encoder selection and modification
 ![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
 
 Options:
-  * decimal_places
-  * font_mask
+  * decimal_places - How may decimals to display
+  * font_mask  
   * font_family - default 'DejaVu Sans Condensed'
   * units_font_mask
   * dbkey
@@ -830,9 +830,9 @@ Options:
   * segments - default 0 options: any integer, defines the number of segments to create
   * segment_gap_percent - default 0.012, defines size of gaps in segments
   * segment_alpha - default 180, 0-255, higher is darker
-  * temperature
-  * highlight_key
-  * decimal_places
+  * temperature - Defines value as temperature for unit switching
+  * highlight_key - If the displayed value matches thie value of this key then the gauge is highlighted. Useful to highlight the max value ie CHTMAX1 or EGTMAX1
+  * decimal_places - How may decimals to display
   * show_units - default True
   * show_value - default True
   * show_name - default True
