@@ -286,7 +286,7 @@ class Screen(QWidget):
                 self.encoder_current_selection = 0
                 # Setup the encoder db key input
                 self.encoder_input = fix.db.get_item(self.encoder)
-                self.encoder_input.valueChanged[int].connect(self.encoderChanged)
+                self.encoder_input.valueWrite[int].connect(self.encoderChanged)
                 #self.encoder_input.oldChanged.connect(self.encoderOld)
                 # Setup the button db key input
                 self.encoder_button_input = fix.db.get_item(self.encoder_button)
