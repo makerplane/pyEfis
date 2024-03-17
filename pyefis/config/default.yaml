@@ -395,7 +395,7 @@ screens:
               showUnits: false
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
             instruments:
@@ -415,7 +415,7 @@ screens:
             common_options:
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
               showUnits: False
@@ -450,7 +450,7 @@ screens:
             common_options:
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
             instruments:
@@ -603,7 +603,7 @@ screens:
               segments: 22
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
             instruments:
@@ -626,7 +626,7 @@ screens:
               highlightKey: EGTMAX1
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
               decimalPlaces: 0
@@ -662,7 +662,7 @@ screens:
               highlightKey: CHTMAX1
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
               decimalPlaces: 0
@@ -697,7 +697,7 @@ screens:
               segments: 22
               smallFontPercent: 0.060
               bigFontPercent: 0.085
-              barWidthPercent: 0.5
+              bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
             instruments:

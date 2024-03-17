@@ -15,7 +15,7 @@ instruments:
           showUnits: false
           smallFontPercent: 0.060
           bigFontPercent: 0.085
-          barWidthPercent: 0.5
+          bar_width_percent: 0.5
           lineWidthPercent: 0.7
           textGap: 8
           segments: 22

@@ -410,7 +410,7 @@ Options:
 ## airspeed_trend_tape
 
 Options:
-  * font_fmaily
+  * font_family
 
 ## altimeter_dial
 Analog altimeter dial
@@ -720,7 +720,7 @@ Options:
   * showUnits
   * smallFontPercent
   * bigFontPercent
-  * barWidthPercent
+  * bar_width_percent
   * lineWidthPercent
   * textGap
   * dbkey
