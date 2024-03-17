@@ -384,6 +384,9 @@ Below is a list of the instrument types, defaults and options. This is a WIP and
 An analog airspeed dial.
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
+Options:
+  * bg_color
+
 ## airspeed_box
 A box that displays airspeed value, it can be switched between IAS, GS and TAS. Will change colors based on limits and status
 
@@ -391,15 +394,24 @@ A box that displays airspeed value, it can be switched between IAS, GS and TAS. 
 Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
+Options:
+  * font_percent
 ## airspeed_trend_tape
 
 ## altimeter_dial
 Analog altimeter dial
 ![Altimeter Dial](/docs/images/altimeter_dial.png)
 
+Options:
+  * altitude
+
 ## altimeter_tape
 Vertical airspeed tape
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
+
+Options:
+  * font_percent
+  * altitude
 
 ## altimeter_trend_tape
 
@@ -414,6 +426,14 @@ Digital arc gauge
 Supports encoder selection and modification
 ![Arc Gauge](/docs/images/arc_gauge.png)
 ![Arc Gauge](/docs/images/arc_gauge_segmented.png)
+
+Options:
+  * nameLocation
+  * decimalPlaces
+  * name
+  * dbkey
+  * temperature
+  * showUnits
 
 ## button
 Supports encoder selection and modification
@@ -573,6 +593,15 @@ Supports encoder selection and modification
 
 ![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
 
+Options:
+  * decimalPlaces
+  * font_mask
+  * units_font_mask
+  * dbkey
+  * pressure - Defines value as pressure for unit switching
+  * altitude - Defines value as altitude for unit switching
+  * temperature - Defines value as temperature for unit switching
+  * showUnits - true/false 
 ## static_text
 
 ![Static Text](/docs/images/static_text.png)
@@ -584,16 +613,38 @@ Supports encoder selection and modification
 ## value_text
 
 ![Value Text](/docs/images/value_text.png)
-
+Options:
+  * font_family
+  * font_ghost_mask
+  * font_mask
+  * _dbkey
+  * font_percent
 ## vertical_bar_gauge
 Supports encoder selection and modification
 
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge_segmented.png)
+Options:
+  * temperature
+  * highlightKey
+  * decimalPlaces
+  * showUnits
+  * smallFontPercent
+  * bigFontPercent
+  * barWidthPercent
+  * lineWidthPercent
+  * textGap
+  * dbkey
+  * name
+  * egt_mode_switching
+  * normalizeRange
 
 ## virtual_vfr
 
 ![Virtual VFR](/docs/images/virtual_vfr.png)
+
+Options:
+  * font_percent
 
 ## vsi_dial
 
