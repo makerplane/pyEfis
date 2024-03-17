@@ -622,7 +622,7 @@ screens:
             common_options:
               segments: 22
               egt_mode_switching: true
-              normalizeRange: 400
+              normalize_range: 400
               highlight_key: EGTMAX1
               smallFontPercent: 0.060
               big_font_percent: 0.085

@@ -275,7 +275,7 @@ If you have a group of EGT instruments you should specify these common_options t
           - name: EGT
             common_options:
               egt_mode_switching: true
-              normalizeRange: 400
+              normalize_range: 400
             instruments:
 
 ```
@@ -307,7 +307,7 @@ Following along with the example, here are the two groups for Power and EGT for 
           - name: EGT
             common_options:
               egt_mode_switching: true
-              normalizeRange: 400
+              normalize_range: 400
             instruments:
               -
                 options:
@@ -726,7 +726,7 @@ Options:
   * dbkey
   * name
   * egt_mode_switching
-  * normalizeRange
+  * normalize_range
   * font_family
 
 ## virtual_vfr
