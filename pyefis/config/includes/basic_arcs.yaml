@@ -31,7 +31,7 @@ instruments:
             options:
               name: Volts
               dbkey: VOLT
-              decimapPlaces: 1
+              decimal_places: 1
   - type: ganged_arc_gauge
     gang_type: vertical
     display_state: 2
@@ -66,4 +66,4 @@ instruments:
             options:
               name: Amps
               dbkey: CURRNT
-              decimapPlaces: 1
+              decimal_places: 1

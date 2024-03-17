@@ -254,7 +254,7 @@ You can give the group a name, tho currently nothing is done with the name inter
               -
                 options:
                   name: Volt
-                  decimapPlaces: 1
+                  decimal_places: 1
                   show_units: false
                   dbkey: VOLT
               -
@@ -296,7 +296,7 @@ Following along with the example, here are the two groups for Power and EGT for 
               -
                 options:
                   name: Volt
-                  decimapPlaces: 1
+                  decimal_places: 1
                   show_units: false
                   dbkey: VOLT
               -

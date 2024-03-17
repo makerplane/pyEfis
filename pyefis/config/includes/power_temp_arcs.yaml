@@ -16,12 +16,12 @@ instruments:
             options:
               name: Volts
               dbkey: VOLT
-              decimapPlaces: 1
+              decimal_places: 1
           -
             options:
               name: Amps
               dbkey: CURRNT
-              decimapPlaces: 1
+              decimal_places: 1
           -
             options:
               name: OAT
