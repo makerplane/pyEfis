@@ -394,7 +394,7 @@ screens:
             common_options:
               showUnits: false
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
@@ -414,7 +414,7 @@ screens:
             gap: 0
             common_options:
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
@@ -449,7 +449,7 @@ screens:
             gap: 0
             common_options:
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
@@ -602,7 +602,7 @@ screens:
             common_options:
               segments: 22
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
@@ -625,7 +625,7 @@ screens:
               normalizeRange: 400
               highlightKey: EGTMAX1
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
@@ -661,7 +661,7 @@ screens:
               segments: 22
               highlightKey: CHTMAX1
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
@@ -696,7 +696,7 @@ screens:
             common_options:
               segments: 22
               smallFontPercent: 0.060
-              bigFontPercent: 0.085
+              big_font_percent: 0.085
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8

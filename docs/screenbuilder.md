@@ -719,7 +719,7 @@ Options:
   * decimalPlaces
   * showUnits
   * smallFontPercent
-  * bigFontPercent
+  * big_font_percent
   * bar_width_percent
   * lineWidthPercent
   * textGap

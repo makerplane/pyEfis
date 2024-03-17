@@ -48,7 +48,7 @@ class EGTGroup(QWidget):
             bar.normalizeRange = 400
             self.bars.append(bar)
         self.smallFontPercent = 0.08
-        self.bigFontPercent = 0.10
+        self.big_font_percent = 0.10
         hmi.actions.setEgtMode.connect(self.setMode)
 
     def setMode(self, args):
