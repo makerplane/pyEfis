@@ -311,7 +311,10 @@ class Button(QWidget):
 
     # Trigger a press of this button
     def enc_select(self):
-        self.processConditions(clicked=True)
+        if self._toggle:
+            self._button.setChecked(not self._button.isChecked())
+        else:
+            self.processConditions(clicked=True)
         # Will trigger as if the button was selected
         # Will return control back to the caller
         return False 
