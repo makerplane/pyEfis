@@ -629,7 +629,7 @@ Options:
   * bar_divisor
   * showValue
   * showUnits
-  * showName
+  * show_name
   * font_family
 
 ## horizontal_situation_indicator

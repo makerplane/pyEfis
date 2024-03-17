@@ -131,7 +131,7 @@ class Screen(QWidget):
             if "key" in item: i.dbkey = item["key"]
             if "decPlaces" in item: i.decimal_places = item["decPlaces"]
             if "showUnits" in item: i.showUnits = item["showUnits"]
-            if "showName" in item: i.showName = item["showName"]
+            if "show_name" in item: i.show_name = item["show_name"]
             if "units1" in item: i.unitsOverride1 = item["units1"]
             if "units2" in item: i.unitsOverride2 = item["units2"]
             if "unitFunction1" in item: i.conversionFunction1 = item["unitFunction1"]

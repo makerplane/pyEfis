@@ -29,7 +29,7 @@ class HorizontalBar(AbstractGauge):
             self.setMinimumSize(100, 50)
         self.showValue = True
         self.showUnits = True
-        self.showName = True
+        self.show_name = True
         self.segments = 0 
         self.segment_gap_percent = 0.01
         self.segment_alpha = 180
@@ -59,7 +59,7 @@ class HorizontalBar(AbstractGauge):
         pen.setColor(self.textColor)
         p.setPen(pen)
         p.setFont(self.smallFont)
-        if self.showName: p.drawText(self.nameTextRect, self.name)
+        if self.show_name: p.drawText(self.nameTextRect, self.name)
 
         # Units
         p.setFont(self.smallFont)

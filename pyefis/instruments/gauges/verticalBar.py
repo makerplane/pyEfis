@@ -29,7 +29,7 @@ class VerticalBar(AbstractGauge):
             self.setMinimumSize(50, 100)
         self.showValue = True
         self.showUnits = True
-        self.showName = True
+        self.show_name = True
         self.bar_width_percent = 0.3
         self.line_width_percent = 0.5
         self.textGap = 3
@@ -108,7 +108,7 @@ class VerticalBar(AbstractGauge):
         self.smallFont = QFont(self.font_family)
         self.smallFont.setPixelSize(qRound(self.height() * self.smallFontPercent))
         #self.barHeight = self.height() / 6
-        if self.showName:
+        if self.show_name:
             self.barTop = self.smallFont.pixelSize() + self.textGap
         else:
             self.barTop = 1
@@ -151,7 +151,7 @@ class VerticalBar(AbstractGauge):
         pen.setCapStyle(Qt.FlatCap)
         p.setPen(pen)
         opt = QTextOption(Qt.AlignCenter)
-        if self.showName:
+        if self.show_name:
             pen.setColor(self.textColor)
             p.setPen(pen)
             p.setFont(self.smallFont)

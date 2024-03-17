@@ -136,7 +136,7 @@ def gauge_list(width, height):
             "key":"FUELQT",
             "decPlaces":1,
             "showUnits":True,
-            "showName":False,
+            "show_name":False,
             "width":90,
             "height":30,
             "x":width - 195,
@@ -226,7 +226,7 @@ class Screen(QWidget):
             i.name = item["name"]
             if "decPlaces" in item: i.decimal_places = item["decPlaces"]
             if "showUnits" in item: i.showUnits = item["showUnits"]
-            if "showName" in item: i.showName = item["showName"]
+            if "show_name" in item: i.show_name = item["show_name"]
             if "units1" in item: i.unitsOverride1 = item["units1"]
             if "units2" in item: i.unitsOverride2 = item["units2"]
             if "unitFunction1" in item: i.conversionFunction1 = item["unitFunction1"]
