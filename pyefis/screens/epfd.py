@@ -53,7 +53,7 @@ class Screen(QWidget):
         # airspeed tape numeral display box
         self.asd_Box = airspeed.Airspeed_Box(self)
 
-        self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bgcolor="#aaaaaa")
+        self.hsi = hsi.HSI(self, font_size=20, fgcolor="#aaaaaa", bg_color="#aaaaaa")
         self.hsi.tickSize = 12
         # Pointer Visibility [Top, Bottom, Right, Left]
         self.hsi.visiblePointers = [True, True, False, False]

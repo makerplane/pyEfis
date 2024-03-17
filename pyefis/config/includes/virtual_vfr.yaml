@@ -19,7 +19,7 @@ instruments:
       #fontSize: 48
       font_percent: 0.05
       fgcolor: "#aaaaaa"
-      bgcolor: "#aaaaaa"
+      bg_color: "#aaaaaa"
       cdi_enabled: true
       gsi_enabled: true
   - type: altimeter_tape

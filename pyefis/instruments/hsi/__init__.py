@@ -32,7 +32,7 @@ from pyefis.instruments import helpers
 
 
 class HSI(QGraphicsView):
-    def __init__(self, parent=None, font_size=15, font_percent=None, fgcolor=Qt.white, bgcolor=Qt.black, gsi_enabled=False, cdi_enabled=False, font_family="DejaVu Sans Condensed"):
+    def __init__(self, parent=None, font_size=15, font_percent=None, fgcolor=Qt.white, bg_color=Qt.black, gsi_enabled=False, cdi_enabled=False, font_family="DejaVu Sans Condensed"):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.font_family = font_family
@@ -47,7 +47,7 @@ class HSI(QGraphicsView):
         self.fontSize = font_size
         self.tickSize = self.fontSize * 0.7
         self.fg_color = fgcolor
-        self.bg_color = bgcolor
+        self.bg_color = bg_color
         self.gsi_enabled = gsi_enabled
         self.cdi_enabled = cdi_enabled
         # List for tick mark visibility, Top, Bottom, Right, Left
@@ -441,12 +441,12 @@ class HSI(QGraphicsView):
 
 
 class HeadingDisplay(QWidget):
-    def __init__(self, parent=None, fgcolor=Qt.gray, bgcolor=Qt.black, font_family="DejaVu Sans Condensed" ):
+    def __init__(self, parent=None, fgcolor=Qt.gray, bg_color=Qt.black, font_family="DejaVu Sans Condensed" ):
         super(HeadingDisplay, self).__init__(parent)
         self.font_family = font_family
         self.setFocusPolicy(Qt.NoFocus)
         self.fg_color = fgcolor
-        self.bg_color = bgcolor
+        self.bg_color = bg_color
 
         self._Old = True
         self._Bad = True
