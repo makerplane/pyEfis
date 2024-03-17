@@ -376,6 +376,69 @@ If you want to use use an include but want it to be a different size simply spec
           columns: 77.5
 ```
 
+# Encoder control
+pyEFIS can be controlled using a single rotary encoder with button. When the encoder is rotated an item on the screen will turn orange to indicate the selected item. While an item is selected if you rotate the encoder the selection will move to the next item. Pressing the button will either perform the action that is selected, such as a touchscreen button, or pass control over the encoder to the selected item such as a listbox. Once control is passed over to an item the behavior will depend on the specific item. after a period of time thetimeout will cause the screen to revert its default state with nothing selected<br>
+
+## listbox control
+To select the listbox rotate the encoder until the title of the listbox is orange. Then press the button.  Now when you rotate the encoder the selected row in the listbox will change, pressing the button will perform the action of the selected row in the listbox. The listbox is unique in that it never relenquishes control unless you allow theinput to timeout.
+
+## arc_gauge, horizontal_bar_gauge, vertical_bar_gauge and numeric_display
+All four of these items behave the same, once you select an item by highlighting it and pressing the button the item will take control over the encoder. Rotating the encoder will change the value of the dbkey defined. Once you have the desired setting press the button and the value will be saved and the screen will revert to its default tate of nothing selected. If you decide to not change the value, do not press the button, let the timeout expire. When it times out the value will be reverted to its previous value and the screen will return to its default state.
+
+## button
+The buttons are simple, if you press the button while a on-screen button is highlighted, the action associated with that button will be performed. Since buttons can b disabled based on various conditions it is not possible to select disabled button.
+
+## Controlling the order.
+To control the order of slections you ned to specify an `encoder_order` for each instrument you want selectable. The recommended approach is to assign a range to each include config that has selectable items. The default configs included with pyEFIS use 11-20 for the touchscreen buttons, 21-30 for the radio components and 31-40 for the EGT mode buttons.<br>
+
+here is an example of the buttons on the side of the screen being enabled for this feature and defining the order.<br>
+pyefis/config/includes/side-buttons.yaml:
+```
+instruments:
+  - type: ganged_button
+    gang_type: vertical
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 14.5
+    groups:
+      - name: Side Buttons
+        gap: 6
+        common_options:
+            font_mask: "ANDROID"
+        instruments:
+          -
+            options:
+              config: buttons/screen-ems-pfd.yaml
+              encoder_order: 11
+          -
+            options:
+              config: buttons/screen-ems2-pfd.yaml
+              encoder_order: 12
+          -
+            options:
+              config: buttons/screen-android-pfd.yaml
+              encoder_order: 13
+          -
+            options:
+              config: buttons/screen-radio-pfd.yaml
+```
+
+## Defining what encoder and button to use
+Each screen needs to have the values `encoder` and `encoder_button` defined to enable this feature on the screen. These should be set to the dbkey for the encoder and button you want to use for controlling the screen.
+
+Example from default.yaml file:
+```
+screens:
+  SIXPACK:
+    module: pyefis.screens.screenbuilder
+    title: Standard Instrument Panel New
+    encoder: ENC9
+    encoder_button: BTN9
+```
+
+
 # Instrument List #
 Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. Currenlty not many options have common names, one instrument might use font_size where another is fontsize or fontSize. Hopefully the community can decide on some common naming and update the code to make maintaining the list here much easier.
 
