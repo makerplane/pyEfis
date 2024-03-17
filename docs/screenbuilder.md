@@ -721,7 +721,7 @@ Options:
   * smallFontPercent
   * big_font_percent
   * bar_width_percent
-  * lineWidthPercent
+  * line_width_percent
   * textGap
   * dbkey
   * name

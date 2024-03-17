@@ -31,7 +31,7 @@ class VerticalBar(AbstractGauge):
         self.showUnits = True
         self.showName = True
         self.bar_width_percent = 0.3
-        self.lineWidthPercent = 0.5
+        self.line_width_percent = 0.5
         self.textGap = 3
         self.smallFontPercent = 0.08
         self.big_font_percent = 0.10
@@ -102,7 +102,7 @@ class VerticalBar(AbstractGauge):
 
     def resizeEvent(self, event):
         self.barWidth = self.width() * self.bar_width_percent
-        self.lineWidth = self.width() * self.lineWidthPercent
+        self.lineWidth = self.width() * self.line_width_percent
         self.bigFont = QFont(self.font_family)
         self.bigFont.setPixelSize(qRound(self.height() * self.big_font_percent))
         self.smallFont = QFont(self.font_family)

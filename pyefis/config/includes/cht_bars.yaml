@@ -18,7 +18,7 @@ instruments:
           smallFontPercent: 0.060
           big_font_percent: 0.085
           bar_width_percent: 0.5
-          lineWidthPercent: 0.7
+          line_width_percent: 0.7
           textGap: 8
         instruments:
               -
