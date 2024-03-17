@@ -534,6 +534,20 @@ Options:
   * show_units - default False
   * font_family - default 'DejaVu Sans Condensed'
   * min_size - default True
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
 
 ## button
 Supports encoder selection and modification
@@ -701,6 +715,21 @@ Options:
   * show_name
   * font_family - default 'DejaVu Sans Condensed'
   * min_size - default True
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
+
 
 ## horizontal_situation_indicator
 Analog or digital situation indicator
@@ -744,6 +773,20 @@ Options:
   * altitude - Defines value as altitude for unit switching
   * temperature - Defines value as temperature for unit switching
   * show_units - true/false 
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
 
 ## static_text
 
@@ -803,6 +846,20 @@ Options:
   * egt_mode_switching
   * normalize_range - default 0
   * font_family - default 'DejaVu Sans Condensed'
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
 
 ## virtual_vfr
 

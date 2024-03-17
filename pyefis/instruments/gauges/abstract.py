@@ -68,41 +68,34 @@ class AbstractGauge(QWidget):
         self.conversionFunction2 = lambda x: x
         self.decimal_places = 1
         # All these colors can be modified by the parent
-        self.outlineColor = QColor(Qt.darkGray)
+        #self.outline_color = Qt.darkGray
         # These are the colors that are used when the value's
         # quality is marked as good
-        self.bgGoodColor = QColor(Qt.black)
-        self.safeGoodColor = QColor(Qt.green)
-        self.warnGoodColor = QColor(Qt.yellow)
-        self.alarmGoodColor = QColor(Qt.red)
-        self.textGoodColor = QColor(Qt.white)
-        self.penGoodColor = QColor(Qt.white)
-        self.highlightGoodColor = QColor(Qt.magenta)
+        self.bg_good_color = Qt.black
+        self.safe_good_color = Qt.green
+        self.warn_good_color = Qt.yellow
+        self.alarm_good_color = Qt.red
+        self.text_good_color = Qt.white
+        self.pen_good_color = Qt.white
+        self.highlight_good_color = Qt.magenta
 
         # These colors are used for bad and fail
-        self.bgBadColor = QColor(Qt.black)
-        self.safeBadColor = QColor(Qt.darkGray)
-        self.warnBadColor = QColor(Qt.darkYellow)
-        self.alarmBadColor = QColor(Qt.darkRed)
-        self.textBadColor = QColor(Qt.gray)
-        self.penBadColor = QColor(Qt.gray)
-        self.highlightBadColor = QColor(Qt.darkMagenta)
+        self.bg_bad_color = Qt.black
+        self.safe_bad_color = Qt.darkGray
+        self.warn_bad_color = Qt.darkYellow
+        self.alarm_bad_color = Qt.darkRed
+        self.text_bad_color = Qt.gray
+        self.pen_bad_color = Qt.gray
+        self.highlight_bad_color = Qt.darkMagenta
 
         # Annunciate changes the text color
-        self.textAnnunciateColor = QColor(Qt.red)
+        self.text_annunciate_color = Qt.red
 
         # The following properties should not be changed by the user.
         # These are set real time based on changes in different states
         # like data quality, selected units or modes
-        self.bgColor = self.bgGoodColor
         self.selectColor = None
-        self.safeColor = self.safeGoodColor
-        self.warnColor = self.warnGoodColor
-        self.alarmColor = self.alarmGoodColor
-        self.textColor = self.textGoodColor # Non value text like units
-        self.valueColor = self.textGoodColor # The actual value text
-        self.penColor = self.penGoodColor # The line on the gauge
-        self.highlightColor = self.highlightGoodColor
+        #self.safeColor = self.safeGoodColor
         self.unitsOverride = None
         self.conversionFunction = lambda x: x
 
@@ -250,23 +243,23 @@ class AbstractGauge(QWidget):
 
     def setColors(self):
         if self.bad or self.fail or self.old:
-            self.bgColor = self.bgBadColor
-            self.safeColor = self.selectColor or self.safeBadColor
-            self.warnColor = self.warnBadColor
-            self.alarmColor = self.alarmBadColor
-            self.textColor = self.selectColor or self.textBadColor
-            self.penColor = self.penBadColor
-            self.highlightColor = self.highlightBadColor
+            self.bgColor = QColor(self.bg_bad_color)
+            self.safeColor = self.selectColor or QColor(self.safe_bad_color)
+            self.warnColor = QColor(self.warn_bad_color)
+            self.alarmColor = QColor(self.alarm_bad_color)
+            self.textColor = self.selectColor or QColor(self.text_bad_color)
+            self.penColor = QColor(self.pen_bad_color)
+            self.highlightColor = QColor(self.highlight_bad_color)
         else:
-            self.bgColor = self.selectColor or self.bgGoodColor
-            self.safeColor = self.selectColor or self.safeGoodColor
-            self.warnColor = self.warnGoodColor
-            self.alarmColor = self.alarmGoodColor
-            self.textColor = self.selectColor or self.textGoodColor
-            self.penColor = self.penGoodColor
-            self.highlightColor = self.highlightGoodColor
+            self.bgColor = self.selectColor or QColor(self.bg_good_color)
+            self.safeColor = self.selectColor or QColor(self.safe_good_color)
+            self.warnColor = QColor(self.warn_good_color)
+            self.alarmColor = QColor(self.alarm_good_color)
+            self.textColor = self.selectColor or QColor(self.text_good_color)
+            self.penColor = QColor(self.pen_good_color)
+            self.highlightColor = QColor(self.highlight_good_color)
         if self.annunciate and not self.fail:
-            self.textColor = self.selectColor or self.textAnnunciateColor
+            self.textColor = self.selectColor or QColor(self.text_annunciate_color)
 
         self.valueColor = self.textColor
         if self.lowWarn != None and self.value < self.lowWarn:
