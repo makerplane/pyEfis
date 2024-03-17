@@ -27,11 +27,11 @@ instruments:
               name: OAT
               dbkey: OAT
               temperature: true
-              showUnits: true
+              show_units: true
           -
             options:
               name: CAT
               temperature: true
               dbkey: CAT
-              showUnits: true
+              show_units: true
 

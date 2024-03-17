@@ -28,7 +28,7 @@ class HorizontalBar(AbstractGauge):
         if min_size:
             self.setMinimumSize(100, 50)
         self.showValue = True
-        self.showUnits = True
+        self.show_units = True
         self.show_name = True
         self.segments = 0 
         self.segment_gap_percent = 0.01
@@ -64,7 +64,7 @@ class HorizontalBar(AbstractGauge):
         # Units
         p.setFont(self.smallFont)
         opt = QTextOption(Qt.AlignRight)
-        if self.showUnits: p.drawText(self.valueTextRect, self.units, opt)
+        if self.show_units: p.drawText(self.valueTextRect, self.units, opt)
 
         # Main Value
         p.setFont(self.bigFont)

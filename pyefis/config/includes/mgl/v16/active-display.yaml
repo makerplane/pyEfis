@@ -42,7 +42,7 @@ instruments:
       name: RX
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
+      show_units: false
       showValue: false
       dbkey: COMACTRXLEVEL{radio_id}
       segments: 22
@@ -57,7 +57,7 @@ instruments:
       name: Squelch
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
+      show_units: false
       showValue: false
       dbkey: COMSQUELCH{radio_id}
       segments: 22
@@ -80,7 +80,7 @@ instruments:
       name: TX
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
+      show_units: false
       showValue: false
       dbkey: COMTXPWR{radio_id}
       segments: 22
@@ -95,7 +95,7 @@ instruments:
       name: SWR
       bar_divisor: 2.5
       decimapPlaces: 0
-      showUnits: false
+      show_units: false
       showValue: false
       dbkey: COMVSWR{radio_id}
       segments: 22

@@ -26,7 +26,7 @@ instruments:
               name: Coolant
               temperature: true
               dbkey: H2OT1
-              showUnits: true
+              show_units: true
           -
             options:
               name: Volts
@@ -55,13 +55,13 @@ instruments:
               name: Oil Temp
               dbkey: OILT1
               temperature: true
-              showUnits: true
+              show_units: true
           -
             options:
               name: OAT
               dbkey: OAT
               temperature: true
-              showUnits: true
+              show_units: true
           -
             options:
               name: Amps

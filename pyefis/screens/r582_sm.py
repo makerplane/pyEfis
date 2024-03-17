@@ -56,7 +56,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"VOLT",
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":100,
@@ -67,7 +67,7 @@ def gauge_list(width, height):
             "type":gauges.VerticalBar,
             "key":"CURRNT",
             "decPlaces":1,
-            "showUnits":False,
+            "show_units":False,
             "width":50,
             "height":150,
             "x":150,
@@ -79,7 +79,7 @@ def gauge_list(width, height):
             "engine": ENGINE_NUMBER,
             "cylinderCount": CYLINDER_COUNT,
             "decPlaces":0,
-            "showUnits":False,
+            "show_units":False,
             "width":200,
             "height":150,
             "x":300,
@@ -130,7 +130,7 @@ class Screen(QWidget):
             i.name = item["name"]
             if "key" in item: i.dbkey = item["key"]
             if "decPlaces" in item: i.decimal_places = item["decPlaces"]
-            if "showUnits" in item: i.showUnits = item["showUnits"]
+            if "show_units" in item: i.show_units = item["show_units"]
             if "show_name" in item: i.show_name = item["show_name"]
             if "units1" in item: i.unitsOverride1 = item["units1"]
             if "units2" in item: i.unitsOverride2 = item["units2"]
@@ -153,7 +153,7 @@ class Screen(QWidget):
             #cht.unitsOverride2 = u'\N{DEGREE SIGN}C'
             cht.unitGroup = "Temperature"
             cht.setUnitSwitching()
-            cht.showUnits = False
+            cht.show_units = False
             cht.dbkey = "CHT1{}".format(x+1)
             self.chts.append(cht)
             item = fix.db.get_item(cht.dbkey)

@@ -392,7 +392,7 @@ screens:
           - name: RPM
             gap: 0
             common_options:
-              showUnits: false
+              show_units: false
               smallFontPercent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
@@ -409,7 +409,7 @@ screens:
                   name: TPS
                   decimal_places: 2
                   dbkey: THR1
-                  showUnits: True
+                  show_units: True
           - name: Engine
             gap: 0
             common_options:
@@ -418,7 +418,7 @@ screens:
               bar_width_percent: 0.5
               line_width_percent: 0.7
               textGap: 8
-              showUnits: False
+              show_units: False
             instruments:
               -
                 options:
@@ -611,12 +611,12 @@ screens:
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
+                  show_units: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
+                  show_units: false
                   dbkey: CURRNT
           - name: EGT
             common_options:
@@ -636,25 +636,25 @@ screens:
                 options:
                   name: "1"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT11
               -
                 options:
                   name: "2"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT12
               -
                 options:
                   name: "3"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT13
               -
                 options:
                   name: "4"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT14
           - name: CHT
             common_options:
@@ -672,25 +672,25 @@ screens:
                 options:
                   name: "1"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT11
               -
                 options:
                   name: "2"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT12
               -
                 options:
                   name: "3"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT13
               -
                 options:
                   name: "4"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: CHT14
           - name: FUEL
             common_options:
@@ -705,19 +705,19 @@ screens:
                 options:
                   name: "Left"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: FUELQ1
               -
                 options:
                   name: "Center"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: FUELQ2
               -
                 options:
                   name: "Right"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: FUELQ1
       - type: include,includes/side-buttons.yaml
         row: 0

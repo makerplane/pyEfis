@@ -255,12 +255,12 @@ You can give the group a name, tho currently nothing is done with the name inter
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
+                  show_units: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
+                  show_units: false
                   dbkey: CURRNT
 
 ```
@@ -297,12 +297,12 @@ Following along with the example, here are the two groups for Power and EGT for 
                 options:
                   name: Volt
                   decimapPlaces: 1
-                  showUnits: false
+                  show_units: false
                   dbkey: VOLT
               -
                 options:
                   name: Amp
-                  showUnits: false
+                  show_units: false
                   dbkey: CURRNT
           - name: EGT
             common_options:
@@ -313,25 +313,25 @@ Following along with the example, here are the two groups for Power and EGT for 
                 options:
                   name: "1"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT11
               -
                 options:
                   name: "2"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT12
               -
                 options:
                   name: "3"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT13
               -
                 options:
                   name: "4"
                   decPlaces: 0
-                  showUnits: false
+                  show_units: false
                   dbkey: EGT14
 
 ```
@@ -464,7 +464,7 @@ Options:
   * name
   * dbkey
   * temperature
-  * showUnits
+  * show_units
   * font_family
 ## button
 Supports encoder selection and modification
@@ -628,7 +628,7 @@ Options:
   * segment_alpha
   * bar_divisor
   * showValue
-  * showUnits
+  * show_units
   * show_name
   * font_family
 
@@ -671,7 +671,7 @@ Options:
   * pressure - Defines value as pressure for unit switching
   * altitude - Defines value as altitude for unit switching
   * temperature - Defines value as temperature for unit switching
-  * showUnits - true/false 
+  * show_units - true/false 
 ## static_text
 
 ![Static Text](/docs/images/static_text.png)
@@ -717,7 +717,7 @@ Options:
   * temperature
   * highlight_key
   * decimal_places
-  * showUnits
+  * show_units
   * smallFontPercent
   * big_font_percent
   * bar_width_percent

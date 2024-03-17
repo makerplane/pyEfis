@@ -28,7 +28,7 @@ class VerticalBar(AbstractGauge):
         if min_size:
             self.setMinimumSize(50, 100)
         self.showValue = True
-        self.showUnits = True
+        self.show_units = True
         self.show_name = True
         self.bar_width_percent = 0.3
         self.line_width_percent = 0.5
@@ -115,7 +115,7 @@ class VerticalBar(AbstractGauge):
         self.barBottom = self.height()
         if self.showValue:
             self.barBottom -= (self.bigFont.pixelSize() + self.textGap)
-        if self.showUnits:
+        if self.show_units:
             self.barBottom -= (self.smallFont.pixelSize() + self.textGap)
 
         self.barLeft = (self.width() - self.barWidth) / 2
@@ -169,7 +169,7 @@ class VerticalBar(AbstractGauge):
             else:
                 # Draw Value
                 self.drawValue(p, pen)
-        if self.showUnits:
+        if self.show_units:
             # Units
             pen.setColor(self.textColor)
             p.setPen(pen)

@@ -31,7 +31,7 @@ class NumericDisplay(AbstractGauge):
         self.font_family = font_family
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
         self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
-        self.showUnits = False
+        self.show_units = False
         self.smallFontPercent = 0.4
         self.units_font_mask = None
 
@@ -47,7 +47,7 @@ class NumericDisplay(AbstractGauge):
         qm = QFontMetrics(self.smallFont)
         unitsWidth = qm.width(self.units)
 
-        if self.showUnits:
+        if self.show_units:
             # TODO Edit to get the units closer to the value 
             self.valueTextRect = QRectF(0, 0, self.width()-unitsWidth-5, self.height())
             self.unitsTextRect = QRectF(self.valueTextRect.width(), 0,
@@ -79,7 +79,7 @@ class NumericDisplay(AbstractGauge):
         p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draw Units
-        if self.showUnits:
+        if self.show_units:
             p.setFont(self.smallFont)
             opt = QTextOption(self.unitsAlignment)
             p.drawText(self.unitsTextRect, self.units, opt)

@@ -29,7 +29,7 @@ class ArcGauge(AbstractGauge):
             self.setMinimumSize(100, 50)
         self.startAngle = 45
         self.sweepAngle = 180 - 45
-        self.showUnits = False
+        self.show_units = False
         self.name_location = 'top' # can also be 'right' above the value
         self.segments = 0
         self.segment_gap_percent = 0.01
@@ -195,7 +195,7 @@ class ArcGauge(AbstractGauge):
         fm = QFontMetrics(f)
         x = fm.width(self.valueText)
         ux = 0
-        if self.showUnits:
+        if self.show_units:
             f.setPixelSize(qRound(self.height() / 4))
             fmu = QFontMetrics(f)
             ux = fmu.width(self.units)
