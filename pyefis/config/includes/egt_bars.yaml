@@ -17,7 +17,7 @@ instruments:
           highlight_key: EGTMAX1
           decimal_places: 0
           show_units: true
-          smallFontPercent: 0.060
+          small_font_percent: 0.060
           big_font_percent: 0.085
           bar_width_percent: 0.5
           line_width_percent: 0.7

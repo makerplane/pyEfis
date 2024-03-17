@@ -32,18 +32,18 @@ class NumericDisplay(AbstractGauge):
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
         self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
         self.show_units = False
-        self.smallFontPercent = 0.4
+        self.small_font_percent = 0.4
         self.units_font_mask = None
 
     def resizeEvent(self, event):
         self.font_size = self.height()
         
         if self.font_mask:
-            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family,self.units_font_mask,self.smallFontPercent)
+            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family,self.units_font_mask,self.small_font_percent)
         self.bigFont = QFont(self.font_family)
         self.bigFont.setPointSizeF(self.font_size)
         self.smallFont = QFont(self.font_family)
-        self.smallFont.setPointSizeF(qRound(self.font_size * self.smallFontPercent))
+        self.smallFont.setPointSizeF(qRound(self.font_size * self.small_font_percent))
         qm = QFontMetrics(self.smallFont)
         unitsWidth = qm.width(self.units)
 

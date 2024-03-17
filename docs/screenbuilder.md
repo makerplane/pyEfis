@@ -718,7 +718,7 @@ Options:
   * highlight_key
   * decimal_places
   * show_units
-  * smallFontPercent
+  * small_font_percent
   * big_font_percent
   * bar_width_percent
   * line_width_percent

@@ -393,7 +393,7 @@ screens:
             gap: 0
             common_options:
               show_units: false
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
@@ -413,7 +413,7 @@ screens:
           - name: Engine
             gap: 0
             common_options:
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
@@ -448,7 +448,7 @@ screens:
           - name: Temps
             gap: 0
             common_options:
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
@@ -601,7 +601,7 @@ screens:
           - name: Power
             common_options:
               segments: 22
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
@@ -624,7 +624,7 @@ screens:
               egt_mode_switching: true
               normalize_range: 400
               highlight_key: EGTMAX1
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
@@ -660,7 +660,7 @@ screens:
             common_options:
               segments: 22
               highlight_key: CHTMAX1
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
@@ -695,7 +695,7 @@ screens:
           - name: FUEL
             common_options:
               segments: 22
-              smallFontPercent: 0.060
+              small_font_percent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7

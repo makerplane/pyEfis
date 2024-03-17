@@ -13,7 +13,7 @@ instruments:
         common_options:
           show_value: false
           show_units: false
-          smallFontPercent: 0.060
+          small_font_percent: 0.060
           big_font_percent: 0.085
           bar_width_percent: 0.5
           line_width_percent: 0.7

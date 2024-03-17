@@ -280,7 +280,7 @@ class Screen(QWidget):
         # self.hobbs.dbkey = "HOBBS1"
         # self.hobbs.alignment = Qt.AlignRight | Qt.AlignVCenter
         # self.hobbs.show_units = True
-        # self.hobbs.smallFontPercent = 0.6
+        # self.hobbs.small_font_percent = 0.6
         #
         # self.oatlabel = misc.StaticText("OAT", parent=self)
         # self.oatlabel.alignment = Qt.AlignLeft | Qt.AlignVCenter
@@ -296,7 +296,7 @@ class Screen(QWidget):
         # self.oat.unitsOverride2 = u'\N{DEGREE SIGN}C'
         # self.oat.show_units = True
         # self.oat.setUnitSwitching()
-        # self.oat.smallFontPercent = 0.6
+        # self.oat.small_font_percent = 0.6
         #
         # self.timez = misc.ValueDisplay(self)
         # self.timez.dbkey = "TIMEZ"
