@@ -95,6 +95,8 @@ screens:
   SIXPACK:
     module: pyefis.screens.screenbuilder
     title: Standard Instrument Panel New
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
       rows: 110
       columns: 200
@@ -179,6 +181,8 @@ screens:
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Screen Builder
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
       #draw_grid: true
       rows: 110
@@ -223,6 +227,8 @@ screens:
       #refresh_period: 0.25
     module: pyefis.screens.screenbuilder
     title: Screen Builder
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
       #draw_grid: true
       rows: 110
@@ -259,6 +265,8 @@ screens:
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Radio Screen
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
       rows: 110
       columns: 200
@@ -313,6 +321,8 @@ screens:
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
     title: Engine Management New
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
       rows: 110
       columns: 200
@@ -371,15 +381,19 @@ screens:
               -
                 options:
                   config: buttons/egt-Normalize.yaml
+                  encoder_order: 31
               -
                 options:
                   config: buttons/egt-Lean.yaml
+                  encoder_order: 32
               -
                 options:
                   config: buttons/egt-Peak.yaml
+                  encoder_order: 33
               -
                 options:
                   config: buttons/egt-reset-peak.yaml
+                  encoder_order: 34
       -
         type: ganged_vertical_bar_gauge
         gang_type: horizontal
@@ -464,6 +478,8 @@ screens:
   EMS2:
     module: pyefis.screens.screenbuilder
     title: Engine Management New
+    encoder: ENC3
+    encoder_button: BTN3
     layout:
       rows: 110
       columns: 200
