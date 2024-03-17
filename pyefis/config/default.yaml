@@ -626,7 +626,7 @@ screens:
               -
                 options:
                   name: Volt
-                  decimapPlaces: 1
+                  decimal_places: 1
                   show_units: false
                   dbkey: VOLT
               -

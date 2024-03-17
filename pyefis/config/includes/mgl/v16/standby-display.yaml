@@ -42,7 +42,7 @@ instruments:
     options:
       name: RX
       bar_divisor: 2.5
-      decimapPlaces: 0
+      decimal_places: 0
       show_units: false
       show_value: false
       dbkey: COMSTDRXLEVEL{radio_id}
