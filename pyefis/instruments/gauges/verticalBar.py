@@ -32,7 +32,7 @@ class VerticalBar(AbstractGauge):
         self.show_name = True
         self.bar_width_percent = 0.3
         self.line_width_percent = 0.5
-        self.textGap = 3
+        self.text_gap = 3
         self.small_font_percent = 0.08
         self.big_font_percent = 0.10
         self.normalizePenColor = QColor(Qt.blue)
@@ -109,14 +109,14 @@ class VerticalBar(AbstractGauge):
         self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         #self.barHeight = self.height() / 6
         if self.show_name:
-            self.barTop = self.smallFont.pixelSize() + self.textGap
+            self.barTop = self.smallFont.pixelSize() + self.text_gap
         else:
             self.barTop = 1
         self.barBottom = self.height()
         if self.show_value:
-            self.barBottom -= (self.bigFont.pixelSize() + self.textGap)
+            self.barBottom -= (self.bigFont.pixelSize() + self.text_gap)
         if self.show_units:
-            self.barBottom -= (self.smallFont.pixelSize() + self.textGap)
+            self.barBottom -= (self.smallFont.pixelSize() + self.text_gap)
 
         self.barLeft = (self.width() - self.barWidth) / 2
         self.barRight = self.barLeft + self.barWidth
@@ -125,8 +125,8 @@ class VerticalBar(AbstractGauge):
         self.barHeight = self.barBottom - self.barTop
 
         self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
-        self.valueTextRect = QRectF(0, self.barBottom + self.textGap, self.width(), self.bigFont.pixelSize())
-        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.textGap, self.width(), self.smallFont.pixelSize() + self.textGap)
+        self.valueTextRect = QRectF(0, self.barBottom + self.text_gap, self.width(), self.bigFont.pixelSize())
+        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.text_gap, self.width(), self.smallFont.pixelSize() + self.text_gap)
         self.ballRadius = self.barWidth * 0.40
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 

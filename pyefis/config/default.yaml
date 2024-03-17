@@ -397,7 +397,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
             instruments:
               -
                 options:
@@ -417,7 +417,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
               show_units: False
             instruments:
               -
@@ -452,7 +452,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
             instruments:
               -
                 options:
@@ -605,7 +605,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
             instruments:
               -
                 options:
@@ -628,7 +628,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
               decimal_places: 0
               temperature: true
             instruments:
@@ -664,7 +664,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
               decimal_places: 0
               temperature: true
             instruments:
@@ -699,7 +699,7 @@ screens:
               big_font_percent: 0.085
               bar_width_percent: 0.5
               line_width_percent: 0.7
-              textGap: 8
+              text_gap: 8
             instruments:
               -
                 options:

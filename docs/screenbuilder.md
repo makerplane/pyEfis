@@ -722,7 +722,7 @@ Options:
   * big_font_percent
   * bar_width_percent
   * line_width_percent
-  * textGap
+  * text_gap
   * dbkey
   * name
   * egt_mode_switching
