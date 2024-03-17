@@ -10,7 +10,7 @@ instruments:
       font_ghost_mask: "~~~~~~~"
       font_family: "DSEG14 Classic"
       font_mask: "000.000"
-      decimalPlaces: 3
+      decimal_places: 3
       dbkey: COMACTFREQ{radio_id}
   - type: value_text
     row: 8

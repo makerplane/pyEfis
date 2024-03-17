@@ -10,7 +10,7 @@ instruments:
       - name: Power and Temp
         common_options:
           nameLocation: right
-          decimalPlaces: 0
+          decimal_places: 0
         instruments:
           -
             options:

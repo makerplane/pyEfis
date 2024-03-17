@@ -224,7 +224,7 @@ class Screen(QWidget):
             else:
                 i = item["type"](self)
             i.name = item["name"]
-            if "decPlaces" in item: i.decimalPlaces = item["decPlaces"]
+            if "decPlaces" in item: i.decimal_places = item["decPlaces"]
             if "showUnits" in item: i.showUnits = item["showUnits"]
             if "showName" in item: i.showName = item["showName"]
             if "units1" in item: i.unitsOverride1 = item["units1"]
@@ -243,7 +243,7 @@ class Screen(QWidget):
             cht = gauges.VerticalBar(self)
 
             cht.name = str(x+1)
-            cht.decimalPlaces = 0
+            cht.decimal_places = 0
             cht.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
             cht.conversionFunction2 = lambda x: x
             #cht.unitsOverride1 = u'\N{DEGREE SIGN}F'
@@ -260,7 +260,7 @@ class Screen(QWidget):
 
         self.chtmax = gauges.NumericDisplay(self)
         self.chtmax.name = "CHT Max"
-        self.chtmax.decimalPlaces = 0
+        self.chtmax.decimal_places = 0
         self.chtmax.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
         self.chtmax.conversionFunction2 = lambda x: x
         self.chtmax.unitsOverride1 = u'\N{DEGREE SIGN}F'
@@ -276,7 +276,7 @@ class Screen(QWidget):
         #
         # self.hobbs = gauges.NumericDisplay(self)
         # self.hobbs.name = "Hobbs"
-        # self.hobbs.decimalPlaces = 1
+        # self.hobbs.decimal_places = 1
         # self.hobbs.dbkey = "HOBBS1"
         # self.hobbs.alignment = Qt.AlignRight | Qt.AlignVCenter
         # self.hobbs.showUnits = True
@@ -287,7 +287,7 @@ class Screen(QWidget):
         #
         # self.oat = gauges.NumericDisplay(self)
         # self.oat.name = "OAT"
-        # self.oat.decimalPlaces = 1
+        # self.oat.decimal_places = 1
         # self.oat.dbkey = "OAT"
         # self.oat.alignment = Qt.AlignLeft | Qt.AlignVCenter
         # self.oat.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0

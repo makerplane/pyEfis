@@ -211,7 +211,7 @@ Here is an example instrument for a tachometer:
           options:
             name: RPM
             dbkey: TACH1
-            decimalPlaces: 0
+            decimal_places: 0
 ``` 
 
 ### Ganged Instruments
@@ -460,7 +460,7 @@ Options:
   * segment_gap_percent
   * segment_alpha
   * nameLocation
-  * decimalPlaces
+  * decimal_places
   * name
   * dbkey
   * temperature
@@ -663,7 +663,7 @@ Supports encoder selection and modification
 ![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
 
 Options:
-  * decimalPlaces
+  * decimal_places
   * font_mask
   * font_family
   * units_font_mask
@@ -716,7 +716,7 @@ Options:
   * segment_alpha
   * temperature
   * highlightKey
-  * decimalPlaces
+  * decimal_places
   * showUnits
   * smallFontPercent
   * big_font_percent

@@ -47,7 +47,7 @@ instruments:
       columns: 12
     options:
       font_mask: "0000"
-      decimalPlaces: 0
+      decimal_places: 0
       dbkey: VS
   - type: airspeed_tape
     row: 5
@@ -125,7 +125,7 @@ instruments:
     options:
       font_mask: "00.00"
       dbkey: BARO
-      decimalPlaces: 2
+      decimal_places: 2
       pressure: true
   - type: button
     row: 83
@@ -162,7 +162,7 @@ instruments:
     options:
       font_mask: "10000"
       dbkey: DALT
-      decimalPlaces: 0
+      decimal_places: 0
       altitude: true
   - type: static_text
     row: 100
@@ -183,7 +183,7 @@ instruments:
     options:
       font_mask: "10000"
       dbkey: PALT
-      decimalPlaces: 0
+      decimal_places: 0
       altitude: true
   - type: static_text
     row: 105
@@ -207,7 +207,7 @@ instruments:
       dbkey: OAT
       temperature: true
       showUnits: true
-      decimalPlaces: 0
+      decimal_places: 0
       #showValue: false
   - type: button
     row: 0

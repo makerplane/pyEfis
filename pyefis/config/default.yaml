@@ -402,12 +402,12 @@ screens:
               -
                 options:
                   name: RPM
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: TACH1
               -
                 options:
                   name: TPS
-                  decimalPlaces: 2
+                  decimal_places: 2
                   dbkey: THR1
                   showUnits: True
           - name: Engine
@@ -423,27 +423,27 @@ screens:
               -
                 options:
                   name: MAP
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: IT
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: AFR
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: AFRT
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
               -
                 options:
                   name: EGO
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: MAP1
           - name: Temps
             gap: 0
@@ -457,7 +457,7 @@ screens:
               -
                 options:
                   name: IAT
-                  decimalPlaces: 0
+                  decimal_places: 0
                   dbkey: CAT
                   temperature: true
 
@@ -514,7 +514,7 @@ screens:
         options:
           segments: 28
           name: RPM
-          decimalPlaces: 0
+          decimal_places: 0
           dbkey: TACH1
           #font_family: "DSEG14 Classic"
       -
@@ -527,7 +527,7 @@ screens:
         options:
           segments: 28
           name: MAP
-          decimalPlaces: 1
+          decimal_places: 1
           dbkey: MAP1
       -
         type: ganged_horizontal_bar_gauge
@@ -629,7 +629,7 @@ screens:
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
-              decimalPlaces: 0
+              decimal_places: 0
               temperature: true
             instruments:
               -
@@ -665,7 +665,7 @@ screens:
               bar_width_percent: 0.5
               lineWidthPercent: 0.7
               textGap: 8
-              decimalPlaces: 0
+              decimal_places: 0
               temperature: true
             instruments:
               -

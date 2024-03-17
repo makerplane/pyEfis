@@ -13,7 +13,7 @@ instruments:
         common_options:
           temperature: true
           highlightKey: CHTMAX1
-          decimalPlaces: 0
+          decimal_places: 0
           showUnits: true
           smallFontPercent: 0.060
           big_font_percent: 0.085

@@ -23,17 +23,17 @@ instruments:
           -
             options:
               name: "RX Vol"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: COMRXVOL{radio_id}
           -
             options:
               name: "Int Vol"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: COMINTVOL{radio_id}
           -
             options:
               name: "Aux Vol"
-              decimalPlaces: 0
+              decimal_places: 0
               dbkey: COMAUDVOL{radio_id}
 # Aux Volume might not exist
 # The intention was to show volume for the audio input

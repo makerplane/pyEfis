@@ -11,7 +11,7 @@ instruments:
       - name: Engine
         common_options:
           nameLocation: right
-          decimalPlaces: 0
+          decimal_places: 0
         instruments:
           -
             options:
@@ -44,7 +44,7 @@ instruments:
       - name: Engine
         common_options:
           nameLocation: right
-          decimalPlaces: 0
+          decimal_places: 0
         instruments:
           -
             options:

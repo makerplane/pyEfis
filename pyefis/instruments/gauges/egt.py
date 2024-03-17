@@ -35,7 +35,7 @@ class EGTGroup(QWidget):
         for i in range(cylinders):
             bar = VerticalBar(self)
             bar.name = str(i+1)
-            bar.decimalPlaces = 0
+            bar.decimal_places = 0
             bar.showUnits = False
             bar.peakMode = False
             bar.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0

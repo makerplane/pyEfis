@@ -53,17 +53,17 @@ class Screen(QWidget):
 
         self.map_g = gauges.ArcGauge(self)
         self.map_g.name = "MAP"
-        self.map_g.decimalPlaces = 1
+        self.map_g.decimal_places = 1
         self.map_g.dbkey = "MAP1"
 
         self.rpm = gauges.ArcGauge(self)
         self.rpm.name = "RPM"
-        self.rpm.decimalPlaces = 0
+        self.rpm.decimal_places = 0
         self.rpm.dbkey = "TACH1"
 
         self.op = gauges.HorizontalBar(self)
         self.op.name = "Oil Press"
-        self.op.decimalPlaces = 1
+        self.op.decimal_places = 1
         self.op.dbkey = "OILP1"
 
 
@@ -81,12 +81,12 @@ class Screen(QWidget):
 
         self.fuel = gauges.HorizontalBar(self)
         self.fuel.name = "Fuel Qty"
-        self.fuel.decimalPlaces = 1
+        self.fuel.decimal_places = 1
         self.fuel.dbkey = "FUELQT"
 
         self.ff = gauges.HorizontalBar(self)
         self.ff.name = "Fuel Flow"
-        self.ff.decimalPlaces = 1
+        self.ff.decimal_places = 1
         self.ff.dbkey = "FUELF1"
 
         self.cht = gauges.HorizontalBar(self)
@@ -111,7 +111,7 @@ class Screen(QWidget):
         self.egt.unitsOverride2 = u'\N{DEGREE SIGN}C'
         self.egt.unitGroup = "Temperature"
         self.egt.setUnitSwitching()
-        self.egt.decimalPlaces = 0
+        self.egt.decimal_places = 0
         self.egt.dbkey = "EGTAVG1"
 
 

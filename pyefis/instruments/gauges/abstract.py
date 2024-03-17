@@ -66,7 +66,7 @@ class AbstractGauge(QWidget):
         self.unitsOverride2 = None
         self.conversionFunction1 = lambda x: x
         self.conversionFunction2 = lambda x: x
-        self.decimalPlaces = 1
+        self.decimal_places = 1
         # All these colors can be modified by the parent
         self.outlineColor = QColor(Qt.darkGray)
         # These are the colors that are used when the value's
@@ -140,7 +140,7 @@ class AbstractGauge(QWidget):
         if self.fail:
             return 'xxx'
         else:
-            return '{0:.{1}f}'.format(float(self.value), self.decimalPlaces)
+            return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
 
     valueText = property(getValueText)
 

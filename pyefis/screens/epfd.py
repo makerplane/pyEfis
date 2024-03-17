@@ -61,7 +61,7 @@ class Screen(QWidget):
         # self.alt_setting = altimeter.Altimeter_Setting(self)
         self.alt_setting = gauges.NumericDisplay(self)
         self.alt_setting.dbkey = "BARO"
-        self.alt_setting.decimalPlaces = 2
+        self.alt_setting.decimal_places = 2
 
         self.check_engine = CheckEngine(self)
         #self.tc = tc.TurnCoordinator(self, dial=False)
