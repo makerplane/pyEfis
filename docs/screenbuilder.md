@@ -382,6 +382,7 @@ Below is a list of the instrument types, defaults and options. This is a WIP and
 
 ## airspeed_dial
 An analog airspeed dial.
+
 ![Airspeed Dial](/docs/images/airspeed_dial.png)
 
 Options:
@@ -401,6 +402,7 @@ Options:
 
 ## altimeter_dial
 Analog altimeter dial
+
 ![Altimeter Dial](/docs/images/altimeter_dial.png)
 
 Options:
@@ -408,6 +410,7 @@ Options:
 
 ## altimeter_tape
 Vertical airspeed tape
+
 ![Airspeed Tape](/docs/images/altimeter_tape.png)
 
 Options:
