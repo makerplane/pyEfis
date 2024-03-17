@@ -459,7 +459,7 @@ Options:
   * segments
   * segment_gap_percent
   * segment_alpha
-  * nameLocation
+  * name_location
   * decimal_places
   * name
   * dbkey

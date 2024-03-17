@@ -10,7 +10,7 @@ instruments:
     groups:
       - name: Engine
         common_options:
-          nameLocation: right
+          name_location: right
           decimal_places: 0
         instruments:
           -
@@ -43,7 +43,7 @@ instruments:
     groups:
       - name: Engine
         common_options:
-          nameLocation: right
+          name_location: right
           decimal_places: 0
         instruments:
           -

@@ -30,7 +30,7 @@ class ArcGauge(AbstractGauge):
         self.startAngle = 45
         self.sweepAngle = 180 - 45
         self.showUnits = False
-        self.nameLocation = 'top' # can also be 'right' above the value
+        self.name_location = 'top' # can also be 'right' above the value
         self.segments = 0
         self.segment_gap_percent = 0.01
         self.segment_alpha = 180
@@ -180,9 +180,9 @@ class ArcGauge(AbstractGauge):
         fm = QFontMetrics(f)
         x = fm.width(self.name)
         p.setFont(f)
-        if self.nameLocation == 'top':
+        if self.name_location == 'top':
             p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
-        elif self.nameLocation == 'right':
+        elif self.name_location == 'right':
             p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
 
         # Main value text

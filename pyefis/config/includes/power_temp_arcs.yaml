@@ -9,7 +9,7 @@ instruments:
     groups:
       - name: Power and Temp
         common_options:
-          nameLocation: right
+          name_location: right
           decimal_places: 0
         instruments:
           -
