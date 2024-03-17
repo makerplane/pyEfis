@@ -392,6 +392,7 @@ A box that displays airspeed value, it can be switched between IAS, GS and TAS. 
 
 ## airspeed_tape
 Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe
+
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
 Options:
@@ -419,11 +420,13 @@ Options:
 
 ## atitude_indicator
 Digital atitude indicator
+
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
 ## arc_gauge
 Digital arc gauge
 Supports encoder selection and modification
+
 ![Arc Gauge](/docs/images/arc_gauge.png)
 ![Arc Gauge](/docs/images/arc_gauge_segmented.png)
 
@@ -571,12 +574,14 @@ Horizontal Heading Tape
 ## horizontal_bar_gauge
 Digital horizontal bar gauge
 Supports encoder selection and modification
+
 ![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
 ![Horizontal Bar Gauge Segmented](/docs/images/horizontal_bar_gauge_segmented.png)
 
 
 ## horizontal_situation_indicator
 Analog or digital situation indicator
+
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
 
@@ -589,6 +594,7 @@ Supports encoder selection and modification
 ## numeric_display
 Displays numeric values, changes colors based on limits and status.
 Supports encoder selection and modification
+
 ![Numeric Display](/docs/images/numeric_display.png)
 
 ![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
@@ -613,17 +619,20 @@ Options:
 ## value_text
 
 ![Value Text](/docs/images/value_text.png)
+
 Options:
   * font_family
   * font_ghost_mask
   * font_mask
   * _dbkey
   * font_percent
+
 ## vertical_bar_gauge
 Supports encoder selection and modification
 
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge.png)
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge_segmented.png)
+
 Options:
   * temperature
   * highlightKey
