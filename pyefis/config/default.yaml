@@ -1,5 +1,6 @@
 auto start: True
-
+# For help configuring your screen layout visit:
+# https://github.com/makerplane/pyEfis/blob/master/docs/screenbuilder.md
 main:
   # IP information for network adapter
   FixServer: 127.0.0.1
