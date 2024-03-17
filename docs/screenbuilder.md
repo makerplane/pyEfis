@@ -387,6 +387,8 @@ An analog airspeed dial.
 
 Options:
   * bg_color
+  * font_family
+  * font_percent
 
 ## airspeed_box
 A box that displays airspeed value, it can be switched between IAS, GS and TAS. Will change colors based on limits and status
@@ -398,6 +400,9 @@ Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne an
 
 Options:
   * font_percent
+  * font_family
+  * font_mask
+
 ## airspeed_trend_tape
 
 ## altimeter_dial
@@ -407,7 +412,8 @@ Analog altimeter dial
 
 Options:
   * altitude
-
+  * font_family
+  * bg_color
 ## altimeter_tape
 Vertical airspeed tape
 
@@ -416,6 +422,11 @@ Vertical airspeed tape
 Options:
   * font_percent
   * altitude
+  * font_family
+  * font_mask
+  * font_percent
+  * dbkey
+  * maxalt
 
 ## altimeter_trend_tape
 
@@ -426,6 +437,10 @@ Digital atitude indicator
 
 ![Atitude Indicator](/docs/images/atitude_indicator.png)
 
+Options:
+  * font_percent
+  * font_family
+
 ## arc_gauge
 Digital arc gauge
 Supports encoder selection and modification
@@ -434,13 +449,16 @@ Supports encoder selection and modification
 ![Arc Gauge](/docs/images/arc_gauge_segmented.png)
 
 Options:
+  * segments
+  * segment_gap_percent
+  * segment_alpha
   * nameLocation
   * decimalPlaces
   * name
   * dbkey
   * temperature
   * showUnits
-
+  * font_family
 ## button
 Supports encoder selection and modification
 
@@ -462,6 +480,11 @@ To add a button you need to spcify the option `config:` that points to the yaml 
         options:
           config: config/buttons/trim-up-invisible.yaml
 ```
+
+Options:
+  * config
+  * font_mask
+  * font_family
 
 ### Button configuration
 Every button needs to have `type:` `text:` and `dbkey:` defined.i
@@ -583,19 +606,36 @@ Supports encoder selection and modification
 ![Horizontal Bar Gauge](/docs/images/horizontal_bar_gauge.png)
 ![Horizontal Bar Gauge Segmented](/docs/images/horizontal_bar_gauge_segmented.png)
 
+Options:
+  * segments
+  * segment_gap_percent
+  * segment_alpha
+  * bar_divisor
+  * showValue
+  * showUnits
+  * showName
+  * font_family
 
 ## horizontal_situation_indicator
 Analog or digital situation indicator
 
 ![Horizontal Situation Indicator](/docs/images/horizontal_situation_indicator.png)
 
-
+Options:
+  * gsi_enabled: true/false
+  * cdi_enabled: true/false
+  * font_percent: 
+  * font_family
+  * fgcolor
+  * bgcolor
 ## listbox
 Displays and loads user-defined lists. Supports various sort options and can set values when items are selected. Useful for frequently needed items like radio frquencies or waypoints.
 Supports encoder selection and modification
 
 ![Listbox](/docs/images/listbox.png)
 
+Options:
+  * font_family
 ## numeric_display
 Displays numeric values, changes colors based on limits and status.
 Supports encoder selection and modification
@@ -607,6 +647,7 @@ Supports encoder selection and modification
 Options:
   * decimalPlaces
   * font_mask
+  * font_family
   * units_font_mask
   * dbkey
   * pressure - Defines value as pressure for unit switching
@@ -617,9 +658,22 @@ Options:
 
 ![Static Text](/docs/images/static_text.png)
 
+Options:
+  * font_family
+  * font_percent
+  * font_mask
+  * font_ghost_mask
+  * font_ghost_alpha
+  * text
+  * alignment
+
 ## turn_coordinator
 
 ![Turn Coordinator](/docs/images/turn_coordinator.png)
+
+Options:
+  * font_family
+  * dial
 
 ## value_text
 
@@ -639,6 +693,9 @@ Supports encoder selection and modification
 ![Vertical Bar Gauge](/docs/images/vertical_bar_gauge_segmented.png)
 
 Options:
+  * segments
+  * segment_gap_percent
+  * segment_alpha
   * temperature
   * highlightKey
   * decimalPlaces
@@ -652,6 +709,7 @@ Options:
   * name
   * egt_mode_switching
   * normalizeRange
+  * font_family
 
 ## virtual_vfr
 
@@ -659,12 +717,29 @@ Options:
 
 Options:
   * font_percent
+  * font_family
+  * gsi
 
 ## vsi_dial
 
 ![VSI Dial](/docs/images/vsi_dial.png)
 
+Options:
+  * font_family
+
 ## vsi_pfd
 
 ![VSI PFD](/docs/images/vsi_pfd.png)
 
+Options:
+  * font_family
+
+
+## weston
+Runs weston compositor inside pyEFIS and starts waydroid to display within it
+
+Options:
+  * socket
+  * ini
+  * command
+  * args
