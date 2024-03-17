@@ -711,7 +711,7 @@ Options:
   * font_family - default 'DejaVu Sans Condensed'
   * font_ghost_mask
   * font_mask
-  * _dbkey
+  * dbkey
   * font_percent
 
 ## vertical_bar_gauge

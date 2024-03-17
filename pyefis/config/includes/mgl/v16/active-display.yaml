@@ -22,7 +22,7 @@ instruments:
       font_family: "DSEG14 Classic"
       font_ghost_mask: "~~~~~~~~~~~~~"
       font_mask:       "XXXXXXXXXXXXX"
-      _dbkey: COMACTNAME{radio_id}
+      dbkey: COMACTNAME{radio_id}
   - type: button
     row: 14
     column: 0

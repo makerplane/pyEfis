@@ -170,7 +170,7 @@ screens:
           rows: 10
           columns: 140
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
 
 
@@ -191,7 +191,7 @@ screens:
           rows: 10
           columns: 155
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: weston
         #disabled: true
@@ -271,7 +271,7 @@ screens:
           rows: 9
           columns: 60
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: include,includes/virtual_vfr.yaml
         disabled: false
@@ -325,7 +325,7 @@ screens:
           rows: 10
           columns: 80
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: include,includes/virtual_vfr.yaml
         row: 0
@@ -476,7 +476,7 @@ screens:
           rows: 10
           columns: 140
         options:
-          _dbkey: APMSG
+          dbkey: APMSG
           font_percent: 0.9
       - type: ganged_button
         gang_type: horizontal

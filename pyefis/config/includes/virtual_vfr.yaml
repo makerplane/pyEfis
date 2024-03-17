@@ -85,7 +85,7 @@ instruments:
       rows: 5
       columns: 35
     options:
-      _dbkey: TIMEZ
+      dbkey: TIMEZ
       font_mask: "HH:MM:SS ZZZ"
       #fontName: DSEG14 Modern Mini, Bold
   - type: value_text
@@ -95,7 +95,7 @@ instruments:
       rows: 5
       columns: 35
     options:
-      _dbkey: TIMEL
+      dbkey: TIMEL
       font_mask: "HH:MM:SS ZZZ"
   - type: value_text
     row: 0
@@ -104,7 +104,7 @@ instruments:
       rows: 5
       columns: 50
     options:
-      _dbkey: APMSG
+      dbkey: APMSG
       font_mask: "12345678901234567890"
   - type: static_text
     row: 90

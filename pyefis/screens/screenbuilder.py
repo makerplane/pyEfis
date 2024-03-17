@@ -389,11 +389,11 @@ class Screen(QWidget):
                 if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
                     hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
                     next
-                if 'dbkey' in option: 
-                    try:
+                if 'dbkey' in option:
+                    if callable(getattr(self.instruments[count], 'setDbkey', None)): 
                         self.instruments[count].setDbkey(value)
-                    except:
-                        pass
+                    else:
+                        setattr(self.instruments[count], option, value)
                     next
                 if 'temperature' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
                     self.instruments[count].conversionFunction1 = funcTempF
