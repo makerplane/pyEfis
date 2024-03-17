@@ -467,11 +467,11 @@ class HeadingDisplay(QWidget):
         self.font.setBold(True)
         self.font_mask = "999"
         self.font_percent = 0.80
-        self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,"Sans")
+        self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,self.font_family)
         self.font.setPointSizeF(self.font_size)
 
     def resizeEvent(self, event):
-        self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,"Sans")
+        self.font_size = helpers.fit_to_mask(self.width()*self.font_percent ,self.height()*self.font_percent,self.font_mask,self.font_family)
         self.font.setPointSizeF(self.font_size)
 
     def paintEvent(self, event):

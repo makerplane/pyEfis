@@ -393,6 +393,10 @@ Options:
 ## airspeed_box
 A box that displays airspeed value, it can be switched between IAS, GS and TAS. Will change colors based on limits and status
 
+Options:
+  * font_family
+
+
 ## airspeed_tape
 Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe
 
@@ -404,6 +408,9 @@ Options:
   * font_mask
 
 ## airspeed_trend_tape
+
+Options:
+  * font_fmaily
 
 ## altimeter_dial
 Analog altimeter dial
@@ -594,8 +601,17 @@ Analog heading display
 
 ![Heading Display](/docs/images/heading_display.png)
 
+Options:
+  * font_family
+  * bgcolor
+  * fgcolor
+
 ## heading_tape
 Horizontal Heading Tape
+
+Options:
+  * font_family
+
 
 ![Heading Tape](/docs/images/heading_tape.png)
 
@@ -636,6 +652,8 @@ Supports encoder selection and modification
 
 Options:
   * font_family
+  * lists
+
 ## numeric_display
 Displays numeric values, changes colors based on limits and status.
 Supports encoder selection and modification
@@ -733,7 +751,7 @@ Options:
 
 Options:
   * font_family
-
+  * font_percent
 
 ## weston
 Runs weston compositor inside pyEFIS and starts waydroid to display within it

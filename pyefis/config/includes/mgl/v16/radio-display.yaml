@@ -52,8 +52,6 @@ instruments:
       rows: 40
       columns: 54
     options:
-      encoder: ENC5
-      button: BTN30
       lists:
         - name: Favorites
           file: lists/radio/favorites.yaml
