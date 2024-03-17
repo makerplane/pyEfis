@@ -623,7 +623,7 @@ screens:
               segments: 22
               egt_mode_switching: true
               normalizeRange: 400
-              highlightKey: EGTMAX1
+              highlight_key: EGTMAX1
               smallFontPercent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5
@@ -659,7 +659,7 @@ screens:
           - name: CHT
             common_options:
               segments: 22
-              highlightKey: CHTMAX1
+              highlight_key: CHTMAX1
               smallFontPercent: 0.060
               big_font_percent: 0.085
               bar_width_percent: 0.5

@@ -137,7 +137,7 @@ class VerticalBar(AbstractGauge):
         p.drawText(self.valueTextRect, self.valueText, QTextOption(Qt.AlignCenter))
 
     def paintEvent(self, event):
-        if self.highlightKey:
+        if self.highlight_key:
             if self._highlightValue == self._rawValue:
                 self.highlight = True
             else:

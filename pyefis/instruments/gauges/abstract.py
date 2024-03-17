@@ -40,7 +40,7 @@ class AbstractGauge(QWidget):
         self.highRange = 100.0
         self.lowRange = 0.0
         self._dbkey = None
-        self.highlightKey = None
+        self.highlight_key = None
         self._highlightValue = 0.0
         self._value = 0.0
         self._rawValue = 0.0
@@ -214,8 +214,8 @@ class AbstractGauge(QWidget):
         elif item.dtype == int:
             item.valueChanged[int].connect(self.setValue)
 
-        if self.highlightKey:
-            highlightItem = fix.db.get_item(self.highlightKey)
+        if self.highlight_key:
+            highlightItem = fix.db.get_item(self.highlight_key)
             self.setHighlightValue(highlightItem.value)
 
             try:

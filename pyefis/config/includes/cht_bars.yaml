@@ -12,7 +12,7 @@ instruments:
         gap: 0
         common_options:
           temperature: true
-          highlightKey: CHTMAX1
+          highlight_key: CHTMAX1
           decimal_places: 0
           showUnits: true
           smallFontPercent: 0.060

@@ -715,7 +715,7 @@ Options:
   * segment_gap_percent
   * segment_alpha
   * temperature
-  * highlightKey
+  * highlight_key
   * decimal_places
   * showUnits
   * smallFontPercent
