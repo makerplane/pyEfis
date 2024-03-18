@@ -82,7 +82,16 @@ class Screen(QWidget):
 
         self.init= False
 
-
+        # Hack to prevent exception at startup that happens
+        # when pyefis is started before fixgateway
+        loaded = False
+        while not loaded:
+            try:
+                fix.db.get_item("ZZLOADER")
+                loaded = True
+            except:
+                logger.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
+                time.sleep(2)
         # list of dial types supported so far:
         # airspeed_dial
         # airspeed_trend_tape # Testing to do
