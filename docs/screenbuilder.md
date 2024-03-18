@@ -848,7 +848,7 @@ The next thing you need to do is define what should happen when this item is sel
       COMACTNAMESET{radio_id}: "{Name}"
 ```
 
-Assuming the replace `radio_id` is set to 1, if the above row is selected then `COMACTFREQSET` will be set to `122800` and `COMACTNAMESET1` will be set to `Knox County`
+Assuming the replace `radio_id` is set to 1, if the above row is selected then `COMACTFREQSET1` will be set to `122800` and `COMACTNAMESET1` will be set to `Knox County`
 
 The last feature is the ability to associate a location with the item. Simply add the keys `lat` and `long` for example:
 ```
