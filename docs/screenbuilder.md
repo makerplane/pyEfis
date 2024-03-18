@@ -2,6 +2,18 @@
 
 The screen builder allows you to make the entire layout of your screens using just the configuration yaml.
 
+## main section ##
+The `main` section of the configuration file contains an option `nodeID` that is used to identify the specific node this config belongs to. This is useful if you have more than one display allowing you to assign a unique id to each display.<br>
+Within screen configurations you can create values with `{id}` where `{id}` will be replaced with the value in set for `nodeID`<br>
+The most obvious place where this is useful is for touchscreen buttons. Such buttons can be associated with physical buttons too so we need a way to identify if the pilot pressed the button or if the co-pilot pressed the button. The example configuration file `buttons/screen-ems-pfd.yaml` is a button that changes the screen between PFD and EMS. We don't want both displays to change when a button is pressed, only the display that the button belongs to.<br>
+Looking at the configuration we see how each screen, with a unique `nodeID` would have a unique db key for the button:
+```
+type: simple
+text: ""
+dbkey: TSBTN{id}12
+```
+In this example `nodeID: 1` would use key `TSBTN112` where `nodeID: 2` would use `TSBTN212`
+
 ## Module name
 To use the screen builder you need to set the module to `module: pyefis.screens.screenbuilder`
 ```
@@ -357,8 +369,33 @@ instruments:
     options:
       config: config/buttons/screen-ems-pfd.yaml
 ```
-All of the instruments are defined the same as in the default.yaml
-Currently you cannot use includes inside of includes.
+
+All of the instruments are defined the same as in the default.yaml<br>
+You can use an include inside of another include. Just be sure to not create recursive includes!<br>
+An example of this in `default.yaml` that includes `config/includes/mgl/v16/radio-display.yaml` that includes `config/includes/mgl/v16/active-display.yaml`, `config/includes/mgl/v16/standby-display.yaml` and `config/includes/mgl/v16/volumes.yaml` On another screen in `default.yaml` `config/includes/mgl/v16/active-display.yaml` is included too.
+
+##### Include replacements #####
+Somtimes it might be useful to reuse an include for multiple devices. For example, maybe you have two com radios. You can create a single set of includes that make up the radio, but use the replacement feature to control what instance belongs to what radio. <br>
+
+This example we include the radio active display and define a replacement for radio_id:
+```
+      - type: include,includes/mgl/v16/active-display.yaml
+        row: 70
+        column: 156
+        span:
+          rows: 40
+          columns: 45
+        display_state: 2
+        replace:
+          radio_id: 1
+```
+
+Inside active-display.yaml, and value with `{radio_id}` will be replaced with `1` The active-display.yaml defines some dbkeys using `{radio_id}`:
+```
+      dbkey: COMACTFREQ{radio_id}
+```
+That would make the actual dbkey used to be `COMACTFREQ1`
+
 
 ##### Include relative #####
 When defining includes you can assume that each instrument starts at 0.
@@ -754,6 +791,121 @@ Supports encoder selection and modification
 Options:
   * font_family - default 'DejaVu Sans Condensed'
   * lists
+
+### Create a list ###
+When defining a listbox you need to specify the options `encoder_order`, if you are using an encoder and `lists`. Each item under list needs a `name` that will be displayed as the title of the list and a `file` that contains the actual list. Here is an example with two lists defined:
+
+```
+  - type: listbox
+    row: 0
+    column: 101
+    span:
+      rows: 40
+      columns: 54
+    options:
+      encoder_order: 28
+      lists:
+        - name: Favorites
+          file: lists/radio/favorites.yaml
+        - name: Ohio
+          file: lists/radio/ohio.yaml
+```
+
+The list box will provide an option to load a list so you can switch between all of the lists defined.<br>
+
+The actual list file will define what options are presented to the user and what data is displayed.
+
+The first section of a list is `display`, this defines the list of columns that will be displayed and what columns can be used to sort. When `sort` is set to true an option to sort by that column will be provided in the listbox. You can have 1 or more columns, only limited by your imagination.
+
+This example defines three columns named `Name`, `Identifier` and `Frequency` where only `Name` and `Identifier` are sortable. 
+```
+display:
+  columns:
+    - name: Name
+      sort: true
+    - name: Identifier
+      sort: true
+    - name: Frequency
+      sort: false #False is the default
+```
+
+The next section is the actual list of items to display in the listbox. Each item in the list should define keys using the exact values from the columns you created. Using our example above you should have a key named `Name`, `Identifier` and `Frequency`
+
+```
+list:
+  - Name: Knox County
+    Identifier: K4I3
+    Frequency: 122.800 Mhz
+```
+
+The next thing you need to do is define what should happen when this item is selected. You can set one or more dbkeys to a value. That value can also contain the values from the columns. For example, if you wanted to set a dbkey to the `Name` of this selection simply specify `{Name}` in the set value.
+```
+  - Name: Knox County
+    Identifier: K4I3
+    Frequency: 122.800 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122800
+      COMACTNAMESET{radio_id}: "{Name}"
+```
+
+Assuming the replace `radio_id` is set to 1, if the above row is selected then `COMACTFREQSET` will be set to `122800` and `COMACTNAMESET1` will be set to `Knox County`
+
+The last feature is the ability to associate a location with the item. Simply add the keys `lat` and `long` for example:
+```
+  - Name: John Glenn Int. Tower
+    Identifier: KCMH
+    Frequency:  132.700 Mhz
+    lat: 39.9969467
+    long: -82.8921592
+    set:
+      COMACTFREQSET{radio_id}: 132700
+      COMACTNAMESET{radio_id}: "{Name}"
+```
+
+You could simply use `lat` and `long` in your dbkey set section, maybe useful if you were making a list of waypoints and want to send the location to the auto pilot. But you can also enable the list to sort by location where the list is sorted by the distance from your current location.
+To enable this sort option add the key `location` with value `true` to the display section:
+```
+display:
+  location: true
+  columns:
+    - name: Name
+      sort: true
+    - name: Identifier
+      sort: true
+    - name: Frequency
+      sort: false
+```
+
+One last thing that might be useful, just like you can set a value using the data from each list item, such as `{Name}` or `{lat}` you can add arbitrary keys and use those in the set value section. The arbitrary keys would not be displayed in the interface.
+
+The next two configurations would both set `EXAMPLEKEY` to `Just a test` to demonstrate how this might be used:
+```
+list:
+  - Name: test
+    arbitrary: Just
+    set:
+      EXAMPLEKEY: {arbitrary} a {Name}
+```
+
+```
+list:
+  - Name: Test
+    set:
+      EXAMPLEKEY: Just a test 
+```
+
+A more useful example of this feature:
+```
+list:
+  - Name: Marion Municipal
+    type: Airport
+    set:
+      WPNAME: {type} {Name}
+  - Name: Giant Basket
+    type: POI
+    set:
+      WPNAME: {type} {Name}
+```
 
 ## numeric_display
 Displays numeric values, changes colors based on limits and status.
