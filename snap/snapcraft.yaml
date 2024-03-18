@@ -1,5 +1,5 @@
 name: pyefis
-version: "0.12.1"
+version: "0.14.0"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -12,6 +12,9 @@ description: |
 
   This snap requires enabling experimental.user-daemons features:
   sudo snap set system experimental.user-daemons=true
+
+  Breaking Changes:
+  Ensure your fix gateway database.yaml file defines a db key named 'ZZLOADER', without this pyefis will not load.
 
   Release Notes:
   This is a beta release and has not seen much testing, if you find any bugs please report them here: https://github.com/makerplane/pyEfis/issues
