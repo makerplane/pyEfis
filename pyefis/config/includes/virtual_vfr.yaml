@@ -18,7 +18,7 @@ instruments:
     options:
       #fontSize: 48
       font_percent: 0.05
-      fg_color: "#aaaaaa"
+      #fg_color: "#aaaaaa"
       bg_color: "#aaaaaa"
       cdi_enabled: true
       gsi_enabled: true
