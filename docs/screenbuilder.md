@@ -527,13 +527,27 @@ Options:
   * segment_gap_percent - default 0.01, defines size of gaps in segments
   * segment_alpha - default 180, 0-255, higher is darker
   * name_location - default 'top', options 'top', 'right'
-  * decimal_places
+  * decimal_places - How may decimals to display
   * name
   * dbkey
-  * temperature
+  * temperature - Defines value as temperature for unit switching
   * show_units - default False
   * font_family - default 'DejaVu Sans Condensed'
   * min_size - default True
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
 
 ## button
 Supports encoder selection and modification
@@ -701,6 +715,21 @@ Options:
   * show_name
   * font_family - default 'DejaVu Sans Condensed'
   * min_size - default True
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
+
 
 ## horizontal_situation_indicator
 Analog or digital situation indicator
@@ -735,8 +764,8 @@ Supports encoder selection and modification
 ![Numeric Display with segmented font and ghosting](/docs/images/numeric_display_segmented_ghosting.png)
 
 Options:
-  * decimal_places
-  * font_mask
+  * decimal_places - How may decimals to display
+  * font_mask  
   * font_family - default 'DejaVu Sans Condensed'
   * units_font_mask
   * dbkey
@@ -744,6 +773,20 @@ Options:
   * altitude - Defines value as altitude for unit switching
   * temperature - Defines value as temperature for unit switching
   * show_units - true/false 
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
 
 ## static_text
 
@@ -787,9 +830,9 @@ Options:
   * segments - default 0 options: any integer, defines the number of segments to create
   * segment_gap_percent - default 0.012, defines size of gaps in segments
   * segment_alpha - default 180, 0-255, higher is darker
-  * temperature
-  * highlight_key
-  * decimal_places
+  * temperature - Defines value as temperature for unit switching
+  * highlight_key - If the displayed value matches thie value of this key then the gauge is highlighted. Useful to highlight the max value ie CHTMAX1 or EGTMAX1
+  * decimal_places - How may decimals to display
   * show_units - default True
   * show_value - default True
   * show_name - default True
@@ -803,6 +846,20 @@ Options:
   * egt_mode_switching
   * normalize_range - default 0
   * font_family - default 'DejaVu Sans Condensed'
+  * bg_good_color - default black
+  * safe_good_color - default green
+  * warn_good_color - default yellow
+  * alarm_good_color - default red
+  * text_good_color - default white
+  * pen_good_color - default white
+  * highlight_good_color - default magenta
+  * bg_bad_color - default black
+  * safe_bad_color - default dark gray
+  * warn_bad_color - default dark yellow
+  * alarm_bad_color - default dark red
+  * text_bad_color - default gray
+  * pen_bad_colo - default gray
+  * highlight_bad_color - default dark magenta
 
 ## virtual_vfr
 

@@ -42,7 +42,7 @@ class VerticalBar(AbstractGauge):
         self.peakValue = 0.0
         self._peakMode = False
         self.peakColor = QColor(Qt.magenta)
-        self._oldpencolor = self.penGoodColor
+        self._oldpencolor = self.pen_good_color
         self.segments = 0
         self.segment_gap_percent = 0.012
         self.segment_alpha = 180
@@ -58,12 +58,12 @@ class VerticalBar(AbstractGauge):
         if x:
             if self._normalizeMode: return
             self._normalizeMode = True
-            self._oldpencolor = self.penGoodColor
+            self._oldpencolor = self.pen_good_color
             self.penGoodColor = self.normalizePenColor
             self.normalizeReference = self.value
         else:
             self._normalizeMode = False
-            self.penGoodColor = self._oldpencolor
+            self.pen_good_color = self._oldpencolor
         self.setColors()
         self.update()
 
