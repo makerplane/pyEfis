@@ -20,6 +20,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from .abstract import AbstractGauge, drawCircle
+from pyefis.instruments import helpers
+
 
 class ArcGauge(AbstractGauge):
     def __init__(self, parent=None,min_size=True, font_family="DejaVu Sans Condensed"):
@@ -78,7 +80,9 @@ class ArcGauge(AbstractGauge):
         self.arrow.append(QPointF(-1, self.arcRadius * 1.1))
         self.arrow.append(QPointF(-self.pointer_width,self.pointer_width+self.arcRadius * .5))
         self.arrow.append(QPointF(0,self.arcRadius * .4))
-
+        self.valueFontSize = self.r_height / 3
+        if self.font_mask:
+            self.valueFontSize = helpers.fit_to_mask(self.r_width / 1.7, self.r_height / 2.8, self.font_mask, self.font_family)
     def paintEvent(self, e):
         start = self.startAngle
         sweep = self.sweepAngle
@@ -180,30 +184,75 @@ class ArcGauge(AbstractGauge):
         fm = QFontMetrics(f)
         x = fm.width(self.name)
         p.setFont(f)
+        #if self.font_ghost_mask:
+        #    alpha = self.textColor.alpha()
+        #    self.textColor.setAlpha(self.font_ghost_alpha)
+            
         if self.name_location == 'top':
             p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
         elif self.name_location == 'right':
             p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
 
         # Main value text
+        opt = QTextOption(Qt.AlignRight)
         path = QPainterPath()
         brush = QBrush(self.valueColor)
         p.setBrush(brush)
-        pen.setColor(QColor(Qt.black))
+        pen.setColor(self.valueColor)
+        #pen.setColor(QColor(Qt.black))
         p.setPen(pen)
-        f.setPixelSize(qRound(self.r_height / 2))
+        #f.setPixelSize(qRound(self.r_height / 2.6))
+        f.setPointSizeF(self.valueFontSize)
         fm = QFontMetrics(f)
-        x = fm.width(self.valueText)
+        if self.font_mask:
+            x = fm.width(self.font_mask)
+        else:
+            x = fm.width(self.valueText)
         ux = 0
         if self.show_units:
-            f.setPixelSize(qRound(self.height() / 4))
+            #f.setPixelSize(qRound(self.height() / 4))
+            f.setPointSizeF(self.valueFontSize/2)
             fmu = QFontMetrics(f)
-            ux = fmu.width(self.units)
+            if self.units_font_mask:
+                ux = fmu.width(self.units_font_mask)
+            else:
+                ux = fmu.width(self.units)
             uy = fmu.ascent() - fmu.descent()
-            path.addText(QPointF( self.lrcx - ux, self.lrcy - uy),f, self.units)
-            f.setPixelSize(qRound(self.height() / 2))
+            #path.addText(QPointF( self.lrcx - ux, self.lrcy - uy),f, self.units)
+            if self.units_font_ghost_mask:
+                alpha = self.valueColor.alpha()
+                self.valueColor.setAlpha(self.font_ghost_alpha)
+                pen.setColor(self.valueColor)
+                p.setPen(pen)
+                p.drawText(QPointF( self.lrcx - ux, self.lrcy - uy), self.units_font_ghost_mask)
+                self.valueColor.setAlpha(alpha)
 
-        path.addText(QPointF( self.lrcx - x -ux , self.lrcy - 1),f, self.valueText)
+            pen.setColor(self.valueColor)
+            p.setPen(pen)
+            p.drawText(QPointF( self.lrcx - ux, self.lrcy - uy), self.units)
+            #f.setPixelSize(qRound(self.height() / 2))
+            f.setPointSizeF(self.valueFontSize)
 
-        p.drawPath(path)
+        if self.font_ghost_mask:
+            alpha = self.valueColor.alpha()
+            self.valueColor.setAlpha(self.font_ghost_alpha)
+            #abrush = QBrush(self.valueColor)
+            #p.setBrush(abrush)
+            #path2 = QPainterPath()
+            #path2.addText(QPointF( self.lrcx - x -ux , self.lrcy - 1),f, self.font_ghost_mask)
+            pen.setColor(self.valueColor)
+            f.setPointSizeF(self.valueFontSize)
+            p.setFont(f)
+            p.setPen(pen)
+
+            #p.drawPath(path2)
+            p.drawText(QRectF( self.lrcx - x -ux, self.lrcy - 1 - (self.r_height / 2.8) , (self.r_width / 1.7) , self.r_height / 2.8),self.font_ghost_mask, opt)
+            self.valueColor.setAlpha(alpha)
+            #brush = QBrush(self.valueColor)
+        #p.setBrush(brush)
+        pen.setColor(self.valueColor)
+        p.setPen(pen)
+        p.drawText(QRectF( self.lrcx - x -ux , self.lrcy - 1 - (self.r_height / 2.8) , (self.r_width / 1.7) , self.r_height / 2.8),self.valueText, opt)
+
+        #p.drawPath(path)
 

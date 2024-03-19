@@ -33,7 +33,6 @@ class NumericDisplay(AbstractGauge):
         self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
         self.show_units = False
         self.small_font_percent = 0.4
-        self.units_font_mask = None
 
     def resizeEvent(self, event):
         self.font_size = self.height()
