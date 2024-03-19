@@ -20,6 +20,8 @@ from PyQt5.QtWidgets import *
 
 
 from .abstract import AbstractGauge
+from pyefis.instruments import helpers
+
 
 class VerticalBar(AbstractGauge):
     def __init__(self, parent=None,min_size=True, font_family="DejaVu Sans Condensed"):
@@ -125,16 +127,26 @@ class VerticalBar(AbstractGauge):
         self.barHeight = self.barBottom - self.barTop
 
         self.nameTextRect = QRectF(0, 0, self.width(), self.smallFont.pixelSize())
-        self.valueTextRect = QRectF(0, self.barBottom + self.text_gap, self.width(), self.bigFont.pixelSize())
+        self.valueTextRect = QRectF(0, self.barBottom + self.text_gap, self.width() -4, self.bigFont.pixelSize())
+        if self.font_mask:
+            self.bigFont.setPointSizeF(helpers.fit_to_mask(self.width() - 4, self.bigFont.pixelSize(), self.font_mask, self.font_family))
+
         self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.text_gap, self.width(), self.smallFont.pixelSize() + self.text_gap)
         self.ballRadius = self.barWidth * 0.40
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 
     def drawValue(self, p, pen):
+        p.setFont(self.bigFont)
+        if self.font_ghost_mask:
+            alpha = self.valueColor.alpha()
+            self.valueColor.setAlpha(self.font_ghost_alpha)
+            pen.setColor(self.valueColor)
+            p.setPen(pen)
+            p.drawText(self.valueTextRect, self.font_ghost_mask, QTextOption(Qt.AlignRight))
+            self.valueColor.setAlpha(alpha)
         pen.setColor(self.valueColor)
         p.setPen(pen)
-        p.setFont(self.bigFont)
-        p.drawText(self.valueTextRect, self.valueText, QTextOption(Qt.AlignCenter))
+        p.drawText(self.valueTextRect, self.valueText, QTextOption(Qt.AlignRight))
 
     def paintEvent(self, event):
         if self.highlight_key:
