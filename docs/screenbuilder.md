@@ -168,7 +168,7 @@ The ASI is 50% smaller and centered in the 100x100 span specified:
 
 ![Span Image](/docs/images/shrink.png)
 
-A more useful example for shrink would be to place a `horizontal_situation_indicator` over an `attitude_indicator`, placing both in the same row/column and span will be them centered to one another, then you can shrink the `horizontal_situation_indicator` to the size you desire.
+A more useful example for shrink would be to place a `horizontal_situation_indicator` over an `attitude_indicator`, placing both in the same row/column and span so they are centered to one another, then you can shrink the `horizontal_situation_indicator` to the size you desire.
 
 ### Options
 Some instruments have options, for example the HSI has the options `gsi_enabled` and `cdi_enabled` that can enable the glide slope indicator or the course deviation indicator
@@ -390,7 +390,7 @@ This example we include the radio active display and define a replacement for ra
           radio_id: 1
 ```
 
-Inside active-display.yaml, and value with `{radio_id}` will be replaced with `1` The active-display.yaml defines some dbkeys using `{radio_id}`:
+Inside active-display.yaml, any value with `{radio_id}` will be replaced with `1` The active-display.yaml defines some dbkeys using `{radio_id}`:
 ```
       dbkey: COMACTFREQ{radio_id}
 ```
@@ -477,7 +477,7 @@ screens:
 
 
 # Instrument List #
-Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. Currenlty not many options have common names, one instrument might use font_size where another is fontsize or fontSize. Hopefully the community can decide on some common naming and update the code to make maintaining the list here much easier.
+Below is a list of the instrument types, defaults and options. This is a WIP and is mostly incomplete. Basically an option is any properly of the instrument that is defined in its source. 
 
 
 ## airspeed_dial
