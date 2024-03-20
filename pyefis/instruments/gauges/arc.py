@@ -211,11 +211,15 @@ class ArcGauge(AbstractGauge):
         ux = 0
         if self.show_units:
             #f.setPixelSize(qRound(self.height() / 4))
-            f.setPointSizeF(self.valueFontSize/2)
-            fmu = QFontMetrics(f)
+            #f.setPointSizeF(self.valueFontSize/2)
+            #fmu = QFontMetrics(f)
             if self.units_font_mask:
+                f.setPointSizeF(helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.units_font_mask, self.font_family))
+                fmu = QFontMetrics(f)
                 ux = fmu.width(self.units_font_mask)
             else:
+                f.setPointSizeF(self.valueFontSize/2)
+                fmu = QFontMetrics(f)
                 ux = fmu.width(self.units)
             uy = fmu.ascent() - fmu.descent()
             #path.addText(QPointF( self.lrcx - ux, self.lrcy - uy),f, self.units)
