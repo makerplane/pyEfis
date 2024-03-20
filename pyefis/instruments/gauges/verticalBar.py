@@ -109,6 +109,9 @@ class VerticalBar(AbstractGauge):
         self.bigFont.setPixelSize(qRound(self.height() * self.big_font_percent))
         self.smallFont = QFont(self.font_family)
         self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
+        self.unitsFont = QFont(self.font_family)
+        self.unitsFont.setPixelSize(qRound(self.height() * self.small_font_percent))
+
         #self.barHeight = self.height() / 6
         if self.show_name:
             self.barTop = self.smallFont.pixelSize() + self.text_gap
@@ -132,10 +135,11 @@ class VerticalBar(AbstractGauge):
         self.valueTextRect = QRectF(0, self.barBottom + self.text_gap, self.width() -4, self.bigFont.pixelSize())
         if self.font_mask:
             self.bigFont.setPointSizeF(helpers.fit_to_mask(self.width() - self.width() / 6, self.bigFont.pixelSize(), self.font_mask, self.font_family))
-
-        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.text_gap, self.width(), self.smallFont.pixelSize() + self.text_gap)
+        self.unitsTextRect = QRectF(0, self.height() - self.smallFont.pixelSize() - self.text_gap, self.width() - 4, self.smallFont.pixelSize() + self.text_gap)
         if self.name_font_mask:
             self.smallFont.setPointSizeF(helpers.fit_to_mask(self.width() - self.width() / 6, self.smallFont.pixelSize(), self.name_font_mask, self.font_family))
+        if self.units_font_mask:
+            self.unitsFont.setPointSizeF(helpers.fit_to_mask(self.width() - self.width() / 6, self.unitsFont.pixelSize(), self.units_font_mask, self.font_family))
 
         self.ballRadius = self.barWidth * 0.40
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
@@ -181,7 +185,6 @@ class VerticalBar(AbstractGauge):
                 p.drawText(self.nameTextRect, self.name_font_ghost_mask, opt)
                 self.textColor.setAlpha(alpha)
                 self.name = self.name.replace(' ', '!')
-                #print(self.name)
             pen.setColor(self.textColor)
             p.setPen(pen)
             p.setFont(self.smallFont)
@@ -199,13 +202,29 @@ class VerticalBar(AbstractGauge):
             else:
                 # Draw Value
                 self.drawValue(p, pen)
+
+        opt = QTextOption(Qt.AlignCenter)
+        pen.setColor(self.textColor)
+        p.setPen(pen)
         if self.show_units:
             # Units
-            opt = QTextOption(Qt.AlignCenter)
-            pen.setColor(self.textColor)
-            p.setPen(pen)
-            p.setFont(self.smallFont)
-            p.drawText(self.unitsTextRect, self.units, opt)
+            if self.units_font_mask:
+                opt = QTextOption(Qt.AlignRight)
+                p.setFont(self.unitsFont)
+                if self.units_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    p.drawText(self.unitsTextRect, self.units_font_ghost_mask.replace(' ', '!') , opt)
+                    self.textColor.setAlpha(alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                p.drawText(self.unitsTextRect, self.units, opt)
+                
+            else:
+                p.setFont(self.smallFont)
+                p.drawText(self.unitsTextRect, self.units, opt)
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)
