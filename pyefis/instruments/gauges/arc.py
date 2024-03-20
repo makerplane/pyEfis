@@ -36,6 +36,7 @@ class ArcGauge(AbstractGauge):
         self.segments = 0
         self.segment_gap_percent = 0.01
         self.segment_alpha = 180
+
     def get_height(self, width):
         return width/ 2
 
@@ -194,15 +195,23 @@ class ArcGauge(AbstractGauge):
             p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
 
         # Main value text
-        opt = QTextOption(Qt.AlignRight)
+        if self.font_mask:
+            opt = QTextOption(Qt.AlignRight)
+        else:
+            opt = QTextOption(Qt.AlignCenter)
         path = QPainterPath()
         brush = QBrush(self.valueColor)
         p.setBrush(brush)
         pen.setColor(self.valueColor)
         #pen.setColor(QColor(Qt.black))
         p.setPen(pen)
+
         #f.setPixelSize(qRound(self.r_height / 2.6))
-        f.setPointSizeF(self.valueFontSize)
+        if self.font_mask:
+            f.setPointSizeF(self.valueFontSize)
+        else:
+            f.setPixelSize(qRound(self.r_height / 2))
+
         fm = QFontMetrics(f)
         if self.font_mask:
             x = fm.width(self.font_mask)
@@ -218,7 +227,8 @@ class ArcGauge(AbstractGauge):
                 fmu = QFontMetrics(f)
                 ux = fmu.width(self.units_font_mask)
             else:
-                f.setPointSizeF(self.valueFontSize/2)
+                #f.setPointSizeF(self.valueFontSize/2)
+                f.setPixelSize(qRound(self.height() / 4))
                 fmu = QFontMetrics(f)
                 ux = fmu.width(self.units)
             uy = fmu.ascent() - fmu.descent()
@@ -234,9 +244,14 @@ class ArcGauge(AbstractGauge):
             pen.setColor(self.valueColor)
             p.setPen(pen)
             p.drawText(QPointF( self.lrcx - ux, self.lrcy - uy), self.units)
-            #f.setPixelSize(qRound(self.height() / 2))
-            f.setPointSizeF(self.valueFontSize)
 
+        if self.font_mask:
+            f.setPointSizeF(self.valueFontSize)
+        else:
+            f.setPixelSize(qRound(self.height() / 2))
+        #f.setPointSizeF(self.valueFontSize)
+        #f.setPointSizeF(self.valueFontSize)
+        p.setFont(f)
         if self.font_ghost_mask:
             alpha = self.valueColor.alpha()
             self.valueColor.setAlpha(self.font_ghost_alpha)
@@ -245,8 +260,6 @@ class ArcGauge(AbstractGauge):
             #path2 = QPainterPath()
             #path2.addText(QPointF( self.lrcx - x -ux , self.lrcy - 1),f, self.font_ghost_mask)
             pen.setColor(self.valueColor)
-            f.setPointSizeF(self.valueFontSize)
-            p.setFont(f)
             p.setPen(pen)
 
             #p.drawPath(path2)
@@ -256,7 +269,11 @@ class ArcGauge(AbstractGauge):
         #p.setBrush(brush)
         pen.setColor(self.valueColor)
         p.setPen(pen)
-        p.drawText(QRectF( self.lrcx - x -ux , self.lrcy - 1 - (self.r_height / 2.8) , (self.r_width / 1.7) , self.r_height / 2.8),self.valueText, opt)
+        if self.font_mask:
+            p.drawText(QRectF( self.lrcx - x -ux , self.lrcy - 1 - (self.r_height / 2.8) , (self.r_width / 1.7) , self.r_height / 2.8),self.valueText, opt)
+        else:
+            path.addText(QPointF( self.lrcx - x -ux , self.lrcy - 1),f, self.valueText)
+            p.drawPath(path)
 
         #p.drawPath(path)
 
