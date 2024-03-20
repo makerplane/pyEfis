@@ -84,6 +84,13 @@ class ArcGauge(AbstractGauge):
         self.valueFontSize = self.r_height / 3
         if self.font_mask:
             self.valueFontSize = helpers.fit_to_mask(self.r_width / 1.7, self.r_height / 2.8, self.font_mask, self.font_family)
+        self.unitsFontSize = qRound(self.height() / 4)
+        if self.units_font_mask:
+            self.unitsFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.units_font_mask, self.font_family)
+        self.nameFontSize = qRound(self.r_height / 6)
+        if self.name_font_mask:
+            self.nameFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
+        
     def paintEvent(self, e):
         start = self.startAngle
         sweep = self.sweepAngle
@@ -181,7 +188,10 @@ class ArcGauge(AbstractGauge):
         f = QFont(self.font_family)
         f.setPixelSize(qRound(self.r_height / 2))
         y = f.pixelSize()
-        f.setPixelSize(qRound(self.r_height / 6))
+        if self.name_font_mask:
+            f.setPointSizeF(self.nameFontSize)
+        else:
+            f.setPixelSize(self.nameFontSize)
         fm = QFontMetrics(f)
         x = fm.width(self.name)
         p.setFont(f)
@@ -190,7 +200,20 @@ class ArcGauge(AbstractGauge):
         #    self.textColor.setAlpha(self.font_ghost_alpha)
             
         if self.name_location == 'top':
-            p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
+            if self.name_font_mask:
+                opt = QTextOption(Qt.AlignLeft)
+                if self.name_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    p.drawText(QRectF(self.tlcx,self.tlcy,(self.r_width / 6), self.r_height / 6),self.name_font_ghost_mask, opt)
+                    self.textColor.setAlpha(alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                p.drawText(QRectF(self.tlcx,self.tlcy,(self.r_width / 6), self.r_height / 6),self.name, opt)
+            else:
+                p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
         elif self.name_location == 'right':
             p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
 
@@ -223,7 +246,7 @@ class ArcGauge(AbstractGauge):
             #f.setPointSizeF(self.valueFontSize/2)
             #fmu = QFontMetrics(f)
             if self.units_font_mask:
-                f.setPointSizeF(helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.units_font_mask, self.font_family))
+                f.setPointSizeF(self.unitsFontSize)
                 fmu = QFontMetrics(f)
                 ux = fmu.width(self.units_font_mask)
             else:
