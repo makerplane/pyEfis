@@ -184,7 +184,7 @@ class VerticalBar(AbstractGauge):
                 p.setFont(self.smallFont)
                 p.drawText(self.nameTextRect, self.name_font_ghost_mask, opt)
                 self.textColor.setAlpha(alpha)
-                self.name = self.name.replace(' ', '!')
+                self.name = self.name
             pen.setColor(self.textColor)
             p.setPen(pen)
             p.setFont(self.smallFont)
@@ -216,7 +216,7 @@ class VerticalBar(AbstractGauge):
                     self.textColor.setAlpha(self.font_ghost_alpha)
                     pen.setColor(self.textColor)
                     p.setPen(pen)
-                    p.drawText(self.unitsTextRect, self.units_font_ghost_mask.replace(' ', '!') , opt)
+                    p.drawText(self.unitsTextRect, self.units_font_ghost_mask , opt)
                     self.textColor.setAlpha(alpha)
                     pen.setColor(self.textColor)
                     p.setPen(pen)
