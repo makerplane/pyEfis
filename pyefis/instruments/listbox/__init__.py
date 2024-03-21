@@ -119,8 +119,7 @@ class ListBox(QGraphicsView):
         self.update()
 
     def enc_clicked(self):
-        self.clicked(self.table.currentItem())
-        return True
+        return self.clicked(self.table.currentItem())
 
     def enc_changed(self,data):
         val = self.table.currentRow() + data
@@ -310,7 +309,8 @@ class ListBox(QGraphicsView):
                         val = val.replace(f"{{{r['name']}}}", str(self.table.item(self.table.currentRow(), c).text()))
                 f.value = val
                 f.output_value()
-
+            return False
+        return True
 
 #Config:
 #    options:

@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import *
 
 
 from .abstract import AbstractGauge
+from pyefis.instruments import helpers
 
 class HorizontalBar(AbstractGauge):
     def __init__(self, parent=None, min_size=True, font_family="DejaVu Sans Condensed"):
@@ -42,8 +43,17 @@ class HorizontalBar(AbstractGauge):
         self.bigFont = QFont(self.font_family)
         self.section_size = self.height() / 12
         self.bigFont.setPixelSize( qRound(self.section_size * 4))
+        if self.font_mask:
+            self.bigFont.setPointSizeF(helpers.fit_to_mask(self.width()-5, self.section_size * 4, self.font_mask, self.font_family))
         self.smallFont = QFont(self.font_family)
         self.smallFont.setPixelSize(qRound(self.section_size * 2))
+        if self.name_font_mask:
+            self.smallFont.setPointSizeF(helpers.fit_to_mask(self.width(), self.section_size * 2.4, self.name_font_mask, self.font_family))
+        self.unitsFont = QFont(self.font_family)
+        self.unitsFont.setPixelSize(qRound(self.section_size * 2))
+        if self.units_font_mask:
+            self.unitsFont.setPointSizeF(helpers.fit_to_mask(self.width(), self.section_size * 2.4, self.name_font_mask, self.font_family))
+
         self.barHeight = self.section_size * self.bar_divisor
         self.barTop = self.section_size * 2.7
         self.nameTextRect = QRectF(1, 0, self.width(), self.section_size * 2.4)
@@ -56,22 +66,53 @@ class HorizontalBar(AbstractGauge):
         pen = QPen()
         pen.setWidth(1)
         pen.setCapStyle(Qt.FlatCap)
-        pen.setColor(self.textColor)
-        p.setPen(pen)
+        #pen.setColor(self.textColor)
+        #p.setPen(pen)
         p.setFont(self.smallFont)
-        if self.show_name: p.drawText(self.nameTextRect, self.name)
+        if self.show_name: 
+            if self.name_font_ghost_mask:
+                opt = QTextOption(Qt.AlignLeft)
+                alpha = self.textColor.alpha()
+                self.textColor.setAlpha(self.font_ghost_alpha)
+                pen.setColor(self.textColor)
+                p.setPen(pen)
+                p.drawText(self.nameTextRect, self.name_font_ghost_mask, opt)
+                self.textColor.setAlpha(alpha)
+            pen.setColor(self.textColor)
+            p.setPen(pen)
+            p.drawText(self.nameTextRect, self.name)
 
         # Units
-        p.setFont(self.smallFont)
+        p.setFont(self.unitsFont)
         opt = QTextOption(Qt.AlignRight)
-        if self.show_units: p.drawText(self.valueTextRect, self.units, opt)
+        if self.show_units: 
+            if self.units_font_ghost_mask:
+                alpha = self.textColor.alpha()
+                self.textColor.setAlpha(self.font_ghost_alpha)
+                pen.setColor(self.textColor)
+                p.setPen(pen)
+                p.drawText(self.valueTextRect, self.units_font_ghost_mask, opt)
+                self.textColor.setAlpha(alpha)
+            pen.setColor(self.textColor)
+            p.setPen(pen)
+            p.drawText(self.valueTextRect, self.units, opt)
 
         # Main Value
         p.setFont(self.bigFont)
-        pen.setColor(self.valueColor)
-        p.setPen(pen)
+        #pen.setColor(self.valueColor)
+        #p.setPen(pen)
         opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
-        if self.show_value: p.drawText(self.valueTextRect, self.valueText, opt)
+        if self.show_value: 
+            if self.font_ghost_mask:
+                alpha = self.valueColor.alpha()
+                self.valueColor.setAlpha(self.font_ghost_alpha)
+                pen.setColor(self.valueColor)
+                p.setPen(pen)
+                p.drawText(self.valueTextRect, self.font_ghost_mask, opt)
+                self.valueColor.setAlpha(alpha)
+            pen.setColor(self.valueColor)
+            p.setPen(pen)
+            p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draws the bar
         p.setRenderHint(QPainter.Antialiasing, False)

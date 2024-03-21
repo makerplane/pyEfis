@@ -29,9 +29,13 @@ class AbstractGauge(QWidget):
     def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(AbstractGauge, self).__init__(parent)
         self.font_family = font_family
-        self.font_ghost_mask = None
+        self.font_ghost_mask = None #Value
         self.font_ghost_alpha = 50
-        self.font_mask = None
+        self.font_mask = None #Value
+        self.units_font_mask = None #units
+        self.units_font_ghost_mask = None #units
+        self.name_font_mask = None #name
+        self.name_font_ghost_mask = None #name 
         self.name = None
         self.highWarn = None
         self.highAlarm = None

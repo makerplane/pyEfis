@@ -417,7 +417,7 @@ If you want to use use an include but want it to be a different size simply spec
 pyEFIS can be controlled using a single rotary encoder with button. When the encoder is rotated an item on the screen will turn orange to indicate the selected item. While an item is selected if you rotate the encoder the selection will move to the next item. Pressing the button will either perform the action that is selected, such as a touchscreen button, or pass control over the encoder to the selected item such as a listbox. Once control is passed over to an item the behavior will depend on the specific item. after a period of time thetimeout will cause the screen to revert its default state with nothing selected<br>
 
 ## listbox control
-To select the listbox rotate the encoder until the title of the listbox is orange. Then press the button.  Now when you rotate the encoder the selected row in the listbox will change, pressing the button will perform the action of the selected row in the listbox. The listbox is unique in that it never relenquishes control unless you allow theinput to timeout.
+To select the listbox rotate the encoder until the title of the listbox is orange. Then press the button.  Now when you rotate the encoder the selected row in the listbox will change, pressing the button will perform the action of the selected row in the listbox. The listbox is unique in that it only relenquishes control of the encoder when selecting an item from this list. It will retain control when using sort or list loading features.
 
 ## arc_gauge, horizontal_bar_gauge, vertical_bar_gauge and numeric_display
 All four of these items behave the same, once you select an item by highlighting it and pressing the button the item will take control over the encoder. Rotating the encoder will change the value of the dbkey defined. Once you have the desired setting press the button and the value will be saved and the screen will revert to its default tate of nothing selected. If you decide to not change the value, do not press the button, let the timeout expire. When it times out the value will be reverted to its previous value and the screen will return to its default state.
@@ -570,6 +570,12 @@ Options:
   * temperature - Defines value as temperature for unit switching
   * show_units - default False
   * font_family - default 'DejaVu Sans Condensed'
+  * font_mask
+  * units_font_mask
+  * name_font_mask
+  * font_ghost_mask
+  * units_font_ghost_mask
+  * name_font_ghost_mask
   * min_size - default True
   * bg_good_color - default black
   * safe_good_color - default green
@@ -751,6 +757,12 @@ Options:
   * show_units
   * show_name
   * font_family - default 'DejaVu Sans Condensed'
+  * font_mask
+  * units_font_mask
+  * name_font_mask
+  * font_ghost_mask
+  * units_font_ghost_mask
+  * name_font_ghost_mask
   * min_size - default True
   * bg_good_color - default black
   * safe_good_color - default green
@@ -998,6 +1010,12 @@ Options:
   * egt_mode_switching
   * normalize_range - default 0
   * font_family - default 'DejaVu Sans Condensed'
+  * font_mask
+  * units_font_mask
+  * name_font_mask
+  * font_ghost_mask
+  * units_font_ghost_mask
+  * name_font_ghost_mask
   * bg_good_color - default black
   * safe_good_color - default green
   * warn_good_color - default yellow
