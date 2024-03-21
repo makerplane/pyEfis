@@ -570,6 +570,12 @@ Options:
   * temperature - Defines value as temperature for unit switching
   * show_units - default False
   * font_family - default 'DejaVu Sans Condensed'
+  * font_mask
+  * units_font_mask
+  * name_font_mask
+  * font_ghost_mask
+  * units_font_ghost_mask
+  * name_font_ghost_mask
   * min_size - default True
   * bg_good_color - default black
   * safe_good_color - default green
@@ -751,6 +757,12 @@ Options:
   * show_units
   * show_name
   * font_family - default 'DejaVu Sans Condensed'
+  * font_mask
+  * units_font_mask
+  * name_font_mask
+  * font_ghost_mask
+  * units_font_ghost_mask
+  * name_font_ghost_mask
   * min_size - default True
   * bg_good_color - default black
   * safe_good_color - default green
@@ -998,6 +1010,12 @@ Options:
   * egt_mode_switching
   * normalize_range - default 0
   * font_family - default 'DejaVu Sans Condensed'
+  * font_mask
+  * units_font_mask
+  * name_font_mask
+  * font_ghost_mask
+  * units_font_ghost_mask
+  * name_font_ghost_mask
   * bg_good_color - default black
   * safe_good_color - default green
   * warn_good_color - default yellow
