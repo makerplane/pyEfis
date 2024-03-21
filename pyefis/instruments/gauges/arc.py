@@ -89,7 +89,11 @@ class ArcGauge(AbstractGauge):
             self.unitsFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.units_font_mask, self.font_family)
         self.nameFontSize = qRound(self.r_height / 6)
         if self.name_font_mask:
-            self.nameFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
+            if self.name_location == 'top':
+                self.nameFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
+            elif self.name_location == 'right':
+                self.nameFontSize = helpers.fit_to_mask(self.r_width / 2.1, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
+
         
     def paintEvent(self, e):
         start = self.startAngle
@@ -186,14 +190,20 @@ class ArcGauge(AbstractGauge):
         pen.setWidth(1)
         p.setPen(pen)
         f = QFont(self.font_family)
-        f.setPixelSize(qRound(self.r_height / 2))
+        #f.setPixelSize(qRound(self.r_height / 2))
         y = f.pixelSize()
         if self.name_font_mask:
             f.setPointSizeF(self.nameFontSize)
         else:
             f.setPixelSize(self.nameFontSize)
         fm = QFontMetrics(f)
-        x = fm.width(self.name)
+        if self.name_font_mask:
+            if self.name_font_ghost_mask:
+                x = fm.width(self.name_font_ghost_mask)
+            else: 
+                x = fm.width(self.name_font_mask)
+        else:
+            x = fm.width(self.name)
         p.setFont(f)
         #if self.font_ghost_mask:
         #    alpha = self.textColor.alpha()
@@ -215,8 +225,25 @@ class ArcGauge(AbstractGauge):
             else:
                 p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
         elif self.name_location == 'right':
-            p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
+            if self.name_font_mask:
+                opt = QTextOption(Qt.AlignRight)
+                if self.name_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    #p.drawText(QRectF(self.tlcx,self.tlcy,(self.r_width / 2), self.r_height / 6),self.name_font_ghost_mask, opt)
+                    #p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name_font_ghost_mask)
+                    p.drawText(QRectF(x, self.tlcy + (self.r_height /2.2) ,(self.r_width / 2), self.r_height / 6),self.name_font_ghost_mask, opt)
 
+                    #p.drawText(QRectF(
+                    self.textColor.setAlpha(alpha)
+                pen.setColor(self.textColor)
+                p.setPen(pen)
+                p.drawText(QRectF(x, self.tlcy + (self.r_height /2.2) ,(self.r_width / 2), self.r_height / 6),self.name, opt)
+                #p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
+            else:
+                p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
         # Main value text
         if self.font_mask:
             opt = QTextOption(Qt.AlignRight)
