@@ -36,6 +36,7 @@ source-code: https://github.com/makerplane/pyEfis
 website: https://makerplane.org/
 
 base: core24
+build-base: devel
 confinement: strict
 compression: lzo 
 platforms:
@@ -84,7 +85,7 @@ parts:
     override-build: |
       sed -i 's/"PyQt5==5.15.9",//' setup.py
       sed -i 's/pyavtools==0.1.0/pyavtools @ git+https:\/\/github.com\/makerplane\/pyAvTools\/@b00273a9016e9a4b975f8efe51d63405103d58fb#egg=pyavtools/' setup.py 
-      snapcraftctl build
+      craftctl default
     stage-packages:
       - libqt5core5a
       - libqt5qml5
@@ -97,12 +98,8 @@ parts:
       - python3.12-minimal
       - libpython3.12-minimal
       - libpython3.12-stdlib
-      - python3-pip
-      - python3-setuptools
-      - python3-wheel
       - python3-venv
       - python3-minimal
-      - python3-distutils
       - python3-pkg-resources
       - python3-pyqt5
       - x11-utils
@@ -133,22 +130,14 @@ parts:
     prime:
     - bin/gpu-2404-wrapper
 
-  ivi:
-    source-type:    git
-    source: ./wayland-ivi-extension
-    plugin:         cmake
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-    stage-packages:
-      - weston
-    build-packages:
-      - libweston-13-dev
-
 plugs:
   gpu-2404:
     interface: content
     target: $SNAP/gpu-2404
-    default-provider: mesa-2404
+    #default-provider: mesa-2404
+    # Until mesa-2404 is in latest/stable this above needs commented out
+    # I believe the lack of this is causing all of the missing dependency
+    # warnings from the linter
 
 apps:
   daemon:
