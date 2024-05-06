@@ -86,7 +86,7 @@ parts:
       sed -i 's/pyavtools==0.1.0/pyavtools @ git+https:\/\/github.com\/makerplane\/pyAvTools\/@b00273a9016e9a4b975f8efe51d63405103d58fb#egg=pyavtools/' setup.py 
       craftctl default
     stage-packages:
-      - libqt5core5a
+      - libqt5core5t64
       - libqt5qml5
       - libqt5qmlmodels5
       - libqt5quick5
