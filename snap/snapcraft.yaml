@@ -1,6 +1,6 @@
 name: pyefis
-version: "0.2.0"
-grade: devel
+version: "2.0.0"
+grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
 description: |
@@ -36,7 +36,6 @@ source-code: https://github.com/makerplane/pyEfis
 website: https://makerplane.org/
 
 base: core24
-build-base: devel
 confinement: strict
 compression: lzo 
 platforms:
@@ -134,10 +133,7 @@ plugs:
   gpu-2404:
     interface: content
     target: $SNAP/gpu-2404
-    #default-provider: mesa-2404
-    # Until mesa-2404 is in latest/stable this above needs commented out
-    # I believe the lack of this is causing all of the missing dependency
-    # warnings from the linter
+    default-provider: mesa-2404
 
 apps:
   daemon:
