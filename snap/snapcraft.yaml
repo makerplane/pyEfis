@@ -40,7 +40,9 @@ confinement: strict
 compression: lzo 
 platforms:
   arm64:
+    build-on: [arm64]
   armhf:
+    build-on: [armhf]
   amd64:
 
 layout:
