@@ -115,12 +115,21 @@ parts:
       - libva-drm2
       - x11-xkb-utils
       - xkb-data
+    build-packages:
+      - execstack
     build-environment:
       - PARTS_PYTHON_INTERPRETER: python3.12
 #      - PIP_VERBOSE: 3
       - PIP_IGNORE_INSTALLED: ''
       - PARTS_PYTHON_VENV_ARGS: --system-site-packages
-
+    override-prime: |
+      set -eu
+      craftctl default
+      for f in usr/lib/arm-linux-gnueabihf/libx264.so.164; do
+        if [ -f $f ]; then
+          execstack -c $f
+        fi
+      done
   gpu-2404:
     after: [pyefis]
     source: https://github.com/canonical/gpu-snap.git
