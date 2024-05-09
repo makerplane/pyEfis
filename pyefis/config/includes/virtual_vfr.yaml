@@ -57,6 +57,12 @@ instruments:
       columns: 15
     options:
       font_percent: 0.25
+  - type: include,includes/vertical_dimmer_control.yaml
+    row: 90
+    column: 16
+    span:
+      rows: 20
+      columns: 6
   - type: heading_display
     row: 0
     column: 72.5

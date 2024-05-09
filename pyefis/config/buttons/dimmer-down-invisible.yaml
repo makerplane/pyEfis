@@ -1,0 +1,10 @@
+type: repeat
+text: ""
+dbkey: BTNDIMDN
+transparent: true
+repeat_interval: 50
+repeat_delay: 100
+conditions:
+  - when: "CLICKED eq true" 
+    actions:
+      - change value: DIM,-1
