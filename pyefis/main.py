@@ -27,7 +27,8 @@ from PyQt5.QtWidgets import *
 import yaml
 import importlib
 from os import environ
-
+import shutil
+import hashlib 
 
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')
@@ -60,31 +61,49 @@ path_options = ['{USER}/makerplane/pyefis/config',
                 '/etc/pyefis',
                 '.']
 
-# Add fixgw/config when not running as snap
-# Helpful for development
-if not environ.get('SNAP',False):
-    path_options.append('fixgw/config')
-
 config_path = None
 
 # This function recursively walks the given directory in the installed
 # package and creates a mirror of it in basedir.
 def create_config_dir(basedir):
     # Look in the package for the configuration
-    import pkg_resources as pr
+    import importlib.resources as ir
     package = 'pyefis'
-    def copy_dir(d):
-        os.makedirs(basedir + "/" + d, exist_ok=True)
-        for each in pr.resource_listdir(package, d):
-            filename = d + "/" + each
-            if pr.resource_isdir(package, filename):
-                copy_dir(filename)
+    def sha256sum(file):
+        sha256 = hashlib.sha256()
+        with open(file, 'rb') as f:
+            while True:
+                data = f.read(65536)
+                if not data:
+                    break
+                sha256.update(data)
+        return sha256.hexdigest()
+
+    def copy_file(source,dest):
+        print(f"Replacing file: {dest}")
+        shutil.copy(source,dest)
+        # Set timestamp
+        os.utime(dest,(350039106.789,350039106.789))
+
+    def copy_dir(module,path=None):
+        if not path: path = module
+        os.makedirs(basedir + "/" + path, exist_ok=True)
+        for each in ir.files(package + '.'+ module).iterdir():
+            filename = path + "/" + each.name
+            filepath = basedir + "/" + filename
+            modulename = module + "." + each.name
+            if each.is_dir():
+                copy_dir(modulename,filename)
             else:
-                if not os.path.exists(basedir + "/" + filename):
-                    # Only copy the file if it is missing
-                    s = pr.resource_string(package, filename)
-                    with open(basedir + "/" + filename, "wb") as f:
-                        f.write(s)
+                # If file does not exist, copy it
+                if not os.path.exists(filepath): 
+                    copy_file(each.as_posix(), filepath)
+                    continue
+                # If file has specific timestamp, it has not been edited by the user
+                if os.path.getmtime(filepath) == 350039106.789:
+                    # If the file is not identical to the one in this version, replace it
+                    if not sha256sum(filepath) == sha256sum(each.as_posix()):
+                        copy_file(each.as_posix(), filepath) 
     copy_dir('config')
 
 
@@ -139,14 +158,6 @@ def main():
     if environ.get('INVOCATION_ID', False):
         # and autostart is not true, exit
         if not config.get('auto start', False): os._exit(0)
-
-
-#    # if we passed in a configuration file on the command line...
-#    if args.config_file:
-#        cf = args.config_file
-#    else: # otherwise use the default
-#        cf = open(config_file)
-#    config = yaml.load(cf, Loader=yaml.SafeLoader)
 
     log_config_file = args.log_config if args.log_config else config_file
 
