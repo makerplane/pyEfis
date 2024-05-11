@@ -38,6 +38,26 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[]):
                         raise Exception(f"Include {val} from {fname} is invalid")                    
             elif isinstance(val, dict):
                 new[key] = from_yaml(fname,bpath,val,bc=bc)
+            elif isinstance(val, list):
+                new[key] = []
+                # Included array elements
+                for l in val:
+                    if isinstance(l, dict):
+                        if 'include' in l:
+                            ifile = fpath + '/' + l['include']
+                            if not os.path.exists(ifile):
+                                # Use base path
+                                ifile = bpath + '/' + l['include']
+                            litems = yaml.safe_load(open(ifile))
+                            if 'items' in litems:
+                                for a in litems['items']:
+                                    new[key].append(a)
+                            else:
+                                raise Exception(f"Error in {ifile}\nWhen including list items they need listed under 'items:' in the include file")
+                        else:
+                            new[key].append(l)
+                    else:
+                        new[key].append(l)
             else:
                 #Save existing
                 new[key] = val
