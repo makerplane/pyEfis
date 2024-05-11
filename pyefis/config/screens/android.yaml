@@ -1,0 +1,41 @@
+ANDROID:
+  module: pyefis.screens.screenbuilder
+  title: Screen Builder
+  encoder: ENC3
+  encoder_button: BTN3
+  layout:
+    #draw_grid: true
+    rows: 110
+    columns: 200
+  instruments:
+    - type: value_text
+      row: 100
+      column: 0
+      span:
+        rows: 10
+        columns: 155
+      options:
+        dbkey: APMSG
+        font_percent: 0.9
+    - type: weston
+      #disabled: true
+      row: 0
+      column: 0
+      span:
+        rows: 100
+        columns: 155
+      options:
+        socket: pyefis-waydroid-1
+        ini: weston.ini
+        command: waydroid
+        args:
+          - show-full-ui
+    - type: include,includes/basic_arcs.yaml
+      row: 0
+      column: 155
+    - type: include,includes/side-buttons.yaml
+      row: 0
+      column: 186
+    - type: include,includes/fuel_gauges.yaml
+      row: 70
+      column: 155

@@ -1,0 +1,4 @@
+# This file defines the two fixids that can be 
+# used to navigate and control pyefis
+encoder: ENC3
+encoder_button: BTN3
