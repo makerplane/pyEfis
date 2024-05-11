@@ -1,7 +1,12 @@
 import yaml
 import os
 
-def from_yaml(fname,bpath=None,cfg=None):
+def from_yaml(fname,bpath=None,cfg=None,bc=[]):
+    bc.append(fname)
+    if len(bc) > 500:
+        import pprint
+        raise Exception(f"{pprint.pformat(bc)}\nPotential loop detected inside yaml includes, the breadcrumbs above might help detect where the issue is")
+        
     fpath = os.path.dirname(fname)
     if not cfg:
         # cfg only populated to process nested data
@@ -25,14 +30,14 @@ def from_yaml(fname,bpath=None,cfg=None):
                     if not os.path.exists(ifile):
                         # Use base path
                         ifile = bpath + '/' + f
-                    sub = from_yaml(ifile, bpath)
+                    sub = from_yaml(ifile, bpath,bc=bc)
                     if hasattr(sub,'items'):
                        for k, v in sub.items():
                            new[k] = v
                     else:
                         raise Exception(f"Include {val} from {fname} is invalid")                    
             elif isinstance(val, dict):
-                new[key] = from_yaml(fname,bpath,val)
+                new[key] = from_yaml(fname,bpath,val,bc=bc)
             else:
                 #Save existing
                 new[key] = val
