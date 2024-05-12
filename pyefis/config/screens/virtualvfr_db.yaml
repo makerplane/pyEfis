@@ -1,3 +1,8 @@
 dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
 indexpath: ~/makerplane/pyefis/CIFP/index.bin
-
+# If metadata file exists the old or new indexes will be used 
+# according to the date and metadata.
+# If missing then dbpath and indexpath above are used
+# This was added to support a content snap to distribute the
+# FAA CIFP data
+metadata: /usr/share/makerplane/CIFP/metadata.yaml
