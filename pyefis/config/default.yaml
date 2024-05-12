@@ -178,6 +178,7 @@ screens:
 
 
   ANDROID:
+    metadata: /usr/share/makerplane/CIFP/metadata.yaml
     dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
@@ -223,6 +224,7 @@ screens:
 
       
   PFD:
+    metadata: /usr/share/makerplane/CIFP/metadata.yaml
     dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
       #refresh_period: 0.25
@@ -262,6 +264,7 @@ screens:
           radio_id: 1 
 
   RADIO:
+    metadata: /usr/share/makerplane/CIFP/metadata.yaml
     dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder
@@ -318,6 +321,7 @@ screens:
           rows: 18
           columns: 75 
   EMS:
+    metadata: /usr/share/makerplane/CIFP/metadata.yaml
     dbpath: ~/makerplane/pyefis/CIFP/FAACIFP18
     indexpath: ~/makerplane/pyefis/CIFP/index.bin
     module: pyefis.screens.screenbuilder

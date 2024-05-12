@@ -19,6 +19,8 @@ import math
 import time
 import threading
 import os
+import yaml
+import datetime
 
 from geomag import declination
 
@@ -125,8 +127,43 @@ class VirtualVfr(AI):
         VirtualVfr.PAPI_YOFFSET = int(self.width() * 0.03)
         VirtualVfr.PAPI_LIGHT_SPACING = int(self.width() * 0.02)
 
-        self.pov = PointOfView(os.path.expanduser(self.myparent.get_config_item('dbpath')),
-                               os.path.expanduser(self.myparent.get_config_item('indexpath')),
+        dbpath = os.path.expanduser(self.myparent.get_config_item('dbpath'))
+        indexpath = os.path.expanduser(self.myparent.get_config_item('indexpath'))
+
+        if self.myparent.get_config_item('metadata'):
+            # metadata file helps us transition to to new data
+            # by packaging the current and next release into one snap.
+            # The metadata file identified the dates of the data
+            # so we can pick the most recent data by date, if avaliable
+            if os.path.exists(os.path.expanduser(self.myparent.get_config_item('metadata'))):
+                # if metadata exists dbpath and indepath are not used.
+                # This allows default for non-snap to home directory and for snaps
+                # to have the /usr/share path
+                metadata = yaml.safe_load(open(os.path.expanduser(self.myparent.get_config_item('metadata'))))
+                date_now = datetime.datetime.now()
+                file = 'old'
+                expired = False
+                old_date = datetime.datetime(year=metadata['old_expires']['year'],month=metadata['old_expires']['month'],day=metadata['old_expires']['day'])
+                new_date = False
+                if 'new_expires' in metadata:
+                    new_date = datetime.datetime(year=metadata['new_expires']['year'],month=metadata['new_expires']['month'],day=metadata['new_expires']['day'])
+
+                if new_date and ( date_now > old_date ):
+                    file = 'new'
+                    if date_now > new_date:
+                        expired = True
+                elif date_now > old_date:
+                    expired = True
+                if expired:
+                    log.info("The FAA CIFP data is expired")
+                path = os.path.dirname(os.path.expanduser(self.myparent.get_config_item('metadata'))) 
+                dbpath =    path + "/" + file + ".db" 
+                indexpath = path + "/" + file + ".bin"
+
+
+        log.info(f"Attempting to load {dbpath}")
+        self.pov = PointOfView(dbpath,
+                               indexpath,
                                self.myparent.get_config_item('refresh_period'))
         self.pov.initialize(["Runway", "Airport"], self.scene.width(),
                     self.lng, self.lat, self.altitude, self.true_heading)
