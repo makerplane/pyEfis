@@ -28,6 +28,7 @@ import yaml
 import importlib
 from os import environ
 
+from pyefis import cfg
 
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')
@@ -124,16 +125,14 @@ def main():
         cf = args.config_file
         config_file = cf.name
     elif config_path is not None: # otherwise use the default
-        cf = open(config_file)
+        pass
     else:
         # If all else fails copy the configuration from the package
         # to ~/makerplane/fixgw/config
         create_config_dir("{USER}/makerplane/pyefis".format(USER=user_home))
         # Reset this stuff like we found it
         config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
-        cf = open(config_file)
-    config_path = os.path.dirname(cf.name)
-    config = yaml.safe_load(cf)
+    config = cfg.from_yaml(config_file)
 
     # If running under systemd
     if environ.get('INVOCATION_ID', False):
