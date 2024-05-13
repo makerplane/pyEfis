@@ -141,18 +141,18 @@ class VirtualVfr(AI):
                 # to have the /usr/share path
                 metadata = yaml.safe_load(open(os.path.expanduser(self.myparent.get_config_item('metadata'))))
                 date_now = datetime.datetime.now()
-                file = 'old'
+                file = 'current'
                 expired = False
-                old_date = datetime.datetime(year=metadata['old_expires']['year'],month=metadata['old_expires']['month'],day=metadata['old_expires']['day'])
-                new_date = False
-                if 'new_expires' in metadata:
-                    new_date = datetime.datetime(year=metadata['new_expires']['year'],month=metadata['new_expires']['month'],day=metadata['new_expires']['day'])
+                current_date = datetime.datetime(year=metadata['current_expires']['year'],month=metadata['current_expires']['month'],day=metadata['current_expires']['day'])
+                next_date = False
+                if 'next_expires' in metadata:
+                    next_date = datetime.datetime(year=metadata['next_expires']['year'],month=metadata['next_expires']['month'],day=metadata['next_expires']['day'])
 
-                if new_date and ( date_now > old_date ):
-                    file = 'new'
-                    if date_now > new_date:
+                if next_date and ( date_now > current_date ):
+                    file = 'next'
+                    if date_now > next_date:
                         expired = True
-                elif date_now > old_date:
+                elif date_now > current_date:
                     expired = True
                 if expired:
                     log.info("The FAA CIFP data is expired")
