@@ -1,5 +1,5 @@
 name: pyefis
-version: "2.0.3"
+version: "2.0.4"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -14,7 +14,8 @@ description: |
   sudo snap set system experimental.user-daemons=true
 
   Breaking Changes:
-  Ensure your fix gateway database.yaml file defines a db key named 'ZZLOADER', without this pyefis will not load.
+  * Ensure your fix gateway database.yaml file defines a db key named 'ZZLOADER', without this pyefis will not load.
+  * Configuration files have been split up taking advantage of yaml includes. Related to this pyefis will auto-update unedited config files in ~/makerplane/pyefis/config/ However, configuration files that exist in ~/makerplane/pyefis/config/ prior to installing this release will not be maintained. You may want to backup your config files, delete them and let pyefis replace all of them. Then merge any custom changes.
 
   Release Notes:
   This is a beta release and has not seen much testing, if you find any bugs please report them here: https://github.com/makerplane/pyEfis/issues
@@ -23,10 +24,13 @@ description: |
   * Programable touchscreen buttons
   * Listbox widget
   * Control pyEFIS with a single rotary encoder and button
-  * Technology Preview - run Android inside pyEFIS for access to your favorite aviation apps
   * Moved to core24 and python 3.12
   * snap now includes the FAA CIFP data for Virtual VFR
-  You can find the instructions to install Android here: https://github.com/makerplane/pyEfis/blob/master/ANDROID.md
+  * yaml includes, easily include contents of one yaml file in another
+  * Automatically sets screen resolution to match your screen, or you can still set it manually in the config file.
+  * Technology Preview - run Android inside pyEFIS for access to your favorite aviation apps
+  You can find the instructions to setup Android here: https://github.com/makerplane/pyEfis/blob/master/ANDROID.md
+
   Known Issues for Android: 
   * No pinch zoom 
 
