@@ -1,0 +1,263 @@
+EMS2:
+  include: hmi/encoder_input.yaml
+  module: pyefis.screens.screenbuilder
+  title: Engine Management New
+  layout:
+    rows: 110
+    columns: 200
+    draw_grid: false
+  instruments:
+    - type: value_text
+      row: 100
+      column: 80
+      span:
+        rows: 10
+        columns: 140
+      options:
+        dbkey: APMSG
+        font_percent: 0.9
+    - type: ganged_button
+      gang_type: horizontal
+      row: 103
+      column: 35
+#        move:
+#          shrink: 25
+#          justify: top
+      span:
+        rows: 4
+        columns: 45
+      groups:
+        - name: Buttons
+          gap: 4
+          instruments:
+            -
+              options:
+                config: buttons/egt-Normalize.yaml
+            -
+              options:
+                config: buttons/egt-Lean.yaml
+            -
+              options:
+                config: buttons/egt-Peak.yaml
+            -
+              options:
+                config: buttons/egt-reset-peak.yaml
+    -
+      type: arc_gauge
+      row: 0
+      column: 0
+      span:
+        rows: 45
+        columns: 70
+      options:
+        segments: 28
+        name: RPM
+        decimal_places: 0
+        dbkey: TACH1
+        #font_family: "DSEG14 Classic"
+    -
+      type: arc_gauge
+      row: 0
+      column: 71
+      span:
+        rows: 45
+        columns: 70
+      options:
+        segments: 28
+        name: MAP
+        decimal_places: 1
+        dbkey: MAP1
+    -
+      type: ganged_horizontal_bar_gauge
+      gang_type: vertical
+      row: 0
+      column: 142
+      span:
+        rows: 50
+        columns: 40
+      groups:
+        - name: Oil
+          common_options:
+            segments: 22
+            #font_family: "DSEG14 Classic"
+          instruments:
+            -
+              options:
+                name: Oil Press
+                dbkey: OILP1
+            -
+              options:
+                name: Oil Temp
+                dbkey: OILT1
+                temperature: true
+    -
+      type: static_text
+      row: 45
+      column: 3
+      span:
+        columns: 21
+        rows: 5
+      options:
+        text: Power
+    -
+      type: static_text
+      row: 45
+      column: 52
+      span:
+        columns: 12
+        rows: 5
+      options:
+        text: EGT
+    -
+      type: static_text
+      row: 45
+      column: 109
+      span:
+        columns: 12
+        rows: 5
+      options:
+        text: CHT
+    -
+      type: static_text
+      row: 45
+      column: 159
+      span:
+        columns: 14
+        rows: 5
+      options:
+        text: FUEL
+    -
+      type: ganged_vertical_bar_gauge
+      gang_type: horizontal
+      ratio: 0.2
+      row: 51
+      column: 0
+      span:
+        rows: 50
+        columns: 186
+      groups:
+        - name: Power
+          common_options:
+            segments: 22
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+          instruments:
+            -
+              options:
+                name: Volt
+                decimal_places: 1
+                show_units: false
+                dbkey: VOLT
+            -
+              options:
+                name: Amp
+                show_units: false
+                dbkey: CURRNT
+        - name: EGT
+          common_options:
+            segments: 22
+            egt_mode_switching: true
+            normalize_range: 400
+            highlight_key: EGTMAX1
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            decimal_places: 0
+            temperature: true
+          instruments:
+            -
+              options:
+                name: "1"
+                decPlaces: 0
+                show_units: false
+                dbkey: EGT11
+            -
+              options:
+                name: "2"
+                decPlaces: 0
+                show_units: false
+                dbkey: EGT12
+            -
+              options:
+                name: "3"
+                decPlaces: 0
+                show_units: false
+                dbkey: EGT13
+            -
+              options:
+                name: "4"
+                decPlaces: 0
+                show_units: false
+                dbkey: EGT14
+        - name: CHT
+          common_options:
+            segments: 22
+            highlight_key: CHTMAX1
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            decimal_places: 0
+            temperature: true
+          instruments:
+            -
+              options:
+                name: "1"
+                decPlaces: 0
+                show_units: false
+                dbkey: CHT11
+            -
+              options:
+                name: "2"
+                decPlaces: 0
+                show_units: false
+                dbkey: CHT12
+            -
+              options:
+                name: "3"
+                decPlaces: 0
+                show_units: false
+                dbkey: CHT13
+            -
+              options:
+                name: "4"
+                decPlaces: 0
+                show_units: false
+                dbkey: CHT14
+        - name: FUEL
+          common_options:
+            segments: 22
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+          instruments:
+            -
+              options:
+                name: "Left"
+                decPlaces: 0
+                show_units: false
+                dbkey: FUELQ1
+            -
+              options:
+                name: "Center"
+                decPlaces: 0
+                show_units: false
+                dbkey: FUELQ2
+            -
+              options:
+                name: "Right"
+                decPlaces: 0
+                show_units: false
+                dbkey: FUELQ1
+    - type: include,includes/side-buttons.yaml
+      row: 0
+      column: 186
+

@@ -1,5 +1,5 @@
 name: pyefis
-version: "2.0.1"
+version: "2.0.3"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -25,7 +25,7 @@ description: |
   * Control pyEFIS with a single rotary encoder and button
   * Technology Preview - run Android inside pyEFIS for access to your favorite aviation apps
   * Moved to core24 and python 3.12
-
+  * snap now includes the FAA CIFP data for Virtual VFR
   You can find the instructions to install Android here: https://github.com/makerplane/pyEfis/blob/master/ANDROID.md
   Known Issues for Android: 
   * No pinch zoom 
@@ -74,6 +74,9 @@ layout:
     bind: $SNAP/etc/fonts
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
+  /usr/share/makerplane/CIFP:
+    symlink: $SNAP/faa-cifp-data/CIFP
+
 parts:
   extras:
     source: ./extras
@@ -145,6 +148,11 @@ plugs:
     interface: content
     target: $SNAP/gpu-2404
     default-provider: mesa-2404
+
+  faa-cifp-data:
+    interface : content
+    target: $SNAP/faa-cifp-data
+    default-provider: faa-cifp-data
 
 apps:
   daemon:
