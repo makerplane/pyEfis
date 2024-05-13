@@ -1,4 +1,5 @@
 |pyefis badge|
+
 .. |pyefis badge| image:: https://snapcraft.io/pyefis/badge.svg
    :target: ihttps://snapcraft.io/pyefis
 
