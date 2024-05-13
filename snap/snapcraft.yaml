@@ -25,7 +25,7 @@ description: |
   * Control pyEFIS with a single rotary encoder and button
   * Technology Preview - run Android inside pyEFIS for access to your favorite aviation apps
   * Moved to core24 and python 3.12
-
+  * snap now includes the FAA CIFP data for Virtual VFR
   You can find the instructions to install Android here: https://github.com/makerplane/pyEfis/blob/master/ANDROID.md
   Known Issues for Android: 
   * No pinch zoom 
