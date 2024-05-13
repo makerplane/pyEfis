@@ -1,7 +1,7 @@
 |Website snapcraft.io|
 
 .. |Website snapcraft.io| image:: https://snapcraft.io/pyefis/badge.svg
-   :target: ihttps://snapcraft.io/pyefis
+   :target: https://snapcraft.io/pyefis
 
 pyEfis
 ==================
