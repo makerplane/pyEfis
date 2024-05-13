@@ -20,9 +20,9 @@ class Weston(QGraphicsView):
         self.weston.setProcessEnvironment(westenv)
         self.weston.start('weston', [f"-c{ini}",'-i0','-Bx11-backend.so',f"-S{socket}"])
         time.sleep(1)
-        p = subprocess.run(['xprop', '-root'], stdout=subprocess.PIPE)
+        p = subprocess.run(['xwininfo', '-name', 'Weston Compositor - Xweston'], stdout=subprocess.PIPE)
         for line in p.stdout.decode().splitlines():
-            m = re.fullmatch(r'^_NET_ACTIVE_WINDOW.*[)].*window id # (0x[0-9a-f]+)', line)
+            m = re.fullmatch(r'^xwininfo: Window id: (0x[0-9a-f]+) .*', line)
             if m:
                 win = QWindow.fromWinId(int(m.group(1), 16))
                 win.setFlag(Qt.FramelessWindowHint, True)
