@@ -6,14 +6,15 @@ main:
   FixServer: 127.0.0.1
   FixPort: 3490
   # Screen Geometry
+  # Defaults to screen size if screenWidth or screenHeight is not defined
   #screenWidth: 1280
   #screenHeight: 720
   #screenWidth: 1024
   #screenHeight: 768
-  screenWidth: 1920
+  #screenWidth: 1920
   #screenHeight: 540
   #screenHeight: 550
-  screenHeight: 1080
+  #screenHeight: 1080
   #screenWidth: 640
   #screenHeight: 480
   #screenWidth: 3840
