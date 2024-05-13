@@ -65,8 +65,16 @@ class Main(QMainWindow):
         super(Main, self).__init__(parent)
 
         self.config_path = config_path
-        self.screenWidth = int(config["main"]["screenWidth"])
-        self.screenHeight = int(config["main"]["screenHeight"])
+        self.screenWidth = int(config["main"].get("screenWidth", False))
+        self.screenHeight = int(config["main"].get("screenHeight", False))
+        if not ( self.screenWidth and self.screenHeight ):
+            # screenWidth and screenHeight are not defined in the config file
+            # go full screen
+            pscreen = QApplication.primaryScreen()
+            screensize = pscreen.size()
+            self.screenWidth = screensize.width()
+            self.screenHeight = screensize.height()
+
         self.screenColor = config["main"]["screenColor"]
         self.nodeID = config["main"].get('nodeID', 1)
 
