@@ -1,5 +1,5 @@
 name: pyefis
-version: "2.0.2"
+version: "2.0.3"
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
@@ -152,7 +152,7 @@ plugs:
   faa-cifp-data:
     interface : content
     target: $SNAP/faa-cifp-data
-    #default-provider: faa-cifp-data
+    default-provider: faa-cifp-data
 
 apps:
   daemon:
