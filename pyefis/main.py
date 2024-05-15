@@ -152,6 +152,7 @@ def main():
         create_config_dir("{USER}/makerplane/pyefis".format(USER=user_home))
         # Reset this stuff like we found it
         config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
+    config_path = os.path.dirname(config_file)
     config = cfg.from_yaml(config_file)
 
     # If running under systemd
