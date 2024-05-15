@@ -230,15 +230,19 @@ class Button(QWidget):
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.screenName
         self._db_data['CLICKED'] = clicked
+        self._db_data["PREVIOUS_CONDITION"] = False
         logger.debug(f"{self._dbkey.key}:{self._dbkey.value}")
         for cond in self._conditions:
             if 'when' in cond:
                 if type(cond['when']) == str:
                     expr = pc.to_struct(pc.tokenize(cond['when'], sep=' ', brkts='[]'))
                     if pc.pycond(expr)(state=self._db_data) == True:
+                        self._db_data["PREVIOUS_CONDITION"] = True
                         logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} = True")
                         self.processActions(cond['actions'])
                         if not cond.get('continue', False): return
+                    else:
+                        self._db_data["PREVIOUS_CONDITION"] = False
                 elif type(cond['when']) == bool:
                     if cond['when']:
                         if self._button.isChecked() or self._toggle == False:

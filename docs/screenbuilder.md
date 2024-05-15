@@ -689,9 +689,10 @@ KEY.aux.max
 etc etc
 ```
 
-In addition to those variables the variables `CLICKED` and `SCREEN` are also provided.
+In addition to those variables the variables `CLICKED`, `SCREEN` and `PREVIOUS_CONDITION` are also provided.
 SCREEN will contain the value of the screen name
 CLICKED will be true if the user has clicked the button to trigger evaluation of the conditions and false if the evaluation was triggered from just data changes.
+PREVIOUS_CONDITION is a boolean that contains the results of the previous condition evaluation. Can be used to implemented a sort of if/else between two conditions.
 
 Here is a list of all the actions:
 
