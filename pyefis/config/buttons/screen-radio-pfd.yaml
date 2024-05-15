@@ -1,21 +1,32 @@
 type: simple
 text: ""
 dbkey: TSBTN{id}13
+condition_keys:
+- MENUHIDE
 conditions:
-  - when: "SCREEN eq 'RADIO'"
+  - when: "MENUHIDE"
+    actions:
+      - set bg color: "#00000000"
+      - set fg color: "#00000000"
+    continue: true
+  - when: "SCREEN eq 'RADIO' and not MENUHIDE"
     actions:
       - set text: PFD
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "SCREEN ne 'RADIO'"
+  - when: "SCREEN ne 'RADIO' and not MENUHIDE"
     actions:
       - set text: RADIO
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "CLICKED eq true and [ SCREEN ne 'RADIO' ]"
+  - when: "CLICKED eq true and SCREEN ne 'RADIO' and not MENUHIDE"
     actions:
       - show screen: RADIO
-  - when: "CLICKED eq true and SCREEN eq 'RADIO'"
+      - set value: MENUHIDE,False
+  - when: "CLICKED eq true and SCREEN eq 'RADIO' and not MENUHIDE"
     actions:
       - show screen: PFD
+      - set value: MENUHIDE,False
 

@@ -1,21 +1,31 @@
 type: simple
 text: ""
 dbkey: TSBTN{id}13
+condition_keys:
+- MENUHIDE
 conditions:
-  - when: "SCREEN eq 'SIXPACK'"
+  - when: "MENUHIDE"
+    actions:
+      - set bg color: "#00000000"
+      - set fg color: "#00000000"
+    continue: true
+  - when: "SCREEN eq 'SIXPACK' and not MENUHIDE"
     actions:
       - set text: PFD
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "SCREEN ne 'SIXPACK'"
+  - when: "SCREEN ne 'SIXPACK' and not MENUHIDE"
     actions:
       - set text: "SIX\nPACK"
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "CLICKED eq true and [ SCREEN ne 'SIXPACK' ]"
+  - when: "CLICKED eq true and SCREEN ne 'SIXPACK' and not MENUHIDE"
     actions:
       - show screen: SIXPACK
-  - when: "CLICKED eq true and SCREEN eq 'SIXPACK'"
+      - set value: MENUHIDE,False
+  - when: "CLICKED eq true and SCREEN eq 'SIXPACK' and not MENUHIDE"
     actions:
       - show screen: PFD
-
+      - set value: MENUHIDE,False
