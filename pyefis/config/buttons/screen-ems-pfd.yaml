@@ -12,11 +12,6 @@ condition_keys:
   - EGT14
   - MENUHIDE
 conditions:
-  - when: "MENUHIDE"
-    actions:
-      - set bg color: "#00000000"
-      - set fg color: "#00000000"
-    continue: true
   - when: "SCREEN eq 'EMS' and not MENUHIDE"
     actions:
       - set text: PFD
@@ -34,10 +29,14 @@ conditions:
       - set bg color: red
       - set fg color: black
     continue: true
-  - when: "CLICKED eq true and SCREEN ne 'EMS' and not MENUHIDE"
+  - when: "MENUHIDE and not PREVIOUS_CONDITION"
+    actions:
+      - set bg color: "#00000000"
+      - set fg color: "#00000000"
+  - when: "CLICKED eq true and SCREEN ne 'EMS'"
     actions:
       - show screen: EMS
-  - when: "CLICKED eq true and SCREEN eq 'EMS' and not MENUHIDE"
+  - when: "CLICKED eq true and SCREEN eq 'EMS'"
     actions:
       - show screen: PFD
 
