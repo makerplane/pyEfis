@@ -4,11 +4,6 @@ dbkey: TSBTN{id}13
 condition_keys:
 - MENUHIDE
 conditions:
-  - when: "MENUHIDE"
-    actions:
-      - set bg color: "#00000000"
-      - set fg color: "#00000000"
-    continue: true
   - when: "SCREEN eq 'ANDROID' and not MENUHIDE"
     actions:
       - set text: PFD
@@ -21,10 +16,14 @@ conditions:
       - set bg color: lightgray
       - set fg color: black
     continue: true
-  - when: "CLICKED eq true and SCREEN ne 'ANDROID' and not MENUHIDE" 
+  - when: "MENUHIDE"
+    actions:
+      - set bg color: "#00000000"
+      - set fg color: "#00000000"
+  - when: "CLICKED eq true and SCREEN ne 'ANDROID'" 
     actions:
       - show screen: ANDROID
-  - when: "CLICKED eq true and SCREEN eq 'ANDROID' and not MENUHIDE"
+  - when: "CLICKED eq true and SCREEN eq 'ANDROID'"
     actions:
       - show screen: PFD
 
