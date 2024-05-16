@@ -10,21 +10,29 @@ condition_keys:
   - EGT12
   - EGT13
   - EGT14
+  - MENUHIDE
 conditions:
-  - when: "SCREEN eq 'EMS'"
+  - when: "SCREEN eq 'EMS' and not MENUHIDE"
     actions:
       - set text: PFD
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "SCREEN ne 'EMS'"
+  - when: "SCREEN ne 'EMS' and not MENUHIDE"
     actions:
       - set text: EMS
       - set bg color: lightgray
+      - set fg color: black
     continue: true
   - when: "SCREEN ne 'EMS' and [ CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate ]"
     actions:
       - set bg color: red
+      - set fg color: black
     continue: true
+  - when: "MENUHIDE and not PREVIOUS_CONDITION"
+    actions:
+      - set bg color: "#00000000"
+      - set fg color: "#00000000"
   - when: "CLICKED eq true and SCREEN ne 'EMS'"
     actions:
       - show screen: EMS

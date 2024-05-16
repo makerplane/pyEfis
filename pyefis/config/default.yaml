@@ -5,6 +5,15 @@ main:
   # IP information for network adapter
   FixServer: 127.0.0.1
   FixPort: 3490
+
+  # Menu timeout in ms
+  # All this does is set fix key MENUITEM to True after a timeout
+  # Individual buttons need to have conditions that will show/hide the button
+  # based on the value of MENUITEM
+  # The main buttons included by default have such logic
+  # Uncomment the next line to enable this feature:
+  #menu_timeout: 5000 
+
   # Screen Geometry
   # Defaults to screen size if screenWidth or screenHeight is not defined
   #screenWidth: 1280

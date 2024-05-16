@@ -1,8 +1,29 @@
 type: simple
 text: "Units"
 dbkey: TSBTN{id}14
+condition_keys:
+- MENUHIDE
 conditions:
-  - when: "CLICKED eq true"
+  - when: "MENUHIDE"
+    actions:
+      #- button: disable
+      - set text: "Show\nMenu"
+      #- set bg color: "#00000000"
+      #- set fg color: "#00000000"
+    continue: true
+  - when: "not MENUHIDE"
+    actions:
+      #- button: enable
+      - set text: "Units"
+      #- set bg color: lightgray
+      #- set fg color: black
+    continue: true
+  - when: "CLICKED eq true and MENUHIDE"
+    actions:
+      - set text: Units
+      - set value: MENUHIDE,False
+  - when: "CLICKED eq true and not MENUHIDE"
     actions:
       - Set Instrument Units: "OAT,OILT1,Temperature,Pressure,Altitude:Toggle"
+      - set value: MENUHIDE,False
 

@@ -26,6 +26,7 @@ import os
 from pyefis import hooks
 from pyefis import hmi
 import pyavtools.fix as fix
+import pyavtools.scheduler as scheduler
 
 screens = []
 
@@ -247,3 +248,26 @@ def initialize(config,config_path):
         mainWindow.width = int(config["main"]["screenWidth"])
         mainWindow.height = int(config["main"]["screenHeight"])
         mainWindow.show()
+
+
+    def menu_timeout():
+        # set MENUTIMEOUT True
+        menu_key.value = True
+
+    def menu_timeout_reset():
+        if not menu_key.value:
+            #When set to False reset timer    
+            menu_timer.start()
+
+    if config['main'].get('menu_timeout', False):
+        scheduler.initialize()
+        menu_timer = scheduler.scheduler.getTimer(config['main']['menu_timeout'])
+        if not menu_timer:
+            scheduler.scheduler.timers.append(scheduler.IntervalTimer(config['main']['menu_timeout']))
+            scheduler.scheduler.timers[-1].start()
+            menu_timer = scheduler.scheduler.getTimer(config['main']['menu_timeout'])
+        menu_key = fix.db.get_item('MENUHIDE')
+        menu_timer.add_callback(menu_timeout)
+        menu_key.valueWrite[bool].connect(menu_timeout_reset)
+
+
