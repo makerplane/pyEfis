@@ -250,24 +250,24 @@ def initialize(config,config_path):
         mainWindow.show()
 
 
-    def menu_timeout():
+    def button_timeout():
         # set MENUTIMEOUT True
-        menu_key.value = True
+        button_key.value = True
 
-    def menu_timeout_reset():
-        if not menu_key.value:
+    def button_timeout_reset():
+        if not button_key.value:
             #When set to False reset timer    
-            menu_timer.start()
+            button_timer.start()
 
-    if config['main'].get('menu_timeout', False):
+    if config['main'].get('button_timeout', False):
         scheduler.initialize()
-        menu_timer = scheduler.scheduler.getTimer(config['main']['menu_timeout'])
-        if not menu_timer:
-            scheduler.scheduler.timers.append(scheduler.IntervalTimer(config['main']['menu_timeout']))
+        button_timer = scheduler.scheduler.getTimer(config['main']['button_timeout'])
+        if not button_timer:
+            scheduler.scheduler.timers.append(scheduler.IntervalTimer(config['main']['button_timeout']))
             scheduler.scheduler.timers[-1].start()
-            menu_timer = scheduler.scheduler.getTimer(config['main']['menu_timeout'])
-        menu_key = fix.db.get_item('MENUHIDE')
-        menu_timer.add_callback(menu_timeout)
-        menu_key.valueWrite[bool].connect(menu_timeout_reset)
+            button_timer = scheduler.scheduler.getTimer(config['main']['button_timeout'])
+        button_key = fix.db.get_item('HIDEBUTTON')
+        button_timer.add_callback(button_timeout)
+        button_key.valueWrite[bool].connect(button_timeout_reset)
 
 
