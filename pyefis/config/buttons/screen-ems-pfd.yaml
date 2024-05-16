@@ -26,6 +26,7 @@ conditions:
     continue: true
   - when: "SCREEN ne 'EMS' and [ CHT11.annunciate or CHT12.annunciate or CHT13.annunciate or CHT14.annunciate or EGT11.annunciate or EGT12.annunciate or EGT13.annunciate or EGT14.annunciate ]"
     actions:
+      - set text: EMS
       - set bg color: red
       - set fg color: black
     continue: true
@@ -36,7 +37,9 @@ conditions:
   - when: "CLICKED eq true and SCREEN ne 'EMS'"
     actions:
       - show screen: EMS
+      - set value: MENUHIDE,False
   - when: "CLICKED eq true and SCREEN eq 'EMS'"
     actions:
       - show screen: PFD
+      - set value: MENUHIDE,False
 
