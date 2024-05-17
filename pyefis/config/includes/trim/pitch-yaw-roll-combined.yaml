@@ -1,0 +1,17 @@
+# To use this on a screen:
+#  - type: include,includes/trim/pitch-yaw-roll.yaml
+#    row: 0
+#    column: 0
+#    span:
+#      rows: 30
+#      columns: 43
+instruments:
+  - type: include,includes/trim/pitch-slider-button-control.yaml
+    row: 0
+    column: 0
+  - type: include,includes/trim/roll-slider-button-contro.yaml
+    row: 12
+    column: 12
+  - type: include,includes/trim/yaw-slider-button-control.yaml
+    row: 22
+    column: 12 
