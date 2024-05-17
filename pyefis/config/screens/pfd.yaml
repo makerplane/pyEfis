@@ -14,20 +14,20 @@ PFD:
       interval: 3000
       states: 2
   instruments:
-    - type: include,includes/virtual_vfr.yaml
+    - type: include,includes/ahrs/virtual_vfr.yaml
       row: 0
       column: 0
-    - type: include,includes/basic_arcs.yaml
+    - type: include,includes/arcs/vertical/ds1_TACH1-OILP1-HTOT1-VOLT_ds2_TACH1-OILT1-OAT-CURRNT.yaml
       row: 0
       column: 155
-    - type: include,includes/side-buttons.yaml
+    - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
       row: 0
       column: 186
-    - type: include,includes/fuel_gauges.yaml
+    - type: include,includes/bars/vertical/fuel_info_FUELP1-FUELF1-FUELQT-FUELQ1-FUELQ2-FUELQ3.yaml
       row: 70
       column: 155
       display_state: 1
-    - type: include,includes/mgl/v16/active-display.yaml
+    - type: include,includes/mgl/v16/square-active-radio-display.yaml
       row: 70
       column: 156
       span:

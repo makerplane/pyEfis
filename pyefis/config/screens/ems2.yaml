@@ -257,7 +257,7 @@ EMS2:
                 decPlaces: 0
                 show_units: false
                 dbkey: FUELQ1
-    - type: include,includes/side-buttons.yaml
+    - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
       row: 0
       column: 186
 
