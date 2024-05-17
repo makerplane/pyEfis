@@ -144,10 +144,8 @@ def main():
     if args.config_file:
         cf = args.config_file
         config_file = cf.name
-    elif config_path is not None: # otherwise use the default
-        pass
     else:
-        # If all else fails copy the configuration from the package
+        # If all else fails or update the configuration from the package
         # to ~/makerplane/fixgw/config
         create_config_dir("{USER}/makerplane/pyefis".format(USER=user_home))
         # Reset this stuff like we found it
