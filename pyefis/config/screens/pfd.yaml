@@ -27,7 +27,7 @@ PFD:
       row: 70
       column: 155
       display_state: 1
-    - type: include,includes/mgl/v16/square-active-radio-display.yaml
+    - type: include,includes/mgl/v16/square-active-radio-display-dseg.yaml
       row: 70
       column: 156
       span:

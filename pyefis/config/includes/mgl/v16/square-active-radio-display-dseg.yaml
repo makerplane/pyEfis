@@ -7,6 +7,8 @@ instruments:
       rows: 8
       columns: 30
     options:
+      font_ghost_mask: "~~~~~~~"
+      font_family: "DSEG14 Classic"
       font_mask: "000.000"
       decimal_places: 3
       dbkey: COMACTFREQ{radio_id}
@@ -18,6 +20,8 @@ instruments:
       rows: 5
       columns: 35
     options:
+      font_family: "DSEG14 Classic"
+      font_ghost_mask: "~~~~~~~~~~~~~"
       font_mask:       "XXXXXXXXXXXXX"
       dbkey: COMACTNAME{radio_id}
   - type: button
