@@ -1,8 +1,8 @@
 SIXPACK:
   module: pyefis.screens.screenbuilder
   title: Standard Instrument Panel New
-  encoder: ENC3
-  encoder_button: BTN3
+  include:
+  - hmi/encoder_input.yaml
   layout:
     rows: 110
     columns: 200

@@ -12,7 +12,7 @@ main:
   # based on the value of MENUITEM
   # The main buttons included by default have such logic
   # Uncomment the next line to enable this feature:
-  #menu_timeout: 5000 
+  #button_timeout: 10000 
 
   # Screen Geometry
   # Defaults to screen size if screenWidth or screenHeight is not defined

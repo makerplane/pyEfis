@@ -2,3 +2,4 @@
 # used to navigate and control pyefis
 encoder: ENC3
 encoder_button: BTN3
+encoder_timeout: 10000

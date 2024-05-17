@@ -1,6 +1,7 @@
 type: simple
 text: ""
 dbkey: TSBTN{id}12
+hover_show: True
 condition_keys:
   - CHT11
   - CHT12
@@ -10,15 +11,15 @@ condition_keys:
   - EGT12
   - EGT13
   - EGT14
-  - MENUHIDE
+  - HIDEBUTTON
 conditions:
-  - when: "SCREEN eq 'EMS2' and not MENUHIDE"
+  - when: "SCREEN eq 'EMS2' and not HIDEBUTTON"
     actions:
       - set text: PFD
       - set bg color: lightgray
       - set fg color: black
     continue: true
-  - when: "SCREEN ne 'EMS2' and not MENUHIDE"
+  - when: "SCREEN ne 'EMS2' and not HIDEBUTTON"
     actions:
       - set text: EMS2
       - set bg color: lightgray
@@ -30,16 +31,16 @@ conditions:
       - set bg color: red
       - set fg color: black
     continue: true
-  - when: "MENUHIDE and not PREVIOUS_CONDITION"
+  - when: "HIDEBUTTON and not PREVIOUS_CONDITION"
     actions:
       - set bg color: "#00000000"
       - set fg color: "#00000000"
   - when: "CLICKED eq true and SCREEN ne 'EMS2'"
     actions:
       - show screen: EMS2
-      - set value: MENUHIDE,False
+      - set value: HIDEBUTTON,False
   - when: "CLICKED eq true and SCREEN eq 'EMS2'"
     actions:
       - show screen: PFD
-      - set value: MENUHIDE,False
+      - set value: HIDEBUTTON,False
 

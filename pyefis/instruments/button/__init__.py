@@ -53,7 +53,7 @@ class Button(QWidget):
         self._style['bg'] = QColor(self.config.get('bg_color',"lightgray"))
         self._style['fg'] = QColor(self.config.get('fg_color',"black"))
         self._style['transparent'] = self.config.get('transparent',False)
-
+        self._buttonhide = self.config.get("hover_show", False)
         self._title = ""
         self._toggle = False
         # Repalce {id} in the dbkey so we can have different 
@@ -94,6 +94,11 @@ class Button(QWidget):
         self._button.setChecked(self._dbkey.value)
         self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
         self.processConditions()
+
+    def enterEvent(self, QEvent):
+        if self._buttonhide:
+            # Show menu if hover over it
+            fix.db.set_value('HIDEBUTTON', False)
 
     def isEnabled(self):
         return self._button.isEnabled()
@@ -307,7 +312,7 @@ class Button(QWidget):
     def enc_highlight(self,onoff):
         if onoff:
             self._style['bg_override'] = QColor('orange')
-            fix.db.set_value('MENUHIDE', False) 
+            fix.db.set_value('HIDEBUTTON', False) 
         else:
             self._style['bg_override'] = None 
         self.setStyle()

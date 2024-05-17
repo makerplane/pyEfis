@@ -1,8 +1,8 @@
 ANDROID:
   module: pyefis.screens.screenbuilder
   title: Screen Builder
-  encoder: ENC3
-  encoder_button: BTN3
+  include:
+  - hmi/encoder_input.yaml
   layout:
     #draw_grid: true
     rows: 110
