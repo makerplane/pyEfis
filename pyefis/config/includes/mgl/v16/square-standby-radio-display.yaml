@@ -1,0 +1,45 @@
+instruments:
+  - type: numeric_display
+    gang_type: horizontal
+    row: 0
+    column: 0
+    span:
+      rows: 8
+      columns: 30
+    options:
+      font_mask: "100.000"
+      decimal_places: 3
+      dbkey: COMSTDFREQ{radio_id}
+      encoder_order: 27
+  - type: value_text
+    row: 8
+    column: 0
+    span:
+      rows: 5
+      columns: 35
+    options:
+      font_mask:       "XXXXXXXXXXXXX"
+      dbkey: COMSTDNAME{radio_id}
+  - type: button
+    row: 14
+    column: 0
+    span:
+      rows: 6
+      columns: 6
+    options:
+      config: buttons/mgl/v16/standby-rx-status.yaml
+  - type: horizontal_bar_gauge
+    ratio: 3
+    row: 13
+    column: 7
+    span:
+      rows: 8
+      columns: 24
+    options:
+      name: RX
+      bar_divisor: 2.5
+      decimal_places: 0
+      show_units: false
+      show_value: false
+      dbkey: COMSTDRXLEVEL{radio_id}
+      segments: 22

@@ -1,0 +1,40 @@
+instruments:
+  - type: horizontal_bar_gauge
+    ratio: 3
+    row: 1
+    column: 1
+    span:
+      rows: 9
+      columns: 28
+    options:
+      name: Yaw
+      bar_width_percent: 0.25
+      decimal_places: 0
+      show_units: false
+      show_value: false
+      dbkey: TRIMY
+  - type: button
+    row: 0
+    column: 0
+    span:
+      rows: 10
+      columns: 10
+    options:
+      config: buttons/trim-yaw-left-invisible.yaml
+  - type: button
+    row: 0
+    column: 10
+    span:
+      rows: 10
+      columns: 10
+    options:
+      config: buttons/trim-yaw-center-invisible.yaml
+  - type: button
+    row: 0
+    column: 20
+    span:
+      rows: 10
+      columns: 10
+    options:
+      config: buttons/trim-yaw-right-invisible.yaml
+

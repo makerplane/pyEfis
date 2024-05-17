@@ -1,0 +1,39 @@
+instruments:
+  - type: horizontal_bar_gauge
+    row: 1
+    column: 1
+    ratio: 3
+    span:
+      rows: 9
+      columns: 28
+    options:
+      name: Roll
+      decimal_places: 0
+      show_units: false
+      show_value: false
+      dbkey: TRIMR
+  - type: button
+    row: 0
+    column: 0
+    span:
+      rows: 10
+      columns: 10
+    options:
+      config: buttons/trim-roll-left-invisible.yaml
+  - type: button
+    row: 0
+    column: 10
+    span:
+      rows: 10
+      columns: 10
+    options:
+      config: buttons/trim-roll-center-invisible.yaml
+  - type: button
+    row: 0
+    column: 20
+    span:
+      rows: 10
+      columns: 10
+    options:
+      config: buttons/trim-roll-right-invisible.yaml
+

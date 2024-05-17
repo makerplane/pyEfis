@@ -18,28 +18,28 @@ EMS:
       options:
         dbkey: APMSG
         font_percent: 0.9
-    - type: include,includes/virtual_vfr.yaml
+    - type: include,includes/ahrs/virtual_vfr.yaml
       row: 0
       column: 0
       span:
         rows: 70
         columns: 125
-    - type: include,includes/basic_arcs.yaml
+    - type: include,includes/arcs/vertical/ds1_TACH1-OILP1-HTOT1-VOLT_ds2_TACH1-OILT1-OAT-CURRNT.yaml
       row: 0
       column: 155
-    - type: include,includes/power_temp_arcs.yaml
+    - type: include,includes/arcs/vertical/power_temp_VOLT-CURRNT-OAT-CAT.yaml
       row: 0
       column: 125
-    - type: include,includes/side-buttons.yaml
+    - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
       row: 0
       column: 186
-    - type: include,includes/fuel_gauges.yaml
+    - type: include,includes/bars/vertical/fuel_info_FUELP1-FUELF1-FUELQT-FUELQ1-FUELQ2-FUELQ3.yaml
       row: 70
       column: 155
-    - type: include,includes/cht_bars.yaml
+    - type: include,includes/bars/vertical/4_CHT.yaml
       row: 70
       column: 123
-    - type: include,includes/egt_bars.yaml
+    - type: include,includes/bars/vertical/4_EGT.yaml
       row: 70
       column: 91
     - type: ganged_button
