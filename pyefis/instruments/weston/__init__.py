@@ -24,11 +24,11 @@ class Weston(QGraphicsView):
         while loop_count < loop_limit:
             loop_count += 1
             time.sleep(0.07)
-            p = subprocess.run(['xwininfo', '-name', 'Weston Compositor - Xweston'], stdout=subprocess.PIPE)
+            p = subprocess.run(['xwininfo', '-tree', '-root'], stdout=subprocess.PIPE)
             if p.returncode > 0:
                 continue
             for line in p.stdout.decode().splitlines():
-                m = re.fullmatch(r'^xwininfo: Window id: (0x[0-9a-f]+) .*', line)
+                m = re.fullmatch(r'^.*(0x[0-9a-f]+) \"Weston Compositor - .*', line)
                 if m:
                     win = QWindow.fromWinId(int(m.group(1), 16))
                     win.setFlag(Qt.FramelessWindowHint, True)
