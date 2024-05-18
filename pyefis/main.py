@@ -109,10 +109,16 @@ def create_config_dir(basedir):
     copy_dir('config')
 
 
+def merge_dict(dest,override):
+    for k, v in override.items():
+        if (k in dest and isinstance(dest[k], dict) and isinstance(override[k], dict)):
+            merge_dict(dest[k], override[k])
+        else:
+            dest[k] = override[k]
 
 def main():
     global config_path
-
+    global preferences
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['test', 'normal'],
@@ -152,7 +158,16 @@ def main():
         config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
     config_path = os.path.dirname(config_file)
     config = cfg.from_yaml(config_file)
-
+    preference_file = f"{config_path}/{config.get('preferences','preferences.yaml')}"
+    with open(preference_file) as cf:
+       preferences = yaml.safe_load(cf)
+    preference_file = preference_file + ".custom"
+    # override preferecnes with customizations
+    if os.path.exists(preference_file):
+        with open(preference_file) as cf:
+            custom = yaml.safe_load(cf)
+        merge_dict(preferences,custom)
+    print(preferences)
     # If running under systemd
     if environ.get('INVOCATION_ID', False):
         # and autostart is not true, exit
@@ -184,7 +199,7 @@ def main():
         fms = importlib.import_module ("FixIntf")
         fms.start(config["FMS"]["aircraft_config"])
 
-    gui.initialize(config,config_path)
+    gui.initialize(config,config_path,preferences)
     if "keybindings" in config:
         hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
