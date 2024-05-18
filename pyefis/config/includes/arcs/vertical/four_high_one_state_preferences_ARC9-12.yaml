@@ -1,0 +1,20 @@
+instruments:
+  - type: ganged_arc_gauge
+    gang_type: vertical
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 30
+    groups:
+      - name: Power and Temp
+        instruments:
+          -
+            preferences: ARC9
+          -
+            preferences: ARC10
+          -
+            preferences: ARC11
+          -
+            preferences: ARC12
+

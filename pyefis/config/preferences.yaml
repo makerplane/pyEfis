@@ -1,8 +1,17 @@
 # Not implemented:
-# fonts, dseg ghost
+#  Cannot re-use an include for a different purpose with diffently numbered
+#  identifiers. Not liking the idea of requiring copying such things.
+#  Also not liking the idea of specifying the identifier range when included as
+#  that would also need copied
+#  Might be best to just accept this and give each include a unique name that
+#  includes something like ARC1-8 so one knows those are in it
+#
+# Not sure how ot deal with things like two vs 4 cylinders.
+#   Different template?
+#   Disable options, tho still not way to disable parts of a gang
+#
 # disable individual gauges in a gang
 # enable/disable states
-# 
 # completing adding options for all defined items
 # Cleanup files no longer needed since preferences takes care of their needs now
 
@@ -44,6 +53,29 @@ styles:
       font_ghost_mask: "~~~~"
       units_font_ghost_mask: "~~"
       name_font_ghost_mask: '~~~~~~~~~'
+
+  BAR:
+    basic:
+      decimal_places: 0
+    segmented:
+      segments: 28
+
+    dseg:
+      font_family: "DSEG14 Classic"
+      font_mask: "0000"
+      name_font_mask: '~~~~'
+      units_font_mask: '~~~~~~'
+      small_font_percent: 0.040 
+    ghost:
+      font_ghost_mask: "~~~~"
+      name_font_ghost_mask: '~~~~'
+      units_font_ghost_mask: '~~~~~~'
+
+  RADIO:
+    basic:
+    segmented:
+    dseg:
+    ghost:
 
 
 # Here you can enable or disble individual controls or gauges
@@ -136,4 +168,65 @@ gauges:
     styles:
       ghost:
         font_ghost_mask: "~~~"
+
+  ARC9:
+    name: Volts
+    dbkey: VOLT
+    decimal_places: 1
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
+
+  ARC10:
+    name: Amps
+    dbkey: CURRNT
+    decimal_places: 1
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
+
+  ARC11:
+    name: OAT
+    dbkey: OAT
+    temperature: true
+    show_units: true
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
+
+  ARC12:
+    name: CAT
+    temperature: true
+    dbkey: CAT
+    show_units: true
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
+
+
+  BAR1:
+    name: "Fuel"
+    dbkey: FUELP1
+
+  BAR2:
+    name: "Flow"
+    decimal_places: 1
+    dbkey: FUELF1
+
+  BAR3:
+    name: "Total"
+    dbkey: FUELQT
+
+  BAR4:
+    name: "Left"
+    dbkey: FUELQ1
+    decimal_places: 1
+  BAR5:
+    name: "Center"
+    decimal_places: 1
+    dbkey: FUELQ2
+  BAR6:
+    name: "Right"
+    decimal_places: 1
+    dbkey: FUELQ3
 
