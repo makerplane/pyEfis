@@ -112,7 +112,12 @@ class Screen(QWidget):
 
     def calc_includes(self,i):
         args = i['type'].split(',')
-        iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        if os.path.exists(os.path.join(self.parent.config_path,args[1])):
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        elif self.parent.preferences['includes'][args[1]]:
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
+        else:
+            raise Exception(f"Include file '{args[1]}' not found")
         insts = iconfig['instruments']
         inst_rows = 0
         inst_cols = 0
@@ -153,7 +158,12 @@ class Screen(QWidget):
                 span_rows = i['span'].get('rows',0)
                 span_cols = i['span'].get('columns',0)
             args = i['type'].split(',')
-            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            if os.path.exists(os.path.join(self.parent.config_path,args[1])):
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            elif self.parent.preferences['includes'][args[1]]:
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
+            else:
+                raise Exception(f"Include file '{args[1]}' not found")
             insts = iconfig['instruments']
 
         else:
