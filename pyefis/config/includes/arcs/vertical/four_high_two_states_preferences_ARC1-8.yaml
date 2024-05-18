@@ -1,0 +1,39 @@
+instruments:
+  - type: ganged_arc_gauge
+    gang_type: vertical
+    display_state: 1
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 30
+    groups:
+      - name: Engine
+        instruments:
+          -
+            preferences: ARC1
+          -
+            preferences: ARC2
+          -
+            preferences: ARC3
+          -
+            preferences: ARC4
+  - type: ganged_arc_gauge
+    gang_type: vertical
+    display_state: 2
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 30
+    groups:
+      - name: Engine
+        instruments:
+          -
+            preferences: ARC5
+          -
+            preferences: ARC6
+          -
+            preferences: ARC7
+          -
+            preferences: ARC8

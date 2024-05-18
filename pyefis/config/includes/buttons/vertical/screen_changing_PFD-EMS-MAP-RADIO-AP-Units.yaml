@@ -1,0 +1,40 @@
+instruments:
+  - type: ganged_button
+    gang_type: vertical
+    row: 0
+    column: 0
+    span:
+      rows: 70
+      columns: 14.5
+    groups:
+      - name: Side Buttons
+        gap: 6
+        instruments:
+          -
+            options:
+              config: buttons/screen-ems-pfd.yaml
+              encoder_order: 11
+          -
+            options:
+              config: buttons/screen-map-pfd.yaml
+              encoder_order: 12
+          -
+            options:
+              config: buttons/screen-radio-pfd.yaml
+              encoder_order: 13
+          -
+            options:
+              config: buttons/units.yaml
+              encoder_order: 14
+          -
+            options:
+              config: buttons/auto-pilot-adjust.yaml
+              encoder_order: 15
+          -
+            options:
+              config: buttons/auto-pilot-heading-hold.yaml
+              encoder_order: 16
+          -
+            options:
+              config: buttons/auto-pilot-flight-plan.yaml
+              encoder_order: 17

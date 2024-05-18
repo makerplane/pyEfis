@@ -112,7 +112,12 @@ class Screen(QWidget):
 
     def calc_includes(self,i):
         args = i['type'].split(',')
-        iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        if os.path.exists(os.path.join(self.parent.config_path,args[1])):
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        elif self.parent.preferences['includes'][args[1]]:
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
+        else:
+            raise Exception(f"Include file '{args[1]}' not found")
         insts = iconfig['instruments']
         inst_rows = 0
         inst_cols = 0
@@ -146,6 +151,11 @@ class Screen(QWidget):
         span_rows = 0
         span_cols = 0
         if 'include,' in i['type']:
+            if 'disabled' in i:
+                if isinstance(i['disabled'],bool) and i['disabled'] == True:
+                    return count
+                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
+                    return count
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
             inst_rows, inst_cols = self.calc_includes(i)
@@ -153,12 +163,22 @@ class Screen(QWidget):
                 span_rows = i['span'].get('rows',0)
                 span_cols = i['span'].get('columns',0)
             args = i['type'].split(',')
-            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            if os.path.exists(os.path.join(self.parent.config_path,args[1])):
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            elif self.parent.preferences['includes'][args[1]]:
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
+            else:
+                raise Exception(f"Include file '{args[1]}' not found")
             insts = iconfig['instruments']
 
         else:
             insts = [i]
         for inst in insts:
+            if 'disabled' in inst:
+                if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
+                    continue
+                elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
+                    continue
             if not parent_state:
                 # No parent state, set to False or this instrument specific state
                 state =  inst.get('display_state', False)
@@ -217,6 +237,12 @@ class Screen(QWidget):
             else:
                 # Check if this is an include, if it is recurse and resolve those instruments
                 if 'include,' in inst['type']:
+                    if 'disabled' in inst:
+                        if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
+                            return count
+                        elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
+                            return count
+
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
                     self.setup_instruments(count,inst,replace=this_replacements,state=state)
@@ -274,7 +300,10 @@ class Screen(QWidget):
         count = 0
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
-                continue
+                if isinstance(i['disabled'],bool) and i['disabled'] == True:
+                    continue
+                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
+                    continue
             count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
@@ -322,6 +351,29 @@ class Screen(QWidget):
 
         font_percent = None
         font_family = "DejaVu Sans Condensed"
+        if 'preferences' in i:
+            specific_pref = dict()
+            if i['preferences'] in self.parent.preferences['gauges']:
+                specific_pref = self.parent.preferences['gauges'][i['preferences']]
+            # Merge the main style(s)
+            for style in self.parent.preferences['style']:
+                #print(f"Style: {style}")
+                if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
+                    if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
+                        pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
+                        if pref is not None:
+                            #print( pref )
+                            i['options'] = i.get('options',dict())|pref
+            # Merge gauge specific settings
+            i['options'] = i.get('options',dict())|specific_pref
+
+            if 'styles' in specific_pref:
+                for style in self.parent.preferences['style']:
+                    pref = specific_pref['styles'].get(style,None)
+                    if pref is not None:
+                        i['options'] = i.get('options',dict())|pref
+
+
         if 'options' in i:
             if 'font_percent' in i['options']:
                 font_percent = i['options']['font_percent']

@@ -8,6 +8,7 @@ instruments:
     options: 
       font_percent: 0.025
   - type: horizontal_situation_indicator
+    disabled: HSI
     row: 0
     column: 0
     span:
@@ -34,12 +35,14 @@ instruments:
       #number_font_size: 40
       altitude: true
   - type: vsi_pfd
+    disabled: VSI_BALL
     row: 0
     column: 130
     span:
       rows: 50
       columns: 10
   - type: numeric_display
+    disabled: VSI_BALL
     row: 50
     column: 128.5
     span:
@@ -49,6 +52,30 @@ instruments:
       font_mask: "0000"
       decimal_places: 0
       dbkey: VS
+  - type: altimeter_tape
+    disabled: VSI_TAPE
+    row: 30
+    column: 127
+    span:
+      rows: 50
+      columns: 13
+    options:
+      dbkey: VS
+      font_mask: "00000"
+      total_decimals: 5
+      altitude: true
+      majorDiv: 100
+      minorDiv: 50
+  - type: static_text
+    disabled: VSI_TAPE
+    row: 49.4
+    column: 129.8
+    span:
+      rows: 2.2
+      columns: 3
+    options:
+      text: VSI
+      font_mask: VSI
   - type: airspeed_tape
     row: 5
     column: 0
@@ -58,6 +85,7 @@ instruments:
     options:
       font_percent: 0.25
   - type: heading_display
+    disabled: HEADING
     row: 0
     column: 72.5
     span:
@@ -69,6 +97,7 @@ instruments:
       #fontSize: 5 #47
       #font_percent: 0.65
   - type: static_text
+    disabled: AUTO_PILOT
     row: 0
     column: 0
     span:
@@ -79,6 +108,7 @@ instruments:
       alignment: AlignRight
       font_mask: "Auto_Pilot:"
   - type: value_text
+    disabled: UTC_TIME
     row: 0
     column: 97
     span:
@@ -89,6 +119,7 @@ instruments:
       font_mask: "HH:MM:SS ZZZ"
       #fontName: DSEG14 Modern Mini, Bold
   - type: value_text
+    disabled: LOCAL_TIME
     row: 5
     column: 97
     span:
@@ -98,6 +129,7 @@ instruments:
       dbkey: TIMEL
       font_mask: "HH:MM:SS ZZZ"
   - type: value_text
+    disabled: AUTO_PILOT
     row: 0
     column: 23
     span:
@@ -107,6 +139,7 @@ instruments:
       dbkey: APMSG
       font_mask: "12345678901234567890"
   - type: static_text
+    disabled: BARO_CONTROLS
     row: 90
     column: 118
     span:
@@ -117,6 +150,7 @@ instruments:
       font_mask: "Baro:"
       alignment: AlignRight
   - type: numeric_display
+    disabled: BARO_CONTROLS
     row: 90
     column: 129
     span:
@@ -128,6 +162,7 @@ instruments:
       decimal_places: 2
       pressure: true
   - type: button
+    disabled: BARO_CONTROLS
     row: 83
     column: 118
     span:
@@ -136,6 +171,7 @@ instruments:
     options:
       config: buttons/baro-down-invisible.yaml
   - type: button
+    disabled: BARO_CONTROLS
     row: 83
     column: 129
     span:
@@ -144,6 +180,7 @@ instruments:
     options:
       config: buttons/baro-up-invisible.yaml
   - type: static_text
+    disabled: PRESSURE_DISPLAY
     row: 95
     column: 118
     span:
@@ -154,6 +191,7 @@ instruments:
       font_mask: "DALT:"
       alignment: AlignRight
   - type: numeric_display
+    disabled: PRESSURE_DISPLAY
     row: 95
     column: 129
     span:
@@ -165,6 +203,7 @@ instruments:
       decimal_places: 0
       altitude: true
   - type: static_text
+    disabled: PRESSURE_DISPLAY
     row: 100
     column: 118
     span:
@@ -175,6 +214,7 @@ instruments:
       font_mask: "PALT:"
       alignment: AlignRight
   - type: numeric_display
+    disabled: PRESSURE_DISPLAY
     row: 100
     column: 129
     span:
@@ -186,6 +226,7 @@ instruments:
       decimal_places: 0
       altitude: true
   - type: static_text
+    disabled: PRESSURE_DISPLAY
     row: 105
     column: 118
     span:
@@ -196,6 +237,7 @@ instruments:
       font_mask: "OAT:"
       alignment: AlignRight
   - type: numeric_display
+    disabled: PRESSURE_DISPLAY
     row: 105
     column: 129
     span:
@@ -209,7 +251,15 @@ instruments:
       show_units: true
       decimal_places: 0
       #show_value: false
+  - type: include,includes/trim/pitch-yaw-roll-combined.yaml
+    disabled: TRIM_CONTROLS
+    row: 77
+    column: 13
+    span:
+      rows: 30
+      columns: 43
   - type: button
+    disabled: LEADER_INDICATOR
     row: 0
     column: 150
     span:

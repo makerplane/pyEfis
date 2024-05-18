@@ -10,32 +10,13 @@ instruments:
     groups:
       - name: EGT
         gap: 0
-        common_options:
-          egt_mode_switching: true
-          normalize_range: 400
-          temperature: true
-          highlight_key: EGTMAX1
-          decimal_places: 0
-          show_units: true
-          small_font_percent: 0.060
-          big_font_percent: 0.085
-          bar_width_percent: 0.5
-          line_width_percent: 0.7
-          text_gap: 8
         instruments:
-          -
-            options:
-              name: "EGT 1"
-              dbkey: EGT11
-          -
-            options:
-              name: "EGT 2"
-              dbkey: EGT12
-          -
-            options:
-              name: "EGT 3"
-              dbkey: EGT13
-          -
-            options:
-              name: "EGT 4"
-              dbkey: EGT14
+            -
+              preferences: BAR11
+            -
+              preferences: BAR12
+            -
+              preferences: BAR13
+            -
+              preferences: BAR14
+

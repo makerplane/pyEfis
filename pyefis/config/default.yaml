@@ -96,6 +96,10 @@ outputs:
   APADJ: onchange
   BTNFP: onchange
 
+# No need to change this.
+# To customize
+preferences: preferences.yaml
+
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."
 # followed by the name.  The only required configuration is

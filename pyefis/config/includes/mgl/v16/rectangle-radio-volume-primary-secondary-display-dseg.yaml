@@ -11,6 +11,7 @@ instruments:
     span:
       rows: 5
       columns: 20
+    preferences: TEXT3
     options:
       text: "Active:"
       font_mask: "XXXXXXX:"
@@ -21,6 +22,7 @@ instruments:
     span:
       rows: 5
       columns: 20
+    preferences: TEXT4
     options:
       text: "Standby:"
       font_mask: "XXXXXXX:"
