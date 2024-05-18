@@ -3,7 +3,14 @@
 # Any section defined here will override what is in
 # the preferences.yaml
 #style: [ ]
+style:
+ - basic
+ - dseg
 
-gauges:
-  ARC1:
-    name: CHANGED
+enabled:
+  VSI_BALL: false
+  VSI_TAPE: true
+
+#gauges:
+#  ARC1:
+#    name: CHANGED

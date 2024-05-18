@@ -367,7 +367,6 @@ class Screen(QWidget):
                 for style in self.parent.preferences['style']:
                     pref = specific_pref['styles'].get(style,None)
                     if pref is not None:
-                        print(f"Specific pref: {pref}" )
                         i['options'] = i.get('options',dict())|pref
 
 

@@ -31,7 +31,7 @@ style:
   #  ghost # really only useful with dseg 
   #  segmented: changes arc/bar gauges to look like individual LEDs
   - basic
-  - segmented
+#  - segmented
 #  - dseg
 #  - ghost
 # This section defines options required to change to the selected style
@@ -74,12 +74,6 @@ styles:
       font_ghost_mask: "~~~~"
       name_font_ghost_mask: '~~~~'
       units_font_ghost_mask: '~~~~~~'
-
-  RADIO:
-    basic:
-    segmented:
-    dseg:
-    ghost:
 
 
 # Here you can enable or disble individual controls or gauges
@@ -250,6 +244,15 @@ gauges:
     name: "Center"
     decimal_places: 1
     dbkey: FUELQ2
+    dseg:
+      font_mask: "0000"
+      font_family: "DSEG14 Classic"
+      units_font_mask: '~~'
+      name_font_mask: '~~~~~'
+    ghost:
+      font_ghost_mask: "~~~~~"
+      units_font_ghost_mask: "~~"
+      name_font_ghost_mask: '~~~~~'
   BAR6:
     name: "Right"
     decimal_places: 1
@@ -451,7 +454,7 @@ gauges:
     dbkey: MAP1
 
   BAR23:
-    namie: IT
+    name: IT
     decimal_places: 0
     dbkey: MAP1
 
