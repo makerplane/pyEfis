@@ -5,7 +5,9 @@
 #style: [ ]
 style:
  - basic
- - dseg
+# - dseg
+# - ghost
+ - segmented
 
 enabled:
   VSI_BALL: false

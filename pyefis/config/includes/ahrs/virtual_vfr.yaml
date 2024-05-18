@@ -8,6 +8,7 @@ instruments:
     options: 
       font_percent: 0.025
   - type: horizontal_situation_indicator
+    disabled: HSI
     row: 0
     column: 0
     span:
@@ -84,6 +85,7 @@ instruments:
     options:
       font_percent: 0.25
   - type: heading_display
+    disabled: HEADING
     row: 0
     column: 72.5
     span:
@@ -95,6 +97,7 @@ instruments:
       #fontSize: 5 #47
       #font_percent: 0.65
   - type: static_text
+    disabled: AUTO_PILOT
     row: 0
     column: 0
     span:
@@ -105,6 +108,7 @@ instruments:
       alignment: AlignRight
       font_mask: "Auto_Pilot:"
   - type: value_text
+    disabled: UTC_TIME
     row: 0
     column: 97
     span:
@@ -115,6 +119,7 @@ instruments:
       font_mask: "HH:MM:SS ZZZ"
       #fontName: DSEG14 Modern Mini, Bold
   - type: value_text
+    disabled: LOCAL_TIME
     row: 5
     column: 97
     span:
@@ -124,6 +129,7 @@ instruments:
       dbkey: TIMEL
       font_mask: "HH:MM:SS ZZZ"
   - type: value_text
+    disabled: AUTO_PILOT
     row: 0
     column: 23
     span:
@@ -253,6 +259,7 @@ instruments:
       rows: 30
       columns: 43
   - type: button
+    disabled: LEADER_INDICATOR
     row: 0
     column: 150
     span:

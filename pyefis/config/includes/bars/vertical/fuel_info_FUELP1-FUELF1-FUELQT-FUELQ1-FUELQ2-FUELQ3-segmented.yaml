@@ -17,35 +17,16 @@ instruments:
           bar_width_percent: 0.5
           line_width_percent: 0.7
           text_gap: 8
-          segments: 28
         instruments:
           -
-            options:
-              name: "Fuel"
-              decimal_places: 0
-              dbkey: FUELP1
+            preferences: BAR1
           -   
-            options:
-              name: "Flow"
-              decimal_places: 1
-              dbkey: FUELF1
+            preferences: BAR2
           - 
-            options:
-              name: "Total"
-              decimal_places: 0
-              dbkey: FUELQT
+            preferences: BAR3
           -
-            options:
-              name: "Left"
-              decimal_places: 1
-              dbkey: FUELQ1
+            preferences: BAR4
           -
-            options:
-              name: "Center"
-              decimal_places: 1
-              dbkey: FUELQ2
+            preferences: BAR5
           -
-            options:
-              name: "Right"
-              decimal_places: 1
-              dbkey: FUELQ3
+            preferences: BAR6

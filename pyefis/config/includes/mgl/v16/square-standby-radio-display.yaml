@@ -6,6 +6,7 @@ instruments:
     span:
       rows: 8
       columns: 30
+    preferences: TEXT5
     options:
       font_mask: "100.000"
       decimal_places: 3
@@ -17,6 +18,7 @@ instruments:
     span:
       rows: 5
       columns: 35
+    preferences: TEXT6
     options:
       font_mask:       "XXXXXXXXXXXXX"
       dbkey: COMSTDNAME{radio_id}
@@ -35,6 +37,7 @@ instruments:
     span:
       rows: 8
       columns: 24
+    preferences: BAR37
     options:
       name: RX
       bar_divisor: 2.5
@@ -42,4 +45,3 @@ instruments:
       show_units: false
       show_value: false
       dbkey: COMSTDRXLEVEL{radio_id}
-      segments: 22

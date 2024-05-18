@@ -75,6 +75,13 @@ styles:
       name_font_ghost_mask: '~~~~'
       units_font_ghost_mask: '~~~~~~'
 
+  TEXT:
+    dseg:
+      font_family: "DSEG14 Classic"
+      name_font_mask: '~~~~~~~'
+    ghost:
+      font_ghost_mask: "~~~~~~"
+
 
 # Here you can enable or disble individual controls or gauges
 # 
@@ -87,7 +94,12 @@ enabled:
   BARO_CONTROLS: true
   VSI_BALL: false
   VSI_TAPE: true
-
+  AUTO_PILOT: true
+  LOCAL_TIME: true
+  UTC_TIME: true
+  LEADER_INDICATOR: true
+  HSI: true
+  HEADING: true
 # Here you can define what include files are used to render some
 # portion of the screen so you can customize as needed easily
 includes:
@@ -244,15 +256,15 @@ gauges:
     name: "Center"
     decimal_places: 1
     dbkey: FUELQ2
-    dseg:
-      font_mask: "0000"
-      font_family: "DSEG14 Classic"
-      units_font_mask: '~~'
-      name_font_mask: '~~~~~'
-    ghost:
-      font_ghost_mask: "~~~~~"
-      units_font_ghost_mask: "~~"
-      name_font_ghost_mask: '~~~~~'
+    styles: 
+      dseg:
+        font_mask: "0000"
+        units_font_mask: '~~'
+        name_font_mask: '~~~~~'
+      ghost:
+        font_ghost_mask: "~~~~~"
+        units_font_ghost_mask: "~~"
+        name_font_ghost_mask: '~~~~~'
   BAR6:
     name: "Right"
     decimal_places: 1
@@ -490,3 +502,80 @@ gauges:
     dbkey: THR1
     show_units: True
 
+  BAR30:
+    # Radio RX Vol
+    styles:
+      segmented:
+        segments: 22
+
+  BAR31:
+    # Radio Int Vol
+    styles:
+      segmented:
+        segments: 22
+
+  BAR32:
+    # Radio Aux Vol
+    styles:
+      segmented:
+        segments: 22
+
+  BAR33:
+    # Radio active squelch
+    styles:
+      segmented:
+        segments: 22
+
+  BAR34:
+    #Radio Active RX
+    styles:
+      segmented:
+        segments: 22
+
+  BAR35:
+    # Radio Active TX
+    styles:
+      segmented:
+        segments: 22
+
+  BAR36:
+    #Radio Active SWR
+    styles:
+      segmented:
+        segments: 22
+
+  BAR37:
+    #Radio Standby rx
+    styles:
+      segmented:
+        segments: 22
+
+#  TEXT1:
+    #Radio Active Freq
+
+  TEXT2:
+    #RAdio act freq name
+    styles:
+      ghost:
+        font_ghost_mask: "~~~~~~~~~~~~~"
+
+  TEXT3:
+    #RAdio Active LAbel
+    styles:
+      ghost:
+        font_ghost_mask: "~~~~~~~"
+
+  TEXT4:
+    #RAdio Standby LAbel
+    styles:
+      ghost:
+        font_ghost_mask: "~~~~~~~~"
+
+#  TEXT5:
+    #Radio Standby Freq
+
+  TEXT6:
+    #RAdio standby freq name
+    styles:
+      ghost:
+        font_ghost_mask: "~~~~~~~~~~~~~" 
