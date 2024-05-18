@@ -167,7 +167,6 @@ def main():
         with open(preference_file) as cf:
             custom = yaml.safe_load(cf)
         merge_dict(preferences,custom)
-    print(preferences)
     # If running under systemd
     if environ.get('INVOCATION_ID', False):
         # and autostart is not true, exit
