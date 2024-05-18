@@ -352,14 +352,18 @@ class Screen(QWidget):
         font_percent = None
         font_family = "DejaVu Sans Condensed"
         if 'preferences' in i:
-            specific_pref = self.parent.preferences['gauges'][i['preferences']]
+            specific_pref = dict()
+            if i['preferences'] in self.parent.preferences['gauges']:
+                specific_pref = self.parent.preferences['gauges'][i['preferences']]
             # Merge the main style(s)
             for style in self.parent.preferences['style']:
                 #print(f"Style: {style}")
-                pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
-                if pref is not None:
-                    #print( pref )
-                    i['options'] = i.get('options',dict())|pref
+                if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
+                    if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
+                        pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
+                        if pref is not None:
+                            #print( pref )
+                            i['options'] = i.get('options',dict())|pref
             # Merge gauge specific settings
             i['options'] = i.get('options',dict())|specific_pref
 
