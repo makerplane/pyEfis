@@ -2,8 +2,7 @@
 # format is the same as preferences.yaml
 # Any section defined here will override what is in
 # the preferences.yaml
-global:
-  segmented: true
+#style: [ ]
 
 gauges:
   ARC1:

@@ -352,11 +352,17 @@ class Screen(QWidget):
         font_percent = None
         font_family = "DejaVu Sans Condensed"
         if 'preferences' in i:
-            # replace options with preferences
+            # Merge the main style(s)
+            for style in self.parent.preferences['style']:
+                print(f"Style: {style}")
+                pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
+                if pref is not None:
+                    print( pref )
+                    i['options'] = i.get('options',dict())|pref
+
+            # Merge gauge specific settings
             i['options'] = i.get('options',dict())|self.parent.preferences['gauges'][i['preferences']]
-            if 'arc_gauge' in i['type'] and self.parent.preferences['global']['segmented']:
-                # Enable segmented display
-                i['options']['segments'] = self.parent.preferences['global']['ARC']['segments']
+
         if 'options' in i:
             if 'font_percent' in i['options']:
                 font_percent = i['options']['font_percent']

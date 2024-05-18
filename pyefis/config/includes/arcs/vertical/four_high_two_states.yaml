@@ -9,9 +9,6 @@ instruments:
       columns: 30
     groups:
       - name: Engine
-        common_options:
-          name_location: right
-          decimal_places: 0
         instruments:
           -
             preferences: ARC1
@@ -31,10 +28,6 @@ instruments:
       columns: 30
     groups:
       - name: Engine
-        common_options:
-          name_location: right
-          decimal_places: 0
-          segments: 28
         instruments:
           -
             preferences: ARC5
