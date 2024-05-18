@@ -151,6 +151,11 @@ class Screen(QWidget):
         span_rows = 0
         span_cols = 0
         if 'include,' in i['type']:
+            if 'disabled' in i:
+                if isinstance(i['disabled'],bool) and i['disabled'] == True:
+                    return count
+                elif not self.parent.preferences['enabled'][i['disabled']]:
+                    return count
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
             inst_rows, inst_cols = self.calc_includes(i)
@@ -169,6 +174,11 @@ class Screen(QWidget):
         else:
             insts = [i]
         for inst in insts:
+            if 'disabled' in inst:
+                if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
+                    continue
+                elif not self.parent.preferences['enabled'][inst['disabled']]:
+                    continue
             if not parent_state:
                 # No parent state, set to False or this instrument specific state
                 state =  inst.get('display_state', False)
@@ -227,6 +237,12 @@ class Screen(QWidget):
             else:
                 # Check if this is an include, if it is recurse and resolve those instruments
                 if 'include,' in inst['type']:
+                    if 'disabled' in inst:
+                        if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
+                            return count
+                        elif not self.parent.preferences['enabled'][inst['disabled']]:
+                            return count
+
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
                     self.setup_instruments(count,inst,replace=this_replacements,state=state)
@@ -284,7 +300,10 @@ class Screen(QWidget):
         count = 0
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
-                continue
+                if isinstance(i['disabled'],bool) and i['disabled'] == True:
+                    continue
+                elif not self.parent.preferences['enabled'][i['disabled']]:
+                    continue
             count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
