@@ -23,8 +23,8 @@ style:
   #  segmented: changes arc/bar gauges to look like individual LEDs
   - basic
   - segmented
-#  - dseg
-#  - ghost
+  - dseg
+  - ghost
 # This section defines options required to change to the selected style
 # The sort of settings you would find in common options of ganged gauges
 # The settings can be combined
@@ -79,18 +79,28 @@ gauges:
     decimal_places: 0
     temperature: false
     show_units: false
+    styles:
+      ghost:
+        name: Oil!Press
+        font_ghost_mask: "~~~"
   ARC3:
     name: Coolant
     dbkey: H2OT1
     decimal_places: 0
     temperature: true
     show_units: true
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
   ARC4:
     name: Volts
     dbkey: VOLT
     decimal_places: 1
     temperature: false
     show_units: false
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
   ARC5:
     name: RPM
     dbkey: TACH1
@@ -103,16 +113,27 @@ gauges:
     decimal_places: 0
     temperature: true
     show_units: true
+    styles:
+      ghost:
+        name: Oil!Temp
+        font_ghost_mask: "~~~"
+
   ARC7:
     name: OAT
     dbkey: OAT
     decimal_places: 0
     temperature: true
     show_units: true
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
   ARC8:
     name: Amps
     dbkey: CURRNT
     decimal_places: 1
     temperature: false
     show_units: false
+    styles:
+      ghost:
+        font_ghost_mask: "~~~"
 
