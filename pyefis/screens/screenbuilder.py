@@ -154,7 +154,7 @@ class Screen(QWidget):
             if 'disabled' in i:
                 if isinstance(i['disabled'],bool) and i['disabled'] == True:
                     return count
-                elif not self.parent.preferences['enabled'][i['disabled']]:
+                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
                     return count
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
@@ -177,7 +177,7 @@ class Screen(QWidget):
             if 'disabled' in inst:
                 if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
                     continue
-                elif not self.parent.preferences['enabled'][inst['disabled']]:
+                elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
                     continue
             if not parent_state:
                 # No parent state, set to False or this instrument specific state
@@ -240,7 +240,7 @@ class Screen(QWidget):
                     if 'disabled' in inst:
                         if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
                             return count
-                        elif not self.parent.preferences['enabled'][inst['disabled']]:
+                        elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
                             return count
 
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
@@ -302,7 +302,7 @@ class Screen(QWidget):
             if 'disabled' in i and i['disabled'] == True:
                 if isinstance(i['disabled'],bool) and i['disabled'] == True:
                     continue
-                elif not self.parent.preferences['enabled'][i['disabled']]:
+                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
                     continue
             count = self.load_instrument(i,count)
         #Place instruments:
