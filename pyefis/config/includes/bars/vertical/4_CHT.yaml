@@ -10,31 +10,13 @@ instruments:
     groups:
       - name: CHT
         gap: 0
-        common_options:
-          temperature: true
-          highlight_key: CHTMAX1
-          decimal_places: 0
-          show_units: true
-          small_font_percent: 0.060
-          big_font_percent: 0.085
-          bar_width_percent: 0.5
-          line_width_percent: 0.7
-          text_gap: 8
         instruments:
-              -
-                options:
-                  name: "CHT 1"
-                  dbkey: CHT11
-              -
-                options:
-                  name: "CHT 2"
-                  dbkey: CHT12
-              -
-                options:
-                  name: "CHT 3"
-                  dbkey: CHT13
-              -
-                options:
-                  name: "CHT 4"
-                  dbkey: CHT14
+            -
+              preferences: BAR15
+            -
+              preferences: BAR16
+            -
+              preferences: BAR17
+            -
+              preferences: BAR18
 

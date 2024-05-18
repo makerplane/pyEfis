@@ -86,73 +86,28 @@ EMS:
       groups:
         - name: RPM
           gap: 0
-          common_options:
-            show_units: false
-            small_font_percent: 0.060
-            big_font_percent: 0.085
-            bar_width_percent: 0.5
-            line_width_percent: 0.7
-            text_gap: 8
           instruments:
             -
-              options:
-                name: RPM
-                decimal_places: 0
-                dbkey: TACH1
+              preferences: BAR28
             -
-              options:
-                name: TPS
-                decimal_places: 2
-                dbkey: THR1
-                show_units: True
+              preferences: BAR29
         - name: Engine
           gap: 0
-          common_options:
-            small_font_percent: 0.060
-            big_font_percent: 0.085
-            bar_width_percent: 0.5
-            line_width_percent: 0.7
-            text_gap: 8
-            show_units: False
           instruments:
             -
-              options:
-                name: MAP
-                decimal_places: 0
-                dbkey: MAP1
+              preferences: BAR22
             -
-              options:
-                name: IT
-                decimal_places: 0
-                dbkey: MAP1
+              preferences: BAR23
             -
-              options:
-                name: AFR
-                decimal_places: 0
-                dbkey: MAP1
+              preferences: BAR24
             -
-              options:
-                name: AFRT
-                decimal_places: 0
-                dbkey: MAP1
+              preferences: BAR25
             -
-              options:
-                name: EGO
-                decimal_places: 0
-                dbkey: MAP1
+              preferences: BAR26
+
         - name: Temps
           gap: 0
-          common_options:
-            small_font_percent: 0.060
-            big_font_percent: 0.085
-            bar_width_percent: 0.5
-            line_width_percent: 0.7
-            text_gap: 8
           instruments:
             -
-              options:
-                name: IAT
-                decimal_places: 0
-                dbkey: CAT
-                temperature: true
+              preferences: BAR27
 

@@ -31,7 +31,7 @@ style:
   #  ghost # really only useful with dseg 
   #  segmented: changes arc/bar gauges to look like individual LEDs
   - basic
-#  - segmented
+  - segmented
 #  - dseg
 #  - ghost
 # This section defines options required to change to the selected style
@@ -436,4 +436,54 @@ gauges:
 #    big_font_percent: 0.085
     small_font_percent: 0.060
 
+
+#             small_font_percent: 0.060
+#            big_font_percent: 0.085
+#            bar_width_percent: 0.5
+#            line_width_percent: 0.7
+#            text_gap: 8
+#            show_units: False
+
+
+  BAR22:
+    name: MAP
+    decimal_places: 0
+    dbkey: MAP1
+
+  BAR23:
+    namie: IT
+    decimal_places: 0
+    dbkey: MAP1
+
+  BAR24:
+    name: AFR
+    decimal_places: 0
+    dbkey: MAP1
+
+  BAR25:
+    name: EGO
+    decimal_places: 0
+    dbkey: MAP1
+
+  BAR26:
+    name: MAP
+    decimal_places: 0
+    dbkey: MAP1
+
+  BAR27:
+    name: IAT
+    decimal_places: 0
+    dbkey: CAT
+    temperature: true
+
+  BAR28:
+    name: RPM
+    decimal_places: 0
+    dbkey: TACH1
+
+  BAR29:
+    name: TPS
+    decimal_places: 2
+    dbkey: THR1
+    show_units: True
 
