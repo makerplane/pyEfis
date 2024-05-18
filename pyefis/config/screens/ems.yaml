@@ -24,7 +24,7 @@ EMS:
       span:
         rows: 70
         columns: 125
-    - type: include,includes/arcs/vertical/four_high_two_states.yaml
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
       row: 0
       column: 155
     - type: include,includes/arcs/vertical/power_temp_VOLT-CURRNT-OAT-CAT.yaml
@@ -33,7 +33,7 @@ EMS:
     - type: include,BUTTON_GROUP1
       row: 0
       column: 186
-    - type: include,includes/bars/vertical/fuel_info_FUELP1-FUELF1-FUELQT-FUELQ1-FUELQ2-FUELQ3.yaml
+    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
       row: 70
       column: 155
     - type: include,includes/bars/vertical/4_CHT.yaml
