@@ -24,7 +24,7 @@ EMS:
       span:
         rows: 70
         columns: 125
-    - type: include,includes/arcs/vertical/ds1_TACH1-OILP1-HTOT1-VOLT_ds2_TACH1-OILT1-OAT-CURRNT.yaml
+    - type: include,includes/arcs/vertical/four_high_two_states.yaml
       row: 0
       column: 155
     - type: include,includes/arcs/vertical/power_temp_VOLT-CURRNT-OAT-CAT.yaml

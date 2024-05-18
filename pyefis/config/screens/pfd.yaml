@@ -17,7 +17,7 @@ PFD:
     - type: include,includes/ahrs/virtual_vfr.yaml
       row: 0
       column: 0
-    - type: include,includes/arcs/vertical/ds1_TACH1-OILP1-HTOT1-VOLT_ds2_TACH1-OILT1-OAT-CURRNT-segmented.yaml
+    - type: include,includes/arcs/vertical/four_high_two_states.yaml
       row: 0
       column: 155
     - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml

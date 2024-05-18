@@ -1,0 +1,61 @@
+global:
+  segmented: true # true / false
+  font: normal # normal, dseg, dseg_ghost
+
+  ARC:
+    segments: 28
+  BAR:
+    segments: 28
+# when segmented true add segments automatically
+# When dseg, replace spaces in names with !
+
+gauges:
+  ARC1:
+    name: RPM
+    dbkey: TACH1
+    decimal_places: 0
+    temperature: false
+    show_units: false
+  ARC2:
+    name: Oil Press
+    dbkey: OILP1
+    decimal_places: 0
+    temperature: false
+    show_units: false
+  ARC3:
+    name: Coolant
+    dbkey: H2OT1
+    decimal_places: 0
+    temperature: true
+    show_units: true
+  ARC4:
+    name: Volts
+    dbkey: VOLT
+    decimal_places: 1
+    temperature: false
+    show_units: false
+  ARC5:
+    name: RPM
+    dbkey: TACH1
+    decimal_places: 0
+    temperature: false
+    show_units: false
+  ARC6:
+    name: Oil Temp
+    dbkey: OILT1
+    decimal_places: 0
+    temperature: true
+    show_units: true
+  ARC7:
+    name: OAT
+    dbkey: OAT
+    decimal_places: 0
+    temperature: true
+    show_units: true
+  ARC8:
+    name: Amps
+    dbkey: CURRNT
+    decimal_places: 1
+    temperature: false
+    show_units: false
+
