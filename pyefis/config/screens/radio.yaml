@@ -34,7 +34,7 @@ RADIO:
     - type: include,includes/arcs/vertical/power_temp_VOLT-CURRNT-OAT-CAT.yaml
       row: 0
       column: 125
-    - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+    - type: include,BUTTON_GROUP1
       row: 0
       column: 186
     - type: include,includes/bars/vertical/fuel_info_FUELP1-FUELF1-FUELQT-FUELQ1-FUELQ2-FUELQ3.yaml

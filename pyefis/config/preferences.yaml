@@ -9,6 +9,9 @@ global:
 # when segmented true add segments automatically
 # When dseg, replace spaces in names with !
 
+includes:
+  BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+
 gauges:
   ARC1:
     name: RPM

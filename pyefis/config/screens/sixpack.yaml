@@ -8,7 +8,7 @@ SIXPACK:
     columns: 200
     draw_grid: false
   instruments:
-    - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+    - type: include,BUTTON_GROUP1
       row: 0
       column: 186
     -

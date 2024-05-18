@@ -20,7 +20,7 @@ PFD:
     - type: include,includes/arcs/vertical/four_high_two_states.yaml
       row: 0
       column: 155
-    - type: include,includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+    - type: include,BUTTON_GROUP1
       row: 0
       column: 186
     - type: include,includes/bars/vertical/fuel_info_FUELP1-FUELF1-FUELQT-FUELQ1-FUELQ2-FUELQ3-segmented.yaml
