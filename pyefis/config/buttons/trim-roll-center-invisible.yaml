@@ -1,6 +1,6 @@
 type: repeat
 text: ""
-dbkey: BTNTRIMRC
+dbkey: TSBTN{id}7
 transparent: true
 repeat_interval: 5
 repeat_delay: 50
