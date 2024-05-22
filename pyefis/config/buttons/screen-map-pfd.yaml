@@ -1,6 +1,6 @@
 type: simple
 text: ""
-dbkey: BTN5
+dbkey: TSBTN{id}13
 conditions:
   - when: "SCREEN eq 'MAP'"
     actions:

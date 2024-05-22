@@ -1,6 +1,6 @@
 type: simple
 text: ""
-dbkey: TSBTN{id}12
+dbkey: TSBTN{id}20
 hover_show: True
 condition_keys:
   - CHT11
