@@ -85,7 +85,7 @@ def create_config_dir(basedir):
         print(f"Replacing file: {dest}")
         shutil.copy(source,dest + extension)
         # Set timestamp
-        os.utime(dest,(350039106.789,350039106.789))
+        os.utime(dest + extension,(350039106.789,350039106.789))
 
     def copy_dir(module,path=None):
         if not path: path = module
