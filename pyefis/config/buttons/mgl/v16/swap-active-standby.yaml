@@ -1,7 +1,6 @@
 type: simple
 text: "Swap"
 dbkey: TSBTN{id}17
-conditions:
-  - when: "CLICKED eq true"
-    actions:
-      - change value: "BARO, -0.01"
+# Since this plugin is not complete
+# we currently do not know what to set here
+

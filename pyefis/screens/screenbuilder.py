@@ -229,10 +229,16 @@ class Screen(QWidget):
                         gi['type'] = inst['type'].replace('ganged_','')
                         gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
                         self.setup_instruments(count,gi,ganged=True,replace=this_replacements,state=state)
-                        if state:
-                            self.display_state_inst[state].append(count)
-                            if state > 1:
-                                self.instruments[count].setVisible(False)
+                        gi_disabled = gi['options'].get('disabled', False)
+                        if isinstance(gi_disabled,bool) and gi_disabled == True:
+                            self.instruments[count].setVisible(False)
+                        elif isinstance(gi_disabled,str) and not self.parent.preferences['enabled'][gi_disabled]:
+                            self.instruments[count].setVisible(False)
+                        else:
+                            if state:
+                                self.display_state_inst[state].append(count)
+                                if state > 1:
+                                    self.instruments[count].setVisible(False)
                         count += 1     
             else:
                 # Check if this is an include, if it is recurse and resolve those instruments
@@ -246,10 +252,16 @@ class Screen(QWidget):
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
                     self.setup_instruments(count,inst,replace=this_replacements,state=state)
-                    if state:
-                        self.display_state_inst[state].append(count)
-                        if state > 1:
-                           self.instruments[count].setVisible(False)
+                    inst_disabled = inst['options'].get('disabled', False)
+                    if isinstance(inst_disabled,bool) and inst_disabled == True:
+                        self.instruments[count].setVisible(False)
+                    elif isinstance(inst_disabled,str) and not self.parent.preferences['enabled'][inst_disabled]:
+                        self.instruments[count].setVisible(False)
+                    else:
+                        if state:
+                            self.display_state_inst[state].append(count)
+                            if state > 1:
+                               self.instruments[count].setVisible(False)
             count += 1
         return count
 

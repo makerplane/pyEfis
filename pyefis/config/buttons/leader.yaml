@@ -1,6 +1,6 @@
 type: simple
 text: "L"
-dbkey: TSBTN{id}15
+dbkey: TSBTN{id}16
 condition_keys:
   - LEADER
 conditions:

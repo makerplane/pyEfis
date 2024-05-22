@@ -1,21 +1,21 @@
 type: simple
 text: ""
-dbkey: BTN5
+dbkey: TSBTN{id}13
 conditions:
-  - when: "SCREEN eq 'MAP'"
+  - when: "SCREEN eq 'ANDROID'"
     actions:
       - set text: PFD
       - set bg color: lightgray
     continue: true
-  - when: "SCREEN eq 'PFD' or SCREEN eq 'EMS'"
+  - when: "SCREEN ne 'ANDROID'"
     actions:
       - set text: MAP
       - set bg color: lightgray
     continue: true
-  - when: "CLICKED eq true and [ SCREEN eq 'PFD' or SCREEN eq 'EMS' ]" 
+  - when: "CLICKED eq true and SCREEN ne 'ANDROID'" 
     actions:
-      - show screen: MAP
-  - when: "CLICKED eq true and SCREEN eq 'MAP'"
+      - show screen: ANDROID
+  - when: "CLICKED eq true and SCREEN eq 'ANDROID'"
     actions:
       - show screen: PFD
 

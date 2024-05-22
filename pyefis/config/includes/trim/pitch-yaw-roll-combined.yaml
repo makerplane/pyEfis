@@ -10,7 +10,7 @@ instruments:
     disabled: PITCH_TRIM
     row: 0
     column: 0
-  - type: include,includes/trim/roll-slider-button-contro.yaml
+  - type: include,includes/trim/roll-slider-button-control.yaml
     disabled: ROLL_TRIM
     row: 12
     column: 12
