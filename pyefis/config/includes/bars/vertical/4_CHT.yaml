@@ -13,10 +13,18 @@ instruments:
         instruments:
             -
               preferences: BAR15
+              options:
+                disabled: CYLINDER_1
             -
               preferences: BAR16
+              options:
+                disabled: CYLINDER_2
             -
               preferences: BAR17
+              options:
+                disabled: CYLINDER_3
             -
               preferences: BAR18
+              options:
+                disabled: CYLINDER_4
 
