@@ -12,10 +12,13 @@ conditions:
       - set bg color: darkgray
       - button: unchecked
       - set value: APADJ, false
-  - when: "APSTAT eq 'ARMED' and APMODE ne 'TRIM' and DBKEY eq false"
+  - when: "APSTAT eq 'ARMED' and APMODE ne 'TRIM' and DBKEY eq false and APADJ ne true"
     actions:
       - button: enable
+      - button: unchecked
       - set bg color: lightgray
+  - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'TRIM'"
+    actions:
       - set value: APADJ, false
     continue: true
   - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'TRIM'"
@@ -23,5 +26,15 @@ conditions:
       - set bg color: green
       - button: checked
       - set value: APADJ, true
+  - when: "APSTAT eq 'ARMED' and APMODE ne 'TRIM' and APADJ ne true"
+    actions:
+      - button: enable
+      - button: unchecked
+      - set bg color: lightgray
+  - when: "APSTAT eq 'ARMED' and APMODE ne 'TRIM' and APADJ eq true"
+    actions:
+      - set bg color: green
+      - button: checked
+ 
 
 
