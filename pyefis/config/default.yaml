@@ -39,7 +39,7 @@ main:
 
   # nodeID, currently only used in touchscreen buttons
   # the value will replace {id} in the button's dbkey
-  include: nodeid.yaml
+  nodeID: 1
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more
