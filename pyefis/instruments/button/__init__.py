@@ -131,6 +131,7 @@ class Button(QWidget):
         time.sleep(0.01)
 
     def dataChanged(self,key=None,signal=None):
+        logger.debug(f"dataChanged key={key} signal={signal}")
         if signal == 'value':
             self._db_data[key] = self._db[key].value
         elif signal == 'old':
@@ -235,6 +236,7 @@ class Button(QWidget):
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.screenName
         self._db_data['CLICKED'] = clicked
+        self._db_data['DBKEY'] = self._dbkey.value 
         self._db_data["PREVIOUS_CONDITION"] = False
         logger.debug(f"{self._dbkey.key}:{self._dbkey.value}")
         for cond in self._conditions:
@@ -245,9 +247,15 @@ class Button(QWidget):
                         self._db_data["PREVIOUS_CONDITION"] = True
                         logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} = True")
                         self.processActions(cond['actions'])
-                        if not cond.get('continue', False): return
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} conditions processed")
+                        if not cond.get('continue', False): 
+                            logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} Does not continue")
+                            return
+                        else:
+                            logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} continues")
                     else:
                         self._db_data["PREVIOUS_CONDITION"] = False
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} = False")
                 elif type(cond['when']) == bool:
                     if cond['when']:
                         if self._button.isChecked() or self._toggle == False:
@@ -283,10 +291,16 @@ class Button(QWidget):
               self._button.setEnabled(False)
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
-            elif args.lower() == 'checked':
+            elif args.lower() == 'checked' and not self._button.isChecked():
+                self._button.blockSignals(True)
                 self._button.setChecked(True)
-            elif args.lower() == 'unchecked':
+                fix.db.set_value(self._dbkey.key, True)
+                self._button.blockSignals(False)
+            elif args.lower() == 'unchecked' and self._button.isChecked():
+                self._button.blockSignals(True)
                 self._button.setChecked(False)
+                fix.db.set_value(self._dbkey.key, False)
+                self._button.blockSignals(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont(self.font_family)
