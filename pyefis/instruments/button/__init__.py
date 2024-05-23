@@ -173,6 +173,7 @@ class Button(QWidget):
         # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
             fix.db.set_value(self._dbkey.key, self._button.isChecked())
+            self._dbkey.output_value()
             # Now we evaluate conditions and update the button style/text/state
             self.processConditions(True)
             #fix.db.set_value(self._dbkey.key, self._button.isChecked())
@@ -295,11 +296,13 @@ class Button(QWidget):
                 self._button.blockSignals(True)
                 self._button.setChecked(True)
                 fix.db.set_value(self._dbkey.key, True)
+                self._dbkey.output_value()
                 self._button.blockSignals(False)
             elif args.lower() == 'unchecked' and self._button.isChecked():
                 self._button.blockSignals(True)
                 self._button.setChecked(False)
                 fix.db.set_value(self._dbkey.key, False)
+                self._dbkey.output_value()
                 self._button.blockSignals(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
