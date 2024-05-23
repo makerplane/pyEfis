@@ -1,9 +1,7 @@
 type: toggle
 text: "Heading\nHold"
-dbkey: BTNHH
+dbkey: TSBTN{id}25
 condition_keys:
-  - BTNAP
-#  - BTNFP
   - APMODE
   - APSTAT
   - APREQ
@@ -20,24 +18,22 @@ conditions:
   - when: "APMODE ne 'CRUISE' and APREQ ne 'CRUISE'"
     actions:
       - set bg color: lightgray
+      - button: unchecked
     continue: true
-#      - set value: BTNHH, True
-  - when: "CLICKED eq true and BTNHH eq false and APMODE eq 'CRUISE' and APREQ eq 'CRUISE'"
+  - when: "CLICKED eq true and DBKEY eq false and APMODE eq 'CRUISE' and APREQ eq 'CRUISE'"
     # We are in cruise, requested mode is cruise but the button is off, drop to TRIM
     actions:
       - set value: APREQ, TRIM
       - set bg color: orange
-  - when: "CLICKED eq true and BTNHH eq true and APMODE ne 'CRUISE'"
+  - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'CRUISE'"
     # We a are on, FP is off, we are armed and not in cruise mode like we should be
     actions:
       - set value: APREQ, CRUISE
-#      - set value: BTNFP, False
       - set bg color: orange
   - when: "CLICKED eq false and APMODE eq 'CRUISE' and [APREQ eq 'CRUISE' or APREQ eq 'INIT']"
     # We have transitioned to cruise mode
     actions:
       - set bg color: green
       - button: checked
-#      - set value: BTNFP, False
 
 
