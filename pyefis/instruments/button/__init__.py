@@ -269,6 +269,8 @@ class Button(QWidget):
 
 
     def processActions(self,actions):
+        # Block signals to prevent unintended recursion"
+        self._button.blockSignals(True)
         for act in actions:
             for action,args in act.items():
                 try:
@@ -278,6 +280,8 @@ class Button(QWidget):
                 except:
                     self.setStyle(action,args)
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:STYLE:{action}:{args}")
+        # Stop blocking signals
+        self._button.blockSignals(False)
 
     def setStyle(self,action='',args=None):
 
@@ -293,17 +297,13 @@ class Button(QWidget):
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
             elif args.lower() == 'checked' and not self._button.isChecked():
-                self._button.blockSignals(True)
                 self._button.setChecked(True)
                 fix.db.set_value(self._dbkey.key, True)
                 self._dbkey.output_value()
-                self._button.blockSignals(False)
             elif args.lower() == 'unchecked' and self._button.isChecked():
-                self._button.blockSignals(True)
                 self._button.setChecked(False)
                 fix.db.set_value(self._dbkey.key, False)
                 self._dbkey.output_value()
-                self._button.blockSignals(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont(self.font_family)
