@@ -1,9 +1,7 @@
 type: toggle
 text: "Fight\nPlan"
-dbkey: BTNFP
+dbkey: TSBTN{id}26
 condition_keys:
-  - BTNAP
-#  - BTNHH
   - APMODE
   - APSTAT
   - APREQ
@@ -14,8 +12,8 @@ conditions:
     # When any condition would prevent use of this mode disable the button
     # This will prevent eval of any other conditions
     actions:
-      - button: unchecked
       - button: disable
+      - button: unchecked
       - set bg color: red
   - when: "APMODE ne 'GUIDED' and WPLAT.old ne true and WPLON.old ne true"
     actions:
@@ -24,21 +22,20 @@ conditions:
   - when: "APMODE ne 'GUIDED' and APREQ ne 'GUIDED'"
     actions:
       - set bg color: lightgray
+      - button: unchecked
     continue: true
-  - when: "CLICKED eq true and BTNFP eq false and APMODE eq 'GUIDED' and APREQ eq 'GUIDED'"
+  - when: "CLICKED eq true and DBKEY eq false and APMODE eq 'GUIDED' and APREQ eq 'GUIDED'"
     actions:
       - set value: APREQ, TRIM
       - set bg color: orange
-  - when: "CLICKED eq true and BTNFP eq true and APMODE ne 'GUIDED'"
+  - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'GUIDED'"
     actions:
       - set value: APREQ, GUIDED
-#      - set value: BTNHH, False
       - set bg color: orange
   - when: "CLICKED eq false and APMODE eq 'GUIDED' and [ APREQ eq 'GUIDED' or APREQ eq 'INIT']"
     actions:
       - set bg color: green
       - button: checked
-#      - set value: BTNHH, False
 
 
 
