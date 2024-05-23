@@ -85,16 +85,13 @@ keybindings:
 # of the point and send the data at half that interval.
 # OnChange will send when the value is changed and Both will
 # do both.
-outputs:
-  BARO: onchange
-  TRIMP: onchange
-  TRIMR: onchange
-  TRIMY: onchange
-  APREQ: onchange
-# I'm not entirely sure if the AP buttons need output or not
-  BTNHH: onchange
-  APADJ: onchange
-  BTNFP: onchange
+#outputs:
+#  BARO: onchange
+#  TRIMP: onchange
+#  TRIMR: onchange
+#  TRIMY: onchange
+#  APREQ: onchange
+#  APADJ: onchange
 
 # No need to change this.
 # To customize
