@@ -78,5 +78,5 @@ SIXPACK:
         rows: 10
         columns: 140
       options:
-        dbkey: APMSG
+        dbkey: MAVMSG
         font_percent: 0.9

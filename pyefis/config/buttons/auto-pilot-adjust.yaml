@@ -2,33 +2,33 @@ type: toggle
 text: "AP\nAdjust"
 dbkey: TSBTN{id}24
 condition_keys:
-  - APMODE
-  - APSTAT
-  - APADJ
+  - MAVMODE
+  - MAVSTATE
+  - MAVADJ
 conditions:
-  - when: "APMODE eq 'TRIM'"
+  - when: "MAVMODE eq 'TRIM'"
     actions:
       - button: disable
       - set bg color: darkgray
       - button: unchecked
-      - set value: APADJ, false
-  - when: "APSTAT eq 'ARMED' and APMODE ne 'TRIM'"
+      - set value: MAVADJ, false
+  - when: "MAVSTATE eq 'ARMED' and MAVMODE ne 'TRIM'"
     actions:
       - button: enable
       - set bg color: lightgray
-    #  - set value: APADJ, false
+    #  - set value: MAVADJ, false
     continue: true
-  - when: "CLICKED eq true and DBKEY eq false and APMODE ne 'TRIM'"
+  - when: "CLICKED eq true and DBKEY eq false and MAVMODE ne 'TRIM'"
     actions:
       - button: unchecked
-      - set value: APADJ, false
-  - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'TRIM'"
+      - set value: MAVADJ, false
+  - when: "CLICKED eq true and DBKEY eq true and MAVMODE ne 'TRIM'"
     actions:
       - set bg color: green
       - button: checked
-      - set value: APADJ, true
+      - set value: MAVADJ, true
 
-  - when: "APADJ eq true and APMODE ne 'TRIM'"
+  - when: "MAVADJ eq true and MAVMODE ne 'TRIM'"
     actions:
       - set bg color: green
       - button: checked
