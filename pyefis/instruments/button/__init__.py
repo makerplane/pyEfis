@@ -145,6 +145,7 @@ class Button(QWidget):
         elif signal == 'aux':
             for aux in self._db[key].aux:
                 self._db_data[f"{key}.aux.{aux}"] = self._db[key].aux[aux]
+        if self._button.signalsBlocked(): return
         self.processConditions()
 
     def resizeEvent(self,event):
