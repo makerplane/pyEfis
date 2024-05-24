@@ -16,7 +16,7 @@ EMS:
         rows: 10
         columns: 80
       options:
-        dbkey: APMSG
+        dbkey: MAVMSG
         font_percent: 0.9
     - type: include,includes/ahrs/virtual_vfr.yaml
       row: 0

@@ -136,7 +136,7 @@ instruments:
       rows: 5
       columns: 50
     options:
-      dbkey: APMSG
+      dbkey: MAVMSG
       font_mask: "12345678901234567890"
   - type: static_text
     disabled: BARO_CONTROLS

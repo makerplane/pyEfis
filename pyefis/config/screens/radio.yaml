@@ -19,7 +19,7 @@ RADIO:
         rows: 9
         columns: 60
       options:
-        dbkey: APMSG
+        dbkey: MAVMSG
         font_percent: 0.9
     - type: include,includes/ahrs/virtual_vfr.yaml
       disabled: false

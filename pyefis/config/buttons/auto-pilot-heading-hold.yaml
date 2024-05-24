@@ -2,36 +2,35 @@ type: toggle
 text: "Heading\nHold"
 dbkey: TSBTN{id}25
 condition_keys:
-  - APMODE
-  - APSTAT
-  - APREQ
+  - MAVMODE
+  - MAVSTATE
+  - MAVREQCRUISE
 conditions:
-  - when: "APSTAT ne 'ARMED'"
+  - when: "MAVSTATE ne 'ARMED'"
     actions:
       - button: disable
       - set bg color: red
       - button: unchecked
-  - when: "APSTAT eq 'ARMED'"
+  - when: "MAVSTATE eq 'ARMED'"
     actions:
       - button: enable
     continue: true
-  - when: "APMODE ne 'CRUISE' and APREQ ne 'CRUISE'"
+  - when: "MAVMODE ne 'CRUISE'"
     actions:
       - set bg color: lightgray
       - button: unchecked
     continue: true
-  - when: "CLICKED eq true and DBKEY eq false and APMODE eq 'CRUISE' and APREQ eq 'CRUISE'"
+  - when: "CLICKED eq true and DBKEY eq false"
     # We are in cruise, requested mode is cruise but the button is off, drop to TRIM
     actions:
-      - set value: APREQ, TRIM
-      - set bg color: orange
-  - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'CRUISE'"
+      - set value: MAVREQTRIM, True
+      - set bg color: lightgray
+  - when: "CLICKED eq true and DBKEY eq true"
     # We a are on, FP is off, we are armed and not in cruise mode like we should be
     actions:
-      - set value: APREQ, CRUISE
+      - set value: MAVREQCRUISE, True
       - set bg color: orange
-  - when: "CLICKED eq false and APMODE eq 'CRUISE'"
-    # We have transitioned to cruise mode
+  - when: "MAVMODE eq 'CRUISE'"
     actions:
       - set bg color: green
       - button: checked

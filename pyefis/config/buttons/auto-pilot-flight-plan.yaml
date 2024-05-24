@@ -2,37 +2,35 @@ type: toggle
 text: "Fight\nPlan"
 dbkey: TSBTN{id}26
 condition_keys:
-  - APMODE
-  - APSTAT
-  - APREQ
+  - MAVMODE
+  - MAVSTATE
+  - MAVWPVALID
+  - MAVREQGUIDED
   - WPLAT
   - WPLON
 conditions:
-  - when: "WPLAT.old eq true or WPLON.old eq true or APSTAT ne 'ARMED'"
+  - when: "MAVWPVALID eq false"
     # When any condition would prevent use of this mode disable the button
     # This will prevent eval of any other conditions
     actions:
       - button: disable
       - button: unchecked
       - set bg color: red
-  - when: "APMODE ne 'GUIDED' and WPLAT.old ne true and WPLON.old ne true"
+  - when: "MAVWPVALID eq true and MAVSTATE eq 'ARMED' and MAVMODE ne 'GUIDED'"
     actions:
       - button: enable
-    continue: true
-  - when: "APMODE ne 'GUIDED' and APREQ ne 'GUIDED'"
-    actions:
       - set bg color: lightgray
       - button: unchecked
     continue: true
-  - when: "CLICKED eq true and DBKEY eq false and APMODE eq 'GUIDED' and APREQ eq 'GUIDED'"
+  - when: "CLICKED eq true and DBKEY eq false"
     actions:
-      - set value: APREQ, TRIM
+      - set value: MAVREQTRIM, True
       - set bg color: orange
-  - when: "CLICKED eq true and DBKEY eq true and APMODE ne 'GUIDED'"
+  - when: "CLICKED eq true and DBKEY eq true"
     actions:
-      - set value: APREQ, GUIDED
+      - set value: MAVREQGUIDED, True
       - set bg color: orange
-  - when: "CLICKED eq false and APMODE eq 'GUIDED' and [ APREQ eq 'GUIDED' or APREQ eq 'INIT']"
+  - when: "MAVMODE eq 'GUIDED'"
     actions:
       - set bg color: green
       - button: checked
