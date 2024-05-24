@@ -16,20 +16,21 @@ conditions:
     actions:
       - button: enable
       - set bg color: lightgray
-    #  - set value: MAVADJ, false
     continue: true
   - when: "CLICKED eq true and DBKEY eq false and MAVMODE ne 'TRIM'"
     actions:
+      - set bg color: orange
       - button: unchecked
       - set value: MAVADJ, false
   - when: "CLICKED eq true and DBKEY eq true and MAVMODE ne 'TRIM'"
     actions:
-      - set bg color: green
+      - set bg color: orange
       - button: checked
       - set value: MAVADJ, true
-
   - when: "MAVADJ eq true and MAVMODE ne 'TRIM'"
     actions:
       - set bg color: green
       - button: checked
-
+  - when: "MAVADJ eq false"
+    actions:
+      - button: unchecked
