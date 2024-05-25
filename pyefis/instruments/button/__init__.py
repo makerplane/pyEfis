@@ -202,6 +202,8 @@ class Button(QWidget):
         # Only buttons on the active screen should be changing.
         logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()})")
         self._db_data[self._dbkey.key] = self._dbkey.value
+        #self._dbkey.output_value()
+
         if not self.isVisible(): return
         #self._db_data[self._dbkey.key] = self._dbkey.value
         if self._toggle and self._button.isChecked() == self._dbkey.value:
@@ -231,7 +233,7 @@ class Button(QWidget):
                 # Physical buttons should not repeat sending True for simple buttons
                 self._dbkey.value = False
             self._button.setChecked(self._dbkey.value) 
-            #self.processConditions(True)
+            self.processConditions(True)
             if self._repeat:
                 # Send press even while true, send release event when false
                 # Physical button would need to only set True while button is pressed, then set to False when released
