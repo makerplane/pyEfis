@@ -70,7 +70,9 @@ class Button(QWidget):
         if self.config['type'] == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
-            self._button.toggled.connect(self.buttonToggled)
+            # toggled reacts to setChecked where clicked does not
+            # Helps to prevent erronious recursion
+            self._button.clicked.connect(self.buttonToggled)
         elif self.config['type'] == 'simple':
             self._button.setCheckable(False)
             self._button.clicked.connect(self.buttonToggled)
@@ -145,6 +147,7 @@ class Button(QWidget):
         elif signal == 'aux':
             for aux in self._db[key].aux:
                 self._db_data[f"{key}.aux.{aux}"] = self._db[key].aux[aux]
+        if self._button.signalsBlocked(): return
         self.processConditions()
 
     def resizeEvent(self,event):
@@ -168,14 +171,16 @@ class Button(QWidget):
         # Button can be toggled by _dbkey or by clicking the button
         # Make sure they stay in sync
         logger.debug(f"{self._button.text()}:buttonToggled:self._button.isChecked({self._button.isChecked()})")
-        #if not self.isVisible(): return
+        if not self.isVisible(): return
 
         # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
+            self._button.blockSignals(True)
             fix.db.set_value(self._dbkey.key, self._button.isChecked())
             self._dbkey.output_value()
             # Now we evaluate conditions and update the button style/text/state
             self.processConditions(True)
+            self._button.blockSignals(False)
             #fix.db.set_value(self._dbkey.key, self._button.isChecked())
 
         elif not self._toggle:
@@ -190,7 +195,7 @@ class Button(QWidget):
         # Only buttons on the active screen should be changing.
         logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()})")
         self._db_data[self._dbkey.key] = self._dbkey.value
-        #if not self.isVisible(): return
+        if not self.isVisible(): return
         #self._db_data[self._dbkey.key] = self._dbkey.value
         if self._toggle and self._button.isChecked() == self._dbkey.value:
             #This is a recursive call do nothing
@@ -232,7 +237,9 @@ class Button(QWidget):
     def showEvent(self,event):
         self.processConditions()
         # Do we need to only do this for toggle buttons?
+        self._button.blockSignals(True)
         self._button.setChecked(self._dbkey.value)
+        self._button.blockSignals(False)
 
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.screenName

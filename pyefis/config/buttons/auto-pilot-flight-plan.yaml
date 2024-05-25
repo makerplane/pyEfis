@@ -18,9 +18,9 @@ conditions:
       - set bg color: red
   - when: "MAVWPVALID eq true and MAVSTATE eq 'ARMED' and MAVMODE ne 'GUIDED'"
     actions:
+      - button: unchecked
       - button: enable
       - set bg color: lightgray
-      - button: unchecked
     continue: true
   - when: "CLICKED eq true and DBKEY eq false"
     actions:
@@ -32,8 +32,9 @@ conditions:
       - set bg color: orange
   - when: "MAVMODE eq 'GUIDED'"
     actions:
-      - set bg color: green
       - button: checked
+      - button: enabled
+      - set bg color: green
 
 
 

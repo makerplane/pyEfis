@@ -9,22 +9,13 @@ conditions:
   - when: "MAVSTATE ne 'ARMED'"
     actions:
       - button: disable
+      - button: unchecked
       - set bg color: red
-      - button: unchecked
-  - when: "MAVSTATE eq 'ARMED'"
-    actions:
-      - button: enable
-    continue: true
-  - when: "MAVMODE ne 'CRUISE'"
-    actions:
-      - set bg color: lightgray
-      - button: unchecked
-    continue: true
   - when: "CLICKED eq true and DBKEY eq false"
     # We are in cruise, requested mode is cruise but the button is off, drop to TRIM
     actions:
       - set value: MAVREQTRIM, True
-      - set bg color: lightgray
+      - set bg color: orange
   - when: "CLICKED eq true and DBKEY eq true"
     # We a are on, FP is off, we are armed and not in cruise mode like we should be
     actions:
@@ -34,5 +25,11 @@ conditions:
     actions:
       - set bg color: green
       - button: checked
+      - button: enable
+  - when: "MAVMODE ne 'CRUISE'"
+    actions:
+      - set bg color: lightgray
+      - button: unchecked
+      - button: enable
 
 
