@@ -307,13 +307,29 @@ class Button(QWidget):
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
             elif args.lower() == 'checked' and not self._button.isChecked():
-                self._button.setChecked(True)
-                fix.db.set_value(self._dbkey.key, True)
-                self._dbkey.output_value()
+                if not self._button.isChecked():
+                    # If button is not checked, check it
+                    btn_state = self._button.isEnabled()
+                    if btn_state:
+                        # If button enabled, disable before checking
+                        self._button.setEnabled(False)
+                        fix.db.set_value(self._dbkey.key, True)
+                        self._dbkey.output_value()
+                    self._button.setChecked(True)
+                    # Set button state back to what it was
+                    self._button.setEnabled(btn_state)
             elif args.lower() == 'unchecked' and self._button.isChecked():
-                self._button.setChecked(False)
-                fix.db.set_value(self._dbkey.key, False)
-                self._dbkey.output_value()
+                if self._button.isChecked():
+                    # If button is checked, check it
+                    btn_state = self._button.isEnabled()
+                    if btn_state:
+                        # If button enabled, disable before unchecking
+                        self._button.setEnabled(False)
+                    fix.db.set_value(self._dbkey.key, False)
+                    self._dbkey.output_value()
+                    self._button.setChecked(False)
+                    # Set button state back to what it was
+                    self._button.setEnabled(btn_state)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont(self.font_family)
