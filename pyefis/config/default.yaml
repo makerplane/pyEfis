@@ -156,9 +156,9 @@ logging:
 #    file:
 #      class: logging.FileHandler
 #      formatter: standard
-#      filename: fixgw.log
+#      filename: {SNAP_USER_COMMON}fixgw.log
 #      mode: w
-      #mode: a
+#      mode: a
 
     syslog:
       class: logging.handlers.SysLogHandler
