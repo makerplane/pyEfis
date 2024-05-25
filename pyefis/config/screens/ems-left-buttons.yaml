@@ -10,6 +10,7 @@ EMS:
     draw_grid: false
   instruments:
     - type: value_text
+      disabled: DEMO_TESTING_TEXT
       row: 100
       column: 75
       span:

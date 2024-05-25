@@ -68,6 +68,7 @@ styles:
 # Here you can enable or disble individual controls or gauges
 # 
 enabled:
+  DEMO_TESTING_TEXT: false
   AIRCRAFT_IDENTIFIER: true
   PITCH_TRIM: true
   YAW_TRIM: true

@@ -72,6 +72,7 @@ SIXPACK:
         rows: 50
         columns: 62
     - type: value_text
+      disabled: DEMO_TESTING_TEXT
       row: 100
       column: 60
       span:

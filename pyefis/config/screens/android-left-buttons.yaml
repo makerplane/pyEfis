@@ -12,6 +12,7 @@ ANDROID:
       states: 2
   instruments:
     - type: value_text
+      disabled: DEMO_TESTING_TEXT
       row: 100
       column: 45
       span:

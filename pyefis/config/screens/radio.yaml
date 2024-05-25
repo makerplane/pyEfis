@@ -12,6 +12,7 @@ RADIO:
     columns: 200
     #draw_grid: true
   instruments:
+      disabled: DEMO_TESTING_TEXT
     - type: value_text
       row: 101
       column: 30
