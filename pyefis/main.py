@@ -186,7 +186,8 @@ def main():
         # If running in snap write to $SNAP_USER_COMMON directory
         snap_dir = os.environ.get('SNAP_USER_COMMON','')
         if len(snap_dir) > 0: snap_dir = snap_dir + "/"
-        logging.config.dictConfig(config['logging'].format(SNAP_USER_COMMON = snap_dir)
+        log_yaml = yaml.dump(config['logging']).format(SNAP_USER_COMMON = snap_dir)
+        logging.config.dictConfig(yaml.load(log_yaml, Loader=yaml.SafeLoader))
     else:
         logging.basicConfig()
 

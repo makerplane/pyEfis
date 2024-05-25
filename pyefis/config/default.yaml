@@ -138,7 +138,7 @@ logging:
       #level: ERROR
       #level: CRITICAL
 
-      handlers: [stderr ] #, file]
+      handlers: [stderr] #, file]
       propagate: True
 
   formatters:
@@ -156,7 +156,7 @@ logging:
 #    file:
 #      class: logging.FileHandler
 #      formatter: standard
-#      filename: {SNAP_USER_COMMON}fixgw.log
+#      filename: "{SNAP_USER_COMMON}fixgw.log"
 #      mode: w
 #      mode: a
 
