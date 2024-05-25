@@ -1,0 +1,160 @@
+EMS2:
+  include: hmi/encoder_input.yaml
+  module: pyefis.screens.screenbuilder
+  title: Engine Management New
+  layout:
+    rows: 110
+    columns: 200
+    draw_grid: false
+  instruments:
+    - type: value_text
+      row: 100
+      column: 95
+      span:
+        rows: 10
+        columns: 140
+      options:
+        dbkey: MAVMSG
+        font_percent: 0.9
+    - type: ganged_button
+      gang_type: horizontal
+      row: 103
+      column: 50
+#        move:
+#          shrink: 25
+#          justify: top
+      span:
+        rows: 4
+        columns: 45
+      groups:
+        - name: Buttons
+          gap: 4
+          instruments:
+            -
+              options:
+                config: buttons/egt-Normalize.yaml
+            -
+              options:
+                config: buttons/egt-Lean.yaml
+            -
+              options:
+                config: buttons/egt-Peak.yaml
+            -
+              options:
+                config: buttons/egt-reset-peak.yaml
+    -
+      type: arc_gauge
+      row: 0
+      column: 15
+      span:
+        rows: 45
+        columns: 70
+      preferences: ARC13
+    -
+      type: arc_gauge
+      row: 0
+      column: 86
+      span:
+        rows: 45
+        columns: 70
+      preferences: ARC14
+    -
+      type: ganged_horizontal_bar_gauge
+      gang_type: vertical
+      row: 0
+      column: 157
+      span:
+        rows: 50
+        columns: 40
+      groups:
+        - name: Oil
+          instruments:
+            -
+              preferences: BAR7
+            -
+              preferences: BAR8
+    -
+      type: static_text
+      row: 45
+      column: 18
+      span:
+        columns: 21
+        rows: 5
+      options:
+        text: Power
+    -
+      type: static_text
+      row: 45
+      column: 67
+      span:
+        columns: 12
+        rows: 5
+      options:
+        text: EGT
+    -
+      type: static_text
+      row: 45
+      column: 124
+      span:
+        columns: 12
+        rows: 5
+      options:
+        text: CHT
+    -
+      type: static_text
+      row: 45
+      column: 174
+      span:
+        columns: 14
+        rows: 5
+      options:
+        text: FUEL
+    -
+      type: ganged_vertical_bar_gauge
+      gang_type: horizontal
+      ratio: 0.2
+      row: 51
+      column: 15
+      span:
+        rows: 50
+        columns: 186
+      groups:
+        - name: Power
+          instruments:
+            -
+              preferences: BAR9
+            -
+              preferences: BAR10
+        - name: EGT
+          instruments:
+            -
+              preferences: BAR11
+            -
+              preferences: BAR12
+            -
+              preferences: BAR13
+            -
+              preferences: BAR14
+        - name: CHT
+          instruments:
+            -
+              preferences: BAR15
+            -
+              preferences: BAR16
+            -
+              preferences: BAR17
+            -
+              preferences: BAR18
+        - name: FUEL
+          instruments:
+            -
+              preferences: BAR19
+            -
+              preferences: BAR20
+            -
+              preferences: BAR21
+
+    - type: include,BUTTON_GROUP1
+      row: 0
+      column: 0
+
