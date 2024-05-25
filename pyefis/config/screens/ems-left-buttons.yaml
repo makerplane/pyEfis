@@ -1,0 +1,113 @@
+EMS:
+  include:
+  - screens/virtualvfr_db.yaml
+  - hmi/encoder_input.yaml
+  module: pyefis.screens.screenbuilder
+  title: Engine Management New
+  layout:
+    rows: 110
+    columns: 200
+    draw_grid: false
+  instruments:
+    - type: value_text
+      row: 100
+      column: 75
+      span:
+        rows: 10
+        columns: 80
+      options:
+        dbkey: MAVMSG
+        font_percent: 0.9
+    - type: include,includes/ahrs/virtual_vfr.yaml
+      row: 0
+      column: 75
+      span:
+        rows: 70
+        columns: 125
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      row: 0
+      column: 45
+    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+      row: 0
+      column: 15
+    - type: include,BUTTON_GROUP1
+      row: 0
+      column: 0
+    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
+      row: 70
+      column: 155
+    - type: include,includes/bars/vertical/4_CHT.yaml
+      row: 70
+      column: 123
+    - type: include,includes/bars/vertical/4_EGT.yaml
+      row: 70
+      column: 91
+    - type: ganged_button
+      #disabled: true
+      gang_type: vertical
+      row: 74
+      column: 80
+      #move:
+      #  shrink: 25
+      #  justify: top
+      span:
+        rows: 30
+        columns: 10
+      groups:
+        - name: Buttons
+          gap: 12
+          common_options:
+            font_mask: Normalize
+          instruments:
+            -
+              options:
+                config: buttons/egt-Normalize.yaml
+                encoder_order: 31
+            -
+              options:
+                config: buttons/egt-Lean.yaml
+                encoder_order: 32
+            -
+              options:
+                config: buttons/egt-Peak.yaml
+                encoder_order: 33
+            -
+              options:
+                config: buttons/egt-reset-peak.yaml
+                encoder_order: 34
+    -
+      type: ganged_vertical_bar_gauge
+      gang_type: horizontal
+      row: 70
+      column: 0
+      span:
+        rows: 30
+        columns: 80
+      groups:
+        - name: RPM
+          gap: 0
+          instruments:
+            -
+              preferences: BAR28
+            -
+              preferences: BAR29
+        - name: Engine
+          gap: 0
+          instruments:
+            -
+              preferences: BAR22
+            -
+              preferences: BAR23
+            -
+              preferences: BAR24
+            -
+              preferences: BAR25
+            -
+              preferences: BAR26
+
+        - name: Temps
+          gap: 0
+          instruments:
+            -
+              preferences: BAR27
+
