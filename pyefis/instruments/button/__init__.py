@@ -72,7 +72,10 @@ class Button(QWidget):
             self._button.setCheckable(True)
             # toggled reacts to setChecked where clicked does not
             # Helps to prevent erronious recursion
-            self._button.clicked.connect(self.buttonToggled)
+            # However not using toggled for toggle buttons breaks
+            # things such as encoder navigation
+            self._button.toggled.connect(self.buttonToggled)
+
         elif self.config['type'] == 'simple':
             self._button.setCheckable(False)
             self._button.clicked.connect(self.buttonToggled)
