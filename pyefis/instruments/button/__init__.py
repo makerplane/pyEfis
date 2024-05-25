@@ -60,6 +60,7 @@ class Button(QWidget):
         # button names per node without having 
         # to duplicate all buttons.
         self._dbkey = fix.db.get_item(self.config['dbkey'].replace('{id}', str(self.parent.parent.nodeID)))
+        self.block_data = False
         time.sleep(0.01)
         #self._button.setChecked(self._dbkey.value)
 
@@ -150,7 +151,6 @@ class Button(QWidget):
         elif signal == 'aux':
             for aux in self._db[key].aux:
                 self._db_data[f"{key}.aux.{aux}"] = self._db[key].aux[aux]
-        if self._button.signalsBlocked(): return
         self.processConditions()
 
     def resizeEvent(self,event):
@@ -178,12 +178,13 @@ class Button(QWidget):
 
         # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
-            self._button.blockSignals(True)
+            self.block_data = True
             fix.db.set_value(self._dbkey.key, self._button.isChecked())
+            #self._dbkey.set_value = self._button.isChecked()
             self._dbkey.output_value()
+            self.block_data = False
             # Now we evaluate conditions and update the button style/text/state
             self.processConditions(True)
-            self._button.blockSignals(False)
             #fix.db.set_value(self._dbkey.key, self._button.isChecked())
 
         elif not self._toggle:
@@ -192,6 +193,9 @@ class Button(QWidget):
 
 
     def dbkeyChanged(self,data):
+        if self.block_data: 
+            logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()}) - processing blocked!")
+            return
         if self._dbkey.bad:
             return
         # The same button configuration might be used on multiple screens
@@ -227,7 +231,7 @@ class Button(QWidget):
                 # Physical buttons should not repeat sending True for simple buttons
                 self._dbkey.value = False
             self._button.setChecked(self._dbkey.value) 
-            self.processConditions(True)
+            #self.processConditions(True)
             if self._repeat:
                 # Send press even while true, send release event when false
                 # Physical button would need to only set True while button is pressed, then set to False when released
@@ -240,9 +244,8 @@ class Button(QWidget):
     def showEvent(self,event):
         self.processConditions()
         # Do we need to only do this for toggle buttons?
-        self._button.blockSignals(True)
-        self._button.setChecked(self._dbkey.value)
-        self._button.blockSignals(False)
+        if self._toggle: 
+            self._button.setChecked(self._dbkey.value)
 
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.screenName
@@ -279,10 +282,14 @@ class Button(QWidget):
 
 
     def processActions(self,actions):
-        # Block signals to prevent unintended recursion"
-        self._button.blockSignals(True)
         for act in actions:
             for action,args in act.items():
+                set_block = False
+                if action == 'set value':
+                    args_data = args.split(',')
+                    if args_data[0] in self._db or args_data[0] == self._dbkey.key:
+                        self.block_data = True
+                        set_block = True
                 try:
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Tried")
                     hmi.actions.trigger(action, args)
@@ -290,8 +297,8 @@ class Button(QWidget):
                 except:
                     self.setStyle(action,args)
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:STYLE:{action}:{args}")
-        # Stop blocking signals
-        self._button.blockSignals(False)
+                if set_block:
+                    self.block_data = False
 
     def setStyle(self,action='',args=None):
 
@@ -307,29 +314,14 @@ class Button(QWidget):
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
             elif args.lower() == 'checked' and not self._button.isChecked():
-                if not self._button.isChecked():
-                    # If button is not checked, check it
-                    btn_state = self._button.isEnabled()
-                    if btn_state:
-                        # If button enabled, disable before checking
-                        self._button.setEnabled(False)
-                        fix.db.set_value(self._dbkey.key, True)
-                        self._dbkey.output_value()
-                    self._button.setChecked(True)
-                    # Set button state back to what it was
-                    self._button.setEnabled(btn_state)
+                fix.db.set_value(self._dbkey.key, True)
+                self._dbkey.output_value()
+                self._button.setEnabled(True)
+
             elif args.lower() == 'unchecked' and self._button.isChecked():
-                if self._button.isChecked():
-                    # If button is checked, check it
-                    btn_state = self._button.isEnabled()
-                    if btn_state:
-                        # If button enabled, disable before unchecking
-                        self._button.setEnabled(False)
-                    fix.db.set_value(self._dbkey.key, False)
-                    self._dbkey.output_value()
-                    self._button.setChecked(False)
-                    # Set button state back to what it was
-                    self._button.setEnabled(btn_state)
+                fix.db.set_value(self._dbkey.key, False)
+                self._dbkey.output_value()
+                self._button.setEnabled(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont(self.font_family)
