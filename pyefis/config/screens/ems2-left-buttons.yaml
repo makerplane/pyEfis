@@ -8,6 +8,7 @@ EMS2:
     draw_grid: false
   instruments:
     - type: value_text
+      disabled: DEMO_TESTING_TEXT
       row: 100
       column: 95
       span:
