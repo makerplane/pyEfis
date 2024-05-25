@@ -4,7 +4,6 @@ dbkey: TSBTN{id}25
 condition_keys:
   - MAVMODE
   - MAVSTATE
-  - MAVREQCRUISE
 conditions:
   - when: "MAVSTATE ne 'ARMED'"
     actions:
