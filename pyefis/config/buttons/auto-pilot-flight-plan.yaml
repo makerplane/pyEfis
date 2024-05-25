@@ -5,9 +5,6 @@ condition_keys:
   - MAVMODE
   - MAVSTATE
   - MAVWPVALID
-  - MAVREQGUIDED
-  - WPLAT
-  - WPLON
 conditions:
   - when: "MAVWPVALID eq false"
     # When any condition would prevent use of this mode disable the button

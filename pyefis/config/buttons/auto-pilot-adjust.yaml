@@ -5,7 +5,6 @@ condition_keys:
   - MAVMODE
   - MAVSTATE
   - MAVADJ
-  - MAVREQADJ
 conditions:
   - when: "MAVMODE eq 'TRIM'"
     actions:
