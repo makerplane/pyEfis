@@ -267,6 +267,16 @@ instruments:
       columns: 5
     options:
       config: buttons/leader.yaml
+  - type: value_text
+    disabled: AIRCRAFT_IDENTIFIER
+    row: 104
+    column: 70
+    span:
+      rows: 6
+      columns: 16
+    options:
+      dbkey: ACID 
+      font_mask: NXXXXX
 
 
 
