@@ -10,7 +10,7 @@ SIXPACK:
   instruments:
     - type: include,BUTTON_GROUP1
       row: 0
-      column: 186
+      column: 185.5
     -
       type: airspeed_dial
       row: 0

@@ -22,7 +22,7 @@ PFD:
       column: 155
     - type: include,BUTTON_GROUP1
       row: 0
-      column: 186
+      column: 185.5
     - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
       row: 70
       column: 155
