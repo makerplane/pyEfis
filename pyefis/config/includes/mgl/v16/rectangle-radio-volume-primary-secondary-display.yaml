@@ -3,7 +3,7 @@ instruments:
     row: 0
     column: 0
     span:
-      rows: 40
+      rows: 38
       columns: 29
   - type: static_text
     row: 0

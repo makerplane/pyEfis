@@ -12,7 +12,7 @@ EMS:
     - type: value_text
       disabled: DEMO_TESTING_TEXT
       row: 100
-      column: 75
+      column: 0
       span:
         rows: 10
         columns: 80
@@ -78,6 +78,7 @@ EMS:
                 encoder_order: 34
     -
       type: ganged_vertical_bar_gauge
+      disabled: DEMO_TESTING_TEXT
       gang_type: horizontal
       row: 70
       column: 0
@@ -107,6 +108,63 @@ EMS:
               preferences: BAR26
 
         - name: Temps
+          gap: 0
+          instruments:
+            -
+              preferences: BAR27
+    -
+      type: ganged_vertical_bar_gauge
+      disabled: not DEMO_TESTING_TEXT
+      ratio: 0.2
+      gang_type: horizontal
+      row: 72
+      column: 0
+      span:
+        rows: 38
+        columns: 80
+      groups:
+        - name: RPM
+          gap: 0
+          common_options:
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            small_font_percent: 0.060 
+            big_font_percent: 0.085   
+          instruments:
+            -
+              preferences: BAR28
+            -
+              preferences: BAR29
+        - name: Engine
+          common_options:
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+          gap: 0
+          instruments:
+            -
+              preferences: BAR22
+            -
+              preferences: BAR23
+            -
+              preferences: BAR24
+            -
+              preferences: BAR25
+            -
+              preferences: BAR26
+
+        - name: Temps
+          common_options:
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+          gap: 0
+          instruments:
           gap: 0
           instruments:
             -
