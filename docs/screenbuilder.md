@@ -1163,7 +1163,7 @@ The second purpose of the gauges sections is to apply specific style settings fo
 ```
 
 ### enabled ###
-The enabled section is where you can turn various things on or off. Within screen builder configs when an instrument has the option `disabled` defined and it is a string rather than a boolean, the actually boolean value will be set to the value of that string as defined in the enabled section.
+The enabled section is where you can turn various things on or off. Within screen builder configs when an instrument has the option `disabled` defined and it is a string rather than a boolean, the actually boolean value will be set to the value of that string as defined in the enabled section. You can also use `not ENABLED_NAME` to disable when `ENABLED_NAME: true` or enable when it is set false. With `not` you can turn on thing on and another off with a single setting.
 
 Example, in the config file `includes/bars/vertical/4_CHT.yaml` an instrument has the option `disabled` set to the string `CYLINDER_``:
 ```
