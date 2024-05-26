@@ -19,7 +19,7 @@ PFD:
       column: 45
     - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
       row: 0
-      column: 15
+      column: 14.5
     - type: include,BUTTON_GROUP1
       row: 0
       column: 0

@@ -27,10 +27,10 @@ EMS:
         columns: 125
     - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
       row: 0
-      column: 45
+      column: 44.5
     - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
       row: 0
-      column: 15
+      column: 14.5
     - type: include,BUTTON_GROUP1
       row: 0
       column: 0
