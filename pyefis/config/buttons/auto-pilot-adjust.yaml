@@ -5,7 +5,6 @@ condition_keys:
   - MAVMODE
   - MAVSTATE
   - MAVADJ
-  - MAVREQADJ
 conditions:
   - when: "MAVMODE eq 'TRIM'"
     actions:
@@ -14,6 +13,14 @@ conditions:
       - button: unchecked
         # Maybethis should be done in the mavlink plugin?
       - set value: MAVREQADJ, false
+  - when: "CLICKED eq true and DBKEY eq false and MAVMODE ne 'TRIM'"
+    actions:
+      - set bg color: orange
+      - set value: MAVREQADJ, false
+  - when: "CLICKED eq true and DBKEY eq true and MAVMODE ne 'TRIM'"
+    actions:
+      - set bg color: orange
+      - set value: MAVREQADJ, true
   - when: "MAVSTATE eq 'ARMED' and MAVMODE ne 'TRIM' and MAVADJ eq true"
     actions:
       - set bg color: green
@@ -26,13 +33,5 @@ conditions:
       - button: unchecked
       - button: enable
     continue: true
-  - when: "CLICKED eq true and DBKEY eq false and MAVMODE ne 'TRIM'"
-    actions:
-      - set bg color: orange
-      - set value: MAVREQADJ, false
-  - when: "CLICKED eq true and DBKEY eq true and MAVMODE ne 'TRIM'"
-    actions:
-      - set bg color: orange
-      - set value: MAVREQADJ, true
 
 
