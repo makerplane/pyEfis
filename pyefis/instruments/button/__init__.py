@@ -316,14 +316,20 @@ class Button(QWidget):
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
             elif args.lower() == 'checked' and not self._button.isChecked():
-                fix.db.set_value(self._dbkey.key, True)
+                #fix.db.set_value(self._dbkey.key, True)
+                self._button.blockSignals(True)
+                self._button.setChecked(True)
+                self._dbkey.value = True
                 self._dbkey.output_value()
-                self._button.setEnabled(True)
+                self._button.blockSignals(False)
 
             elif args.lower() == 'unchecked' and self._button.isChecked():
-                fix.db.set_value(self._dbkey.key, False)
+                #fix.db.set_value(self._dbkey.key, False)
+                self._button.blockSignals(True)
+                self._button.setChecked(False)
+                self._dbkey.value = False
                 self._dbkey.output_value()
-                self._button.setEnabled(False)
+                self._button.blockSignals(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont(self.font_family)
