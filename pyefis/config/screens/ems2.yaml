@@ -157,5 +157,5 @@ EMS2:
 
     - type: include,BUTTON_GROUP1
       row: 0
-      column: 186
+      column: 185.5
 
