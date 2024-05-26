@@ -316,7 +316,6 @@ class Button(QWidget):
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
             elif args.lower() == 'checked' and not self._button.isChecked():
-                #fix.db.set_value(self._dbkey.key, True)
                 self._button.blockSignals(True)
                 self._button.setChecked(True)
                 self._dbkey.value = True
@@ -324,7 +323,6 @@ class Button(QWidget):
                 self._button.blockSignals(False)
 
             elif args.lower() == 'unchecked' and self._button.isChecked():
-                #fix.db.set_value(self._dbkey.key, False)
                 self._button.blockSignals(True)
                 self._button.setChecked(False)
                 self._dbkey.value = False
