@@ -104,6 +104,8 @@ includes:
   DATABINDING_CONFIG: databindings/default.yaml
   # The outputs section of the configuration:
   OUTPUTS_CONFIG: outputs/default.yaml
+  # The screens setion of the configuration:
+  SCREENS_CONFIG: screens/default_list.yaml
   # The include for the main navigations buttons:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
   # The include for the encoder button control feature
@@ -117,6 +119,8 @@ includes:
   SCREEN_EMS2: screens/ems2.yaml
   # Include file for logging configuration
   LOGGING_CONFIG: logging/stderr-info.yaml
+  # File that defines what lists are included in the radio listbox
+  RADIO_LISTBOX: lists/radio/listbox.yaml  
 
 # Here you can customize individual gauges on the screen
 # Maybe you want to display MAXCHT1 instead of H2OT1
