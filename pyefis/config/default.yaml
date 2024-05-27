@@ -31,13 +31,7 @@ outputs:
 # the screen
 
 screens:
-  include: 
-  - SCREEN_SIXPACK
-  - SCREEN_ANDROID
-  - SCREEN_PFD
-  - SCREEN_RADIO
-  - SCREEN_EMS
-  - SCREEN_EMS2
+  include: SCREENS_CONFIG
  
 # Hooks are user defined modules that are loaded at specific points
 # in the programs execution.  Right now their is only one place and
