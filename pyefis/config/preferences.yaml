@@ -68,6 +68,7 @@ styles:
 # Here you can enable or disble individual controls or gauges
 # 
 enabled:
+  AUTO_START: true
   DEMO_TESTING_TEXT: false
   VERSION_DISPLAY: true
   AIRCRAFT_IDENTIFIER: true
