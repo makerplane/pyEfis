@@ -806,7 +806,7 @@ class Screen(QWidget):
                 if val < 0:
                     val = len(self.encoder_list_sorted) -1
                     loop += 1
-                elif val + 1 == len(self.encoder_list_sorted):
+                elif val == len(self.encoder_list_sorted):
                     val = 0
                     loop += 1
         # turn off highlight on current instrument   
