@@ -162,8 +162,7 @@ def main():
         # Reset this stuff like we found it
         config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
     config_path = os.path.dirname(config_file)
-    config = cfg.from_yaml(config_file)
-    preference_file = f"{config_path}/{config.get('preferences','preferences.yaml')}"
+    preference_file = f"{config_path}/preferences.yaml"
     with open(preference_file) as cf:
        preferences = yaml.safe_load(cf)
     preference_file = preference_file + ".custom"
@@ -172,6 +171,9 @@ def main():
         with open(preference_file) as cf:
             custom = yaml.safe_load(cf)
         merge_dict(preferences,custom)
+
+    config = cfg.from_yaml(config_file,preferences=preferences)
+
     # If running under systemd
     if environ.get('INVOCATION_ID', False):
         # and autostart is not true, exit
