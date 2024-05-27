@@ -106,7 +106,8 @@ includes:
   SCREEN_RADIO: screens/radio.yaml
   SCREEN_EMS: screens/ems.yaml
   SCREEN_EMS2: screens/ems2.yaml
-
+  # Include file for logging configuration
+  LOGGING_CONFIG: logging/stderr-info.yaml
 
 # Here you can customize individual gauges on the screen
 # Maybe you want to display MAXCHT1 instead of H2OT1
