@@ -73,8 +73,9 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
                                     raise Exception(f"Cannot find include: {f}")
                             litems = yaml.safe_load(open(ifile))
                             if 'items' in litems:
-                                for a in litems['items']:
-                                    new[key].append(a)
+                                if litems['items'] != None:
+                                    for a in litems['items']:
+                                        new[key].append(a)
                             else:
                                 raise Exception(f"Error in {ifile}\nWhen including list items they need listed under 'items:' in the include file")
                         else:
