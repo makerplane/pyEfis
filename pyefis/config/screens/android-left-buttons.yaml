@@ -22,7 +22,7 @@ ANDROID:
         dbkey: MAVMSG
         font_percent: 0.9
     - type: weston
-      #disabled: true
+      disabled: DEMO_TESTING_TEXT
       row: 0
       column: 45
       span:
@@ -34,9 +34,22 @@ ANDROID:
         command: waydroid
         args:
           - show-full-ui
+    - type: weston
+      disabled: not DEMO_TESTING_TEXT
+      row: 0
+      column: 45
+      span:
+        rows: 110
+        columns: 155
+      options:
+        socket: pyefis-waydroid-1
+        ini: weston.ini
+        command: waydroid
+        args:
+          - show-full-ui
     - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
       row: 0
-      column: 15
+      column: 14.5
     - type: include,BUTTON_GROUP1
       row: 0
       column: 0

@@ -22,11 +22,24 @@ ANDROID:
         dbkey: MAVMSG
         font_percent: 0.9
     - type: weston
-      #disabled: true
+      disabled: DEMO_TESTING_TEXT
       row: 0
       column: 0
       span:
         rows: 100
+        columns: 155
+      options:
+        socket: pyefis-waydroid-1
+        ini: weston.ini
+        command: waydroid
+        args:
+          - show-full-ui
+    - type: weston
+      disabled: not DEMO_TESTING_TEXT
+      row: 0
+      column: 0
+      span:
+        rows: 110
         columns: 155
       options:
         socket: pyefis-waydroid-1

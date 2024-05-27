@@ -15,7 +15,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
+import time
+from pyefis import version
 import sys, os
 
 import logging
@@ -199,6 +200,18 @@ def main():
     log.info("Starting pyEFIS")
 
     fix.initialize(config)
+    loaded = False
+    while not loaded:
+        try:
+            fix.db.get_item("ZZLOADER")
+            loaded = True
+        except:
+            log.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
+            time.sleep(2)
+    pyefis_ver = fix.db.get_item('PYEFIS_VERSION')
+    pyefis_ver.value = version.VERSION
+    pyefis_ver.output_value()
+
     hmi.initialize(config)
 
     if 'FMS' in config:

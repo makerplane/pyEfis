@@ -82,16 +82,6 @@ class Screen(QWidget):
 
         self.init= False
 
-        # Hack to prevent exception at startup that happens
-        # when pyefis is started before fixgateway
-        loaded = False
-        while not loaded:
-            try:
-                fix.db.get_item("ZZLOADER")
-                loaded = True
-            except:
-                logger.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
-                time.sleep(2)
         # list of dial types supported so far:
         # airspeed_dial
         # airspeed_trend_tape # Testing to do
@@ -154,8 +144,13 @@ class Screen(QWidget):
             if 'disabled' in i:
                 if isinstance(i['disabled'],bool) and i['disabled'] == True:
                     return count
-                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
-                    return count
+                elif isinstance(i['disabled'],str):
+                    check_not = i['disabled'].split(" ")
+                    if check_not[0].lower() == 'not':
+                        if self.parent.preferences['enabled'][check_not[1]]:
+                            return count
+                    elif not self.parent.preferences['enabled'][i['disabled']]:
+                        return count
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
             inst_rows, inst_cols = self.calc_includes(i)
@@ -177,8 +172,13 @@ class Screen(QWidget):
             if 'disabled' in inst:
                 if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
                     continue
-                elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
-                    continue
+                elif isinstance(inst['disabled'],str):
+                    check_not = inst['disabled'].split(" ")
+                    if check_not[0].lower() == 'not':
+                        if self.parent.preferences['enabled'][check_not[1]]:
+                            continue
+                    elif not self.parent.preferences['enabled'][inst['disabled']]:
+                        continue
             if not parent_state:
                 # No parent state, set to False or this instrument specific state
                 state =  inst.get('display_state', False)
@@ -232,8 +232,13 @@ class Screen(QWidget):
                         gi_disabled = gi['options'].get('disabled', False)
                         if isinstance(gi_disabled,bool) and gi_disabled == True:
                             self.instruments[count].setVisible(False)
-                        elif isinstance(gi_disabled,str) and not self.parent.preferences['enabled'][gi_disabled]:
-                            self.instruments[count].setVisible(False)
+                        elif isinstance(gi_disabled,str):
+                            check_not = gi_disabled.split(" ")
+                            if check_not[0].lower() == 'not':
+                                if self.parent.preferences['enabled'][check_not[1]]:
+                                    self.instruments[count].setVisible(False)
+                            elif not self.parent.preferences['enabled'][gi_disabled]:
+                                self.instruments[count].setVisible(False)
                         else:
                             if state:
                                 self.display_state_inst[state].append(count)

@@ -69,6 +69,7 @@ styles:
 # 
 enabled:
   DEMO_TESTING_TEXT: false
+  VERSION_DISPLAY: true
   AIRCRAFT_IDENTIFIER: true
   PITCH_TRIM: true
   YAW_TRIM: true
