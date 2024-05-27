@@ -177,7 +177,20 @@ def main():
     # If running under systemd
     if environ.get('INVOCATION_ID', False):
         # and autostart is not true, exit
-        if not config.get('auto start', False): os._exit(0)
+        auto = config.get('auto start', False)
+        print(auto)
+        if isinstance(auto, str):
+            # Check preferecnes
+            if 'enabled' in preferences:
+                if not preferences['enabled'].get('AUTO_START', False):
+                    os._exit(0)
+            else:
+                # It is a string and we we cannot lookup enabled keys in preferences
+                # Assume false
+                os._exit(0)
+        elif not auto:
+            os._exit(0)
+
 
     log_config_file = args.log_config if args.log_config else config_file
 
