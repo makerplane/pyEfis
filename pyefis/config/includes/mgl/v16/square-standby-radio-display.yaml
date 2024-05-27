@@ -8,10 +8,11 @@ instruments:
       columns: 30
     preferences: TEXT5
     options:
-      font_mask: "100.000"
-      decimal_places: 3
+      font_mask: "100.0000"
+      decimal_places: 4
       dbkey: COMSTDFREQ{radio_id}
       encoder_order: 27
+      encoder_multiplier: 0.025
   - type: value_text
     row: 8
     column: 0

@@ -8,10 +8,11 @@ instruments:
       columns: 30
     preferences: TEXT1
     options:
-      font_mask: "000.000"
-      decimal_places: 3
+      font_mask: "000.0000"
+      decimal_places: 4
       dbkey: COMACTFREQ{radio_id}
       encoder_order: 24
+      encoder_multiplier: 0.025
   - type: value_text
     row: 8
     column: 0
