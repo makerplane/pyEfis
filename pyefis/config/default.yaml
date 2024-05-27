@@ -2,44 +2,7 @@ auto start: AUTO_START
 # For help configuring your screen layout visit:
 # https://github.com/makerplane/pyEfis/blob/master/docs/screenbuilder.md
 main:
-  # IP information for network adapter
-  FixServer: 127.0.0.1
-  FixPort: 3490
-
-  # Menu timeout in ms
-  # All this does is set fix key MENUITEM to True after a timeout
-  # Individual buttons need to have conditions that will show/hide the button
-  # based on the value of MENUITEM
-  # The main buttons included by default have such logic
-  # Uncomment the next line to enable this feature:
-  #button_timeout: 10000 
-
-  # Screen Geometry
-  # Defaults to screen size if screenWidth or screenHeight is not defined
-  #screenWidth: 1280
-  #screenHeight: 720
-  #screenWidth: 1024
-  #screenHeight: 768
-  #screenWidth: 1920
-  #screenHeight: 540
-  #screenHeight: 550
-  #screenHeight: 1080
-  #screenWidth: 640
-  #screenHeight: 480
-  #screenWidth: 3840
-  #screenHeight: 1100
-  # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: True
-
-  # Screen background color RGB
-  screenColor: (0,0,0)
-
-  # If left out the first defined screen will be default
-  defaultScreen: PFD
-
-  # nodeID, currently only used in touchscreen buttons
-  # the value will replace {id} in the button's dbkey
-  nodeID: 1
+  include: MAIN_CONFIG
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more

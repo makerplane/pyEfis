@@ -96,6 +96,8 @@ enabled:
 # Here you can define what include files are used to render some
 # portion of the screen so you can customize as needed easily
 includes:
+  # The main section of the configuration
+  MAIN_CONFIG: main/default.yaml
   # The include for the main navigations buttons:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
   # The include for the encoder button control feature
