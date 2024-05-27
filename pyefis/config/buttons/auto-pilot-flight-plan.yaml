@@ -22,11 +22,11 @@ conditions:
   - when: "CLICKED eq true and DBKEY eq false"
     actions:
       - set value: MAVREQTRIM, True
-      - set bg color: orange
+      - set bg color: yellow
   - when: "CLICKED eq true and DBKEY eq true"
     actions:
       - set value: MAVREQGUIDED, True
-      - set bg color: orange
+      - set bg color: yellow
   - when: "MAVMODE eq 'GUIDED'"
     actions:
       - button: checked
