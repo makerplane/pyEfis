@@ -11,7 +11,9 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
     if not cfg:
         # cfg only populated to process nested data
         if not bpath: bpath = fpath
-        cfg = yaml.safe_load(open(fname))
+        with open(fname) as cf:
+            cfg = yaml.safe_load(cf)
+
     new = {}
     if hasattr(cfg,'items'):
         for key, val in cfg.items():
@@ -71,7 +73,8 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
                                                 raise Exception(f"Cannot find include: {f}")
                                 else:
                                     raise Exception(f"Cannot find include: {f}")
-                            litems = yaml.safe_load(open(ifile))
+                            with open(ifile) as cf:
+                                litems = yaml.safe_load(cf)
                             if 'items' in litems:
                                 if litems['items'] != None:
                                     for a in litems['items']:
