@@ -14,12 +14,12 @@ conditions:
     # We are in cruise, requested mode is cruise but the button is off, drop to TRIM
     actions:
       - set value: MAVREQTRIM, True
-      - set bg color: orange
+      - set bg color: yellow
   - when: "CLICKED eq true and DBKEY eq true"
     # We a are on, FP is off, we are armed and not in cruise mode like we should be
     actions:
       - set value: MAVREQCRUISE, True
-      - set bg color: orange
+      - set bg color: yellow
   - when: "MAVMODE eq 'CRUISE'"
     actions:
       - set bg color: green

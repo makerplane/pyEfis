@@ -15,11 +15,11 @@ conditions:
       - set value: MAVREQADJ, false
   - when: "CLICKED eq true and DBKEY eq false and MAVMODE ne 'TRIM'"
     actions:
-      - set bg color: orange
+      - set bg color: yellow
       - set value: MAVREQADJ, false
   - when: "CLICKED eq true and DBKEY eq true and MAVMODE ne 'TRIM'"
     actions:
-      - set bg color: orange
+      - set bg color: yellow
       - set value: MAVREQADJ, true
   - when: "MAVSTATE eq 'ARMED' and MAVMODE ne 'TRIM' and MAVADJ eq true"
     actions:
