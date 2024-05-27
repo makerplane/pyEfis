@@ -277,6 +277,48 @@ instruments:
     options:
       dbkey: ACID 
       font_mask: NXXXXX
+  - type: static_text
+    disabled: VERSION_DISPLAY
+    row: 105
+    column: 0
+    span:
+      rows: 2.5
+      columns: 9
+    options:
+      text: "pyefis:"
+      font_mask: "pyefis:"
+      alignment: AlignRight
+  - type: value_text
+    disabled: VERSION_DISPLAY
+    row: 105
+    column: 9
+    span:
+      rows: 2.5
+      columns: 9
+    options:
+      dbkey: PYEFIS_VERSION
+      font_mask: X.X.XX
+  - type: static_text
+    disabled: VERSION_DISPLAY
+    row: 107
+    column: 0
+    span:
+      rows: 2.5
+      columns: 9
+    options:
+      text: "gateway:"
+      font_mask: "gateway:"
+      alignment: AlignRight
+  - type: value_text
+    disabled: VERSION_DISPLAY
+    row: 107
+    column: 9
+    span:
+      rows: 2.5
+      columns: 9
+    options:
+      dbkey: GATEWAY_VERSION
+      font_mask: X.X.XX
 
 
 
