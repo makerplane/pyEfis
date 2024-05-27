@@ -2,7 +2,7 @@ ANDROID:
   module: pyefis.screens.screenbuilder
   title: Screen Builder
   include:
-  - hmi/encoder_input.yaml
+  - HMI_ENCODER_BUTTONS
   layout:
     #draw_grid: true
     rows: 110

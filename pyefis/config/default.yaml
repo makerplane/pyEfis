@@ -1,83 +1,19 @@
-auto start: True
+auto start: AUTO_START
 # For help configuring your screen layout visit:
 # https://github.com/makerplane/pyEfis/blob/master/docs/screenbuilder.md
 main:
-  # IP information for network adapter
-  FixServer: 127.0.0.1
-  FixPort: 3490
-
-  # Menu timeout in ms
-  # All this does is set fix key MENUITEM to True after a timeout
-  # Individual buttons need to have conditions that will show/hide the button
-  # based on the value of MENUITEM
-  # The main buttons included by default have such logic
-  # Uncomment the next line to enable this feature:
-  #button_timeout: 10000 
-
-  # Screen Geometry
-  # Defaults to screen size if screenWidth or screenHeight is not defined
-  #screenWidth: 1280
-  #screenHeight: 720
-  #screenWidth: 1024
-  #screenHeight: 768
-  #screenWidth: 1920
-  #screenHeight: 540
-  #screenHeight: 550
-  #screenHeight: 1080
-  #screenWidth: 640
-  #screenHeight: 480
-  #screenWidth: 3840
-  #screenHeight: 1100
-  # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: True
-
-  # Screen background color RGB
-  screenColor: (0,0,0)
-
-  # If left out the first defined screen will be default
-  defaultScreen: PFD
-
-  # nodeID, currently only used in touchscreen buttons
-  # the value will replace {id} in the button's dbkey
-  nodeID: 1
+  include: MAIN_CONFIG
 
 # The keybindings are used to attach keystrokes to actions.  The key can be
 # a string that represents a key Sequence.  See the documentation for more
 # information about key sequences and actions.
 keybindings:
-  - key: X
-    action: exit
-
-  - key: A
-    action: Show Previous Screen
-
-  - key: S
-    action: Show Next Screen
-
-  - key: P
-    action: Show Screen
-    args: PFD
-
-  - key: M
-    action: Set Airspeed Mode
-
-  - key: "1"
-    action: Set EGT Mode
-    args: Normalize
-  - key: "2"
-    action: Set EGT Mode
-    args: Peak
-  - key: "3"
-    action: Set EGT Mode
-    args: Lean
-  - key: "4"
-    action: Set EGT Mode
-    args: Reset Peak
+  - include: KEYBINDING_CONFIG
 
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
-#databindings:
-
+databindings:
+  - include: DATABINDING_CONFIG
 
 # This section defines FIX IDs that we'll write out to the
 # FIX Gateway server.  Each can be defined as one of three
@@ -85,17 +21,8 @@ keybindings:
 # of the point and send the data at half that interval.
 # OnChange will send when the value is changed and Both will
 # do both.
-#outputs:
-#  BARO: onchange
-#  TRIMP: onchange
-#  TRIMR: onchange
-#  TRIMY: onchange
-#  APREQ: onchange
-#  APADJ: onchange
-
-# No need to change this.
-# To customize
-preferences: preferences.yaml
+outputs:
+  - include: OUTPUTS_CONFIG
 
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."
@@ -105,12 +32,12 @@ preferences: preferences.yaml
 
 screens:
   include: 
-  - screens/sixpack.yaml
-  - screens/android.yaml
-  - screens/pfd.yaml
-  - screens/radio.yaml
-  - screens/ems.yaml
-  - screens/ems2.yaml
+  - SCREEN_SIXPACK
+  - SCREEN_ANDROID
+  - SCREEN_PFD
+  - SCREEN_RADIO
+  - SCREEN_EMS
+  - SCREEN_EMS2
  
 # Hooks are user defined modules that are loaded at specific points
 # in the programs execution.  Right now their is only one place and
@@ -125,41 +52,5 @@ hooks:
 
 
 # Logging configuration - See Python logging.config module documenation
-# Logging configuration - See Python logging.config module documenation
 logging:
-  version: 1
-  disable_existing_loggers: False
-  loggers:
-    '':
-      # messages with levels below the one given will not be logged
-      #level: DEBUG
-      level: INFO
-      #level: WARNING
-      #level: ERROR
-      #level: CRITICAL
-
-      handlers: [stderr] #, file]
-      propagate: True
-
-  formatters:
-    standard:
-      format: "%(levelname)s:%(asctime)s:%(name)s - %(message)s"
-      datefmt: "%Y%m%d-%H:%M:%S"
-      class: logging.Formatter
-
-  handlers:
-    stderr:
-      class: logging.StreamHandler
-      formatter: standard
-      stream: ext://sys.stderr
-
-#    file:
-#      class: logging.FileHandler
-#      formatter: standard
-#      filename: "{SNAP_USER_COMMON}fixgw.log"
-#      mode: w
-#      mode: a
-
-    syslog:
-      class: logging.handlers.SysLogHandler
-      formatter: standard
+  include: LOGGING_CONFIG

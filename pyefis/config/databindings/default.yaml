@@ -1,0 +1,56 @@
+# Data bindings allow mapping data changes to actions
+# If you have an idea for some defaults we should include here
+# pull requests on github are welcome!
+
+items:
+# These button examples map BTN1 and BTN2 to activating
+# the button of the legacy menu.
+# Since the legacy menu is disabled by default so are 
+# these mappings:
+#  - key: BTN1
+#    condition: True
+#    action: Activate Menu Item
+#    args: 1
+#  - key: BTN2
+#    condition: True
+#    action: Activate Menu Item
+#    args: 2
+
+# This encoder example is also for the legacy menu
+#  - key: ENC1
+#    action: Menu Encoder
+#    args: <VALUE>   # This sends the data value to the action
+
+# This is an example that could still be useful
+# Currently the EMS button is set to turn red under 
+# some conditions, a low oil pressure like this 
+# could be added to that button.
+# The button could also, instead of turning red take you to the 
+# EMS screen like this configuration would do
+# Basically this is just an alternative way to
+# do the same things we can do within buttons
+#  - key: OILP1
+#    condition: < 25
+#    action: Show Screen
+#    args: EMS
+
+# Currently the hmi action class:
+# pyefis/hmi/actionclass.py
+# Supports the following actions that could be used here:
+# "set airspeed mode":self.setAirspeedMode,
+# "set egt mode":self.setEgtMode,
+# "show screen":self.showScreen,
+# "show next screen":self.showNextScreen,
+# "show previous screen":self.showPrevScreen,
+# "set value":functions.setValue,
+# "change value":functions.changeValue,
+# "toggle bit":functions.toggleBool,
+# "activate menu item":self.activateMenuItem,
+# "activate menu":activateMenu,
+# "menu encoder":self.menuEncoder,
+# "set menu focus":self.setMenuFocus,
+# "set instrument units":self.setInstUnits,
+# "exit":self.doExit,
+#
+# The button instrument can also call these as actions
+

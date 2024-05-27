@@ -68,6 +68,7 @@ styles:
 # Here you can enable or disble individual controls or gauges
 # 
 enabled:
+  AUTO_START: true
   DEMO_TESTING_TEXT: false
   VERSION_DISPLAY: true
   AIRCRAFT_IDENTIFIER: true
@@ -95,7 +96,27 @@ enabled:
 # Here you can define what include files are used to render some
 # portion of the screen so you can customize as needed easily
 includes:
+  # The main section of the configuration
+  MAIN_CONFIG: main/default.yaml
+  # The keybinding section of the configuration
+  KEYBINDING_CONFIG: keybindings/default.yaml
+  # The databinding section of the configuration
+  DATABINDING_CONFIG: databindings/default.yaml
+  # The outputs section of the configuration:
+  OUTPUTS_CONFIG: outputs/default.yaml
+  # The include for the main navigations buttons:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+  # The include for the encoder button control feature
+  HMI_ENCODER_BUTTONS: hmi/encoder_input.yaml
+  # The screen config files to load for the various default screens:
+  SCREEN_SIXPACK: screens/sixpack.yaml
+  SCREEN_ANDROID: screens/android.yaml
+  SCREEN_PFD: screens/pfd.yaml
+  SCREEN_RADIO: screens/radio.yaml
+  SCREEN_EMS: screens/ems.yaml
+  SCREEN_EMS2: screens/ems2.yaml
+  # Include file for logging configuration
+  LOGGING_CONFIG: logging/stderr-info.yaml
 
 # Here you can customize individual gauges on the screen
 # Maybe you want to display MAXCHT1 instead of H2OT1

@@ -1,7 +1,7 @@
 import yaml
 import os
 
-def from_yaml(fname,bpath=None,cfg=None,bc=[]):
+def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
     bc.append(fname)
     if len(bc) > 500:
         import pprint
@@ -29,14 +29,26 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[]):
                     if not os.path.exists(ifile):
                         # Use base path
                         ifile = bpath + '/' + f
-                    sub = from_yaml(ifile, bpath,bc=bc)
+                    if not os.path.exists(ifile):
+                        # Check preferences
+                        if 'includes' in preferences:
+                            pfile = preferences['includes'].get(f,False)
+                            if pfile:
+                                ifile = fpath + '/' + pfile
+                                if not os.path.exists(ifile):
+                                    ifile = bpath + '/' + pfile
+                                    if not os.path.exists(ifile):
+                                        raise Exception(f"Cannot find include: {f}")
+                        else:
+                            raise Exception(f"Cannot find include: {f}")
+                    sub = from_yaml(ifile, bpath,bc=bc,preferences=preferences)
                     if hasattr(sub,'items'):
                        for k, v in sub.items():
                            new[k] = v
                     else:
                         raise Exception(f"Include {val} from {fname} is invalid")                    
             elif isinstance(val, dict):
-                new[key] = from_yaml(fname,bpath,val,bc=bc)
+                new[key] = from_yaml(fname,bpath,val,bc=bc,preferences=preferences)
             elif isinstance(val, list):
                 new[key] = []
                 # Included array elements
@@ -47,10 +59,23 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[]):
                             if not os.path.exists(ifile):
                                 # Use base path
                                 ifile = bpath + '/' + l['include']
+                            if not os.path.exists(ifile):
+                                # Check preferences
+                                if 'includes' in preferences:
+                                    pfile = preferences['includes'].get(l['include'],False)
+                                    if pfile:
+                                        ifile = fpath + '/' + pfile
+                                        if not os.path.exists(ifile):
+                                            ifile = bpath + '/' + pfile
+                                            if not os.path.exists(ifile):
+                                                raise Exception(f"Cannot find include: {f}")
+                                else:
+                                    raise Exception(f"Cannot find include: {f}")
                             litems = yaml.safe_load(open(ifile))
                             if 'items' in litems:
-                                for a in litems['items']:
-                                    new[key].append(a)
+                                if litems['items'] != None:
+                                    for a in litems['items']:
+                                        new[key].append(a)
                             else:
                                 raise Exception(f"Error in {ifile}\nWhen including list items they need listed under 'items:' in the include file")
                         else:

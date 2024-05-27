@@ -2,7 +2,7 @@
 PFD:
   include:
   - screens/virtualvfr_db.yaml
-  - hmi/encoder_input.yaml
+  - HMI_ENCODER_BUTTONS
     #refresh_period: 0.25
   module: pyefis.screens.screenbuilder
   title: Screen Builder

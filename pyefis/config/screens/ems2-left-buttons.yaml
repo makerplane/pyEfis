@@ -1,5 +1,5 @@
 EMS2:
-  include: hmi/encoder_input.yaml
+  include: HMI_ENCODER_BUTTONS
   module: pyefis.screens.screenbuilder
   title: Engine Management New
   layout:

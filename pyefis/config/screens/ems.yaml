@@ -1,7 +1,7 @@
 EMS:
   include:
   - screens/virtualvfr_db.yaml
-  - hmi/encoder_input.yaml
+  - HMI_ENCODER_BUTTONS
   module: pyefis.screens.screenbuilder
   title: Engine Management New
   layout:
