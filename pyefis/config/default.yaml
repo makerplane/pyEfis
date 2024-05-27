@@ -21,13 +21,8 @@ databindings:
 # of the point and send the data at half that interval.
 # OnChange will send when the value is changed and Both will
 # do both.
-#outputs:
-#  BARO: onchange
-#  TRIMP: onchange
-#  TRIMR: onchange
-#  TRIMY: onchange
-#  APREQ: onchange
-#  APADJ: onchange
+outputs:
+  - include: OUTPUTS_CONFIG
 
 # Screen definitions describe the screens that will be loaded
 # and ready for use.  Each section should start with "Screen."

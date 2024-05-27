@@ -1,0 +1,15 @@
+# Here would can set a list of fixids to
+# have their values sent to the FIX Gateway 
+# whenever the value changes ( onchange )
+# or at an interval ( interval )
+# This is necessary whenever data is changed and pyefis 
+# AND you want that data avaliable to the FIX Gateway
+# or other things connected to the gateway.
+#
+# Currently the default screen buttons that change data
+# do not require this feature. if a button changes a value
+# it always outputs that value
+
+items:
+#  BARO: onchange
+#  MYCUSTOMKEY: interval

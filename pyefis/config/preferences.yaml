@@ -102,6 +102,8 @@ includes:
   KEYBINDING_CONFIG: keybindings/default.yaml
   # The databinding section of the configuration
   DATABINDING_CONFIG: databindings/default.yaml
+  # The outputs section of the configuration:
+  OUTPUTS_CONFIG: outputs/default.yaml
   # The include for the main navigations buttons:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
   # The include for the encoder button control feature
