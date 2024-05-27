@@ -16,6 +16,7 @@ style:
 #  - segmented
 #  - dseg
 #  - ghost
+#  - 8khz #Change radio to 8.33Khz channels, default is 25Khz
 # This section defines options required to change to the selected style
 # The sort of settings you would find in common options of ganged gauges
 # The settings can be combined
@@ -567,8 +568,15 @@ gauges:
       segmented:
         segments: 22
 
-#  TEXT1:
+  TEXT1:
     #Radio Active Freq
+    styles:
+      8khz:
+        encoder_multiplier: 0.008333333333
+      ghost:
+        font_ghost_mask: "~~~~~~~~"
+      dseg:
+        font_family: "DSEG14 Classic"
 
   TEXT2:
     #RAdio act freq name
@@ -588,8 +596,15 @@ gauges:
       ghost:
         font_ghost_mask: "~~~~~~~~"
 
-#  TEXT5:
+  TEXT5:
     #Radio Standby Freq
+    styles:
+      8khz:
+        encoder_multiplier: 0.008333333333
+      ghost:
+        font_ghost_mask: "~~~~~~~~"
+      dseg:
+        font_family: "DSEG14 Classic"
 
   TEXT6:
     #RAdio standby freq name
