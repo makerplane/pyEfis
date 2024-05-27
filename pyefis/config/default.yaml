@@ -101,12 +101,12 @@ keybindings:
 
 screens:
   include: 
-  - screens/sixpack.yaml
-  - screens/android.yaml
-  - screens/pfd.yaml
-  - screens/radio.yaml
-  - screens/ems.yaml
-  - screens/ems2.yaml
+  - SCREEN_SIXPACK
+  - SCREEN_ANDROID
+  - SCREEN_PFD
+  - SCREEN_RADIO
+  - SCREEN_EMS
+  - SCREEN_EMS2
  
 # Hooks are user defined modules that are loaded at specific points
 # in the programs execution.  Right now their is only one place and
