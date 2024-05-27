@@ -1,5 +1,5 @@
 name: pyefis
-adopt-info: data
+adopt-info: pyefis
 grade: stable
 license: GPL-2.0+
 summary: pyEFIS Open Source Avionics Application
