@@ -98,6 +98,8 @@ enabled:
 includes:
   # The main section of the configuration
   MAIN_CONFIG: main/default.yaml
+  # The keybinding section of the configuration
+  KEYBINDING_CONFIG: keybindings/default.yaml
   # The include for the main navigations buttons:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
   # The include for the encoder button control feature

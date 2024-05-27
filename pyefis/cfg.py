@@ -59,6 +59,18 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
                             if not os.path.exists(ifile):
                                 # Use base path
                                 ifile = bpath + '/' + l['include']
+                            if not os.path.exists(ifile):
+                                # Check preferences
+                                if 'includes' in preferences:
+                                    pfile = preferences['includes'].get(l['include'],False)
+                                    if pfile:
+                                        ifile = fpath + '/' + pfile
+                                        if not os.path.exists(ifile):
+                                            ifile = bpath + '/' + pfile
+                                            if not os.path.exists(ifile):
+                                                raise Exception(f"Cannot find include: {f}")
+                                else:
+                                    raise Exception(f"Cannot find include: {f}")
                             litems = yaml.safe_load(open(ifile))
                             if 'items' in litems:
                                 for a in litems['items']:
