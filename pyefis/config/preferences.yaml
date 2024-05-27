@@ -119,6 +119,8 @@ includes:
   SCREEN_EMS2: screens/ems2.yaml
   # Include file for logging configuration
   LOGGING_CONFIG: logging/stderr-info.yaml
+  # File that defines what lists are included in the radio listbox
+  RADIO_LISTBOX: lists/radio/listbox.yaml  
 
 # Here you can customize individual gauges on the screen
 # Maybe you want to display MAXCHT1 instead of H2OT1

@@ -1,0 +1,17 @@
+instruments:
+  - type: listbox
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 54
+    options:
+# Clone this file, edit the lists below
+# then update RADIO_LISTBOX in preferences.yaml.custom
+# to customize the lists
+      encoder_order: 28
+      lists:
+        - name: Favorites
+          file: lists/radio/favorites.yaml
+        - name: Ohio
+          file: lists/radio/ohio.yaml

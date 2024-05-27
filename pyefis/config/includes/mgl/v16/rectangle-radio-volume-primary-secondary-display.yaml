@@ -48,16 +48,10 @@ instruments:
       config: buttons/mgl/v16/swap-active-standby.yaml
       font_mask: "SWAP"
       encoder_order: 26
-  - type: listbox
+  - type: include,lists/radio/listbox.yaml
     row: 0
     column: 101
     span:
       rows: 40
       columns: 54
-    options:
-      encoder_order: 28
-      lists:
-        - name: Favorites
-          file: lists/radio/favorites.yaml
-        - name: Ohio
-          file: lists/radio/ohio.yaml
+
