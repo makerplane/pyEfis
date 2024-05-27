@@ -2,7 +2,7 @@ SIXPACK:
   module: pyefis.screens.screenbuilder
   title: Standard Instrument Panel New
   include:
-  - hmi/encoder_input.yaml
+  - HMI_ENCODER_BUTTONS
   layout:
     rows: 110
     columns: 200

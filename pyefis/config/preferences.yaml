@@ -96,7 +96,7 @@ enabled:
 # portion of the screen so you can customize as needed easily
 includes:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
-
+  HMI_ENCODER_BUTTONS: hmi/encoder_input.yaml
 # Here you can customize individual gauges on the screen
 # Maybe you want to display MAXCHT1 instead of H2OT1
 # You can make such changes in this section
