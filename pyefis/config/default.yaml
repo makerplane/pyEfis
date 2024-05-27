@@ -12,8 +12,8 @@ keybindings:
 
 # Data bindings tie actions to values in teh database
 # key is the database key and should match the FIX Gateway key
-#databindings:
-
+databindings:
+  - include: DATABINDING_CONFIG
 
 # This section defines FIX IDs that we'll write out to the
 # FIX Gateway server.  Each can be defined as one of three
