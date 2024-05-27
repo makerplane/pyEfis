@@ -9,7 +9,7 @@ conditions:
     continue: true
   - when: "SCREEN ne 'ANDROID'"
     actions:
-      - set text: MAP
+      - set text: Map
       - set bg color: lightgray
     continue: true
   - when: "CLICKED eq true and SCREEN ne 'ANDROID'" 
