@@ -1,6 +1,6 @@
 type: repeat
 text: ""
-dbkey: BTNDIMUP
+dbkey: TSBTN{id}27
 transparent: true
 repeat_interval: 50
 repeat_delay: 100
