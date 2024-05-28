@@ -8,11 +8,13 @@ instruments:
       rows: 40
       columns: 30 
     groups:
-      - name: CHT
+      - name: EGT
         gap: 0
         common_options:
+          egt_mode_switching: true
+          normalize_range: 400
           temperature: true
-          highlight_key: CHTMAX1
+          highlight_key: EGTMAX1
           decimal_places: 0
           show_units: true
           small_font_percent: 0.060
@@ -21,20 +23,11 @@ instruments:
           line_width_percent: 0.7
           text_gap: 8
         instruments:
-              -
-                options:
-                  name: "CHT 1"
-                  dbkey: CHT11
-              -
-                options:
-                  name: "CHT 2"
-                  dbkey: CHT12
-              -
-                options:
-                  name: "CHT 3"
-                  dbkey: CHT13
-              -
-                options:
-                  name: "CHT 4"
-                  dbkey: CHT14
-
+          -
+            options:
+              name: "EGT 1"
+              dbkey: EGT11
+          -
+            options:
+              name: "EGT 2"
+              dbkey: EGT12

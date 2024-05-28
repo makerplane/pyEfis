@@ -689,9 +689,11 @@ KEY.aux.max
 etc etc
 ```
 
-In addition to those variables the variables `CLICKED` and `SCREEN` are also provided.
+In addition to those variables the variables `DBKEY`, `CLICKED`, `SCREEN` and `PREVIOUS_CONDITION` are also provided.
+DBKEY provides the boolean value of the button dbkey, mostly useful in toggle buttons where you might want to know if the state is pressed (true) or released (false).
 SCREEN will contain the value of the screen name
 CLICKED will be true if the user has clicked the button to trigger evaluation of the conditions and false if the evaluation was triggered from just data changes.
+PREVIOUS_CONDITION is a boolean that contains the results of the previous condition evaluation. Can be used to implemented a sort of if/else between two conditions.
 
 Here is a list of all the actions:
 
@@ -1063,3 +1065,143 @@ Options:
   * ini
   * command
   * args
+
+
+
+# Preferences #
+Preferences is a way to define various styles or options that can be turned on or off from a single configuration file. Obviously not everyone will have the exact same hardware so our example screens are unlikely to work for anyone without making numerous changes. Additionally, if someone wants slightly different options for a large portion of the instruments they would not want to edit those settings in dozens of places.
+
+The goal with this is to hopefully develop example screens and preferences that meet most users needed so they can focus on using pyEFIS rather than tinkering with it.
+
+## preferences.yaml & preferences.yaml.custom ##
+This file contains the preferences and options avaliable by default. You should not edit this file, if you want to make changes edit the `preferences.yaml.custom` file.  The resulting preferences will be the combination of both files with the `preferences.yaml.custom` file overriding any conflicting settings in the two files.
+
+### style ###
+The style section is where you pick what style(s) you want applied.
+Example selecting basic and segmented styles:
+```
+style:
+- basic
+- segmented
+```
+
+### styles ###
+The styles section defines the various styles avaliable The schema is:
+```
+styles:
+  TYPE_OF_GAUGE1:
+    STYLE_NAME1:
+      Settings needed to apply the style fo TYPE_OF_GAUGE1
+    STYLE_NAME2:
+      Settings needed to apply the style fo TYPE_OF_GAUGE1
+  TYPE_OF_GAUGE2:
+    STYLE_NAME1:
+      Settings needed to apply the style fo TYPE_OF_GAUGE2
+    STYLE_NAME2:
+      Settings needed to apply the style fo TYPE_OF_GAUGE2
+```
+TYPE_OF_GAUGE should match the gauge names, without the numbers, that are listed in the `gauges` sction
+
+For example if in gauges you have:  
+```
+gauges:
+  ARC1:
+    name: RPM
+    dbkey: TACH1
+    decimal_places: 0
+    temperature: false
+    show_units: false
+  ARC2:
+    name: Oil Press
+    dbkey: OILP1
+    decimal_places: 0
+    temperature: false
+    show_units: false
+```
+
+syles that apply to all `ARC` gauges would be defined with:
+```
+styles:
+  ARC:
+    STYLE_NAME:
+      settings needed for style
+```
+
+You can use the default names of `ARC`, `BAR` and `TEXT` or create your own if needed
+
+
+### gauges ###
+The gauges sections serves two purposes. Maybe you do not want the ARC1 gauges to be a tachometer, instead you want it to be the Maximum EGT. You could copy the ARC1 section from `preferences.yaml` to `preferences.yaml.custom` then edit it.
+preferences.yaml:
+```
+gauges:
+  ARC1:
+    name: RPM
+    dbkey: TACH1
+    decimal_places: 0
+    temperature: false
+    show_units: false
+```
+
+In your preferences.yaml.custom file:
+```
+gauges:
+  ARC1:
+    name: MAX EGT
+    dbkey: EGTMAX1
+    temperature: True
+    show_units: True
+```
+
+The second purpose of the gauges sections is to apply specific style settings for individual gauges.  As an example, the `segmented` style for BAR32 uses a different number of segments than what is defined in the `styles` section. So the segments setting is modified for BAR32:
+```
+  BAR32:
+    # Radio Aux Vol
+    styles:
+      segmented:
+        segments: 22
+```
+
+### enabled ###
+The enabled section is where you can turn various things on or off. Within screen builder configs when an instrument has the option `disabled` defined and it is a string rather than a boolean, the actually boolean value will be set to the value of that string as defined in the enabled section. You can also use `not ENABLED_NAME` to disable when `ENABLED_NAME: true` or enable when it is set false. With `not` you can turn on thing on and another off with a single setting.
+
+Example, in the config file `includes/bars/vertical/4_CHT.yaml` an instrument has the option `disabled` set to the string `CYLINDER_``:
+```
+        instruments:
+            -
+              preferences: BAR15
+              options:
+                disabled: CYLINDER_1
+```
+The actual value used for disabled will be looked up in the enabled section and set to the value defined:
+```
+enabled:
+  CYLINDER_1: true
+```
+
+This allows you to customize the default screens by simply setting options to true or false. Maybe you only have a two cylinder engine, not four. in your `preferences.yaml.custom` you could define:
+```
+enabled:
+  CYLINDER_1: true
+  CYLINDER_2: true
+  CYLINDER_3: false
+  CYLINDER_4: false
+
+```
+Now the EGT and CHT displays will only show two cylinders.
+
+Another example, the trim controls are not shown by default because `TRIM_CONTROLS` is set to `false` in preferences.yaml. You only have a pitch trim, not roll and yaw. In the `preferneces.yaml.custom` you would define:
+```
+enabled:
+  PITCH_TRIM: true
+  YAW_TRIM: false
+  ROLL_TRIM: false
+  TRIM_CONTROLS: true
+```
+
+### includes ###
+The includes section is used to change what screen builder config file is used for a specific include. An example of using this is to replace the set of buttons on the right side of the screen.  That include is used within many screen builder configs, instead of editing each of the config files we can simply define the include with a key name, then in the includes section define that key and the name of the actual file you want to load. 
+```
+includes:
+  BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+```

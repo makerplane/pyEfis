@@ -119,6 +119,7 @@ class DataBinding(object):
 
 
 def initialize(config):
+    if config == None: return
     for x in config:
         try:
             d = DataBinding(x)

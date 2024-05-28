@@ -1,0 +1,32 @@
+instruments:
+  - type: ganged_vertical_bar_gauge
+    gang_type: horizontal
+    ratio: 0.2
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 45
+    groups:
+      - name: FUEL
+        gap: 0 
+        common_options:
+          show_units: true
+          small_font_percent: 0.060
+          big_font_percent: 0.085
+          bar_width_percent: 0.5
+          line_width_percent: 0.7
+          text_gap: 8
+        instruments:
+          -
+            preferences: BAR1
+          -   
+            preferences: BAR2
+          - 
+            preferences: BAR3
+          -
+            preferences: BAR4
+          -
+            preferences: BAR5
+          -
+            preferences: BAR6

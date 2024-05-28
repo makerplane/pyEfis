@@ -53,13 +53,14 @@ class Button(QWidget):
         self._style['bg'] = QColor(self.config.get('bg_color',"lightgray"))
         self._style['fg'] = QColor(self.config.get('fg_color',"black"))
         self._style['transparent'] = self.config.get('transparent',False)
-
+        self._buttonhide = self.config.get("hover_show", False)
         self._title = ""
         self._toggle = False
         # Repalce {id} in the dbkey so we can have different 
         # button names per node without having 
         # to duplicate all buttons.
         self._dbkey = fix.db.get_item(self.config['dbkey'].replace('{id}', str(self.parent.parent.nodeID)))
+        self.block_data = False
         time.sleep(0.01)
         #self._button.setChecked(self._dbkey.value)
 
@@ -70,7 +71,12 @@ class Button(QWidget):
         if self.config['type'] == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
+            # toggled reacts to setChecked where clicked does not
+            # Helps to prevent erronious recursion
+            # However not using toggled for toggle buttons breaks
+            # things such as encoder navigation
             self._button.toggled.connect(self.buttonToggled)
+
         elif self.config['type'] == 'simple':
             self._button.setCheckable(False)
             self._button.clicked.connect(self.buttonToggled)
@@ -94,6 +100,11 @@ class Button(QWidget):
         self._button.setChecked(self._dbkey.value)
         self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
         self.processConditions()
+
+    def enterEvent(self, QEvent):
+        if self._buttonhide:
+            # Show menu if hover over it
+            fix.db.set_value('HIDEBUTTON', False)
 
     def isEnabled(self):
         return self._button.isEnabled()
@@ -126,6 +137,7 @@ class Button(QWidget):
         time.sleep(0.01)
 
     def dataChanged(self,key=None,signal=None):
+        logger.debug(f"dataChanged key={key} signal={signal}")
         if signal == 'value':
             self._db_data[key] = self._db[key].value
         elif signal == 'old':
@@ -162,11 +174,15 @@ class Button(QWidget):
         # Button can be toggled by _dbkey or by clicking the button
         # Make sure they stay in sync
         logger.debug(f"{self._button.text()}:buttonToggled:self._button.isChecked({self._button.isChecked()})")
-        #if not self.isVisible(): return
+        if not self.isVisible(): return
 
         # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
+            self.block_data = True
             fix.db.set_value(self._dbkey.key, self._button.isChecked())
+            #self._dbkey.set_value = self._button.isChecked()
+            self._dbkey.output_value()
+            self.block_data = False
             # Now we evaluate conditions and update the button style/text/state
             self.processConditions(True)
             #fix.db.set_value(self._dbkey.key, self._button.isChecked())
@@ -177,13 +193,18 @@ class Button(QWidget):
 
 
     def dbkeyChanged(self,data):
+        if self.block_data: 
+            logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()}) - processing blocked!")
+            return
         if self._dbkey.bad:
             return
         # The same button configuration might be used on multiple screens
         # Only buttons on the active screen should be changing.
         logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()})")
         self._db_data[self._dbkey.key] = self._dbkey.value
-        #if not self.isVisible(): return
+        #self._dbkey.output_value()
+
+        if not self.isVisible(): return
         #self._db_data[self._dbkey.key] = self._dbkey.value
         if self._toggle and self._button.isChecked() == self._dbkey.value:
             #This is a recursive call do nothing
@@ -225,20 +246,32 @@ class Button(QWidget):
     def showEvent(self,event):
         self.processConditions()
         # Do we need to only do this for toggle buttons?
-        self._button.setChecked(self._dbkey.value)
+        if self._toggle: 
+            self._button.setChecked(self._dbkey.value)
 
     def processConditions(self,clicked=False):
         self._db_data['SCREEN'] = self.parent.screenName
         self._db_data['CLICKED'] = clicked
+        self._db_data['DBKEY'] = self._dbkey.value 
+        self._db_data["PREVIOUS_CONDITION"] = False
         logger.debug(f"{self._dbkey.key}:{self._dbkey.value}")
         for cond in self._conditions:
             if 'when' in cond:
                 if type(cond['when']) == str:
                     expr = pc.to_struct(pc.tokenize(cond['when'], sep=' ', brkts='[]'))
                     if pc.pycond(expr)(state=self._db_data) == True:
+                        self._db_data["PREVIOUS_CONDITION"] = True
                         logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} = True")
                         self.processActions(cond['actions'])
-                        if not cond.get('continue', False): return
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} conditions processed")
+                        if not cond.get('continue', False): 
+                            logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} Does not continue")
+                            return
+                        else:
+                            logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} continues")
+                    else:
+                        self._db_data["PREVIOUS_CONDITION"] = False
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:{cond['when']} = False")
                 elif type(cond['when']) == bool:
                     if cond['when']:
                         if self._button.isChecked() or self._toggle == False:
@@ -253,6 +286,12 @@ class Button(QWidget):
     def processActions(self,actions):
         for act in actions:
             for action,args in act.items():
+                set_block = False
+                if action == 'set value':
+                    args_data = args.split(',')
+                    if args_data[0] in self._db or args_data[0] == self._dbkey.key:
+                        self.block_data = True
+                        set_block = True
                 try:
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Tried")
                     hmi.actions.trigger(action, args)
@@ -260,6 +299,8 @@ class Button(QWidget):
                 except:
                     self.setStyle(action,args)
                     logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:STYLE:{action}:{args}")
+                if set_block:
+                    self.block_data = False
 
     def setStyle(self,action='',args=None):
 
@@ -274,10 +315,19 @@ class Button(QWidget):
               self._button.setEnabled(False)
             elif args.lower() == 'enable':
               self._button.setEnabled(True)
-            elif args.lower() == 'checked':
+            elif args.lower() == 'checked' and not self._button.isChecked():
+                self._button.blockSignals(True)
                 self._button.setChecked(True)
-            elif args.lower() == 'unchecked':
+                self._dbkey.value = True
+                self._dbkey.output_value()
+                self._button.blockSignals(False)
+
+            elif args.lower() == 'unchecked' and self._button.isChecked():
+                self._button.blockSignals(True)
                 self._button.setChecked(False)
+                self._dbkey.value = False
+                self._dbkey.output_value()
+                self._button.blockSignals(False)
 
         self._style['border_size'] = qRound(self._button.height() * 6/100)
         self.font = QFont(self.font_family)
@@ -291,7 +341,7 @@ class Button(QWidget):
         if self._style['transparent']:
             self._button.setStyleSheet(f"QPushButton {{border: 1px solid {bg_color.name()}; background: transparent;border-radius: 6px}}")# border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {self._style['bg'].name()}, stop: 1 {self._style['bg'].lighter(110).name()});border-style:inset}}")
         else:
-            self._button.setStyleSheet(f"QPushButton {{border: 2px solid {bg_color.darker(130).name()};border-radius: 6px; background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.lighter(110).name()}, stop: 1 {bg_color.name()});border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.name()}, stop: 1 {bg_color.lighter(110).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.name()}, stop: 1 {bg_color.lighter(110).name()});border-style:inset}}")
+            self._button.setStyleSheet(f"QPushButton {{border: 2px solid {bg_color.darker(150).name()};border-radius: 10%; background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.lighter(130).name()}, stop: 1 {bg_color.name()});border-style: outset; border-width: {self._style['border_size']}px;color:{self._style['fg'].name()}}} QPushButton:pressed {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.name()}, stop: 1 {bg_color.lighter(190).name()});border-style:inset}} QPushButton:checked {{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 {bg_color.name()}, stop: 1 {bg_color.lighter(190).name()});border-style:inset}}")
 
         self._button.setFont(self.font)
 
@@ -302,7 +352,8 @@ class Button(QWidget):
     # Highlight this instrument to show it is the current selection
     def enc_highlight(self,onoff):
         if onoff:
-            self._style['bg_override'] = QColor('orange') 
+            self._style['bg_override'] = QColor('orange')
+            fix.db.set_value('HIDEBUTTON', False) 
         else:
             self._style['bg_override'] = None 
         self.setStyle()

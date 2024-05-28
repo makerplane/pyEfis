@@ -1,0 +1,39 @@
+# Example primary flight display
+PFD:
+  include:
+  - screens/virtualvfr_db.yaml
+  - HMI_ENCODER_BUTTONS
+    #refresh_period: 0.25
+  module: pyefis.screens.screenbuilder
+  title: Screen Builder
+  layout:
+    #draw_grid: true
+    rows: 110
+    columns: 200
+    display_state:
+      interval: 3000
+      states: 2
+  instruments:
+    - type: include,includes/ahrs/virtual_vfr.yaml
+      row: 0
+      column: 45
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      row: 0
+      column: 14.5
+    - type: include,BUTTON_GROUP1
+      row: 0
+      column: 0
+    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
+      row: 70
+      column: 0
+      display_state: 1
+    - type: include,includes/mgl/v16/square-active-radio-display.yaml
+      row: 70
+      column: 0
+      span:
+        rows: 40
+        columns: 45
+      display_state: 2
+      replace:
+        radio_id: 1
+

@@ -1,0 +1,36 @@
+  version: 1
+  disable_existing_loggers: False
+  loggers:
+    '':
+      # messages with levels below the one given will not be logged
+      level: DEBUG
+      #level: INFO
+      #level: WARNING
+      #level: ERROR
+      #level: CRITICAL
+
+      handlers: [stderr, file]
+      propagate: True
+
+  formatters:
+    standard:
+      format: "%(levelname)s:%(asctime)s:%(name)s - %(message)s"
+      datefmt: "%Y%m%d-%H:%M:%S"
+      class: logging.Formatter
+
+  handlers:
+    stderr:
+      class: logging.StreamHandler
+      formatter: standard
+      stream: ext://sys.stderr
+
+    file:
+      class: logging.FileHandler
+      formatter: standard
+      filename: "{SNAP_USER_COMMON}pyefis.log"
+      mode: a
+
+    syslog:
+      class: logging.handlers.SysLogHandler
+      formatter: standard
+

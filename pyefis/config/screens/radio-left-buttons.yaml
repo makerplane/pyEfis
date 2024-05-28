@@ -1,0 +1,60 @@
+# This is a work in progress for a radio interface
+# Eric plans to purchase an MGL V16 radio, once in hand 
+# development on this feature will continue
+RADIO:
+  include:
+  - screens/virtualvfr_db.yaml
+  - HMI_ENCODER_BUTTONS
+  module: pyefis.screens.screenbuilder
+  title: Radio Screen
+  layout:
+    rows: 110
+    columns: 200
+    #draw_grid: true
+  instruments:
+    - type: value_text
+      disabled: DEMO_TESTING_TEXT
+      row: 103
+      column: 30
+      span:
+        rows: 6
+        columns: 60
+      options:
+        dbkey: MAVMSG
+        font_percent: 0.9
+    - type: include,includes/ahrs/virtual_vfr.yaml
+      disabled: false
+      row: 0
+      column: 75
+      span:
+        rows: 70
+        columns: 125
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      row: 0
+      column: 44.5
+    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+      row: 0
+      column: 14.5
+    - type: include,BUTTON_GROUP1
+      row: 0
+      column: 0
+    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
+      row: 70
+      column: 155
+    - type: include,includes/mgl/v16/rectangle-radio-volume-primary-secondary-display.yaml
+      replace:
+        radio_id: 1 # {radio_id} is replaced anywhere it appears in the included config
+                    # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
+      row: 71
+      column: 0
+    - type: include,includes/mgl/v16/rectangle-radio-volume-primary-secondary-display.yaml
+      disabled: true
+      replace:
+        radio_id: 2 # {radio_id} is replaced anywhere it appears in the included config
+                    # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
+      row: 0
+      column: 0
+      span:
+        rows: 18
+        columns: 75
+

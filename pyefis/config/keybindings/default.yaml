@@ -1,0 +1,31 @@
+# List of default key bindings
+items:
+  - key: X
+    action: exit
+
+  - key: A
+    action: Show Previous Screen
+
+  - key: S
+    action: Show Next Screen
+
+  - key: P
+    action: Show Screen
+    args: PFD
+
+  - key: M
+    action: Set Airspeed Mode
+
+  - key: "1"
+    action: Set EGT Mode
+    args: Normalize
+  - key: "2"
+    action: Set EGT Mode
+    args: Peak
+  - key: "3"
+    action: Set EGT Mode
+    args: Lean
+  - key: "4"
+    action: Set EGT Mode
+    args: Reset Peak
+

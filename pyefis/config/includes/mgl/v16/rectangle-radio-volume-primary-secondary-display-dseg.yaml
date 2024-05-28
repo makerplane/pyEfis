@@ -1,5 +1,5 @@
 instruments:
-  - type: include,includes/mgl/v16/volumes.yaml
+  - type: include,includes/mgl/v16/radio-volumes-controls-display-dseg.yaml
     row: 0
     column: 0
     span:
@@ -11,6 +11,7 @@ instruments:
     span:
       rows: 5
       columns: 20
+    preferences: TEXT3
     options:
       text: "Active:"
       font_mask: "XXXXXXX:"
@@ -21,17 +22,18 @@ instruments:
     span:
       rows: 5
       columns: 20
+    preferences: TEXT4
     options:
       text: "Standby:"
       font_mask: "XXXXXXX:"
       alignment: AlignLeft
-  - type: include,includes/mgl/v16/active-display.yaml
+  - type: include,includes/mgl/v16/square-active-radio-display-dseg.yaml
     row: 5
     column: 28
 #    span:
 #      rows: 27
 #      columns: 42
-  - type: include,includes/mgl/v16/standby-display.yaml
+  - type: include,includes/mgl/v16/square-standby-radio-display.yaml
     row: 5
     column: 65
   - type: button
@@ -46,16 +48,9 @@ instruments:
       config: buttons/mgl/v16/swap-active-standby.yaml
       font_mask: "SWAP"
       encoder_order: 26
-  - type: listbox
+  - type: include,lists/radio/listbox.yaml
     row: 0
     column: 101
     span:
       rows: 40
       columns: 54
-    options:
-      encoder_order: 28
-      lists:
-        - name: Favorites
-          file: lists/radio/favorites.yaml
-        - name: Ohio
-          file: lists/radio/ohio.yaml

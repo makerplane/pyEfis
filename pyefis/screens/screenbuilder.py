@@ -82,16 +82,6 @@ class Screen(QWidget):
 
         self.init= False
 
-        # Hack to prevent exception at startup that happens
-        # when pyefis is started before fixgateway
-        loaded = False
-        while not loaded:
-            try:
-                fix.db.get_item("ZZLOADER")
-                loaded = True
-            except:
-                logger.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
-                time.sleep(2)
         # list of dial types supported so far:
         # airspeed_dial
         # airspeed_trend_tape # Testing to do
@@ -112,7 +102,12 @@ class Screen(QWidget):
 
     def calc_includes(self,i):
         args = i['type'].split(',')
-        iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        if os.path.exists(os.path.join(self.parent.config_path,args[1])):
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+        elif self.parent.preferences['includes'][args[1]]:
+            iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
+        else:
+            raise Exception(f"Include file '{args[1]}' not found")
         insts = iconfig['instruments']
         inst_rows = 0
         inst_cols = 0
@@ -146,6 +141,16 @@ class Screen(QWidget):
         span_rows = 0
         span_cols = 0
         if 'include,' in i['type']:
+            if 'disabled' in i:
+                if isinstance(i['disabled'],bool) and i['disabled'] == True:
+                    return count
+                elif isinstance(i['disabled'],str):
+                    check_not = i['disabled'].split(" ")
+                    if check_not[0].lower() == 'not':
+                        if self.parent.preferences['enabled'][check_not[1]]:
+                            return count
+                    elif not self.parent.preferences['enabled'][i['disabled']]:
+                        return count
             relative_x = i.get('row', 0)
             relative_y = i.get('column', 0)
             inst_rows, inst_cols = self.calc_includes(i)
@@ -153,12 +158,27 @@ class Screen(QWidget):
                 span_rows = i['span'].get('rows',0)
                 span_cols = i['span'].get('columns',0)
             args = i['type'].split(',')
-            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            if os.path.exists(os.path.join(self.parent.config_path,args[1])):
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
+            elif self.parent.preferences['includes'][args[1]]:
+                iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
+            else:
+                raise Exception(f"Include file '{args[1]}' not found")
             insts = iconfig['instruments']
 
         else:
             insts = [i]
         for inst in insts:
+            if 'disabled' in inst:
+                if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
+                    continue
+                elif isinstance(inst['disabled'],str):
+                    check_not = inst['disabled'].split(" ")
+                    if check_not[0].lower() == 'not':
+                        if self.parent.preferences['enabled'][check_not[1]]:
+                            continue
+                    elif not self.parent.preferences['enabled'][inst['disabled']]:
+                        continue
             if not parent_state:
                 # No parent state, set to False or this instrument specific state
                 state =  inst.get('display_state', False)
@@ -209,21 +229,46 @@ class Screen(QWidget):
                         gi['type'] = inst['type'].replace('ganged_','')
                         gi['options'] = g.get('common_options', dict())|gi.get('options',dict()) #Merge with common_options losing the the instrument
                         self.setup_instruments(count,gi,ganged=True,replace=this_replacements,state=state)
-                        if state:
-                            self.display_state_inst[state].append(count)
-                            if state > 1:
+                        gi_disabled = gi['options'].get('disabled', False)
+                        if isinstance(gi_disabled,bool) and gi_disabled == True:
+                            self.instruments[count].setVisible(False)
+                        elif isinstance(gi_disabled,str):
+                            check_not = gi_disabled.split(" ")
+                            if check_not[0].lower() == 'not':
+                                if self.parent.preferences['enabled'][check_not[1]]:
+                                    self.instruments[count].setVisible(False)
+                            elif not self.parent.preferences['enabled'][gi_disabled]:
                                 self.instruments[count].setVisible(False)
+                        else:
+                            if state:
+                                self.display_state_inst[state].append(count)
+                                if state > 1:
+                                    self.instruments[count].setVisible(False)
                         count += 1     
             else:
                 # Check if this is an include, if it is recurse and resolve those instruments
                 if 'include,' in inst['type']:
+                    if 'disabled' in inst:
+                        if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
+                            return count
+                        elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
+                            return count
+
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
                     self.setup_instruments(count,inst,replace=this_replacements,state=state)
-                    if state:
-                        self.display_state_inst[state].append(count)
-                        if state > 1:
-                           self.instruments[count].setVisible(False)
+                    inst_disabled = inst.get('options', False)
+                    if isinstance(inst_disabled, dict):
+                        inst_disabled = inst['options'].get('disabled', False)
+                    if isinstance(inst_disabled,bool) and inst_disabled == True:
+                        self.instruments[count].setVisible(False)
+                    elif isinstance(inst_disabled,str) and not self.parent.preferences['enabled'][inst_disabled]:
+                        self.instruments[count].setVisible(False)
+                    else:
+                        if state:
+                            self.display_state_inst[state].append(count)
+                            if state > 1:
+                               self.instruments[count].setVisible(False)
             count += 1
         return count
 
@@ -274,7 +319,10 @@ class Screen(QWidget):
         count = 0
         for i in self.get_config_item('instruments'):
             if 'disabled' in i and i['disabled'] == True:
-                continue
+                if isinstance(i['disabled'],bool) and i['disabled'] == True:
+                    continue
+                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
+                    continue
             count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
@@ -322,6 +370,29 @@ class Screen(QWidget):
 
         font_percent = None
         font_family = "DejaVu Sans Condensed"
+        if 'preferences' in i:
+            specific_pref = dict()
+            if i['preferences'] in self.parent.preferences['gauges']:
+                specific_pref = self.parent.preferences['gauges'][i['preferences']]
+            # Merge the main style(s)
+            for style in self.parent.preferences['style']:
+                #print(f"Style: {style}")
+                if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
+                    if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
+                        pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
+                        if pref is not None:
+                            #print( pref )
+                            i['options'] = i.get('options',dict())|pref
+            # Merge gauge specific settings
+            i['options'] = i.get('options',dict())|specific_pref
+
+            if 'styles' in specific_pref:
+                for style in self.parent.preferences['style']:
+                    pref = specific_pref['styles'].get(style,None)
+                    if pref is not None:
+                        i['options'] = i.get('options',dict())|pref
+
+
         if 'options' in i:
             if 'font_percent' in i['options']:
                 font_percent = i['options']['font_percent']
@@ -735,7 +806,7 @@ class Screen(QWidget):
                 if val < 0:
                     val = len(self.encoder_list_sorted) -1
                     loop += 1
-                elif val + 1 == len(self.encoder_list_sorted):
+                elif val == len(self.encoder_list_sorted):
                     val = 0
                     loop += 1
         # turn off highlight on current instrument   

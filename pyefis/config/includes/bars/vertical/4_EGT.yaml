@@ -1,0 +1,30 @@
+instruments:
+  - type: ganged_vertical_bar_gauge
+    gang_type: horizontal
+    ratio: 0.2
+    row: 0
+    column: 0
+    span:
+      rows: 40
+      columns: 30 
+    groups:
+      - name: EGT
+        gap: 0
+        instruments:
+            -
+              preferences: BAR11
+              options: 
+                disabled: CYLINDER_1
+            -
+              preferences: BAR12
+              options:
+                disabled: CYLINDER_2
+            -
+              preferences: BAR13
+              options:
+                disabled: CYLINDER_3
+            -
+              preferences: BAR14
+              options:
+                disabled: CYLINDER_4
+

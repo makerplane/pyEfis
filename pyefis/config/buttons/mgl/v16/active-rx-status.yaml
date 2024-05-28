@@ -1,6 +1,6 @@
 type: simple
 text: "RX"
-dbkey: TSBTN{id}18
+dbkey: TSBTN{id}22
 condition_keys:
   - COMACTRX1
 conditions:

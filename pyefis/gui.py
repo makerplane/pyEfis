@@ -26,6 +26,7 @@ import os
 from pyefis import hooks
 from pyefis import hmi
 import pyavtools.fix as fix
+import pyavtools.scheduler as scheduler
 
 screens = []
 
@@ -61,12 +62,20 @@ class Main(QMainWindow):
     windowClose = pyqtSignal(QEvent)
     #change_asd_mode = pyqtSignal(QEvent)
 
-    def __init__(self, config, config_path, parent=None):
+    def __init__(self, config, config_path, preferences, parent=None):
         super(Main, self).__init__(parent)
-
+        self.preferences = preferences
         self.config_path = config_path
-        self.screenWidth = int(config["main"]["screenWidth"])
-        self.screenHeight = int(config["main"]["screenHeight"])
+        self.screenWidth = int(config["main"].get("screenWidth", False))
+        self.screenHeight = int(config["main"].get("screenHeight", False))
+        if not ( self.screenWidth and self.screenHeight ):
+            # screenWidth and screenHeight are not defined in the config file
+            # go full screen
+            pscreen = QApplication.primaryScreen()
+            screensize = pscreen.size()
+            self.screenWidth = screensize.width()
+            self.screenHeight = screensize.height()
+
         self.screenColor = config["main"]["screenColor"]
         self.nodeID = config["main"].get('nodeID', 1)
 
@@ -187,7 +196,7 @@ def setDefaultScreen(s):
     return found
 
 
-def initialize(config,config_path):
+def initialize(config,config_path,preferences):
     global mainWindow
     global log
     log = logging.getLogger(__name__)
@@ -210,7 +219,7 @@ def initialize(config,config_path):
 
     setDefaultScreen(d)
 
-    mainWindow = Main(config,config_path)
+    mainWindow = Main(config,config_path,preferences)
     hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)
     hmi.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
     hmi.actions.showScreen.connect(mainWindow.showScreen)
@@ -239,3 +248,26 @@ def initialize(config,config_path):
         mainWindow.width = int(config["main"]["screenWidth"])
         mainWindow.height = int(config["main"]["screenHeight"])
         mainWindow.show()
+
+
+    def button_timeout():
+        # set MENUTIMEOUT True
+        button_key.value = True
+
+    def button_timeout_reset():
+        if not button_key.value:
+            #When set to False reset timer    
+            button_timer.start()
+
+    if config['main'].get('button_timeout', False):
+        scheduler.initialize()
+        button_timer = scheduler.scheduler.getTimer(config['main']['button_timeout'])
+        if not button_timer:
+            scheduler.scheduler.timers.append(scheduler.IntervalTimer(config['main']['button_timeout']))
+            scheduler.scheduler.timers[-1].start()
+            button_timer = scheduler.scheduler.getTimer(config['main']['button_timeout'])
+        button_key = fix.db.get_item('HIDEBUTTON')
+        button_timer.add_callback(button_timeout)
+        button_key.valueWrite[bool].connect(button_timeout_reset)
+
+

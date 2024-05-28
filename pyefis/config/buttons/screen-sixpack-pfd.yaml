@@ -1,21 +1,31 @@
 type: simple
 text: ""
-dbkey: TSBTN{id}13
+dbkey: TSBTN{id}18
+hover_show: True
+condition_keys:
+- HIDEBUTTON
 conditions:
-  - when: "SCREEN eq 'SIXPACK'"
+  - when: "SCREEN eq 'SIXPACK' and not HIDEBUTTON"
     actions:
       - set text: PFD
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "SCREEN ne 'SIXPACK'"
+  - when: "SCREEN ne 'SIXPACK' and not HIDEBUTTON"
     actions:
       - set text: "SIX\nPACK"
       - set bg color: lightgray
+      - set fg color: black
     continue: true
-  - when: "CLICKED eq true and [ SCREEN ne 'SIXPACK' ]"
+  - when: "HIDEBUTTON"
+    actions:
+      - set bg color: "#00000000"
+      - set fg color: "#00000000"
+  - when: "CLICKED eq true and SCREEN ne 'SIXPACK'"
     actions:
       - show screen: SIXPACK
+      - set value: HIDEBUTTON,False
   - when: "CLICKED eq true and SCREEN eq 'SIXPACK'"
     actions:
       - show screen: PFD
-
+      - set value: HIDEBUTTON,False

@@ -15,7 +15,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
+import time
+from pyefis import version
 import sys, os
 
 import logging
@@ -27,7 +28,10 @@ from PyQt5.QtWidgets import *
 import yaml
 import importlib
 from os import environ
+import shutil
+import hashlib 
 
+from pyefis import cfg
 
 if "pyAvTools" not in ''.join(sys.path):
     neighbor_tools = os.path.join('..', 'pyAvTools')
@@ -60,38 +64,66 @@ path_options = ['{USER}/makerplane/pyefis/config',
                 '/etc/pyefis',
                 '.']
 
-# Add fixgw/config when not running as snap
-# Helpful for development
-if not environ.get('SNAP',False):
-    path_options.append('fixgw/config')
-
 config_path = None
 
 # This function recursively walks the given directory in the installed
 # package and creates a mirror of it in basedir.
 def create_config_dir(basedir):
     # Look in the package for the configuration
-    import pkg_resources as pr
+    import importlib.resources as ir
     package = 'pyefis'
-    def copy_dir(d):
-        os.makedirs(basedir + "/" + d, exist_ok=True)
-        for each in pr.resource_listdir(package, d):
-            filename = d + "/" + each
-            if pr.resource_isdir(package, filename):
-                copy_dir(filename)
+    def sha256sum(file):
+        sha256 = hashlib.sha256()
+        with open(file, 'rb') as f:
+            while True:
+                data = f.read(65536)
+                if not data:
+                    break
+                sha256.update(data)
+        return sha256.hexdigest()
+
+    def copy_file(source,dest,extension=""):
+        print(f"Replacing file: {dest}")
+        shutil.copy(source,dest + extension)
+        # Set timestamp
+        os.utime(dest + extension,(350039106.789,350039106.789))
+
+    def copy_dir(module,path=None):
+        if not path: path = module
+        os.makedirs(basedir + "/" + path, exist_ok=True)
+        for each in ir.files(package + '.'+ module).iterdir():
+            filename = path + "/" + each.name
+            filepath = basedir + "/" + filename
+            modulename = module + "." + each.name
+            if each.is_dir():
+                copy_dir(modulename,filename)
             else:
-                if not os.path.exists(basedir + "/" + filename):
-                    # Only copy the file if it is missing
-                    s = pr.resource_string(package, filename)
-                    with open(basedir + "/" + filename, "wb") as f:
-                        f.write(s)
+                # If file does not exist, copy it
+                if not os.path.exists(filepath): 
+                    copy_file(each.as_posix(), filepath)
+                    continue
+                # If file has specific timestamp, it has not been edited by the user
+                if os.path.getmtime(filepath) == 350039106.789:
+                    # If the file is not identical to the one in this version, replace it
+                    if not sha256sum(filepath) == sha256sum(each.as_posix()):
+                        copy_file(each.as_posix(), filepath) 
+                else:
+                    # Copy file but with .dist added to the filename.
+                    copy_file(each.as_posix(), filepath, ".dist")
+
     copy_dir('config')
 
 
+def merge_dict(dest,override):
+    for k, v in override.items():
+        if (k in dest and isinstance(dest[k], dict) and isinstance(override[k], dict)):
+            merge_dict(dest[k], override[k])
+        else:
+            dest[k] = override[k]
 
 def main():
     global config_path
-
+    global preferences
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['test', 'normal'],
@@ -123,30 +155,42 @@ def main():
     if args.config_file:
         cf = args.config_file
         config_file = cf.name
-    elif config_path is not None: # otherwise use the default
-        cf = open(config_file)
     else:
-        # If all else fails copy the configuration from the package
+        # If all else fails or update the configuration from the package
         # to ~/makerplane/fixgw/config
         create_config_dir("{USER}/makerplane/pyefis".format(USER=user_home))
         # Reset this stuff like we found it
         config_file = "{USER}/makerplane/pyefis/config/{FILE}".format(USER=user_home, FILE=config_filename)
-        cf = open(config_file)
-    config_path = os.path.dirname(cf.name)
-    config = yaml.safe_load(cf)
+    config_path = os.path.dirname(config_file)
+    preference_file = f"{config_path}/preferences.yaml"
+    with open(preference_file) as cf:
+       preferences = yaml.safe_load(cf)
+    preference_file = preference_file + ".custom"
+    # override preferecnes with customizations
+    if os.path.exists(preference_file):
+        with open(preference_file) as cf:
+            custom = yaml.safe_load(cf)
+        merge_dict(preferences,custom)
+
+    config = cfg.from_yaml(config_file,preferences=preferences)
 
     # If running under systemd
     if environ.get('INVOCATION_ID', False):
         # and autostart is not true, exit
-        if not config.get('auto start', False): os._exit(0)
+        auto = config.get('auto start', False)
+        print(auto)
+        if isinstance(auto, str):
+            # Check preferecnes
+            if 'enabled' in preferences:
+                if not preferences['enabled'].get('AUTO_START', False):
+                    os._exit(0)
+            else:
+                # It is a string and we we cannot lookup enabled keys in preferences
+                # Assume false
+                os._exit(0)
+        elif not auto:
+            os._exit(0)
 
-
-#    # if we passed in a configuration file on the command line...
-#    if args.config_file:
-#        cf = args.config_file
-#    else: # otherwise use the default
-#        cf = open(config_file)
-#    config = yaml.load(cf, Loader=yaml.SafeLoader)
 
     log_config_file = args.log_config if args.log_config else config_file
 
@@ -155,7 +199,11 @@ def main():
     if args.log_config:
         logging.config.fileConfig(args.log_config)
     elif 'logging' in config:
-        logging.config.dictConfig(config['logging'])
+        # If running in snap write to $SNAP_USER_COMMON directory
+        snap_dir = os.environ.get('SNAP_USER_COMMON','')
+        if len(snap_dir) > 0: snap_dir = snap_dir + "/"
+        log_yaml = yaml.dump(config['logging']).format(SNAP_USER_COMMON = snap_dir)
+        logging.config.dictConfig(yaml.load(log_yaml, Loader=yaml.SafeLoader))
     else:
         logging.basicConfig()
 
@@ -167,6 +215,18 @@ def main():
     log.info("Starting pyEFIS")
 
     fix.initialize(config)
+    loaded = False
+    while not loaded:
+        try:
+            fix.db.get_item("ZZLOADER")
+            loaded = True
+        except:
+            log.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
+            time.sleep(2)
+    pyefis_ver = fix.db.get_item('PYEFIS_VERSION')
+    pyefis_ver.value = version.VERSION
+    pyefis_ver.output_value()
+
     hmi.initialize(config)
 
     if 'FMS' in config:
@@ -174,7 +234,7 @@ def main():
         fms = importlib.import_module ("FixIntf")
         fms.start(config["FMS"]["aircraft_config"])
 
-    gui.initialize(config,config_path)
+    gui.initialize(config,config_path,preferences)
     if "keybindings" in config:
         hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])

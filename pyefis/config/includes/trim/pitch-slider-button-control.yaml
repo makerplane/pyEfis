@@ -1,0 +1,38 @@
+instruments:
+  - type: vertical_bar_gauge
+    row: 1
+    column: 0
+    span:
+      rows: 29
+      columns: 13
+    options:
+      name: Pitch
+      decimal_places: 0
+      show_units: false
+      show_value: false
+      dbkey: TRIMP
+  - type: button
+    row: 0
+    column: 2
+    span:
+      rows: 12
+      columns: 9
+    options:
+      config: buttons/trim-up-invisible.yaml
+  - type: button
+    row: 12
+    column: 2
+    span:
+      rows: 10
+      columns: 9
+    options:
+      config: buttons/trim-center-invisible.yaml
+  - type: button
+    row: 22
+    column: 2
+    span:
+      rows: 10
+      columns: 9
+    options:
+      config: buttons/trim-down-invisible.yaml
+
