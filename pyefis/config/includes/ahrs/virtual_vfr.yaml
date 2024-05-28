@@ -84,6 +84,13 @@ instruments:
       columns: 15
     options:
       font_percent: 0.25
+  - type: include,includes/bars/vertical/dimmer_control.yaml
+    disabled: DIMMER
+    row: 90
+    column: 112
+    span:
+      rows: 20
+      columns: 6
   - type: heading_display
     disabled: HEADING
     row: 0

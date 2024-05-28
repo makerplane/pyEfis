@@ -92,7 +92,7 @@ enabled:
   CYLINDER_2: true
   CYLINDER_3: true
   CYLINDER_4: true
-
+  DIMMER: false
 
 # Here you can define what include files are used to render some
 # portion of the screen so you can customize as needed easily
