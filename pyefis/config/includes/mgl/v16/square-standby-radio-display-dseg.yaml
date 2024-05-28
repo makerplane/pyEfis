@@ -12,7 +12,7 @@ instruments:
       font_mask: "100.0000"
       decimal_places: 4
       dbkey: COMSTDFREQ{radio_id}
-      encoder_order: 27
+      encoder_order: 400027
       encoder_multiplier: 0.025
   - type: value_text
     row: 8

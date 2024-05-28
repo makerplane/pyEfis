@@ -15,25 +15,25 @@ instruments:
           -
             options:
               config: buttons/screen-ems-pfd.yaml
-              encoder_order: 11
+              encoder_order: 100011
           -
             options:
               config: buttons/screen-ems2-pfd.yaml
-              encoder_order: 12
+              encoder_order: 100012
           -
             options:
               config: buttons/screen-android-pfd.yaml
-              encoder_order: 13
+              encoder_order: 100013
           -
             options:
               config: buttons/screen-radio-pfd.yaml
-              encoder_order: 14
+              encoder_order: 100014
           -
             options:
               config: buttons/screen-sixpack-pfd.yaml
-              encoder_order: 15
+              encoder_order: 100015
           -
             options:
               config: buttons/units.yaml
-              encoder_order: 16
+              encoder_order: 100016
 

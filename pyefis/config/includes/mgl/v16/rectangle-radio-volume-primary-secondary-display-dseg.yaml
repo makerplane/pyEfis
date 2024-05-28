@@ -47,7 +47,7 @@ instruments:
     options:
       config: buttons/mgl/v16/swap-active-standby.yaml
       font_mask: "SWAP"
-      encoder_order: 26
+      encoder_order: 400026
   - type: include,lists/radio/listbox.yaml
     row: 0
     column: 101

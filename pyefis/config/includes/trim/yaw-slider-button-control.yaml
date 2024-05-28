@@ -13,6 +13,7 @@ instruments:
       show_units: false
       show_value: false
       dbkey: TRIMY
+      encoder_order: 200030
   - type: button
     row: 0
     column: 0

@@ -11,7 +11,7 @@ instruments:
       font_mask: "000.0000"
       decimal_places: 4
       dbkey: COMACTFREQ{radio_id}
-      encoder_order: 24
+      encoder_order: 400024
       encoder_multiplier: 0.025
   - type: value_text
     row: 8
@@ -61,7 +61,7 @@ instruments:
       show_units: false
       show_value: false
       dbkey: COMSQUELCH{radio_id}
-      encoder_order: 25
+      encoder_order: 400025
   - type: button
     row: 21.5
     column: 0

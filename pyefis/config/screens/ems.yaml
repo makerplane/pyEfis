@@ -63,19 +63,19 @@ EMS:
             -
               options:
                 config: buttons/egt-Normalize.yaml
-                encoder_order: 31
+                encoder_order: 600031
             -
               options:
                 config: buttons/egt-Lean.yaml
-                encoder_order: 32
+                encoder_order: 600032
             -
               options:
                 config: buttons/egt-Peak.yaml
-                encoder_order: 33
+                encoder_order: 600033
             -
               options:
                 config: buttons/egt-reset-peak.yaml
-                encoder_order: 34
+                encoder_order: 600034
     -
       type: ganged_vertical_bar_gauge
       gang_type: horizontal
