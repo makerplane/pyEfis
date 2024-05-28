@@ -11,6 +11,7 @@ instruments:
       show_units: false
       show_value: false
       dbkey: TRIMP
+      encoder_order: 200010
   - type: button
     row: 0
     column: 2

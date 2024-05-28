@@ -9,7 +9,7 @@ instruments:
 # Clone this file, edit the lists below
 # then update RADIO_LISTBOX in preferences.yaml.custom
 # to customize the lists
-      encoder_order: 28
+      encoder_order: 400028
       lists:
         - name: Favorites
           file: lists/radio/favorites.yaml

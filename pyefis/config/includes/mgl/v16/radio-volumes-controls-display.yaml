@@ -25,20 +25,20 @@ instruments:
               name: "RX Vol"
               decimal_places: 0
               dbkey: COMRXVOL{radio_id}
-              encoder_order: 21
+              encoder_order: 400021
           -
             preferences: BAR31
             options:
               name: "Int Vol"
               decimal_places: 0
               dbkey: COMINTVOL{radio_id}
-              encoder_order: 22
+              encoder_order: 400022
           -
             preferences: BAR32
             options:
               name: "Aux Vol"
               decimal_places: 0
               dbkey: COMAUDVOL{radio_id}
-              encoder_order: 23
+              encoder_order: 400023
 # Aux Volume might not exist
 # The intention was to show volume for the audio input

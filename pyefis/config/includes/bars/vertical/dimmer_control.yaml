@@ -12,6 +12,7 @@ instruments:
       show_value: false
       dbkey: DIM
       bar_width_percent: 0.5
+      encoder_order: 200060
   - type: button
     row: 0
     column: 0

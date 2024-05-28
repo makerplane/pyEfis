@@ -177,6 +177,7 @@ instruments:
       columns: 10
     options:
       config: buttons/baro-down-invisible.yaml
+      encoder_order: 200080
   - type: button
     disabled: BARO_CONTROLS
     row: 83
@@ -186,6 +187,7 @@ instruments:
       columns: 10
     options:
       config: buttons/baro-up-invisible.yaml
+      encoder_order: 200090
   - type: static_text
     disabled: PRESSURE_DISPLAY
     row: 95

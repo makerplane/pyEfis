@@ -12,6 +12,7 @@ instruments:
       show_units: false
       show_value: false
       dbkey: TRIMR
+      encoder_order: 200020
   - type: button
     row: 0
     column: 0
