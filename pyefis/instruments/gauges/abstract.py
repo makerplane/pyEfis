@@ -72,6 +72,8 @@ class AbstractGauge(QWidget):
         self.encoder_num_enforce_multiplier = False # When true, the user can only select from digits that are valid based on the multiplier
         self.encoder_num_excluded = [] # Array of values that are not allowed, for example the frequencies above and belo 121.500
         self.encoder_num_string = str
+        self.encoder_num_digit_selected = 0
+        self.encoder_num_digit_options = []
 
         # These properties can be modified by the parent
         self.clipping = False
@@ -384,7 +386,18 @@ class AbstractGauge(QWidget):
     def enc_changed(self,data):
         if self.encoder_num_mask:
             # Here we need to deal with changing individual digits.
-              
+            if data > 0:
+                if self.encoder_num_digit_selected == len(self.encoder_num_digit_options) - 1:
+                    self.encoder_num_digit_selected = 0
+                else:
+                    self.encoder_num_digit_selected = self.encoder_num_digit_selected + 1
+            elif data < 0:
+                if self.encoder_num_digit_selected == 0:
+                    self.encoder_num_digit_selected = len(self.encoder_num_digit_options) -1
+                else:
+                    self.encoder_num_digit_selected = self.encoder_num_digit_selected - 1    
+            self.set_encoder_value()
+            self.update()
             return True
         else:
             self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
@@ -482,4 +495,6 @@ class AbstractGauge(QWidget):
         else:
             # Set the next digit, the one the user is selecting now
             self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
-        
+            self.encoder_num_digit_options = allow
+       
+ 
