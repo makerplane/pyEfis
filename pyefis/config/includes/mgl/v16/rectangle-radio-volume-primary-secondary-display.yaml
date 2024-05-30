@@ -35,10 +35,10 @@ instruments:
 #      columns: 42
   - type: include,includes/mgl/v16/square-standby-radio-display.yaml
     row: 5
-    column: 65
+    column: 66
   - type: button
     row: 5
-    column: 58
+    column: 59
     span:
       rows: 6
       columns: 7

@@ -13,6 +13,11 @@ instruments:
       dbkey: COMSTDFREQ{radio_id}
       encoder_order: 400027
       encoder_multiplier: 0.025
+      font_family: DejaVu Sans Mono
+      encoder_num_enforce_multiplier: true
+      encoder_num_mask: "000.0000"
+
+
   - type: value_text
     row: 8
     column: 0
