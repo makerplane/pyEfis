@@ -74,7 +74,9 @@ class AbstractGauge(QWidget):
         self.encoder_num_string = str
         self.encoder_num_digit_selected = 0
         self.encoder_num_digit_options = []
-
+        self.encoder_num_blink = False
+        self.encoder_num_blink_timer = QTimer()
+        self.encoder_num_blink_timer.timeout.connect(self.encoder_blink_event)
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -151,7 +153,11 @@ class AbstractGauge(QWidget):
             if self.encoder_selected and self.encoder_num_mask:
                 # TODO, do we need to format here for highlighting the digit?
                 # Also, we need to change how we keep track of the encoder_set_key or maybe just when we send it or not
-                return self.encoder_num_string
+                if self.encoder_num_blink:
+                    print(  str(self.encoder_num_string[:self.encoder_num_digit]) + "_" + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:]))
+                    return  str(self.encoder_num_string[:self.encoder_num_digit]) + " " + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
+                else:    
+                    return self.encoder_num_string
             else: 
                 return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
 
@@ -361,6 +367,8 @@ class AbstractGauge(QWidget):
                 self.encoder_item.value = self.encoder_start_value
                 self.encoder_item.output_value()
             self.encoder_selected = False
+            self.encoder_num_blink_timer.stop()
+            self.encoder_num_blink = False
         self.setColors()
         self.update()
 
@@ -376,6 +384,7 @@ class AbstractGauge(QWidget):
             #self.calculate_selections()
             #self.set_encoder_value()
             #self.update()
+            self.encoder_num_blink_timer.start(300)
             self.encoder_num_digit_selected = 0
             self.encoder_num_digit = 0
             self.set_encoder_value()
@@ -386,6 +395,9 @@ class AbstractGauge(QWidget):
     def enc_changed(self,data):
         if self.encoder_num_mask:
             # Here we need to deal with changing individual digits.
+            if data == 0:
+                # Nothing to do if data is zero
+                return True
             if data > 0:
                 if self.encoder_num_digit_selected == len(self.encoder_num_digit_options) - 1:
                     self.encoder_num_digit_selected = 0
@@ -395,12 +407,13 @@ class AbstractGauge(QWidget):
                 if self.encoder_num_digit_selected == 0:
                     self.encoder_num_digit_selected = len(self.encoder_num_digit_options) -1
                 else:
-                    self.encoder_num_digit_selected = self.encoder_num_digit_selected - 1    
+                    self.encoder_num_digit_selected = self.encoder_num_digit_selected - 1
             self.set_encoder_value()
             self.update()
             return True
         else:
             self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
+            # TODO I think we should only output data on final selection.
             self.encoder_item.output_value()
             return True
 
@@ -489,12 +502,19 @@ class AbstractGauge(QWidget):
                 continue
             digit_found = True
         print(f"Current selection: {self.encoder_num_string} digit:{self.encoder_num_digit}")
-        if self.encoder_num_digit == len(self.encoder_num_mask) and len(allow) <= 1:
+        if self.encoder_num_digit == len(self.encoder_num_mask) - 1 and len(allow) == 1:
             print("DONE!")
+            self.encoder_num_blink_timer.stop()
             # TODO We have the final value, save it?
+            # What conditions are done?
+            #  We are on the last digit, user clicks encoder button to select value
+            # We are on some previous digit, user clicks to select a value so we end up on last digit with 0 or 1 things to chose from
+
         else:
             # Set the next digit, the one the user is selecting now
             self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
             self.encoder_num_digit_options = allow
        
- 
+    def encoder_blink_event(self):
+        self.encoder_num_blink = not self.encoder_num_blink 
+        self.update()

@@ -9,6 +9,7 @@ instruments:
     preferences: TEXT1
     options:
       font_mask: "000.0000"
+      font_family: DejaVu Sans Mono
       decimal_places: 4
       dbkey: COMACTFREQ{radio_id}
       encoder_order: 400024
