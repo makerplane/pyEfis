@@ -489,7 +489,7 @@ class AbstractGauge(QWidget):
                 continue
             digit_found = True
         print(f"Current selection: {self.encoder_num_string} digit:{self.encoder_num_digit}")
-        if self.encoder_num_digit == len(self.encoder_num_mask) and len(allow) == 1:
+        if self.encoder_num_digit == len(self.encoder_num_mask) and len(allow) <= 1:
             print("DONE!")
             # TODO We have the final value, save it?
         else:
