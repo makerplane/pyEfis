@@ -156,23 +156,21 @@ class AbstractGauge(QWidget):
             return 'xxx'
         else:
             if self.encoder_selected and self.encoder_num_mask:
-                # TODO, do we need to format here for highlighting the digit?
-                # Also, we need to change how we keep track of the encoder_set_key or maybe just when we send it or not
                 if self.encoder_num_blink:
-                    print(f"self.encoder_num_require_confirm:{self.encoder_num_require_confirm} self.encoder_num_digit_options:{self.encoder_num_digit_options}")
                     #if self.encoder_num_require_confirm and self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 0:
                     if self.encoder_num_require_confirm and self.encoder_num_digit == len(self.encoder_num_mask) - 1:
+                        # Confirm selection
                         return " " * len(self.encoder_num_mask)
+                    # Blank the digit being selected now
                     if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
-                        print(  str(self.encoder_num_string[:self.encoder_num_digit]) + "_" + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:]))
                         return  str(self.encoder_num_string[:self.encoder_num_digit]) + " " + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
                     else:
-                        # Are we selecting the last digit or confirming?
-                        print(  str(self.encoder_num_string[:self.encoder_num_digit]) + "_")
                         return  str(self.encoder_num_string[:self.encoder_num_digit]) + " "
-                else:    
+                else:
+                    # Return normal value
                     return self.encoder_num_string
-            else: 
+            else:
+                # return properly formatted value
                 return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
 
     valueText = property(getValueText)
@@ -376,36 +374,36 @@ class AbstractGauge(QWidget):
         if onoff:
             self.selectColor = QColor('orange')
         else:
+            # Timed out to final value selected
             self.selectColor = None
             if self.encoder_selected:
-                # Set the value:
                 if self.encoder_revert:
-                    # Timed out making selection
+                    # Timed out making selection, set value back to what it was before
                     self.encoder_item.value = self.encoder_start_value
                 else:
+                    # Set to value user selected
                     self.encoder_item.value = self.encoder_set_value
-                # output the value
+                # output the value to fix gateway
                 self.encoder_item.output_value()
+                # Reset the states
                 self.encoder_selected = False
                 self.encoder_num_blink_timer.stop()
                 self.encoder_num_blink = False
+        # update the display
         self.setColors()
         self.update()
 
     def enc_select(self):
         # Called when the user selects to interact with this item
-
         self.encoder_item = fix.db.get_item(self.encoder_set_key)
         # Save current value so it can be reverted
         self.encoder_start_value = self.value #encoder_item.value
         self.encoder_revert = True
         self.encoder_selected = True
         if self.encoder_num_mask:
-            print("Setting value to mask")
+            # User will select individual digits
+            # Setup that state
             self.encoder_num_string = self.encoder_num_mask
-            #self.calculate_selections()
-            #self.set_encoder_value()
-            #self.update()
             self.encoder_num_blink_timer.start(300)
             self.encoder_num_digit_selected = 0
             self.encoder_num_digit = 0
@@ -429,6 +427,7 @@ class AbstractGauge(QWidget):
             if data == 0:
                 # Nothing to do if data is zero
                 return True
+            # Change the selected digit
             if data > 0:
                 if self.encoder_num_digit_selected == len(self.encoder_num_digit_options) - 1:
                     self.encoder_num_digit_selected = 0
@@ -436,52 +435,47 @@ class AbstractGauge(QWidget):
                     self.encoder_num_digit_selected = self.encoder_num_digit_selected + 1
             elif data < 0:
                 if self.encoder_num_digit_selected == 0:
-                    self.encoder_num_digit_selected = len(self.encoder_num_digit_options) -1
+                    self.encoder_num_digit_selected = len(self.encoder_num_digit_options) - 1
                 else:
                     self.encoder_num_digit_selected = self.encoder_num_digit_selected - 1
+            # Update the display
             self.set_encoder_value()
             self.update()
             return True
         else:
+            # Set the value
             if self.clipping:
                 self.encoder_set_value = common.bounds(self.lowRange, self.highRange, self.encoder_set_value + (self.encoder_multiplier * data))
             else:
                 self.encoder_set_value = self.encoder_set_value + (self.encoder_multiplier * data)
-            # TODO I think we should only output data on final selection.
-            #self.encoder_item.output_value()
+            self.update()
             return True
 
     def enc_clicked(self):
         if self.encoder_num_mask:
-            # Here we need to deal with what digit to change or to
             # make the selection permenant
-            if self.encoder_num_confirmed: #self.encoder_num_digit == len(self.encoder_num_mask) - 1: #Not sure this is right
-                print(f"Final selection is: {self.encoder_num_string}")
+            if self.encoder_num_confirmed: 
                 # Need to finalize the selection
                 self.encoder_revert = False 
-                #return False
             else:
                 self.encoder_num_digit_selected = 0
-                # TODO Do we need to chck the value before changing?
-                #if self.encoder_num_digit == len(self.encoder_num_mask) - 1:
-                #    if len(self.encoder_num_digit_options) == 0:
-                #        # We just selected the last digit
-                #        self.encoder_num_confirmed = True
-                #else:
+                # Move to the next digit
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                     self.encoder_num_digit = self.encoder_num_digit + 1
+                # Update the display
                 self.set_encoder_value(clicked=True)
-                
                 self.update()
-                if self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 1:
+                if self.encoder_num_confirmed:
+                    # If a confimration click finaliaze the selection 
                     self.encoder_revert = False
             if not self.encoder_revert:
                 # Something above decided we have a final selection
+                # Save the current value
                 if self.clipping:
                     self.encoder_set_value = common.bounds(self.lowRange, self.highRange, float(self.encoder_num_string))
                 else:
                     self.encoder_set_value = float(self.encoder_num_string)
-
+            # Return control to the caller, or not
             return self.encoder_revert
         else:
             # Return control back to caller
@@ -490,62 +484,64 @@ class AbstractGauge(QWidget):
 
 
     def calculate_selections(self):
-        # Needs recalculated whenever min/max change
         count = 0
-        #total = len(self.encoder_numeric_mask)
-        # TODO, set decimans based on mak
-        # OR we need to not use amask and get from some other valuid
-        #mask = self.encoder_numeric_mask.split('.')
-        #if len(mask) == 2:
-        #    decimals = len(mask[1])
-        #else:
-        #    decimals = 0
+        # builds a dict that will contain all valid digit selections.
+        # We build a string of each valid value to populate the dict
+        # Perhaps someone has some mathmatical way to calculate this?
+        # While this is brute force, it does not add any noticable slowdown
+        # to the application.
         while self.lowRange + ( count * self.encoder_multiplier ) <= self.highRange:
+            # build a string for the number
             if self.decimal_places > 0:
                 string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
             else:
                 string = "{num:0{t}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask))
             current = self.encoder_num_selectors
-            #print(current)
+            # loop over each digit of the mask
             for x in range(0, len((self.encoder_num_mask))):
+                # The last digit is added to an list in the dict
                 if x == len(self.encoder_num_mask) - 1:
                     if string[x] not in current:
                         current.append(string[x])
                         continue
+                # If this digit is not saved, save it to the dict.
                 if string[x] not in current:
                     if x == len(self.encoder_num_mask) - 2:
+                        # The nested dict ends with a list
                         current[string[x]] = []
                     else:
+                        # add nested dict
                         current[string[x]] = dict()
                 current=current[string[x]]
+            # Increment to the next number and repeat
             count = count + 1
-        #self.encoder_num_selectors = current
-        print("#########################################")
-        print(self.encoder_multiplier)
-        print(self.encoder_num_selectors)
-        print("########################################")
 
     def allowed_digits(self):
+        # Returns the digits the user can select from
         current = self.encoder_num_selectors
-        print(f"current:{current}")
+        # First digit is the key names
         if self.encoder_num_digit == 0:
             return list(current.keys())
-        print(f"self.encoder_num_string: {self.encoder_num_string}, self.encoder_num_digit:{self.encoder_num_digit} self.encoder_num_digit_selected:{self.encoder_num_digit_selected}")
+        # Follow the nested dict until we get to the digit we want
         for x in range(0, self.encoder_num_digit ):
             current = current[self.encoder_num_string[x]]
         if isinstance(current,list):
+            # The last set of digits are a list already
             return current
         else:
+            # All other digits the valid selections are the key names
             return list(current.keys())
         
     def set_encoder_value(self,clicked=False):
+        # This set the string that will be displayed on the screen
+        # when a user is selecting an individual digit
         start_digit = self.encoder_num_digit
         digit_found = False
         allow = []
         while not digit_found and self.encoder_num_digit <= len(self.encoder_num_mask) - 1:
             allow = self.allowed_digits()
-            print(f"Allowed digits: {allow} self.encoder_num_digit:{self.encoder_num_digit}")
             if len(allow) == 0:
+                # No valid digit, so skip it and move to next digit
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                     self.encoder_num_digit = self.encoder_num_digit + 1
                 else:
@@ -554,6 +550,7 @@ class AbstractGauge(QWidget):
                 continue
                 
             if len(allow) == 1:
+                # Only one digit is valid so it is auto-selected and we move to the next digit
                 self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[0]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                     self.encoder_num_digit = self.encoder_num_digit + 1
@@ -562,39 +559,33 @@ class AbstractGauge(QWidget):
                 self.encoder_num_digit_selected = 0
                 continue
             digit_found = True
-        print(f"Current selection: {self.encoder_num_string} digit:{self.encoder_num_digit} digit_found:{digit_found}")
-        #if clicked and not self.encoder_num_require_confirm:
-        #    # We do no require final confirmation we are done
-        #    self.encoder_num_digit_options = []
-        #    print(f"Final selection is: {self.encoder_num_string}")
-        #elif clicked and self.encoder_num_require_confirm:
-        #    # We do require confirm and this is the click to confirm
-        #    self.encoder_num_digit_options = []
-        #    print(f"The Final selection is: {self.encoder_num_string} and was confirmed by the user")
-        
-        #else:
-            # We are just setting the last digit
-            # Set the next digit, the one the user is selecting now
         if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+            # not the last digit
+            # create the string with selected digit
             self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
         else:
             # the last digit
-            print(f"self.encoder_num_digit:{self.encoder_num_digit} self.encoder_num_string:{self.encoder_num_string} self.encoder_num_digit_selected:{self.encoder_num_digit_selected} allow:{allow} start_digit:{start_digit} self.encoder_num_require_confirm:{self.encoder_num_require_confirm}")
+            # create the screen with the selected digit
             self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected])
             if start_digit == self.encoder_num_digit:
                 # Came here with the same digit to select
                 if clicked:
+                    # If we got here from click, rather than encoder change, confirm the click
                     self.encoder_num_confirmed = True
             elif len(allow) == 1:
                 # We selected some previous digit and now the last digit can only be one value
                 if not self.encoder_num_require_confirm:
+                    # We do not require final confirm so confirm the final value for the user
                     self.encoder_num_confirmed = True
- 
-            
+        # Set the list of digits the user can select from            
         self.encoder_num_digit_options = allow
        
     def encoder_blink_event(self):
+        # Called from the blink timer
         self.encoder_num_blink = not self.encoder_num_blink 
         if self.encoder_num_blink:
-          self.encoder_num_blink_timer.start(100)
+            self.encoder_num_blink_timer.start(100)
+        else:
+            self.encoder_num_blink_timer.start(300)
+        # update the display
         self.update()
