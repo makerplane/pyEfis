@@ -461,7 +461,7 @@ class AbstractGauge(QWidget):
                 self.encoder_revert = False 
                 #return False
             else:
-                #self.encoder_num_digit_selected = 0
+                self.encoder_num_digit_selected = 0
                 # TODO Do we need to chck the value before changing?
                 #if self.encoder_num_digit == len(self.encoder_num_mask) - 1:
                 #    if len(self.encoder_num_digit_options) == 0:
