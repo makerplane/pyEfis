@@ -1,9 +1,9 @@
 instruments:
-  - type: include,includes/mgl/v16/radio-volumes-controls-display-dseg.yaml
+  - type: include,includes/mgl/v16/radio-volumes-controls-display.yaml
     row: 0
     column: 0
     span:
-      rows: 40
+      rows: 38
       columns: 29
   - type: static_text
     row: 0
@@ -33,17 +33,17 @@ instruments:
 #    span:
 #      rows: 27
 #      columns: 42
-  - type: include,includes/mgl/v16/square-standby-radio-display.yaml
+  - type: include,includes/mgl/v16/square-standby-radio-display-dseg.yaml
     row: 5
-    column: 65
+    column: 66
   - type: button
     row: 5
-    column: 58
+    column: 60
     span:
       rows: 6
       columns: 7
     move:
-      shrink: 12
+      shrink: 14
     options:
       config: buttons/mgl/v16/swap-active-standby.yaml
       font_mask: "SWAP"
@@ -54,3 +54,4 @@ instruments:
     span:
       rows: 40
       columns: 54
+

@@ -5,7 +5,7 @@ instruments:
     column: 0
     span:
       rows: 8
-      columns: 30
+      columns: 32
     preferences: TEXT5
     options:
       font_mask: "100.0000"

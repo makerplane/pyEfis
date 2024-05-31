@@ -38,12 +38,12 @@ instruments:
     column: 66
   - type: button
     row: 5
-    column: 59
+    column: 60
     span:
       rows: 6
       columns: 7
     move:
-      shrink: 12
+      shrink: 14
     options:
       config: buttons/mgl/v16/swap-active-standby.yaml
       font_mask: "SWAP"

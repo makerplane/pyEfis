@@ -5,7 +5,7 @@ instruments:
     column: 0
     span:
       rows: 8
-      columns: 30
+      columns: 32
     options:
       font_ghost_mask: "~~~~~~~~"
       font_family: "DSEG14 Classic"
