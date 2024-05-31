@@ -16,7 +16,7 @@ instruments:
       font_family: DejaVu Sans Mono
       encoder_num_enforce_multiplier: true
       encoder_num_mask: "000.0000"
-
+      encoder_num_require_confirm: false
 
   - type: value_text
     row: 8
