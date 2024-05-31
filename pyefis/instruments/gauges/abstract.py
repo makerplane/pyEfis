@@ -172,6 +172,9 @@ class AbstractGauge(QWidget):
                 else:
                     # Return normal value
                     return self.encoder_num_string
+            elif self.encoder_selected:
+                # Return normal value
+                return '{0:.{1}f}'.format(float(self.encoder_set_value), self.decimal_places)
             else:
                 # return properly formatted value
                 return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
