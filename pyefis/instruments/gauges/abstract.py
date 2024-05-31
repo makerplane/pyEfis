@@ -82,6 +82,9 @@ class AbstractGauge(QWidget):
         self.encoder_num_blink_timer.timeout.connect(self.encoder_blink_event)
         self.encoder_num_require_confirm = False
         self.encoder_num_confirmed = False
+        self.encoder_num_blink_time_on  = 300
+        self.encoder_num_blink_time_off = 100
+
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -404,7 +407,7 @@ class AbstractGauge(QWidget):
             # User will select individual digits
             # Setup that state
             self.encoder_num_string = self.encoder_num_mask
-            self.encoder_num_blink_timer.start(300)
+            self.encoder_num_blink_timer.start(self.encoder_num_blink_time_on)
             self.encoder_num_digit_selected = 0
             self.encoder_num_digit = 0
             self.encoder_num_confirmed = False
@@ -584,8 +587,8 @@ class AbstractGauge(QWidget):
         # Called from the blink timer
         self.encoder_num_blink = not self.encoder_num_blink 
         if self.encoder_num_blink:
-            self.encoder_num_blink_timer.start(100)
+            self.encoder_num_blink_timer.start(self.encoder_num_blink_time_off)
         else:
-            self.encoder_num_blink_timer.start(300)
+            self.encoder_num_blink_timer.start(self.encoder_num_blink_time_on)
         # update the display
         self.update()
