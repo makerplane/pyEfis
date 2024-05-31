@@ -420,7 +420,16 @@ pyEFIS can be controlled using a single rotary encoder with button. When the enc
 To select the listbox rotate the encoder until the title of the listbox is orange. Then press the button.  Now when you rotate the encoder the selected row in the listbox will change, pressing the button will perform the action of the selected row in the listbox. The listbox is unique in that it only relenquishes control of the encoder when selecting an item from this list. It will retain control when using sort or list loading features.
 
 ## arc_gauge, horizontal_bar_gauge, vertical_bar_gauge and numeric_display
-All four of these items behave the same, once you select an item by highlighting it and pressing the button the item will take control over the encoder. Rotating the encoder will change the value of the dbkey defined. Once you have the desired setting press the button and the value will be saved and the screen will revert to its default tate of nothing selected. If you decide to not change the value, do not press the button, let the timeout expire. When it times out the value will be reverted to its previous value and the screen will return to its default state.
+All four of these items behave the same, once you select an item by highlighting it and pressing the button the item will take control over the encoder. Rotating the encoder will change the value displayed on the screen. Once you have the desired setting press the button and the value will be saved to the dbkey and the screen will revert to its default state of nothing selected. If you decide to not change the value, do not press the button, let the timeout expire. When it times out the value will be reverted to its previous value and the screen will return to its default state.
+
+### Advanced gauge options
+These options change how the encoder works with these gauges.
+`clipping`: ensures the value does not exceed the min/max set for the db key
+`encoder_multiplier`: each step of the encoder will increase or decrease the value by the multiplier. The default is 1
+`encoder_num_mask`: This is set to a max used for number input such as "000.0000" When this option is set the user will set the first digit, then the 2nd digit etc. The digit being set will flash on and off.
+`encoder_num_enforce_multiplier`: when set to true, encoder_num_mask option will only allow the user to set digits that would result in a valid number that is a multiple of the multiplier.
+`encoder_num_require_confirm`: when false, once the user selects the last digit, the value is saved. When True, after selecting the last digit all digits will flash and the user must pres the button once more to save the value.
+`encoder_set_key`: when set the defined dbkey will be updated with the new value instead of the db key being displayed. The MGL radio plugin that is still in development will use this. It will require one dbkey to be set to request the frequency. The plugin will output another dbkey with the actual frequency tuned.
 
 ## button
 The buttons are simple, if you press the button while a on-screen button is highlighted, the action associated with that button will be performed. Since buttons can b disabled based on various conditions it is not possible to select disabled button.
