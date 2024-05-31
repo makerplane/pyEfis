@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import *
 
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
+from pyefis import common
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRectF(x - r, y - r, r * 2, r * 2)
@@ -65,7 +66,9 @@ class AbstractGauge(QWidget):
         self.encoder_revert = False
         self.encoder_item = None
         self.encoder_selected = False
-        
+       
+        self.encoder_set_value = None # None until user has selected a value.
+ 
         self.encoder_num_mask = False # defines what digits can be set ie 000.0000
         self.encoder_num_digit = 0 # current digit the user is setting
         self.encoder_num_selectors = dict() # dict that defines calid selections, used with multipl option
@@ -77,6 +80,8 @@ class AbstractGauge(QWidget):
         self.encoder_num_blink = False
         self.encoder_num_blink_timer = QTimer()
         self.encoder_num_blink_timer.timeout.connect(self.encoder_blink_event)
+        self.encoder_num_require_confirm = False
+        self.encoder_num_confirmed = False
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -154,10 +159,15 @@ class AbstractGauge(QWidget):
                 # TODO, do we need to format here for highlighting the digit?
                 # Also, we need to change how we keep track of the encoder_set_key or maybe just when we send it or not
                 if self.encoder_num_blink:
+                    print(f"self.encoder_num_require_confirm:{self.encoder_num_require_confirm} self.encoder_num_digit_options:{self.encoder_num_digit_options}")
+                    #if self.encoder_num_require_confirm and self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 0:
+                    if self.encoder_num_require_confirm and self.encoder_num_digit == len(self.encoder_num_mask) - 1:
+                        return "        "
                     if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                         print(  str(self.encoder_num_string[:self.encoder_num_digit]) + "_" + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:]))
                         return  str(self.encoder_num_string[:self.encoder_num_digit]) + " " + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
                     else:
+                        # Are we selecting the last digit or confirming?
                         print(  str(self.encoder_num_string[:self.encoder_num_digit]) + "_")
                         return  str(self.encoder_num_string[:self.encoder_num_digit]) + " "
                 else:    
@@ -367,19 +377,27 @@ class AbstractGauge(QWidget):
             self.selectColor = QColor('orange')
         else:
             self.selectColor = None
-            if self.encoder_revert:
-                self.encoder_item.value = self.encoder_start_value
+            if self.encoder_selected:
+                # Set the value:
+                if self.encoder_revert:
+                    # Timed out making selection
+                    self.encoder_item.value = self.encoder_start_value
+                else:
+                    self.encoder_item.value = self.encoder_set_value
+                # output the value
                 self.encoder_item.output_value()
-            self.encoder_selected = False
-            self.encoder_num_blink_timer.stop()
-            self.encoder_num_blink = False
+                self.encoder_selected = False
+                self.encoder_num_blink_timer.stop()
+                self.encoder_num_blink = False
         self.setColors()
         self.update()
 
     def enc_select(self):
+        # Called when the user selects to interact with this item
+
         self.encoder_item = fix.db.get_item(self.encoder_set_key)
         # Save current value so it can be reverted
-        self.encoder_start_value = self.encoder_item.value
+        self.encoder_start_value = self.value #encoder_item.value
         self.encoder_revert = True
         self.encoder_selected = True
         if self.encoder_num_mask:
@@ -391,13 +409,22 @@ class AbstractGauge(QWidget):
             self.encoder_num_blink_timer.start(300)
             self.encoder_num_digit_selected = 0
             self.encoder_num_digit = 0
+            self.encoder_num_confirmed = False
             self.set_encoder_value()
             self.update()
+        else:
+            # Set the initial value to the current value
+            self.encoder_set_value = self.encoder_start_value
         return True
 
 
     def enc_changed(self,data):
         if self.encoder_num_mask:
+            if len(self.encoder_num_digit_options) == 0:
+                # We can only get here if confirm is required and while waiting for
+                # user to confirm they turned the encoder
+                # Treat this like they want to exit not confirm
+                return False
             # Here we need to deal with changing individual digits.
             if data == 0:
                 # Nothing to do if data is zero
@@ -416,28 +443,46 @@ class AbstractGauge(QWidget):
             self.update()
             return True
         else:
-            self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
+            if self.clipping:
+                self.encoder_set_value = common.bounds(self.lowRange, self.highRange, self.encoder_set_value + (self.encoder_multiplier * data))
+            else:
+                self.encoder_set_value = self.encoder_set_value + (self.encoder_multiplier * data)
             # TODO I think we should only output data on final selection.
-            self.encoder_item.output_value()
+            #self.encoder_item.output_value()
             return True
 
     def enc_clicked(self):
         if self.encoder_num_mask:
             # Here we need to deal with what digit to change or to
             # make the selection permenant
-            if self.encoder_num_digit == len(self.encoder_num_mask) - 1: #Not sure this is right
-                # This might not catch selecting the last digit
+            if self.encoder_num_confirmed: #self.encoder_num_digit == len(self.encoder_num_mask) - 1: #Not sure this is right
                 print(f"Final selection is: {self.encoder_num_string}")
                 # Need to finalize the selection
                 self.encoder_revert = False 
-                return False
+                #return False
             else:
-                self.encoder_num_digit_selected = 0
+                #self.encoder_num_digit_selected = 0
                 # TODO Do we need to chck the value before changing?
-                self.encoder_num_digit = self.encoder_num_digit + 1
-                self.set_encoder_value()
+                #if self.encoder_num_digit == len(self.encoder_num_mask) - 1:
+                #    if len(self.encoder_num_digit_options) == 0:
+                #        # We just selected the last digit
+                #        self.encoder_num_confirmed = True
+                #else:
+                if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+                    self.encoder_num_digit = self.encoder_num_digit + 1
+                self.set_encoder_value(clicked=True)
+                
                 self.update()
-                return True
+                if self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 1:
+                    self.encoder_revert = False
+            if not self.encoder_revert:
+                # Something above decided we have a final selection
+                if self.clipping:
+                    self.encoder_set_value = common.bounds(self.lowRange, self.highRange, float(self.encoder_num_string))
+                else:
+                    self.encoder_set_value = float(self.encoder_num_string)
+
+            return self.encoder_revert
         else:
             # Return control back to caller
             self.encoder_revert = False
@@ -493,42 +538,60 @@ class AbstractGauge(QWidget):
         else:
             return list(current.keys())
         
-    def set_encoder_value(self):
+    def set_encoder_value(self,clicked=False):
+        start_digit = self.encoder_num_digit
         digit_found = False
         allow = []
         while not digit_found and self.encoder_num_digit <= len(self.encoder_num_mask) - 1:
             allow = self.allowed_digits()
-            print(f"Allowed digits: {allow}")
+            print(f"Allowed digits: {allow} self.encoder_num_digit:{self.encoder_num_digit}")
             if len(allow) == 0:
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                     self.encoder_num_digit = self.encoder_num_digit + 1
+                else:
+                    break
                 self.encoder_num_digit_selected = 0
                 continue
+                
             if len(allow) == 1:
                 self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[0]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                     self.encoder_num_digit = self.encoder_num_digit + 1
+                else:
+                    break
                 self.encoder_num_digit_selected = 0
                 continue
             digit_found = True
-        print(f"Current selection: {self.encoder_num_string} digit:{self.encoder_num_digit}")
-        if self.encoder_num_digit == len(self.encoder_num_mask) - 1 and len(allow) == 1:
-            print("DONE!")
-            print(f"Final selection is: {self.encoder_num_string}")
-            self.encoder_num_blink_timer.stop()
-            # TODO We have the final value, save it?
-            # What conditions are done?
-            #  We are on the last digit, user clicks encoder button to select value
-            # We are on some previous digit, user clicks to select a value so we end up on last digit with 0 or 1 things to chose from
-
-        else:
+        print(f"Current selection: {self.encoder_num_string} digit:{self.encoder_num_digit} digit_found:{digit_found}")
+        #if clicked and not self.encoder_num_require_confirm:
+        #    # We do no require final confirmation we are done
+        #    self.encoder_num_digit_options = []
+        #    print(f"Final selection is: {self.encoder_num_string}")
+        #elif clicked and self.encoder_num_require_confirm:
+        #    # We do require confirm and this is the click to confirm
+        #    self.encoder_num_digit_options = []
+        #    print(f"The Final selection is: {self.encoder_num_string} and was confirmed by the user")
+        
+        #else:
+            # We are just setting the last digit
             # Set the next digit, the one the user is selecting now
-            if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
-                self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
-            else:
-                print(f"self.encoder_num_digit:{self.encoder_num_digit} self.encoder_num_string:{self.encoder_num_string} self.encoder_num_digit_selected:{self.encoder_num_digit_selected} allow:{allow}")
-                self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected])
-            self.encoder_num_digit_options = allow
+        if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+            self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
+        else:
+            # the last digit
+            print(f"self.encoder_num_digit:{self.encoder_num_digit} self.encoder_num_string:{self.encoder_num_string} self.encoder_num_digit_selected:{self.encoder_num_digit_selected} allow:{allow} start_digit:{start_digit} self.encoder_num_require_confirm:{self.encoder_num_require_confirm}")
+            self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected])
+            if start_digit == self.encoder_num_digit:
+                # Came here with the same digit to select
+                if clicked:
+                    self.encoder_num_confirmed = True
+            elif len(allow) == 1:
+                # We selected some previous digit and now the last digit can only be one value
+                if not self.encoder_num_require_confirm:
+                    self.encoder_num_confirmed = True
+ 
+            
+        self.encoder_num_digit_options = allow
        
     def encoder_blink_event(self):
         self.encoder_num_blink = not self.encoder_num_blink 
