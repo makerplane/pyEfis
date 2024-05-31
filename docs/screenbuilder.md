@@ -425,6 +425,7 @@ All four of these items behave the same, once you select an item by highlighting
 ### Advanced gauge options
 These options change how the encoder works with these gauges.
 `clipping`: ensures the value does not exceed the min/max set for the db key
+`encoder_set_real_time`: When true the dbkey is updated and set as the encoder is turned, however if you let it timeout before pressing the button to confirm the setting the value will revert back to what it was before. This setting is ignored if `encoder_num_mask` is set.
 `encoder_multiplier`: each step of the encoder will increase or decrease the value by the multiplier. The default is 1
 `encoder_num_mask`: This is set to a max used for number input such as "000.0000" When this option is set the user will set the first digit, then the 2nd digit etc. The digit being set will flash on and off.
 `encoder_num_enforce_multiplier`: when set to true, encoder_num_mask option will only allow the user to set digits that would result in a valid number that is a multiple of the multiplier.

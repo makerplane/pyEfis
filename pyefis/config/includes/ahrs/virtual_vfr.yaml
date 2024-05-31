@@ -170,6 +170,7 @@ instruments:
       pressure: true
       clipping: True
       encoder_order: 200079
+      encoder_set_real_time: true
       encoder_multiplier: 0.01
       #encoder_num_mask: "00.00"
   - type: button
