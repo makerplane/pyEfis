@@ -162,7 +162,7 @@ class AbstractGauge(QWidget):
                     print(f"self.encoder_num_require_confirm:{self.encoder_num_require_confirm} self.encoder_num_digit_options:{self.encoder_num_digit_options}")
                     #if self.encoder_num_require_confirm and self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 0:
                     if self.encoder_num_require_confirm and self.encoder_num_digit == len(self.encoder_num_mask) - 1:
-                        return "        "
+                        return " " * len(self.encoder_num_mask)
                     if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                         print(  str(self.encoder_num_string[:self.encoder_num_digit]) + "_" + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:]))
                         return  str(self.encoder_num_string[:self.encoder_num_digit]) + " " + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
