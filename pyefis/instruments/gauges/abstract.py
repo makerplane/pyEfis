@@ -66,7 +66,7 @@ class AbstractGauge(QWidget):
         self.encoder_revert = False
         self.encoder_item = None
         self.encoder_selected = False
-       
+        self.encoder_set_real_time: False 
         self.encoder_set_value = None # None until user has selected a value.
  
         self.encoder_num_mask = False # defines what digits can be set ie 000.0000
@@ -455,6 +455,10 @@ class AbstractGauge(QWidget):
             else:
                 self.encoder_set_value = self.encoder_set_value + (self.encoder_multiplier * data)
             self.update()
+            if self.encoder_set_real_time:
+                self.encoder_item.value = self.encoder_set_value
+                # output the value to fix gateway
+                self.encoder_item.output_value()
             return True
 
     def enc_clicked(self):
