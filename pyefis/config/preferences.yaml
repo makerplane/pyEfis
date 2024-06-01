@@ -606,13 +606,18 @@ gauges:
     styles:
       ghost:
         font_ghost_mask: "~~~~~~:~"
+      dseg:
+        text: "Active:!"
+        font_mask: "XXXXXX:!"
 
   TEXT4:
     #RAdio Standby LAbel
     styles:
       ghost:
         font_ghost_mask: "~~~~~~~:~"
-
+      dseg:
+        text: "Standby:!"
+        font_mask: "XXXXXXX:!"
   TEXT5:
     #Radio Standby Freq
     styles:
