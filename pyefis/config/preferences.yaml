@@ -8,18 +8,24 @@ style:
   # The resulting style is the combination 
   # of all styles defined
   # currently we support:
-  #  basic # Normal Sans font
-  #  dseg  # Uses digital segmented font
-  #  ghost # really only useful with dseg 
-  #  segmented: changes arc/bar gauges to look like individual LEDs
+  #  basic Normal Sans font
+  #  dseg  Uses digital segmented font
+  #  ghost really only useful with dseg, shows faded digital segments that are off so it looks like a real segmented display
+  #  segmented changes arc/bar gauges to look like individual LEDs
+  #  8khs Changes radio to 8,33Khz channel spacing
+  #  radio_confirm requires final confirmation to set the frequency after the digits are input
   - basic
 #  - segmented
 #  - dseg
 #  - ghost
-#  - 8khz #Change radio to 8.33Khz channels, default is 25Khz
+#  - 8khz
+  - radio_confirm
+
 # This section defines options required to change to the selected style
 # The sort of settings you would find in common options of ganged gauges
-# The settings can be combined
+# These settings are applied to all gauges of the type they are set under.
+# To change style settings for a spcific instance of a gauge, see the gauges 
+# section below.
 styles:
   ARC:
     basic:
@@ -122,7 +128,14 @@ includes:
   LOGGING_CONFIG: logging/stderr-info.yaml
   # File that defines what lists are included in the radio listbox
   RADIO_LISTBOX: lists/radio/listbox.yaml  
+  RADIO_ACTIVE: includes/mgl/v16/square-active-radio-display.yaml
+  RADIO_STANDBY: includes/mgl/v16/square-standby-radio-display.yaml
+  RADIO_VOLUMES: includes/mgl/v16/radio-volumes-controls-display.yaml
+  RADIO_COMBINED: includes/mgl/v16/rectangle-radio-volume-primary-secondary-display.yaml
 
+#  columns: 35 for square
+#  29 + 35 = 64
+#  64+35 = 99
 # Here you can customize individual gauges on the screen
 # Maybe you want to display MAXCHT1 instead of H2OT1
 # You can make such changes in this section
@@ -571,11 +584,13 @@ gauges:
   TEXT1:
     #Radio Active Freq
     styles:
+      radio_confirm:
+        encoder_num_require_confirm: true
       8khz:
         encoder_multiplier: 0.008333333333
         encoder_num_8khz_channels: true
       ghost:
-        font_ghost_mask: "~~~~~~~"
+        font_ghost_mask: "~~.~~~~"
       dseg:
         encoder_num_mask_blank_character: "!"
         font_family: "DSEG14 Classic"
@@ -584,28 +599,30 @@ gauges:
     #RAdio act freq name
     styles:
       ghost:
-        font_ghost_mask: "~~~~~~~~~~~~~"
+        font_ghost_mask: "~~~~~~~~~~~~"
 
   TEXT3:
     #RAdio Active LAbel
     styles:
       ghost:
-        font_ghost_mask: "~~~~~~~"
+        font_ghost_mask: "~~~~~~:~"
 
   TEXT4:
     #RAdio Standby LAbel
     styles:
       ghost:
-        font_ghost_mask: "~~~~~~~~"
+        font_ghost_mask: "~~~~~~~:~"
 
   TEXT5:
     #Radio Standby Freq
     styles:
+      radio_confirm:
+        encoder_num_require_confirm: true
       8khz:
         encoder_multiplier: 0.008333333333
         encoder_num_8khz_channels: true
       ghost:
-        font_ghost_mask: "~~~~~~~"
+        font_ghost_mask: "~~~.~~~"
       dseg:
         encoder_num_mask_blank_character: "!"
         font_family: "DSEG14 Classic"
@@ -614,4 +631,4 @@ gauges:
     #RAdio standby freq name
     styles:
       ghost:
-        font_ghost_mask: "~~~~~~~~~~~~~" 
+        font_ghost_mask: "~~~~~~~~~~~~" 

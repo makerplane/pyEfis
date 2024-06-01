@@ -4,8 +4,8 @@ instruments:
     row: 0
     column: 0
     span:
-      rows: 8
-      columns: 32
+      rows: 7
+      columns: 35
     preferences: TEXT5
     options:
       font_mask: "100.000"
@@ -16,7 +16,6 @@ instruments:
       font_family: DejaVu Sans Mono
       encoder_num_enforce_multiplier: true
       encoder_num_mask: "000.000"
-      encoder_num_require_confirm: false
 
   - type: value_text
     row: 8
@@ -26,7 +25,7 @@ instruments:
       columns: 35
     preferences: TEXT6
     options:
-      font_mask:       "XXXXXXXXXXXXX"
+      font_mask:       "XXXXXXXXXXXX"
       dbkey: COMSTDNAME{radio_id}
   - type: button
     row: 14
