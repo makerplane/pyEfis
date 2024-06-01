@@ -18,7 +18,7 @@ instruments:
       alignment: AlignLeft
   - type: static_text
     row: 0
-    column: 68
+    column: 64
     span:
       rows: 5
       columns: 27
