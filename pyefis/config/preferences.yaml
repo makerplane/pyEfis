@@ -574,8 +574,9 @@ gauges:
       8khz:
         encoder_multiplier: 0.008333333333
       ghost:
-        font_ghost_mask: "~~~~~~~~"
+        font_ghost_mask: "~~~~~~~"
       dseg:
+        encoder_num_mask_blank_character: "!"
         font_family: "DSEG14 Classic"
 
   TEXT2:
@@ -602,8 +603,9 @@ gauges:
       8khz:
         encoder_multiplier: 0.008333333333
       ghost:
-        font_ghost_mask: "~~~~~~~~"
+        font_ghost_mask: "~~~~~~~"
       dseg:
+        encoder_num_mask_blank_character: "!"
         font_family: "DSEG14 Classic"
 
   TEXT6:
