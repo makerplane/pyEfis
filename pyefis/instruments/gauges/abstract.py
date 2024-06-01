@@ -523,6 +523,15 @@ class AbstractGauge(QWidget):
         # All other numbers are rounded to the nearest multiple of 0.005
         # The last two digits are always one of:
         # 0.005, 0.010, 0.015, 0.030, 0.035, 0.040, 0.055, 0.060, 0.065, 0.080, 0.085, 0.090
+        # NOTE:
+        # Need to do more research but it seems like a few 25khz channels are still valid on 8,33khz radios.
+        # In some docs I've read 121.5Mhz is one exception, 123,1Mhz alt for search and rescue, 
+        # and in NATO member states 122.100Mhz is to remain 25khz spacing
+        # VHF digital link (VDL) frequencies (136,725 MHz, 136,775 MHz, 136,825MHz, 136,875 MHz, 136,925 MHz and 136,975 MHz)
+        # ACARS 131,525 MHz, 131,725 MHz and 131,825 MHz)
+        # I am not sure if that list is complete and also not sure if the 8.33Khz channels that occupy
+        # those 25khz frequencies are not allowed, I'd assume so but I need to read more.
+
         m = 0.005
         i = frequency // m
         mult1 = (i + 1) * m

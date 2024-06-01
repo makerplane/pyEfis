@@ -12,7 +12,7 @@ style:
   #  dseg  Uses digital segmented font
   #  ghost really only useful with dseg, shows faded digital segments that are off so it looks like a real segmented display
   #  segmented changes arc/bar gauges to look like individual LEDs
-  #  8khs Changes radio to 8,33Khz channel spacing
+  #  8khz Changes radio to 8,33Khz channel spacing, EXPERIMENTAL! 
   #  radio_confirm requires final confirmation to set the frequency after the digits are input
   - basic
 #  - segmented

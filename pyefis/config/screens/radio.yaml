@@ -10,7 +10,7 @@ RADIO:
   layout:
     rows: 110
     columns: 200
-    draw_grid: true
+    #draw_grid: true
   instruments:
     - type: value_text
       disabled: DEMO_TESTING_TEXT
