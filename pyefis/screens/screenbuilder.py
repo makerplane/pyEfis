@@ -376,6 +376,9 @@ class Screen(QWidget):
                 specific_pref = self.parent.preferences['gauges'][i['preferences']]
             # Merge the main style(s)
             for style in self.parent.preferences['style']:
+                if not self.parent.preferences['style'][style]:
+                    #only process if true
+                    continue
                 #print(f"Style: {style}")
                 if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
                     if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
@@ -388,6 +391,9 @@ class Screen(QWidget):
 
             if 'styles' in specific_pref:
                 for style in self.parent.preferences['style']:
+                    if not self.parent.preferences['style'][style]:
+                        #only process if true
+                        continue
                     pref = specific_pref['styles'].get(style,None)
                     if pref is not None:
                         i['options'] = i.get('options',dict())|pref
