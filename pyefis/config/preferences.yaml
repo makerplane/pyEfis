@@ -14,12 +14,12 @@ style:
   #  segmented changes arc/bar gauges to look like individual LEDs
   #  8khz Changes radio to 8,33Khz channel spacing, EXPERIMENTAL! 
   #  radio_confirm requires final confirmation to set the frequency after the digits are input
-  - basic
-#  - segmented
-#  - dseg
-#  - ghost
-#  - 8khz
-  - radio_confirm
+  basic: true
+  segmented: false
+  dseg: false
+  ghost: false
+  8khz: false
+  radio_confirm: true
 
 # This section defines options required to change to the selected style
 # The sort of settings you would find in common options of ganged gauges
