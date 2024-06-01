@@ -8,14 +8,14 @@ instruments:
       columns: 32
     preferences: TEXT5
     options:
-      font_mask: "100.0000"
-      decimal_places: 4
+      font_mask: "100.000"
+      decimal_places: 3 
       dbkey: COMSTDFREQ{radio_id}
       encoder_order: 400027
       encoder_multiplier: 0.025
       font_family: DejaVu Sans Mono
       encoder_num_enforce_multiplier: true
-      encoder_num_mask: "000.0000"
+      encoder_num_mask: "000.000"
       encoder_num_require_confirm: false
 
   - type: value_text

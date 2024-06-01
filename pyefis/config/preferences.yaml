@@ -573,6 +573,7 @@ gauges:
     styles:
       8khz:
         encoder_multiplier: 0.008333333333
+        encoder_num_8khz_channels: true
       ghost:
         font_ghost_mask: "~~~~~~~"
       dseg:
@@ -602,6 +603,7 @@ gauges:
     styles:
       8khz:
         encoder_multiplier: 0.008333333333
+        encoder_num_8khz_channels: true
       ghost:
         font_ghost_mask: "~~~~~~~"
       dseg:
