@@ -66,10 +66,11 @@ class AbstractGauge(QWidget):
         self.encoder_revert = False
         self.encoder_item = None
         self.encoder_selected = False
-        self.encoder_set_real_time: False 
+        self.encoder_set_real_time = False 
         self.encoder_set_value = None # None until user has selected a value.
  
         self.encoder_num_mask = False # defines what digits can be set ie 000.0000
+        self.encoder_num_mask_blank_character = " "
         self.encoder_num_digit = 0 # current digit the user is setting
         self.encoder_num_selectors = dict() # dict that defines calid selections, used with multipl option
         self.encoder_num_enforce_multiplier = False # When true, the user can only select from digits that are valid based on the multiplier
@@ -84,7 +85,7 @@ class AbstractGauge(QWidget):
         self.encoder_num_confirmed = False
         self.encoder_num_blink_time_on  = 300
         self.encoder_num_blink_time_off = 100
-
+        self.encoder_num_8khz_channels = False
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -163,12 +164,12 @@ class AbstractGauge(QWidget):
                     #if self.encoder_num_require_confirm and self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 0:
                     if self.encoder_num_require_confirm and self.encoder_num_digit == len(self.encoder_num_mask) - 1:
                         # Confirm selection
-                        return " " * len(self.encoder_num_mask)
+                        return self.encoder_num_mask_blank_character * len(self.encoder_num_mask)
                     # Blank the digit being selected now
                     if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
-                        return  str(self.encoder_num_string[:self.encoder_num_digit]) + " " + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
+                        return  str(self.encoder_num_string[:self.encoder_num_digit]) + self.encoder_num_mask_blank_character + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
                     else:
-                        return  str(self.encoder_num_string[:self.encoder_num_digit]) + " "
+                        return  str(self.encoder_num_string[:self.encoder_num_digit]) + self.encoder_num_mask_blank_character
                 else:
                     # Return normal value
                     return self.encoder_num_string
@@ -272,6 +273,8 @@ class AbstractGauge(QWidget):
         if self.encoder_num_mask and self.encoder_num_enforce_multiplier:
             # Recalculate selections
             self.calculate_selections()
+
+
     def setAuxData(self, auxdata):
         if "Min" in auxdata and auxdata["Min"] != None:
             self.lowRange = self.conversionFunction(auxdata["Min"])
@@ -492,6 +495,24 @@ class AbstractGauge(QWidget):
             self.encoder_revert = False
             return False
 
+    def freq_to_channel(self,frequency):
+        # Converts a 8,33khz frequency to the standard 3 decimal channel number
+        # If the frequency match a 25khz spacign frequency, add 0.005 to the frequency to get the channel number
+        # All other numbers are rounded to the nearest multiple of 0.005
+        # The last two digits are always one of:
+        # 0.005, 0.010, 0.015, 0.030, 0.035, 0.040, 0.055, 0.060, 0.065, 0.080, 0.085, 0.090
+        m = 0.005
+        i = frequency // m
+        mult1 = (i + 1) * m
+        mult2 = i * m
+        if abs(mult2 - frequency) <= abs(mult1 - frequency):
+            final = mult2
+        else:
+            final = mult1
+        if (int(final * 1000) % 25 ) == 0:
+            final = m + final
+        return float(final)
+
 
     def calculate_selections(self):
         count = 0
@@ -500,10 +521,18 @@ class AbstractGauge(QWidget):
         # Perhaps someone has some mathmatical way to calculate this?
         # While this is brute force, it does not add any noticable slowdown
         # to the application.
+        #print(f"self.encoder_multiplier:{self.encoder_multiplier} self.decimal_places:{self.decimal_places} count:{count} self.encoder_num_8khz_channels:{self.encoder_num_8khz_channels}")
+
         while self.lowRange + ( count * self.encoder_multiplier ) <= self.highRange:
             # build a string for the number
+            #print(f"self.encoder_multiplier:{self.encoder_multiplier} self.decimal_places:{self.decimal_places} count:{count} self.encoder_num_8khz_channels:{self.encoder_num_8khz_channels}")
             if self.decimal_places > 0:
-                string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
+                if self.encoder_num_8khz_channels:
+                    # 8,33 spacing uses channels, not the actual frequency on the tuning display.
+                    # This is to distinguish 8.33 frequencies from 25khz frequencies.
+                    string = "{num:0{t}.{d}f}".format(num=self.freq_to_channel(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
+                else:
+                    string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
             else:
                 string = "{num:0{t}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask))
             current = self.encoder_num_selectors
@@ -525,7 +554,6 @@ class AbstractGauge(QWidget):
                 current=current[string[x]]
             # Increment to the next number and repeat
             count = count + 1
-
     def allowed_digits(self):
         # Returns the digits the user can select from
         current = self.encoder_num_selectors
