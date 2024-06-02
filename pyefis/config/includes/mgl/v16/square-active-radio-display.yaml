@@ -67,6 +67,7 @@ instruments:
       show_value: false
       dbkey: COMSQUELCH{radio_id}
       encoder_order: 400025
+      encoder_set_real_time: True
   - type: button
     row: 21.5
     column: 0
