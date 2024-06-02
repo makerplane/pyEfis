@@ -83,7 +83,7 @@ def create_config_dir(basedir):
         return sha256.hexdigest()
 
     def copy_file(source,dest,extension=""):
-        print(f"Replacing file: {dest}")
+        print(f"Replacing file: {dest}{extension}")
         shutil.copy(source,dest + extension)
         # Set timestamp
         os.utime(dest + extension,(350039106.789,350039106.789))
