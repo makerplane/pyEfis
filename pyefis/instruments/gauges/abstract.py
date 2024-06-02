@@ -644,9 +644,7 @@ class AbstractGauge(QWidget):
                     self.encoder_num_confirmed = True
             elif len(allow) == 1:
                 # We selected some previous digit and now the last digit can only be one value
-                if not self.encoder_num_require_confirm:
-                    # We do not require final confirm so confirm the final value for the user
-                    self.encoder_num_confirmed = True
+                self.encoder_num_confirmed = True
        
     def encoder_blink_event(self):
         # Called from the blink timer
