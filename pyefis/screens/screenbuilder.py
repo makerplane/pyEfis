@@ -81,6 +81,8 @@ class Screen(QWidget):
             self.setAutoFillBackground(True)
 
         self.init= False
+        self.previous_width = self.width()
+        self.previous_height = self.height()
 
         # list of dial types supported so far:
         # airspeed_dial
@@ -291,6 +293,7 @@ class Screen(QWidget):
             self.instruments[i].setVisible(True)
 
     def init_screen(self):
+
         self.layout = self.get_config_item('layout')
         self.encoder = self.get_config_item('encoder')
         self.encoder_button = self.get_config_item('encoder_button')
@@ -548,6 +551,9 @@ class Screen(QWidget):
 
 
     def grid_layout(self):
+        self.previous_width = self.width()
+        self.previous_height = self.height()
+
         for i,c in self.insturment_config.items():
             topm = 0
             leftm = 0
@@ -693,6 +699,7 @@ class Screen(QWidget):
 
             else:
                 self.move_resize_inst(i,qRound(x),qRound(y),qRound(r_width),qRound(r_height))
+
             try:
                 # Gauges need this run to set them up
                 self.instruments[i].setupGauge()
@@ -712,8 +719,8 @@ class Screen(QWidget):
         if not self.init:
             self.init_screen()
 
-        #if self.layout['type'] == 'grid':
-        self.grid_layout()
+        if self.previous_width != self.width() and self.previous_height != self.height():
+            self.grid_layout()
 
     def get_config_item(self, key):
         return self.parent.get_config_item(self, key)
