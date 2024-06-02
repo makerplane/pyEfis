@@ -467,16 +467,14 @@ class AbstractGauge(QWidget):
     def enc_clicked(self):
         if self.encoder_num_mask:
             # make the selection permenant
-            if self.encoder_num_confirmed: 
+            if self.encoder_num_confirmed:
                 # Need to finalize the selection
                 self.encoder_revert = False 
             else:
-                clicked = False
                 # Move to the next digit
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
                     self.encoder_num_digit_selected = 0
-                    self.encoder_num_digit = self.encoder_num_digit + 1
-                    self.set_encoder_value(clicked=False)
+                    self.set_encoder_value(clicked=True)
                     if self.encoder_num_confirmed and not self.encoder_num_require_confirm:
                         # Only one digit was possible and we do not need final confirm
                         # Done
@@ -552,17 +550,14 @@ class AbstractGauge(QWidget):
         # Perhaps someone has some mathmatical way to calculate this?
         # While this is brute force, it does not add any noticable slowdown
         # to the application.
-        #print(f"self.encoder_multiplier:{self.encoder_multiplier} self.decimal_places:{self.decimal_places} count:{count} self.encoder_num_8khz_channels:{self.encoder_num_8khz_channels}")
 
         while self.lowRange + ( count * self.encoder_multiplier ) <= self.highRange:
             # build a string for the number
-            #print(f"self.encoder_multiplier:{self.encoder_multiplier} self.decimal_places:{self.decimal_places} count:{count} self.encoder_num_8khz_channels:{self.encoder_num_8khz_channels}")
             if self.decimal_places > 0:
                 if self.encoder_num_8khz_channels:
                     # 8,33 spacing uses channels, not the actual frequency on the tuning display.
                     # This is to distinguish 8.33 frequencies from 25khz frequencies.
                     string = "{num:0{t}.{d}f}".format(num=self.freq_to_channel(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
-                    print(string)
                 else:
                     string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
             else:
@@ -604,14 +599,16 @@ class AbstractGauge(QWidget):
             return list(current.keys())
         
     def set_encoder_value(self,clicked=False):
+        start_digit = self.encoder_num_digit
+        # Increment the count if clicked and not on last digit
+        if clicked and self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+            self.encoder_num_digit = self.encoder_num_digit + 1
         # This set the string that will be displayed on the screen
         # when a user is selecting an individual digit
-        start_digit = self.encoder_num_digit
         digit_found = False
         allow = []
         while not digit_found and self.encoder_num_digit <= len(self.encoder_num_mask) - 1:
             allow = self.allowed_digits()
-            print(allow)
             if len(allow) == 0:
                 # No valid digit, so skip it and move to next digit
                 if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
@@ -641,21 +638,15 @@ class AbstractGauge(QWidget):
             # create the screen with the selected digit
             self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected])
             if start_digit == self.encoder_num_digit:
-                print(2)
                 # Came here with the same digit to select
-                print(f"self.encoder_num_digit:{self.encoder_num_digit} len(self.encoder_num_mask) - 1:{len(self.encoder_num_mask) - 1}")
                 if clicked:
                     # If we got here from click, rather than encoder change, confirm the click
                     self.encoder_num_confirmed = True
             elif len(allow) == 1:
-                print(1)
                 # We selected some previous digit and now the last digit can only be one value
                 if not self.encoder_num_require_confirm:
                     # We do not require final confirm so confirm the final value for the user
                     self.encoder_num_confirmed = True
-        # Set the list of digits the user can select from            
-        #self.encoder_num_digit_options = allow
-        print(f"self.encoder_num_digit_options:{self.encoder_num_digit_options} self.encoder_num_confirmed:{self.encoder_num_confirmed} clicked:{clicked} self.encoder_num_digit:{self.encoder_num_digit} start_digit:{start_digit} self.encoder_num_mask:{self.encoder_num_mask}:{len(self.encoder_num_mask)}")
        
     def encoder_blink_event(self):
         # Called from the blink timer
