@@ -321,11 +321,16 @@ class Screen(QWidget):
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
-            if 'disabled' in i and i['disabled'] == True:
+            if 'disabled' in i: # and i['disabled'] == True:
                 if isinstance(i['disabled'],bool) and i['disabled'] == True:
                     continue
-                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
-                    continue
+                elif isinstance(i['disabled'],str):
+                    check_not = i['disabled'].split(" ")
+                    if check_not[0].lower() == 'not':
+                        if self.parent.preferences['enabled'][check_not[1]]:
+                            continue
+                    elif not self.parent.preferences['enabled'][i['disabled']]:
+                        continue
             count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
@@ -382,12 +387,10 @@ class Screen(QWidget):
                 if not self.parent.preferences['style'][style]:
                     #only process if true
                     continue
-                #print(f"Style: {style}")
                 if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
                     if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
                         pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
                         if pref is not None:
-                            #print( pref )
                             i['options'] = i.get('options',dict())|pref
             # Merge gauge specific settings
             i['options'] = i.get('options',dict())|specific_pref
