@@ -89,7 +89,8 @@ class Main(QMainWindow):
              p.setColor(w.backgroundRole(), QColor(self.screenColor))
              w.setPalette(p)
              w.setAutoFillBackground(True)
-
+        # Init the variable to prvent exception in getRunningScreen()
+        self.running_screen = None
         for idx, scr in enumerate(screens):
 
             scr.object = scr.module.Screen(self)
@@ -103,6 +104,13 @@ class Main(QMainWindow):
                 self.running_screen = idx
             else:
                 scr.hide()
+                # This is to force screen builder to parse its configs now
+                # instead of waiting to do so just before it is first shown.
+                # Without this the user will often see a delay when navigating 
+                # to a screen for the first time
+                if callable(getattr(scr.object, 'initScreen', None)):
+                    scr.object.initScreen()
+
 
     def showScreen(self, scr):
         found = None
@@ -135,7 +143,10 @@ class Main(QMainWindow):
             self.showScreen(self.running_screen-1)
 
     def getRunningScreen(self, s=""):
-        return screens[self.running_screen].name
+        if getattr(self.running_screen, 'name', None):
+            return screens[self.running_screen].name
+        else:
+            return 'Unknown'
 
     def doExit(self, s=""):
         # Ensure external processes are terminated before exiting

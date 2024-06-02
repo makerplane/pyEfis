@@ -704,6 +704,10 @@ class Screen(QWidget):
         self.instruments[inst].move(x,y)
         self.instruments[inst].resize(width,height)
 
+    def initScreen(self):
+        if not self.init:
+            self.init_screen()
+
     def resizeEvent(self, event):
         if not self.init:
             self.init_screen()
