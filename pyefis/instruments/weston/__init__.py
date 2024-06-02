@@ -7,7 +7,7 @@ import re
 import os
 
 class Weston(QWidget):
-    def __init__(self, parent=None, socket=None, ini=None, command=None, args=None):
+    def __init__(self, parent=None, socket=None, ini=None, command=None, args=None, wide=None, high=None):
         super(Weston, self).__init__(parent)
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -18,7 +18,11 @@ class Weston(QWidget):
         westenv = QProcessEnvironment.systemEnvironment()
             
         self.weston.setProcessEnvironment(westenv)
-        self.weston.start('weston', [f"-c{ini}",'-i0','-Bx11-backend.so',f"-S{socket}"])
+        if ( high == None or wide == None):
+            self.weston.start('weston', [f"-c{ini}",'-i0','-Bx11-backend.so',f"-S{socket}"])
+        else:
+            # Ensuring the width and height are the same as used in pyefis and using the fullscreen option seems to aleviate many of the strange rendering issues where the waydroid area was not as large as it should be.
+            self.weston.start('weston', [f"-c{ini}",'-i0','-Bx11-backend.so',f"--width={wide}",f"--height={high}","--fullscreen",f"-S{socket}"])
         loop_count = 0
         loop_limit = 15
         while loop_count < loop_limit:
@@ -41,6 +45,6 @@ class Weston(QWidget):
         self.weston.terminate()
         self.weston.waitForFinished(4000)
 
-        super(QGraphicsView, self).closeEvent(event)
+        super(QWidget, self).closeEvent(event)
 
 
