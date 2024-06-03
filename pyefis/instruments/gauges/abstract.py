@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import *
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
 from pyefis import common
+import copy
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRectF(x - r, y - r, r * 2, r * 2)
@@ -86,6 +87,7 @@ class AbstractGauge(QWidget):
         self.encoder_num_blink_time_on  = 300
         self.encoder_num_blink_time_off = 100
         self.encoder_num_8khz_channels = False
+        self.encoder_num_limits = dict()
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -271,8 +273,15 @@ class AbstractGauge(QWidget):
                 highlightItem.valueChanged[int].connect(self.setHighlightValue)
 
         if self.encoder_num_mask and self.encoder_num_enforce_multiplier:
-            # Recalculate selections
-            self.calculate_selections()
+            if 'lowRange' not in self.encoder_num_limits and 'highRange' not in self.encoder_num_limits:
+                self.encoder_num_limits['lowRange'] = copy.copy(self.lowRange)
+                self.encoder_num_limits['highRange'] = copy.copy(self.highRange)
+                self.calculate_selections()
+            elif not (self.lowRange == self.encoder_num_limits['lowRange'] and self.highRange == self.encoder_num_limits['highRange']):
+                self.encoder_num_limits['lowRange'] = copy.copy(self.lowRange)
+                self.encoder_num_limits['highRange'] = copy.copy(self.highRange)
+                # Recalculate selections
+                self.calculate_selections()
 
 
     def setAuxData(self, auxdata):
@@ -550,7 +559,8 @@ class AbstractGauge(QWidget):
         # Perhaps someone has some mathmatical way to calculate this?
         # While this is brute force, it does not add any noticable slowdown
         # to the application.
-
+        build = dict()
+        current = build
         while self.lowRange + ( count * self.encoder_multiplier ) <= self.highRange:
             # build a string for the number
             if self.decimal_places > 0:
@@ -562,7 +572,7 @@ class AbstractGauge(QWidget):
                     string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
             else:
                 string = "{num:0{t}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask))
-            current = self.encoder_num_selectors
+            current = build
             # loop over each digit of the mask
             for x in range(0, len((self.encoder_num_mask))):
                 # The last digit is added to an list in the dict
@@ -581,7 +591,7 @@ class AbstractGauge(QWidget):
                 current=current[string[x]]
             # Increment to the next number and repeat
             count = count + 1
-
+        self.encoder_num_selectors = copy.copy(build)
     def allowed_digits(self):
         # Returns the digits the user can select from
         current = self.encoder_num_selectors
