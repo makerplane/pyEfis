@@ -14,6 +14,7 @@ instruments:
       show_value: false
       dbkey: TRIMY
       encoder_order: 200030
+      encoder_set_real_time: true
   - type: button
     row: 0
     column: 0

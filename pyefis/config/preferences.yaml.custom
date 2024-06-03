@@ -4,10 +4,10 @@
 # the preferences.yaml
 #style: [ ]
 style:
- - basic
-# - dseg
-# - ghost
- - segmented
+  basic: true
+  dseg: false
+  ghost: false
+  segmented: true
 
 enabled:
   VSI_BALL: false

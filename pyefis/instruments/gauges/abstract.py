@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import *
 
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
+from pyefis import common
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRectF(x - r, y - r, r * 2, r * 2)
@@ -64,6 +65,28 @@ class AbstractGauge(QWidget):
         self.encoder_start_value = None
         self.encoder_revert = False
         self.encoder_item = None
+        self.encoder_selected = False
+        self.encoder_set_real_time = False 
+        self.encoder_set_value = None # None until user has selected a value.
+ 
+        self.encoder_num_mask = False # defines what digits can be set ie 000.0000
+        self.encoder_num_mask_blank_character = " "
+        self.encoder_num_digit = 0 # current digit the user is setting
+        self.encoder_num_selectors = dict() # dict that defines calid selections, used with multipl option
+        self.encoder_num_enforce_multiplier = False # When true, the user can only select from digits that are valid based on the multiplier
+        self.encoder_num_excluded = [] # Array of values that are not allowed, for example the frequencies above and belo 121.500
+        self.encoder_num_string = str
+        self.encoder_num_digit_selected = 0
+        self.encoder_num_digit_options = []
+        self.encoder_num_blink = False
+        self.encoder_num_blink_timer = QTimer()
+        self.encoder_num_blink_timer.timeout.connect(self.encoder_blink_event)
+        self.encoder_num_require_confirm = False
+        self.encoder_num_confirmed = False
+        self.encoder_num_blink_time_on  = 300
+        self.encoder_num_blink_time_off = 100
+        self.encoder_num_8khz_channels = False
+        self.encoder_num_limits = dict()
         # These properties can be modified by the parent
         self.clipping = False
         self.unitsOverride1 = None
@@ -137,7 +160,26 @@ class AbstractGauge(QWidget):
         if self.fail:
             return 'xxx'
         else:
-            return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
+            if self.encoder_selected and self.encoder_num_mask:
+                if self.encoder_num_blink:
+                    #if self.encoder_num_require_confirm and self.encoder_num_confirmed: #len(self.encoder_num_digit_options) == 0:
+                    if self.encoder_num_confirmed and self.encoder_num_require_confirm and self.encoder_num_digit == len(self.encoder_num_mask) - 1:
+                        # Confirm selection
+                        return self.encoder_num_mask_blank_character * len(self.encoder_num_mask)
+                    # Blank the digit being selected now
+                    if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+                        return  str(self.encoder_num_string[:self.encoder_num_digit]) + self.encoder_num_mask_blank_character + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
+                    else:
+                        return  str(self.encoder_num_string[:self.encoder_num_digit]) + self.encoder_num_mask_blank_character
+                else:
+                    # Return normal value
+                    return self.encoder_num_string
+            elif self.encoder_selected:
+                # Return normal value
+                return '{0:.{1}f}'.format(float(self.encoder_set_value), self.decimal_places)
+            else:
+                # return properly formatted value
+                return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
 
     valueText = property(getValueText)
 
@@ -228,6 +270,18 @@ class AbstractGauge(QWidget):
                 highlightItem.valueChanged[float].connect(self.setHighlightValue)
             elif highlightItem.dtype == int:
                 highlightItem.valueChanged[int].connect(self.setHighlightValue)
+
+        if self.encoder_num_mask and self.encoder_num_enforce_multiplier:
+            # We only need to re-calculate if the range changed
+            if 'lowRange' not in self.encoder_num_limits and 'highRange' not in self.encoder_num_limits:
+                self.encoder_num_limits['lowRange'] = self.lowRange
+                self.encoder_num_limits['highRange'] = self.highRange
+                self.calculate_selections()
+            elif not (self.lowRange == self.encoder_num_limits['lowRange'] and self.highRange == self.encoder_num_limits['highRange']):
+                self.encoder_num_limits['lowRange'] = self.lowRange
+                self.encoder_num_limits['highRange'] = self.highRange
+                # Recalculate selections
+                self.calculate_selections()
 
 
     def setAuxData(self, auxdata):
@@ -338,28 +392,285 @@ class AbstractGauge(QWidget):
         if onoff:
             self.selectColor = QColor('orange')
         else:
+            # Timed out to final value selected
             self.selectColor = None
-            if self.encoder_revert:
-                self.encoder_item.value = self.encoder_start_value
+            if self.encoder_selected:
+                if self.encoder_revert:
+                    # Timed out making selection, set value back to what it was before
+                    self.encoder_item.value = self.encoder_start_value
+                else:
+                    # Set to value user selected
+                    self.encoder_item.value = self.encoder_set_value
+                # output the value to fix gateway
                 self.encoder_item.output_value()
+                # Reset the states
+                self.encoder_selected = False
+                self.encoder_num_blink_timer.stop()
+                self.encoder_num_blink = False
+        # update the display
         self.setColors()
         self.update()
 
     def enc_select(self):
+        # Called when the user selects to interact with this item
         self.encoder_item = fix.db.get_item(self.encoder_set_key)
         # Save current value so it can be reverted
-        self.encoder_start_value = self.encoder_item.value
+        self.encoder_start_value = self.value #encoder_item.value
         self.encoder_revert = True
+        self.encoder_selected = True
+        if self.encoder_num_mask:
+            # User will select individual digits
+            # Setup that state
+            self.encoder_num_string = self.encoder_num_mask
+            self.encoder_num_blink_timer.start(self.encoder_num_blink_time_on)
+            self.encoder_num_digit_selected = 0
+            self.encoder_num_digit = 0
+            self.encoder_num_confirmed = False
+            self.set_encoder_value()
+            self.update()
+        else:
+            # Set the initial value to the current value
+            self.encoder_set_value = self.encoder_start_value
         return True
 
 
     def enc_changed(self,data):
-        self.encoder_item.value = self.encoder_item.value + (self.encoder_multiplier * data)
-        self.encoder_item.output_value()
-
-        return True
+        if self.encoder_num_mask:
+            if len(self.encoder_num_digit_options) == 0:
+                # We can only get here if confirm is required and while waiting for
+                # user to confirm they turned the encoder
+                # Treat this like they want to exit not confirm
+                return False
+            # Here we need to deal with changing individual digits.
+            if data == 0:
+                # Nothing to do if data is zero
+                return True
+            # Change the selected digit
+            if data > 0:
+                if self.encoder_num_digit_selected == len(self.encoder_num_digit_options) - 1:
+                    self.encoder_num_digit_selected = 0
+                else:
+                    self.encoder_num_digit_selected = self.encoder_num_digit_selected + 1
+            elif data < 0:
+                if self.encoder_num_digit_selected == 0:
+                    self.encoder_num_digit_selected = len(self.encoder_num_digit_options) - 1
+                else:
+                    self.encoder_num_digit_selected = self.encoder_num_digit_selected - 1
+            # Update the display
+            self.set_encoder_value()
+            self.update()
+            return True
+        else:
+            # Set the value
+            if self.clipping:
+                self.encoder_set_value = common.bounds(self.lowRange, self.highRange, self.encoder_set_value + (self.encoder_multiplier * data))
+            else:
+                self.encoder_set_value = self.encoder_set_value + (self.encoder_multiplier * data)
+            self.update()
+            if self.encoder_set_real_time:
+                self.encoder_item.value = self.encoder_set_value
+                # output the value to fix gateway
+                self.encoder_item.output_value()
+            return True
 
     def enc_clicked(self):
-        # Return control back to caller
-        self.encoder_revert = False
-        return False
+        if self.encoder_num_mask:
+            # make the selection permenant
+            if self.encoder_num_confirmed:
+                # Need to finalize the selection
+                self.encoder_revert = False 
+            else:
+                # Move to the next digit
+                if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+                    self.encoder_num_digit_selected = 0
+                    self.set_encoder_value(clicked=True)
+                    if self.encoder_num_confirmed and not self.encoder_num_require_confirm:
+                        # Only one digit was possible and we do not need final confirm
+                        # Done
+                        self.update()
+                        self.encoder_revert = False
+        
+                else:
+                    if not self.encoder_num_require_confirm:
+                        # User selected last digit
+                        # We do not need final confirm
+                        # Done
+                        self.update()
+                        self.encoder_revert = False
+                    else:
+                        # We do need final confirm
+                        if self.encoder_num_confirmed:
+                            # We have final confirm
+                            # Done
+                            self.update()
+                            self.encoder_revert = False
+                        else:
+                            # The user is selecting the last digit
+                            # Wee need final confirmation
+                            self.set_encoder_value(clicked=True)
+                            self.update()
+                            self.encoder_revert = True
+            if not self.encoder_revert:
+                # Something above decided we have a final selection
+                # Save the current value
+                if self.clipping:
+                    self.encoder_set_value = common.bounds(self.lowRange, self.highRange, float(self.encoder_num_string))
+                else:
+                    self.encoder_set_value = float(self.encoder_num_string)
+            # Return control to the caller, or not
+            return self.encoder_revert
+        else:
+            # Return control back to caller
+            self.encoder_revert = False
+            return False
+
+    def freq_to_channel(self,frequency):
+        # Converts a 8,33khz frequency to the standard 3 decimal channel number
+        # If the frequency match a 25khz spacign frequency, add 0.005 to the frequency to get the channel number
+        # All other numbers are rounded to the nearest multiple of 0.005
+        # The last two digits are always one of:
+        # 0.005, 0.010, 0.015, 0.030, 0.035, 0.040, 0.055, 0.060, 0.065, 0.080, 0.085, 0.090
+        # NOTE:
+        # Need to do more research but it seems like a few 25khz channels are still valid on 8,33khz radios.
+        # In some docs I've read 121.5Mhz is one exception, 123,1Mhz alt for search and rescue, 
+        # and in NATO member states 122.100Mhz is to remain 25khz spacing
+        # VHF digital link (VDL) frequencies (136,725 MHz, 136,775 MHz, 136,825MHz, 136,875 MHz, 136,925 MHz and 136,975 MHz)
+        # ACARS 131,525 MHz, 131,725 MHz and 131,825 MHz)
+        # I am not sure if that list is complete and also not sure if the 8.33Khz channels that occupy
+        # those 25khz frequencies are not allowed, I'd assume so but I need to read more.
+
+        m = 0.005
+        i = frequency // m
+        mult1 = (i + 1) * m
+        mult2 = i * m
+        if abs(mult2 - frequency) <= abs(mult1 - frequency):
+            final = mult2
+        else:
+            final = mult1
+        if (int(final * 1000) % 25 ) == 0:
+            final = m + final
+        return float(final)
+
+
+    def calculate_selections(self):
+        count = 0
+        # builds a nested dict that will contain all valid digit selections.
+        # We build a string of each valid value to populate the dict
+        # The keys of the dict are the allowed digits.
+        # The last dict ends in a list of valid characters, the list
+        # is the valid digits for the last digit.
+        # Perhaps someone has some mathmatical way to calculate this?
+        # While this is brute force, it does not add any noticable slowdown
+        # to the application.
+
+        # We might also need to add additional strings and possibly exclusions
+        # to make this feature complete for radio tuning
+
+        #always start with an empty dict
+        build = dict()
+        while self.lowRange + ( count * self.encoder_multiplier ) <= self.highRange:
+            # build a string for the number
+            if self.decimal_places > 0:
+                if self.encoder_num_8khz_channels:
+                    # 8,33 spacing uses channels, not the actual frequency on the tuning display.
+                    # This is to distinguish 8.33 frequencies from 25khz frequencies.
+                    string = "{num:0{t}.{d}f}".format(num=self.freq_to_channel(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
+                else:
+                    string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
+            else:
+                string = "{num:0{t}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask))
+            current = build
+            # loop over each digit of the mask
+            for x in range(0, len((self.encoder_num_mask))):
+                # The last digit is added to an list in the dict
+                if x == len(self.encoder_num_mask) - 1:
+                    if string[x] not in current:
+                        current.append(string[x])
+                        continue
+                # If this digit is not saved, save it to the dict.
+                if string[x] not in current:
+                    if x == len(self.encoder_num_mask) - 2:
+                        # The nested dict ends with a list
+                        current[string[x]] = []
+                    else:
+                        # add nested dict
+                        current[string[x]] = dict()
+                current=current[string[x]]
+            # Increment to the next number and repeat
+            count = count + 1
+        #Update the number selectors
+        self.encoder_num_selectors = build
+
+    def allowed_digits(self):
+        # Returns the digits the user can select from
+        current = self.encoder_num_selectors
+        # First digit is the key names
+        if self.encoder_num_digit == 0:
+            return list(current.keys())
+        # Follow the nested dict until we get to the digit we want
+        for x in range(0, self.encoder_num_digit ):
+            current = current[self.encoder_num_string[x]]
+        if isinstance(current,list):
+            # The last set of digits are a list already
+            return current
+        else:
+            # All other digits the valid selections are the key names
+            return list(current.keys())
+        
+    def set_encoder_value(self,clicked=False):
+        start_digit = self.encoder_num_digit
+        # Increment the count if clicked and not on last digit
+        if clicked and self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+            self.encoder_num_digit = self.encoder_num_digit + 1
+        # This set the string that will be displayed on the screen
+        # when a user is selecting an individual digit
+        digit_found = False
+        allow = []
+        while not digit_found and self.encoder_num_digit <= len(self.encoder_num_mask) - 1:
+            allow = self.allowed_digits()
+            if len(allow) == 0:
+                # No valid digit, so skip it and move to next digit
+                if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+                    self.encoder_num_digit = self.encoder_num_digit + 1
+                else:
+                    break
+                self.encoder_num_digit_selected = 0
+                continue
+                
+            if len(allow) == 1:
+                # Only one digit is valid so it is auto-selected and we move to the next digit
+                self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[0]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
+                if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+                    self.encoder_num_digit = self.encoder_num_digit + 1
+                else:
+                    break
+                self.encoder_num_digit_selected = 0
+                continue
+            digit_found = True
+        self.encoder_num_digit_options = allow
+        if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
+            # not the last digit
+            # create the string with selected digit
+            self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected]) + str(self.encoder_num_string[int(self.encoder_num_digit) + 1:])
+        else:
+            # the last digit
+            # create the screen with the selected digit
+            self.encoder_num_string = str(self.encoder_num_string[:self.encoder_num_digit]) + str(allow[self.encoder_num_digit_selected])
+            if start_digit == self.encoder_num_digit:
+                # Came here with the same digit to select
+                if clicked:
+                    # If we got here from click, rather than encoder change, confirm the click
+                    self.encoder_num_confirmed = True
+            elif len(allow) == 1:
+                # We selected some previous digit and now the last digit can only be one value
+                self.encoder_num_confirmed = True
+       
+    def encoder_blink_event(self):
+        # Called from the blink timer
+        self.encoder_num_blink = not self.encoder_num_blink 
+        if self.encoder_num_blink:
+            self.encoder_num_blink_timer.start(self.encoder_num_blink_time_off)
+        else:
+            self.encoder_num_blink_timer.start(self.encoder_num_blink_time_on)
+        # update the display
+        self.update()

@@ -12,6 +12,7 @@ instruments:
       show_value: false
       dbkey: TRIMP
       encoder_order: 200010
+      encoder_set_real_time: true
   - type: button
     row: 0
     column: 2

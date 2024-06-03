@@ -66,6 +66,7 @@ class NumericDisplay(AbstractGauge):
         # Draw Value
         p.setFont(self.bigFont)
         opt = QTextOption(self.alignment)
+        opt.setWrapMode(QTextOption.NoWrap)
         if self.font_ghost_mask:
             alpha = self.valueColor.alpha()
             self.valueColor.setAlpha(self.font_ghost_alpha)

@@ -18,6 +18,7 @@ instruments:
           bar_width_percent: 0.5
           line_width_percent: 0.7
           text_gap: 8
+          encoder_set_real_time: True
         instruments:
           -
             preferences: BAR30

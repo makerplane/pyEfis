@@ -13,6 +13,7 @@ instruments:
       show_value: false
       dbkey: TRIMR
       encoder_order: 200020
+      encoder_set_real_time: true
   - type: button
     row: 0
     column: 0

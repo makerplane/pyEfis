@@ -168,6 +168,11 @@ instruments:
       dbkey: BARO
       decimal_places: 2
       pressure: true
+      clipping: True
+      encoder_order: 200079
+      encoder_set_real_time: true
+      encoder_multiplier: 0.01
+      #encoder_num_mask: "00.00"
   - type: button
     disabled: BARO_CONTROLS
     row: 83
@@ -177,7 +182,6 @@ instruments:
       columns: 10
     options:
       config: buttons/baro-down-invisible.yaml
-      encoder_order: 200080
   - type: button
     disabled: BARO_CONTROLS
     row: 83
@@ -187,7 +191,6 @@ instruments:
       columns: 10
     options:
       config: buttons/baro-up-invisible.yaml
-      encoder_order: 200090
   - type: static_text
     disabled: PRESSURE_DISPLAY
     row: 95

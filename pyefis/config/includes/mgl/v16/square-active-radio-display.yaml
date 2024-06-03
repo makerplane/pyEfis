@@ -4,15 +4,20 @@ instruments:
     row: 0
     column: 0
     span:
-      rows: 8
-      columns: 30
+      rows: 7
+      columns: 35
     preferences: TEXT1
     options:
-      font_mask: "000.0000"
-      decimal_places: 4
+      clipping: True
+      font_mask: "000.000"
+      font_family: DejaVu Sans Mono
+      decimal_places: 3
       dbkey: COMACTFREQ{radio_id}
       encoder_order: 400024
       encoder_multiplier: 0.025
+      encoder_num_enforce_multiplier: true
+      encoder_num_mask: "000.000"
+      # encoder_num_excluded: []
   - type: value_text
     row: 8
     column: 0
@@ -21,7 +26,7 @@ instruments:
       columns: 35
     preferences: TEXT2
     options:
-      font_mask:       "XXXXXXXXXXXXX"
+      font_mask:       "XXXXXXXXXXXX"
       dbkey: COMACTNAME{radio_id}
   - type: button
     row: 14
@@ -62,6 +67,7 @@ instruments:
       show_value: false
       dbkey: COMSQUELCH{radio_id}
       encoder_order: 400025
+      encoder_set_real_time: True
   - type: button
     row: 21.5
     column: 0

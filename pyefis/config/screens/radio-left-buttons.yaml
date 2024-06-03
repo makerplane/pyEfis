@@ -41,13 +41,13 @@ RADIO:
     - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
       row: 70
       column: 155
-    - type: include,includes/mgl/v16/rectangle-radio-volume-primary-secondary-display.yaml
+    - type: include,RADIO_COMBINED
       replace:
         radio_id: 1 # {radio_id} is replaced anywhere it appears in the included config
                     # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
       row: 71
       column: 0
-    - type: include,includes/mgl/v16/rectangle-radio-volume-primary-secondary-display.yaml
+    - type: include,RADIO_COMBINED
       disabled: true
       replace:
         radio_id: 2 # {radio_id} is replaced anywhere it appears in the included config

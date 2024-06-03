@@ -1,5 +1,5 @@
 instruments:
-  - type: include,includes/mgl/v16/radio-volumes-controls-display.yaml
+  - type: include,RADIO_VOLUMES
     row: 0
     column: 0
     span:
@@ -9,49 +9,49 @@ instruments:
     row: 0
     column: 29
     span:
-      rows: 5
-      columns: 20
+      rows: 4
+      columns: 27
     preferences: TEXT3
     options:
       text: "Active:"
-      font_mask: "XXXXXXX:"
+      font_mask: "XXXXXX:"
       alignment: AlignLeft
   - type: static_text
     row: 0
-    column: 68
+    column: 64
     span:
       rows: 5
-      columns: 20
+      columns: 27
     preferences: TEXT4
     options:
       text: "Standby:"
       font_mask: "XXXXXXX:"
       alignment: AlignLeft
-  - type: include,includes/mgl/v16/square-active-radio-display.yaml
+  - type: include,RADIO_ACTIVE
     row: 5
     column: 28
 #    span:
 #      rows: 27
 #      columns: 42
-  - type: include,includes/mgl/v16/square-standby-radio-display.yaml
+  - type: include,RADIO_STANDBY
     row: 5
-    column: 65
+    column: 64
   - type: button
-    row: 5
-    column: 58
+    row: 26
+    column: 64
     span:
       rows: 6
-      columns: 7
-    move:
-      shrink: 12
+      columns: 6
+    #move:
+    #  shrink: 14
     options:
       config: buttons/mgl/v16/swap-active-standby.yaml
       font_mask: "SWAP"
       encoder_order: 400026
-  - type: include,lists/radio/listbox.yaml
+  - type: include,RADIO_LISTBOX
     row: 0
-    column: 101
+    column: 100
     span:
       rows: 40
-      columns: 54
+      columns: 55
 

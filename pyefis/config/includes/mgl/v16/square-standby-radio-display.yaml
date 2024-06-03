@@ -4,15 +4,19 @@ instruments:
     row: 0
     column: 0
     span:
-      rows: 8
-      columns: 30
+      rows: 7
+      columns: 35
     preferences: TEXT5
     options:
-      font_mask: "100.0000"
-      decimal_places: 4
+      font_mask: "100.000"
+      decimal_places: 3 
       dbkey: COMSTDFREQ{radio_id}
       encoder_order: 400027
       encoder_multiplier: 0.025
+      font_family: DejaVu Sans Mono
+      encoder_num_enforce_multiplier: true
+      encoder_num_mask: "000.000"
+
   - type: value_text
     row: 8
     column: 0
@@ -21,7 +25,7 @@ instruments:
       columns: 35
     preferences: TEXT6
     options:
-      font_mask:       "XXXXXXXXXXXXX"
+      font_mask:       "XXXXXXXXXXXX"
       dbkey: COMSTDNAME{radio_id}
   - type: button
     row: 14

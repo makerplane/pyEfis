@@ -81,6 +81,8 @@ class Screen(QWidget):
             self.setAutoFillBackground(True)
 
         self.init= False
+        self.previous_width = self.width()
+        self.previous_height = self.height()
 
         # list of dial types supported so far:
         # airspeed_dial
@@ -291,6 +293,7 @@ class Screen(QWidget):
             self.instruments[i].setVisible(True)
 
     def init_screen(self):
+
         self.layout = self.get_config_item('layout')
         self.encoder = self.get_config_item('encoder')
         self.encoder_button = self.get_config_item('encoder_button')
@@ -318,11 +321,16 @@ class Screen(QWidget):
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
-            if 'disabled' in i and i['disabled'] == True:
+            if 'disabled' in i: # and i['disabled'] == True:
                 if isinstance(i['disabled'],bool) and i['disabled'] == True:
                     continue
-                elif isinstance(i['disabled'],str) and not self.parent.preferences['enabled'][i['disabled']]:
-                    continue
+                elif isinstance(i['disabled'],str):
+                    check_not = i['disabled'].split(" ")
+                    if check_not[0].lower() == 'not':
+                        if self.parent.preferences['enabled'][check_not[1]]:
+                            continue
+                    elif not self.parent.preferences['enabled'][i['disabled']]:
+                        continue
             count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
@@ -376,18 +384,22 @@ class Screen(QWidget):
                 specific_pref = self.parent.preferences['gauges'][i['preferences']]
             # Merge the main style(s)
             for style in self.parent.preferences['style']:
-                #print(f"Style: {style}")
+                if not self.parent.preferences['style'][style]:
+                    #only process if true
+                    continue
                 if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
                     if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
                         pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
                         if pref is not None:
-                            #print( pref )
                             i['options'] = i.get('options',dict())|pref
             # Merge gauge specific settings
             i['options'] = i.get('options',dict())|specific_pref
 
             if 'styles' in specific_pref:
                 for style in self.parent.preferences['style']:
+                    if not self.parent.preferences['style'][style]:
+                        #only process if true
+                        continue
                     pref = specific_pref['styles'].get(style,None)
                     if pref is not None:
                         i['options'] = i.get('options',dict())|pref
@@ -400,7 +412,22 @@ class Screen(QWidget):
                 font_family = i['options']['font_family']
         # Process the type of instrument this is and create them
         if i['type'] == 'weston':
-            self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
+            # The only way I could make weston work reliably and render the proper
+            # size, was to either make it the first screen to be shown, the primary,
+            # or provide the width and height options along with fullscreen option
+            # when starting weston.
+            if 'span' in i and {'rows', 'columns'} <= set(i['span']) \
+               and 'row' in i \
+               and 'column' in i:
+                grid_x, grid_y, grid_width, grid_height = self.get_grid_coordinates( i['column'], i['row'])
+                weston_width = int(grid_width * i['span']['columns'])
+                weston_height = int(grid_height * i['span']['rows'])
+                # span rows/columns are required for weston to work properly and they need to be at least 200px x 200px
+                self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'],wide=weston_width,high=weston_height)
+            else:
+                # if span not provided user can hope that it scales well
+                self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
+
         if i['type'] == 'airspeed_dial':
             self.instruments[count] = airspeed.Airspeed(self,font_family=font_family)
         if i['type'] == 'airspeed_box':
@@ -538,30 +565,39 @@ class Screen(QWidget):
         
         return false
 
+    def get_grid_margins(self):
+        topm = 0
+        leftm = 0
+        rightm = 0
+        bottomm = 0
+        # Margins in %
+        if 'margin' in self.layout:
+            if 'top' in self.layout['margin'] and self.layout['margin']['top'] > 0 and self.layout['margin']['top'] < 100:
+                topm = self.height() * ( self.layout['margin']['top'] / 100 )
+            if 'bottom' in self.layout['margin'] and self.layout['margin']['bottom'] > 0 and self.layout['margin']['bottom'] < 100:
+                bottomm = self.height() * ( self.layout['margin']['bottom'] / 100 )
+            if 'left' in self.layout['margin'] and self.layout['margin']['left'] > 0 and self.layout['margin']['left'] < 100:
+                leftm = self.height() * ( self.layout['margin']['left'] / 100 )
+            if 'right' in self.layout['margin'] and self.layout['margin']['right'] > 0 and self.layout['margin']['right'] < 100:
+                rightm = self.height() * ( self.layout['margin']['right'] / 100 )
+        return topm, leftm, rightm, bottomm
 
+    def get_grid_coordinates(self, column, row ):
+        topm, leftm, rightm, bottomm = self.get_grid_margins()
+        grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
+        grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
+        grid_x = leftm + grid_width * (( column ))
+        #print(f"leftm:{type(leftm)}, grid_width:{type(grid_width)} column:{column}")
+        grid_y = topm + grid_height * (( row ))
+        return grid_x, grid_y, grid_width, grid_height
 
-
+    
     def grid_layout(self):
-        for i,c in self.insturment_config.items():
-            topm = 0
-            leftm = 0
-            rightm = 0
-            bottomm = 0
-            # Margins in %
-            if 'margin' in self.layout:
-                if 'top' in self.layout['margin'] and self.layout['margin']['top'] > 0 and self.layout['margin']['top'] < 100:
-                    topm = self.height() * ( self.layout['margin']['top'] / 100 )
-                if 'bottom' in self.layout['margin'] and self.layout['margin']['bottom'] > 0 and self.layout['margin']['bottom'] < 100:
-                    bottomm = self.height() * ( self.layout['margin']['bottom'] / 100 )
-                if 'left' in self.layout['margin'] and self.layout['margin']['left'] > 0 and self.layout['margin']['left'] < 100:
-                    leftm = self.height() * ( self.layout['margin']['left'] / 100 )
-                if 'right' in self.layout['margin'] and self.layout['margin']['right'] > 0 and self.layout['margin']['right'] < 100:
-                    rightm = self.height() * ( self.layout['margin']['right'] / 100 )
+        self.previous_width = self.width()
+        self.previous_height = self.height()
 
-            grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
-            grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
-            grid_x = leftm + grid_width * ((c['column']) )
-            grid_y = topm + grid_height * ((c['row']) )
+        for i,c in self.insturment_config.items():
+            grid_x, grid_y, grid_width, grid_height = self.get_grid_coordinates( c['column'], c['row'])
             
             # Span columns to the right and rows down
             if 'span' in c:
@@ -687,6 +723,7 @@ class Screen(QWidget):
 
             else:
                 self.move_resize_inst(i,qRound(x),qRound(y),qRound(r_width),qRound(r_height))
+
             try:
                 # Gauges need this run to set them up
                 self.instruments[i].setupGauge()
@@ -698,12 +735,16 @@ class Screen(QWidget):
         self.instruments[inst].move(x,y)
         self.instruments[inst].resize(width,height)
 
+    def initScreen(self):
+        if not self.init:
+            self.init_screen()
+
     def resizeEvent(self, event):
         if not self.init:
             self.init_screen()
 
-        #if self.layout['type'] == 'grid':
-        self.grid_layout()
+        if self.previous_width != self.width() and self.previous_height != self.height():
+            self.grid_layout()
 
     def get_config_item(self, key):
         return self.parent.get_config_item(self, key)
