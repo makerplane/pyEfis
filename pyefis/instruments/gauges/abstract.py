@@ -21,7 +21,6 @@ from PyQt5.QtWidgets import *
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
 from pyefis import common
-import copy
 
 def drawCircle(p, x, y, r, start, end):
     rect = QRectF(x - r, y - r, r * 2, r * 2)
@@ -273,13 +272,14 @@ class AbstractGauge(QWidget):
                 highlightItem.valueChanged[int].connect(self.setHighlightValue)
 
         if self.encoder_num_mask and self.encoder_num_enforce_multiplier:
+            # We only need to re-calculate if the range changed
             if 'lowRange' not in self.encoder_num_limits and 'highRange' not in self.encoder_num_limits:
-                self.encoder_num_limits['lowRange'] = copy.copy(self.lowRange)
-                self.encoder_num_limits['highRange'] = copy.copy(self.highRange)
+                self.encoder_num_limits['lowRange'] = self.lowRange
+                self.encoder_num_limits['highRange'] = self.highRange
                 self.calculate_selections()
             elif not (self.lowRange == self.encoder_num_limits['lowRange'] and self.highRange == self.encoder_num_limits['highRange']):
-                self.encoder_num_limits['lowRange'] = copy.copy(self.lowRange)
-                self.encoder_num_limits['highRange'] = copy.copy(self.highRange)
+                self.encoder_num_limits['lowRange'] = self.lowRange
+                self.encoder_num_limits['highRange'] = self.highRange
                 # Recalculate selections
                 self.calculate_selections()
 
@@ -554,13 +554,20 @@ class AbstractGauge(QWidget):
 
     def calculate_selections(self):
         count = 0
-        # builds a dict that will contain all valid digit selections.
+        # builds a nested dict that will contain all valid digit selections.
         # We build a string of each valid value to populate the dict
+        # The keys of the dict are the allowed digits.
+        # The last dict ends in a list of valid characters, the list
+        # is the valid digits for the last digit.
         # Perhaps someone has some mathmatical way to calculate this?
         # While this is brute force, it does not add any noticable slowdown
         # to the application.
+
+        # We might also need to add additional strings and possibly exclusions
+        # to make this feature complete for radio tuning
+
+        #always start with an empty dict
         build = dict()
-        current = build
         while self.lowRange + ( count * self.encoder_multiplier ) <= self.highRange:
             # build a string for the number
             if self.decimal_places > 0:
@@ -591,7 +598,9 @@ class AbstractGauge(QWidget):
                 current=current[string[x]]
             # Increment to the next number and repeat
             count = count + 1
-        self.encoder_num_selectors = copy.copy(build)
+        #Update the number selectors
+        self.encoder_num_selectors = build
+
     def allowed_digits(self):
         # Returns the digits the user can select from
         current = self.encoder_num_selectors
