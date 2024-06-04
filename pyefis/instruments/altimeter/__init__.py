@@ -231,6 +231,7 @@ class Altimeter_Tape(QGraphicsView):
         self.conversionFunction2 = lambda x: x
         self.conversionFunction = lambda x: x
 
+        #self.scene = QGraphicsScene()
 
     def resizeEvent(self, event):
         if self.font_percent:
