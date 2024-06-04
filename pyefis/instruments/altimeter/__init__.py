@@ -231,8 +231,6 @@ class Altimeter_Tape(QGraphicsView):
         self.conversionFunction2 = lambda x: x
         self.conversionFunction = lambda x: x
 
-        #self.scene = QGraphicsScene()
-
     def resizeEvent(self, event):
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
@@ -297,6 +295,7 @@ class Altimeter_Tape(QGraphicsView):
         return self.height_pixel - (alt*self.pph) - self.height() 
 
     def redraw(self):
+        if not self.isVisible(): return 
         self.resetTransform()
         self.centerOn(self.scene.width() / 2, self.y_offset(self._altimeter+self.maxalt))
         self.numerical_display.value = self._altimeter
@@ -324,7 +323,7 @@ class Altimeter_Tape(QGraphicsView):
         self.unitsOverride = self.unitsOverride1
         self.conversionFunction = self.conversionFunction1
         hmi.actions.setInstUnits.connect(self.setUnits)
-        self.update()
+        if self.isVisible(): self.update()
 
     def setUnits(self, args):
         x = args.split(':')
