@@ -42,7 +42,7 @@ dependencies = [
 # Until this revision is published to PyPy get it from git:
     "pyavtools@git+https://github.com/makerplane/pyAvTools/#egg=@b00273a9016e9a4b975f8efe51d63405103d58fb",
     "pycond==20230212",
-    "PyQt5==5.15.9",
+    "PyQt5==5.15.10",
     "PyYAML==6.0.1",
 ]
 

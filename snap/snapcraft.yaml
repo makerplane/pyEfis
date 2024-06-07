@@ -91,6 +91,7 @@ parts:
     source: .
     # Use the OS provided pyqt5 to reduce build issues
     override-build: |
+      sed -i 's/"PyQt5==5.15.10",//' pyproject.toml
       craftctl default
       craftctl set version=$(python3 src/pyefis/version.py)
     stage-packages:
