@@ -7,9 +7,15 @@ SHELL := /bin/bash
 ##################################### I N I T   T A R G E T S #####################################
 venv:
 	python3 -m venv venv
+	source venv/bin/activate
+	pip install --upgrade pip
+	pip install black
+	pip install pytest
+	echo "\nRun:\nsource venv/bin/activate"
+
 .PHONY: venv
 
-init.marker: setup.py
+init.marker: pyproject.toml
 	pip install -e .[install]
 	touch init.marker
 init: init.marker
@@ -25,3 +31,12 @@ init-build: init-build.marker
 
 wheel: init-build
 	python -m build --wheel
+
+
+test:
+	pip install pytest
+	pip install pytest-qt
+	pytest
+
+.PHONY: test
+
