@@ -70,3 +70,6 @@ filterwarnings = [
 ]
 addopts = "--cov=pyefis --cov-report html:extras/extras/test_results/htmlcov/ --cov-report term-missing"
 
+[tool.coverage.run]
+relative_files = true
+
