@@ -79,6 +79,15 @@ This creates an index.bin file in CIFP directory
 Update the config file [Screen.PFD] section dbpath and indexpath
 with the path names of the FAACIFP18 and index.bin files respectively.
 
+Testing
+------------
+To run all of the automated tests and code covreage.
+
+::
+
+    $ make test
+
+
 Distribution
 ------------
 
@@ -113,4 +122,14 @@ All CLI options work as defined.
                               Alternate configuration file
       --log-config LOG_CONFIG
                               Alternate logger configuration file
+
+
+Cleanup
+------------
+
+To cleanup all of the test files, virtual environemnt and other changes made by the makefile. This is a destructive command, you may want to review what it does before running it.
+
+::
+
+    $ make clean
 
