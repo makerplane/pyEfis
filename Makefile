@@ -12,6 +12,7 @@ venv.marker:
 	source venv/bin/activate ; pip install pytest
 	source venv/bin/activate ; pip install pytest-qt
 	source venv/bin/activate ; pip install pytest-env
+	source venv/bin/activate ; pip install pytest-cov
 	touch venv.marker
 	echo -e "\nRun:\nsource venv/bin/activate"
 venv: venv.marker
@@ -44,6 +45,7 @@ clean:
 	rm -rf venv
 	rm -f extras/extras/test_results/*.html
 	rm -f extras/extras/test_results/*.png
+	rm -rf extras/extras/test_results/htmlcov/
 	rm -f init-build.marker
 	rm -f init.marker
 	rm -f venv.marker

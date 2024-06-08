@@ -68,3 +68,5 @@ filterwarnings = [
     # I belive this is warning that pyqt needs updated if you update to python 3.12
     "ignore:sipPyTypeDict.*:DeprecationWarning:.*:"
 ]
+addopts = "--cov=pyefis --cov-report html:extras/extras/test_results/htmlcov/ --cov-report term-missing"
+
