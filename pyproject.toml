@@ -48,7 +48,7 @@ dependencies = [
 
 [project.optional-dependencies]
 build = [
-    "build==1.0.3",
+    "build==1.2.1",
 ]
 
 [project.scripts]
