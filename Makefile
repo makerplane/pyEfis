@@ -5,38 +5,46 @@ SHELL := /bin/bash
 
 
 ##################################### I N I T   T A R G E T S #####################################
-venv:
+venv.marker:
 	python3 -m venv venv
-	source venv/bin/activate
-	pip install --upgrade pip
-	pip install black
-	pip install pytest
-	echo "\nRun:\nsource venv/bin/activate"
-
+	source venv/bin/activate ; pip install --upgrade pip
+	source venv/bin/activate ; pip install black
+	source venv/bin/activate ; pip install pytest
+	source venv/bin/activate ; pip install pytest-qt
+	source venv/bin/activate ; pip install pytest-env
+	touch venv.marker
+	echo -e "\nRun:\nsource venv/bin/activate"
+venv: venv.marker
 .PHONY: venv
 
 init.marker: pyproject.toml
-	pip install -e .[install]
+	source venv/bin/activate ; pip install -e .[install]
 	touch init.marker
-init: init.marker
+init: venv.marker init.marker
 .PHONY: init
 
 #################################### W H E E L   T A R G E T S ####################################
 init-build.marker: init
-	pip install -e .[build]
+	source venv/bin/activate ; pip install -e .[build]
 	touch init-build.marker
 
 init-build: init-build.marker
 .PHONY: init-build
 
 wheel: init-build
-	python -m build --wheel
+	source venv/bin/activate ; python -m build --wheel
 
 
-test:
-	pip install pytest
-	pip install pytest-qt
-	pytest
+test: init
+	source venv/bin/activate ; pytest
 
 .PHONY: test
 
+clean:
+	rm -rf venv
+	rm -f extras/extras/test_results/*.html
+	rm -f extras/extras/test_results/*.png
+	rm -f init-build.marker
+	rm -f init.marker
+	rm -f venv.marker
+.PHONY: clean
