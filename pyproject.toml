@@ -61,4 +61,7 @@ Source = "https://github.com/makerplane/pyEfis"
 
 [tool.pytest.ini_options]
 qt_api="pyqt5"
-
+filterwarnings = [
+    # I belive this is warning that pyqt needs updated if you update to python 3.12
+    "ignore:sipPyTypeDict.*:DeprecationWarning:.*:"
+]

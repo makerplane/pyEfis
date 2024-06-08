@@ -21,11 +21,20 @@ from PyQt5.QtWidgets import *
 import pyavtools.fix as fix
 from pyefis.instruments import helpers
 
+
 class StaticText(QWidget):
     """Represents a simple static text display.  This is very simple and is
-       really just here to keep the individual screens from having to have
-       a painter object and a redraw event handler"""
-    def __init__(self, text="", fontsize=1.0, color=QColor(Qt.white), parent=None, font_family="DejaVu Sans Condensed"):
+    really just here to keep the individual screens from having to have
+    a painter object and a redraw event handler"""
+
+    def __init__(
+        self,
+        text="",
+        fontsize=1.0,
+        color=QColor(Qt.white),
+        parent=None,
+        font_family="DejaVu Sans Condensed",
+    ):
         super(StaticText, self).__init__(parent)
         self.font_family = font_family
         self.font_ghost_mask = None
@@ -39,10 +48,12 @@ class StaticText(QWidget):
     def resizeEvent(self, event):
         self.Font = QFont(self.font_family)
         if self.font_mask:
-            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family)
+            self.font_size = helpers.fit_to_mask(
+                self.width(), self.height(), self.font_mask, self.font_family
+            )
             self.Font.setPointSizeF(self.font_size)
         else:
-            self.Font.setPixelSize(qRound(self.height()*self.font_percent))
+            self.Font.setPixelSize(qRound(self.height() * self.font_percent))
         self.textRect = QRectF(0, 0, self.width(), self.height())
 
     def paintEvent(self, event):
@@ -65,7 +76,7 @@ class StaticText(QWidget):
             p.setPen(pen)
             p.drawText(self.textRect, self.font_ghost_mask, opt)
             self.color.setAlpha(alpha)
- 
+
         pen.setColor(self.color)
         p.setPen(pen)
         p.drawText(self.textRect, self.text, opt)
@@ -108,14 +119,17 @@ class ValueDisplay(QWidget):
         # These are the colors that are actually used
         # for drawing gauge.
         self.bgColor = self.bgGoodColor
-        self.textColor = self.textGoodColor # Non value text like units
+        self.textColor = self.textGoodColor  # Non value text like units
         self.highlightColor = self.highlightGoodColor
 
         self.font_mask = None
+
     def resizeEvent(self, event):
         self.font = QFont(self.font_family)
         if self.font_mask:
-            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family)
+            self.font_size = helpers.fit_to_mask(
+                self.width(), self.height(), self.font_mask, self.font_family
+            )
             self.font.setPointSizeF(self.font_size)
         else:
             self.font.setPixelSize(qRound(self.height() * self.font_percent))
@@ -141,12 +155,10 @@ class ValueDisplay(QWidget):
             p.setPen(pen)
             p.drawText(self.valueRect, self.font_ghost_mask, opt)
             self.textColor.setAlpha(alpha)
-          
+
         pen.setColor(self.textColor)
         p.setPen(pen)
         p.drawText(self.valueRect, self.valueText, opt)
-
-
 
     def getValue(self):
         return self._value
@@ -165,7 +177,7 @@ class ValueDisplay(QWidget):
 
     def getValueText(self):
         if self.fail:
-            return 'xxx'
+            return "xxx"
         else:
             return str(self.value)
 
@@ -187,7 +199,6 @@ class ValueDisplay(QWidget):
 
     dbkey = property(getDbkey, setDbkey)
 
-
     # This should get called when the gauge is created and then again
     # anytime a new report of the db item is recieved from the server
     def setupGauge(self):
@@ -207,10 +218,9 @@ class ValueDisplay(QWidget):
             self.item.valueChanged[bool].disconnect(self.setValue)
             self.item.valueChanged[str].disconnect(self.setValue)
         except:
-            pass # One will probably fail all the time
+            pass  # One will probably fail all the time
 
         self.item.valueChanged[self.item.dtype].connect(self.setValue)
-
 
     def setColors(self):
         if self.bad or self.fail or self.old:
