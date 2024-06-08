@@ -1,22 +1,22 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application
+name: CI
 
 on:
   push:
     branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
 
-permissions:
-  contents: read
 
 jobs:
   build:
-
+    
     runs-on: ubuntu-latest
-
+    permissions:
+      # Needed to save data for comment
+      pull-requests: write
+      contents: write
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12
@@ -38,3 +38,19 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+    - name: Coverage comment
+      id: coverage_comment
+      uses: py-cov-action/python-coverage-comment-action@v3
+      with:
+        GITHUB_TOKEN: ${{ github.token }}
+        
+    - name: Store Pull Request comment to be posted
+      uses: actions/upload-artifact@v4
+      if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
+      with:
+        # If you use a different name, update COMMENT_ARTIFACT_NAME accordingly
+        name: python-coverage-comment-action
+        # If you use a different name, update COMMENT_FILENAME accordingly
+        path: python-coverage-comment-action.txt
+        
