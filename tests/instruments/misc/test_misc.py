@@ -18,22 +18,23 @@ def app(qtbot):
         test_app = QApplication([])
     return test_app
 
-def test_save_screenshot(qtbot,request):
+
+def test_save_screenshot(qtbot, request):
     widget1 = StaticText(text="Testing!")
-    widget1.font_mask = "XXXXXXXX" 
+    widget1.font_mask = "XXXXXXXX"
     widget1.color = QColor(Qt.black)
-    #qtbot.addWidget(widget1)
-    widget1.move(0,0)
+    widget1.move(0, 0)
     widget1.resize(100, 50)
-    #qtbot.waitExposed(widget1)
-    #assert widget1.width() == 100
-    #assert widget1.height() == 10
     qtbot.addWidget(widget1)
     widget1.show()
     qtbot.waitExposed(widget1)
-    path = qtbot.screenshot(widget1,"instruments-misc-test_misc")
+    path = qtbot.screenshot(widget1, "instruments-misc-test_misc")
     qtbot.wait(500)
-    os.rename(path, request.config.rootdir + "/extras/extras/test_results/instruments-misc-test_misc-StaticText.png")
+    os.rename(
+        path,
+        request.config.rootdir
+        + "/extras/extras/test_results/instruments-misc-test_misc-StaticText.png",
+    )
 
 
 def test_static_text_default(qtbot):
@@ -46,8 +47,7 @@ def test_static_text_default(qtbot):
 
     widget.show()
     assert widget.isVisible()
-    #qtbot.waitForWindowShown(widget)
-    #time.sleep(3)
+
 
 def test_static_text_resize(qtbot):
     widget = StaticText(text="Test", fontsize=1.0)
@@ -57,6 +57,7 @@ def test_static_text_resize(qtbot):
     qtbot.waitExposed(widget)
     assert widget.width() == 200
     assert widget.height() == 100
+
 
 def test_value_display_default(qtbot):
     widget = ValueDisplay()
@@ -72,6 +73,7 @@ def test_value_display_default(qtbot):
     widget.show()
     assert widget.isVisible()
 
+
 def test_value_display_set_value(qtbot):
     widget = ValueDisplay()
     qtbot.addWidget(widget)
@@ -82,7 +84,8 @@ def test_value_display_set_value(qtbot):
     widget.setValue(-3.14)
     assert widget.getValue() == -3.14
 
-@mock.patch('pyefis.instruments.misc.fix')
+
+@mock.patch("pyefis.instruments.misc.fix")
 def test_value_display_flags(mock_fix, qtbot):
     mock_item = mock.Mock()
     mock_item.value = 100.0
@@ -101,11 +104,11 @@ def test_value_display_flags(mock_fix, qtbot):
 
     widget.oldFlag(True)
     assert widget.old == True
-    assert widget.getValueText() == '100.0'
+    assert widget.getValueText() == "100.0"
 
     widget.badFlag(True)
     assert widget.bad == True
-    assert widget.getValueText() == '100.0'
+    assert widget.getValueText() == "100.0"
 
     widget.failFlag(True)
     assert widget.fail == True
@@ -114,6 +117,6 @@ def test_value_display_flags(mock_fix, qtbot):
     widget.annunciateFlag(True)
     assert widget.annunciate == True
 
+
 if __name__ == "__main__":
     pytest.main()
-
