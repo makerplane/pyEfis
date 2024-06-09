@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-import pyefis.hmi.functions  # Import your module here
+import pyefis.hmi.functions 
 
 # Mock the fix module
 @pytest.fixture

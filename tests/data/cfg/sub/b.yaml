@@ -1,0 +1,4 @@
+b:
+  include: c.yaml
+b2:
+  include: d.yaml
