@@ -1,0 +1,4 @@
+b:
+  include: test_sub_parent_includesC.yaml
+b2:
+  include: test_sub_parent_includesD.yaml
