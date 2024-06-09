@@ -1,3 +1,3 @@
 import pyefis
-print(pyefis.__version__)
 
+print(pyefis.__version__)

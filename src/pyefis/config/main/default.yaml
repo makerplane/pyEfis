@@ -16,15 +16,15 @@
 
   # Screen Geometry
   # Defaults to screen size if screenWidth or screenHeight is not defined
-  #screenWidth: 1280
-  #screenHeight: 720
+  screenWidth: 1280
+  screenHeight: 720
   #screenWidth: 1024
   #screenHeight: 768
   #screenWidth: 1920
   #screenHeight: 1080
 
   # Set EFIS to occupy the entire screen without system border / menu
-  screenFullSize: True
+  screenFullSize: False
 
   # Screen background color RGB
   screenColor: (0,0,0)
