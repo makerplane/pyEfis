@@ -37,32 +37,31 @@ class ActionClass(QWidget):
     doExit = pyqtSignal(object)
     # arg = <inst name>,<inst name>,<inst name>,..:<Command>
 
-
     def __init__(self):
         super(ActionClass, self).__init__()
-        self.signalMap = {"set airspeed mode":self.setAirspeedMode,
-                          "set egt mode":self.setEgtMode,
-                          "show screen":self.showScreen,
-                          "show next screen":self.showNextScreen,
-                          "show previous screen":self.showPrevScreen,
-                          "set value":functions.setValue,
-                          "change value":functions.changeValue,
-                          "toggle bit":functions.toggleBool,
-                          "activate menu item":self.activateMenuItem,
-                          "activate menu":activateMenu,
-                          "menu encoder":self.menuEncoder,
-                          "set menu focus":self.setMenuFocus,
-                          "set instrument units":self.setInstUnits,
-                          "exit":self.doExit,
-                          "evaluate":eval
-                    }
-
+        self.signalMap = {
+            "set airspeed mode": self.setAirspeedMode,
+            "set egt mode": self.setEgtMode,
+            "show screen": self.showScreen,
+            "show next screen": self.showNextScreen,
+            "show previous screen": self.showPrevScreen,
+            "set value": functions.setValue,
+            "change value": functions.changeValue,
+            "toggle bit": functions.toggleBool,
+            "activate menu item": self.activateMenuItem,
+            "activate menu": activateMenu,
+            "menu encoder": self.menuEncoder,
+            "set menu focus": self.setMenuFocus,
+            "set instrument units": self.setInstUnits,
+            "exit": self.doExit,
+            "evaluate": eval,
+        }
 
     def trigger(self, action, argument=""):
         a = self.signalMap[action.lower()]
         if isinstance(a, pyqtBoundSignal):
             a.emit(argument)
-        else: # It's not a signal so assume it's a function
+        else:  # It's not a signal so assume it's a function
             a(argument)
 
     def findAction(self, action):
