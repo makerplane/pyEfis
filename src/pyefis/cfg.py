@@ -80,12 +80,6 @@ def from_yaml(fname, bpath=None, cfg=None, bc=None, preferences=None):
                     if hasattr(sub, "items"):
                         for k, v in sub.items():
                             new[k] = v
-                    else:
-                        # Not sure if this is correct error text, also not sure how to get here because I think one can only return a dict from base yaml
-                        # Even bad syntax never gets here
-                        raise SyntaxError(
-                            f"Error in {fname}\nWhen including list items they need listed under 'items:' in the include file"
-                        )
             elif isinstance(val, dict):
                 new[key] = from_yaml(fname, bpath, val, bc=bc, preferences=preferences)
             elif isinstance(val, list):
@@ -110,10 +104,10 @@ def from_yaml(fname, bpath=None, cfg=None, bc=None, preferences=None):
                                             ifile = bpath + "/" + pfile
                                             if not os.path.exists(ifile):
                                                 raise FileNotFoundError(
-                                                    f"Cannot find include: {f}"
+                                                    f"Cannot find include: {pfile}"
                                                 )
                                 else:
-                                    raise FileNotFoundError(f"Cannot find include: {f}")
+                                    raise FileNotFoundError(f"Cannot find include: {ifile}")
                             # with open(ifile) as cf:
                             litems = from_yaml(
                                 ifile, bpath, bc=bc, preferences=preferences

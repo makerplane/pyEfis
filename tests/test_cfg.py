@@ -40,8 +40,22 @@ def test_loop_detection_exception():
 def test_preference_file_not_found():
     with pytest.raises(FileNotFoundError):
         e = from_yaml(
-            "tests/data/cfg/test_preference_file_not_found.yaml",
+            "tests/data/cfg/sub/test_preference_file_not_found.yaml",
             preferences={"includes": {"NOT_FOUND": "preference_not_found.yaml"}},
+        )
+
+def test_preference_file_not_found_list():
+    with pytest.raises(FileNotFoundError):
+        e = from_yaml(
+            "tests/data/cfg/sub/test_preference_file_not_found_list.yaml",
+            preferences={"includes": {"NOT_FOUND": "preference_not_found.yaml"}},
+        )
+
+def test_preference_file_not_found_list_no_includes():
+    with pytest.raises(FileNotFoundError):
+        e = from_yaml(
+            "tests/data/cfg/sub/test_preference_file_not_found_list.yaml",
+            preferences={"includes_typo": {"NOT_FOUND": "preference_not_found.yaml"}},
         )
 
 
