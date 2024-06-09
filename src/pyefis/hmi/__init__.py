@@ -24,6 +24,7 @@ from . import data
 actions = None
 from . import menu
 
+
 def initialize(config):
     global actions
     log = logging.getLogger(__name__)
