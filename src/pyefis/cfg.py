@@ -1,13 +1,37 @@
 import yaml
 import os
 
-def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
+# allows using include preferences and include: keys to include yaml files inside yaml files
+# While it does support including includes within includes, it does not support the include: key being nested deeply.
+#
+# Rxamples:
+# include: some_file.yaml <- supported
+#
+# test:
+#  - include: some.yaml <- supported, when inside a list the included yaml needs to return a list inside items {items:[]}
+#
+# testing:
+#  include: some.yaml <- supported, the keys inside some.yaml will be nested under testing
+#
+# testing:
+#   deep:
+#     include: some.yaml <- not supported
+#
+#
+# Thi was made to split monolithic files into smaller includable sections
+# Allowing users to easily swap sections in/out to configure the screens to their liking
+
+def from_yaml(fname,bpath=None,cfg=None,bc=None,preferences=None):
+    if bc == None:
+        bc = list()
     bc.append(fname)
     if len(bc) > 500:
         import pprint
-        raise Exception(f"{pprint.pformat(bc)}\nPotential loop detected inside yaml includes, the breadcrumbs above might help detect where the issue is")
+        raise RecursionError(f"{pprint.pformat(bc)}\nPotential loop detected inside yaml includes, the breadcrumbs above might help detect where the issue is")
         
     fpath = os.path.dirname(fname)
+    if not cfg and not fpath:
+        raise SyntaxError(f"The filename '{fname}', must include the path, not just the filename")
     if not cfg:
         # cfg only populated to process nested data
         if not bpath: bpath = fpath
@@ -23,7 +47,7 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
                 elif isinstance(val, list):
                     files = val
                 else:
-                    raise Exception(f"#include in {fname} must be string or array")
+                    raise SyntaxError(f"#include in {fname} must be string or array")
                 # Process include(s)
                 for f in files:
                     # Check if file relative to current file
@@ -33,22 +57,24 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
                         ifile = bpath + '/' + f
                     if not os.path.exists(ifile):
                         # Check preferences
-                        if 'includes' in preferences:
+                        if preferences != None and 'includes' in preferences:
                             pfile = preferences['includes'].get(f,False)
                             if pfile:
                                 ifile = fpath + '/' + pfile
                                 if not os.path.exists(ifile):
                                     ifile = bpath + '/' + pfile
                                     if not os.path.exists(ifile):
-                                        raise Exception(f"Cannot find include: {f}")
+                                        raise FileNotFoundError(f"Cannot find include: {f}")
                         else:
-                            raise Exception(f"Cannot find include: {f}")
+                            raise FileNotFoundError(f"Cannot find include: {f}")
                     sub = from_yaml(ifile, bpath,bc=bc,preferences=preferences)
                     if hasattr(sub,'items'):
                        for k, v in sub.items():
                            new[k] = v
                     else:
-                        raise Exception(f"Include {val} from {fname} is invalid")                    
+                        # Not sure if this is correct error text, also not sure how to get here because I think one can only return a dict from base yaml
+                        # Even bad syntax never gets here
+                        raise SyntaxError(f"Error in {fname}\nWhen including list items they need listed under 'items:' in the include file")
             elif isinstance(val, dict):
                 new[key] = from_yaml(fname,bpath,val,bc=bc,preferences=preferences)
             elif isinstance(val, list):
@@ -70,17 +96,24 @@ def from_yaml(fname,bpath=None,cfg=None,bc=[],preferences=None):
                                         if not os.path.exists(ifile):
                                             ifile = bpath + '/' + pfile
                                             if not os.path.exists(ifile):
-                                                raise Exception(f"Cannot find include: {f}")
+                                                raise FileNotFoundError(f"Cannot find include: {f}")
                                 else:
-                                    raise Exception(f"Cannot find include: {f}")
-                            with open(ifile) as cf:
-                                litems = yaml.safe_load(cf)
+                                    raise FileNotFoundError(f"Cannot find include: {f}")
+                            #with open(ifile) as cf:
+                            litems = from_yaml(ifile,bpath,bc=bc,preferences=preferences) #yaml.safe_load(cf)
                             if 'items' in litems:
                                 if litems['items'] != None:
                                     for a in litems['items']:
-                                        new[key].append(a)
+                                        # What about nested things?
+                                        ap = a
+                                        if isinstance(a,dict):
+                                            ap = from_yaml(ifile,bpath,a,bc=bc,preferences=preferences)
+                                        if isinstance(litems['items'], dict):
+                                            new[key].append({ap:litems['items'][ap]})
+                                        else:
+                                            new[key].append(ap)
                             else:
-                                raise Exception(f"Error in {ifile}\nWhen including list items they need listed under 'items:' in the include file")
+                                raise SyntaxError(f"Error in {ifile}\nWhen including list items they need listed under 'items:' in the include file")
                         else:
                             new[key].append(l)
                     else:
