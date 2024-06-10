@@ -217,7 +217,7 @@ class ValueDisplay(QWidget):
             self.item.valueChanged[int].disconnect(self.setValue)
             self.item.valueChanged[bool].disconnect(self.setValue)
             self.item.valueChanged[str].disconnect(self.setValue)
-        except:
+        except TypeError:
             pass  # One will probably fail all the time
 
         self.item.valueChanged[self.item.dtype].connect(self.setValue)

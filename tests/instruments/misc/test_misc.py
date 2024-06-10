@@ -39,14 +39,19 @@ def test_save_screenshot(qtbot, request):
 
 def test_static_text_default(qtbot):
     widget = StaticText(text="Testing!")
+    widget.font_mask = "0.0"
+    widget.font_ghost_mask = "0.0"
     qtbot.addWidget(widget)
 
     assert widget.text == "Testing!"
     assert widget.font_family == "DejaVu Sans Condensed"
     assert widget.color == QColor(Qt.white)
-
+    widget.resizeEvent(None)
+    widget.paintEvent(None)
     widget.show()
+    qtbot.waitExposed(widget)
     assert widget.isVisible()
+    assert widget.color.alpha() != 50
 
 
 def test_static_text_resize(qtbot):
@@ -54,6 +59,8 @@ def test_static_text_resize(qtbot):
     qtbot.addWidget(widget)
 
     widget.resize(200, 100)
+    widget.resizeEvent(None)
+    widget.paintEvent(None)
     qtbot.waitExposed(widget)
     assert widget.width() == 200
     assert widget.height() == 100
@@ -73,6 +80,18 @@ def test_value_display_default(qtbot):
     widget.show()
     assert widget.isVisible()
 
+def test_value_display_font_mask(qtbot):
+    widget = ValueDisplay()
+    widget.font_size = 100
+    widget.font_mask = "0.0"
+    widget.font_ghost_mask = "0.0"
+    qtbot.addWidget(widget)
+    widget.resizeEvent(None)
+    widget.paintEvent(None)
+    widget.show()
+    qtbot.waitExposed(widget)
+    assert widget.isVisible()
+    assert widget.font_size != 100
 
 def test_value_display_set_value(qtbot):
     widget = ValueDisplay()
@@ -114,8 +133,34 @@ def test_value_display_flags(mock_fix, qtbot):
     assert widget.fail == True
     assert widget.getValueText() == "xxx"
 
+    widget.failFlag(False)
     widget.annunciateFlag(True)
     assert widget.annunciate == True
+    assert widget.textColor == widget.textAnnunciateColor
+
+@mock.patch("pyefis.instruments.misc.fix")
+def test_set_db_key(mock_fix,qtbot):
+    mock_item = mock.MagicMock()
+    mock_item.value = 100.0
+    mock_item.fail = True
+    mock_item.bad = False
+    mock_fix.db.get_item.return_value = mock_item
+    mock_setupGauge = mock.MagicMock()
+    widget = ValueDisplay()
+    qtbot.addWidget(widget)
+    widget.setDbkey('TEST')
+    mock_fix.db.get_item.assert_called_once_with("TEST")
+    mock_item.reportReceived.connect.assert_called_once_with(widget.setupGauge)
+    mock_item.annunciateChanged.connect.assert_called_once_with(widget.annunciateFlag)
+    mock_item.oldChanged.connect.assert_called_once_with(widget.oldFlag)
+    mock_item.badChanged.connect.assert_called_once_with(widget.badFlag)
+    mock_item.failChanged.connect.assert_called_once_with(widget.failFlag)
+    assert widget._dbkey == "TEST"
+    # These would only match if self.setupGauge() was called:
+    assert widget.fail == True
+    assert widget.bad == False
+#    assert mock_item.
+
 
 
 if __name__ == "__main__":
