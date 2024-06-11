@@ -9,6 +9,7 @@ from pyefis.instruments.misc import StaticText, ValueDisplay
 import time
 import subprocess
 import os
+import pyavtools.fix as fix
 
 
 @pytest.fixture
@@ -95,22 +96,28 @@ def test_value_display_font_mask(qtbot):
 
 def test_value_display_set_value(qtbot):
     widget = ValueDisplay()
+    fix.db.set_value("TEST",42.0)
+    fix.db.get_item("TEST").fail = False
+    widget.setDbkey("TEST")
     qtbot.addWidget(widget)
 
-    widget.setValue(42.0)
     assert widget.getValue() == 42.0
 
-    widget.setValue(-3.14)
-    assert widget.getValue() == -3.14
+    fix.db.set_value("TEST",3.14)
+    assert widget.getValue() == 3.14
 
 
-@mock.patch("pyefis.instruments.misc.fix")
-def test_value_display_flags(mock_fix, qtbot):
-    mock_item = mock.Mock()
-    mock_item.value = 100.0
-    mock_fix.db.get_item.return_value = mock_item
-
+#@mock.patch("pyefis.instruments.misc.fix")
+#def test_value_display_flags(mock_fix, qtbot):
+def test_value_display_flags( qtbot):
+    #mock_item = mock.Mock()
+    #mock_item.value = 100.0
+    #mock_fix.db.get_item.return_value = mock_item
     widget = ValueDisplay()
+
+    fix.db.set_value("TEST",100)
+    widget.setDbkey("TEST")
+
     qtbot.addWidget(widget)
 
     widget.failFlag(True)
