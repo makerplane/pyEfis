@@ -1,9 +1,9 @@
 # Patch pyavtools.fix so it can run in memory without a fix server
 import sys
-import mock_db.client
-import mock_db.scheduler
-sys.modules["pyavtools.fix.client"] = mock_db.client
-sys.modules["pyavtools.scheduler"] = mock_db.scheduler
+import tests.mock_db.client
+import tests.mock_db.scheduler
+sys.modules["pyavtools.fix.client"] = tests.mock_db.client
+sys.modules["pyavtools.scheduler"] = tests.mock_db.scheduler
 
 # import fix
 import pyavtools.fix as fix
