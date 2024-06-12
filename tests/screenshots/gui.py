@@ -89,10 +89,7 @@ class Main(QMainWindow):
              w.setPalette(p)
              w.setAutoFillBackground(True)
 
-        print(self.scr)
-        print(dir(self.scr))
         scr.object = self.scr.module.Screen(self)
-        setattr(scr.object,'screenName',scr.name)
         scr.object.resize(self.width(), self.height())
         scr.object.move(0,0)
         scr.show()

@@ -6,23 +6,8 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QColor
 #from pyefis.screens import screenbuilder
-from tests.screen import gui
-
-class Screen(QObject):
-    def __init__(self, name, module, config):
-        super(Screen, self).__init__()
-        self.name = name
-        self.module = importlib.import_module(module)
-        self.config = config
-        self.object = None
-        self.default = False
-    def show(self):
-        self.object.show()
-        self.screenShow.emit()
-    def hide(self):
-        self.object.hide()
-        self.screenHide.emit()
-
+from tests.screenshots import gui
+import yaml
 
 @pytest.fixture
 def app(qtbot):
@@ -33,40 +18,8 @@ def app(qtbot):
 
 
 def test_save_screenshot(qtbot, request):
-
-    config = {
-      "main": {
-        "nodeID": 1,
-        "screenWidth": 1024,
-        "screenHeight": 1024,
-        "screenColor": "0,0,0"
-      },
-      "screens": {
-        "TEST": {
-          "layout": {
-            "rows": 100,
-            "columns": 100,
-          },
-          "instruments": [
-            { 
-            "type": "value_text",
-            "row": 0,
-            "column": 0,
-            "span": {
-              "rows": 10,
-              "columns": 10
-            },
-            "options": {
-              "dbkey": "TEST"
-            }
-
-
-            }
-          ]
-        }
-      }
-    }
-
+    with open("tests/screenshots/configs/pyefis.instruments.gauges.NumericDisplay.yaml") as cf:
+        config = yaml.safe_load(cf)
     #widget = Screen("TEST", "pyefis.screens.screenbuilder", config)
     gui.initialize(config,"tests",{})
     qtbot.waitExposed(gui.mainWindow.scr.module)

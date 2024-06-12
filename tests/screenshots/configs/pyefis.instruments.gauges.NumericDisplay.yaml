@@ -1,0 +1,68 @@
+main:
+  nodeID: 1
+  screenWidth: 1024
+  screenHeight: 1024
+  screenFullSize: True
+  screenColor: (0,0,0)
+
+screens:
+  TEST:
+    layout:
+      rows: 100
+      columns: 100
+      draw_grid: true
+    instruments:
+    - type: ganged_numeric_display
+      gang_type: vertical
+      row: 10
+      column: 10
+      span:
+        rows: 90
+        columns: 30
+      groups:
+        - name: ROW1
+          gap: 0
+          common_options:
+            dbkey: NUMOK
+            decimal_places: 2
+            show_units: false
+          instruments:
+              -
+                options:
+                  show_units: false
+              -
+                options:
+                  font_mask: "00.00"
+              -
+                options:
+                  font_mask: "00.00"
+                  font_family: "DSEG14 Classic" 
+                  #units_font_mask: '~~'
+
+              -
+                options:
+                  font_mask: "00.00"
+                  font_family: "DSEG14 Classic"
+                  #units_font_mask: '~~'
+                  font_ghost_mask: "~~.~~"
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMOLD
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMBAD
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMFAIL
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMLOWWARN
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMLOWALARM
+
