@@ -50,7 +50,7 @@ class NumericDisplay(AbstractGauge):
             # TODO Edit to get the units closer to the value 
             self.valueTextRect = QRectF(0, 0, self.width()-unitsWidth-5, self.height())
             self.unitsTextRect = QRectF(self.valueTextRect.width(), 0,
-                                        self.width()-self.valueTextRect.width(), self.height())
+                                        self.width()-self.valueTextRect.width()-2, self.height() * self.small_font_percent)
         else:
             self.valueTextRect = QRectF(0, 0, self.width(), self.height())
 
