@@ -179,7 +179,10 @@ class AbstractGauge(QWidget):
                 return '{0:.{1}f}'.format(float(self.encoder_set_value), self.decimal_places)
             else:
                 # return properly formatted value
-                return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
+                if self.font_mask != None:
+                    return '{0:{1}.{2}f}'.format(float(self.value),len(self.font_mask), self.decimal_places)
+                else:
+                    return '{0:.{1}f}'.format(float(self.value), self.decimal_places)
 
     valueText = property(getValueText)
 
