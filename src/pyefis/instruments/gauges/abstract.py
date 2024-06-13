@@ -158,7 +158,10 @@ class AbstractGauge(QWidget):
 
     def getValueText(self):
         if self.fail:
-            return 'xxx'
+            if self.font_mask:
+                return ''.join('X' if x != '.' else x for x in self.font_mask)
+            else:
+                return 'xxx'
         else:
             if self.encoder_selected and self.encoder_num_mask:
                 if self.encoder_num_blink:
