@@ -82,4 +82,13 @@ class NumericDisplay(AbstractGauge):
         if self.show_units:
             p.setFont(self.smallFont)
             opt = QTextOption(self.unitsAlignment)
+            if self.units_font_ghost_mask:
+                alpha = self.textColor.alpha()
+                self.textColor.setAlpha(self.font_ghost_alpha)
+                pen.setColor(self.textColor)
+                p.setPen(pen)
+                p.drawText(self.unitsTextRect, self.units_font_ghost_mask , opt)
+                self.textColor.setAlpha(alpha)
+                pen.setColor(self.textColor)
+                p.setPen(pen)
             p.drawText(self.unitsTextRect, self.units, opt)
