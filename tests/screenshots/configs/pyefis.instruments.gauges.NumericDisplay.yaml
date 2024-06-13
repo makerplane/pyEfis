@@ -1,7 +1,7 @@
 main:
   nodeID: 1
-  screenWidth: 1024
-  screenHeight: 1024
+  screenWidth: 1000
+  screenHeight: 1000
   screenFullSize: True
   screenColor: (0,0,0)
 
@@ -26,6 +26,7 @@ screens:
             dbkey: NUMOK
             decimal_places: 2
             show_units: false
+            font_family: DejaVu Sans Mono
           instruments:
               -
                 options:
@@ -36,15 +37,10 @@ screens:
               -
                 options:
                   font_mask: "00.00"
-                  font_family: "DSEG14 Classic" 
-                  #units_font_mask: '~~'
-
-              -
-                options:
-                  font_mask: "00.00"
                   font_family: "DSEG14 Classic"
                   #units_font_mask: '~~'
                   font_ghost_mask: "~~.~~"
+                  #units_font_ghost_mask: "~~"
               -
                 options:
                   font_mask: "00.00"
@@ -57,6 +53,129 @@ screens:
                 options:
                   font_mask: "00.00"
                   dbkey: NUMFAIL
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMANNUNCIATE
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMLOWWARN
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMLOWALARM
+
+    - type: ganged_numeric_display
+      gang_type: vertical
+      row: 10
+      column: 45
+      span:
+        rows: 90
+        columns: 30
+      groups:
+        - name: ROW1
+          gap: 0
+          common_options:
+            dbkey: NUMOK
+            decimal_places: 2
+            show_units: true
+            font_family: DejaVu Sans Mono
+          instruments:
+              -
+                options:
+                  show_units: false
+              -
+                options:
+                  font_mask: "00.00"
+              -
+                options:
+                  font_mask: "00.00"
+                  font_family: "DSEG14 Classic"
+                  units_font_mask: '~~'
+                  font_ghost_mask: "~~.~~"
+                  units_font_ghost_mask: "~~"
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMOLD
+                  units_font_mask: '~~'
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMBAD
+                  units_font_mask: '~~'
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMFAIL
+                  units_font_mask: '~~'
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMANNUNCIATE
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMLOWWARN
+                  units_font_mask: '~~'
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMLOWALARM
+                  units_font_mask: '~~'
+
+
+
+
+
+
+    - type: ganged_numeric_display
+      gang_type: vertical
+      row: 10
+      column: 80
+      span:
+        rows: 90
+        columns: 20
+      groups:
+        - name: ROW1
+          gap: 0
+          common_options:
+            dbkey: NUMOK
+            decimal_places: 2
+            show_units: false
+            font_family: DejaVu Sans Mono
+
+          instruments:
+              -
+                options:
+                  show_units: false
+              -
+                options:
+                  font_mask: "00.00"
+              -
+                options:
+                  font_mask: "00.00"
+                  font_family: "DSEG14 Classic"
+                  #units_font_mask: '~~'
+                  font_ghost_mask: "~~.~~"
+                  #units_font_ghost_mask: "~~"
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMOLD
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMBAD
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMFAIL
+              -
+                options:
+                  font_mask: "00.00"
+                  dbkey: NUMANNUNCIATE
               -
                 options:
                   font_mask: "00.00"

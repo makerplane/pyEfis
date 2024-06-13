@@ -5,9 +5,9 @@ from unittest import mock
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QObject
 from PyQt5.QtGui import QColor
-#from pyefis.screens import screenbuilder
 from tests.screenshots import gui
 import yaml
+import os
 
 @pytest.fixture
 def app(qtbot):
@@ -17,14 +17,17 @@ def app(qtbot):
     return test_app
 
 
-def test_save_screenshot(qtbot, request):
+def test_save_screenshot_numeric_display(qtbot, request):
     with open("tests/screenshots/configs/pyefis.instruments.gauges.NumericDisplay.yaml") as cf:
         config = yaml.safe_load(cf)
     #widget = Screen("TEST", "pyefis.screens.screenbuilder", config)
     gui.initialize(config,"tests",{})
     qtbot.waitExposed(gui.mainWindow.scr.module)
-    qtbot.wait(5000)
-#show()
-#resize(1024,1024)
-
-#screenbuilder.Screen(config=config)
+    path = qtbot.screenshot(gui.mainWindow, "numeric_display")
+    qtbot.wait(500)
+    os.rename(
+        path,
+        request.config.rootdir
+        + "/extras/extras/test_results/numeric_display.png",
+    )
+    qtbot.wait(10000)
