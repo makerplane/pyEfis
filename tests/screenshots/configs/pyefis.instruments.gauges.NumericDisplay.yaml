@@ -88,6 +88,7 @@ screens:
               -
                 options:
                   font_mask: "00.00"
+                  units_font_mask: '~~'
               -
                 options:
                   font_mask: "00.00"
@@ -114,6 +115,7 @@ screens:
                 options:
                   font_mask: "00.00"
                   dbkey: NUMANNUNCIATE
+                  units_font_mask: '~~'
               -
                 options:
                   font_mask: "00.00"
