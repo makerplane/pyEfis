@@ -587,7 +587,6 @@ class Screen(QWidget):
         grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
         grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
         grid_x = leftm + grid_width * (( column ))
-        #print(f"leftm:{type(leftm)}, grid_width:{type(grid_width)} column:{column}")
         grid_y = topm + grid_height * (( row ))
         return grid_x, grid_y, grid_width, grid_height
 
@@ -933,26 +932,26 @@ class GridOverlay(QWidget):
         self.textRect = QRectF(int(0), int(0), qRound(grid_width), qRound(grid_height))
         while x <= int(self.layout['columns']):
             grid_x = leftm + grid_width * (x)
-            painter.setPen(QPen(Qt.red,1))
+            painter.setPen(QPen(QColor("#99ff0000"),1))
             if (x) % 10 == 0:
-                painter.setPen(QPen(Qt.green,3))
+                painter.setPen(QPen(QColor("#9900ff00"),3))
                 self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
                 painter.drawText(self.textRect, str(x),QTextOption(Qt.AlignCenter))
-                painter.setPen(QPen(Qt.red,3))
+                painter.setPen(QPen(QColor("#99ff0000"),3))
             painter.drawLine(qRound(grid_x), qRound(grid_y), qRound(grid_x), self.height())
             x += 5
         y = 0
         grid_x = leftm
         while y <= int(self.layout['rows']):
             grid_y = topm + grid_height * (y)
-            painter.setPen(QPen(Qt.red,1))
+            painter.setPen(QPen(QColor("#99ff0000"),1))
             if (y) % 10 == 0:
                 if y > 0:
-                    painter.setPen(QPen(Qt.green,3))
+                    painter.setPen(QPen(QColor("#9900ff00"),3))
                     self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
                     painter.drawText(self.textRect, str(y),QTextOption(Qt.AlignCenter))
 
-                painter.setPen(QPen(Qt.red,3))
+                painter.setPen(QPen(QColor("#99ff0000"),3))
             painter.drawLine(qRound(grid_x), qRound(grid_y), self.width(),  qRound(grid_y))
             y += 5
 
