@@ -3,9 +3,10 @@ from unittest import mock
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QBrush
-from pyefis.instruments import airspeed #import Airspeed, Airspeed_Tape, Airspeed_Box
+from pyefis.instruments import airspeed  # import Airspeed, Airspeed_Tape, Airspeed_Box
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
+
 
 @pytest.fixture
 def app(qtbot):
@@ -16,16 +17,16 @@ def app(qtbot):
 
 
 def test_numerical_airspeed(qtbot):
-    fix.db.get_item("IAS").set_aux_value("Vs",45.0)
-    fix.db.get_item("IAS").set_aux_value("Vs0",40.0)
-    fix.db.get_item("IAS").set_aux_value("Vno",125.0)
-    fix.db.get_item("IAS").set_aux_value("Vne",140.0)
-    fix.db.get_item("IAS").set_aux_value("Vfe",70.0)
+    fix.db.get_item("IAS").set_aux_value("Vs", 45.0)
+    fix.db.get_item("IAS").set_aux_value("Vs0", 40.0)
+    fix.db.get_item("IAS").set_aux_value("Vno", 125.0)
+    fix.db.get_item("IAS").set_aux_value("Vne", 140.0)
+    fix.db.get_item("IAS").set_aux_value("Vfe", 70.0)
     fix.db.set_value("IAS", "100")
     widget = airspeed.Airspeed()
     assert widget.getRatio() == 1
     qtbot.addWidget(widget)
-    widget.resize(201,200)
+    widget.resize(201, 200)
     widget.show()
     qtbot.waitExposed(widget)
     qtbot.wait(500)
@@ -36,30 +37,31 @@ def test_numerical_airspeed(qtbot):
     fix.db.get_item("IAS").old = True
     fix.db.get_item("IAS").old = False
     fix.db.set_value("IAS", "20")
-    widget.setAsOld(True) 
+    widget.setAsOld(True)
     widget.setAsBad(True)
     widget.setAsFail(True)
     assert widget.getAirspeed() == 20
     qtbot.wait(200)
 
+
 def test_numerical_airspeed_tape(qtbot):
     widget = airspeed.Airspeed_Tape(font_percent=0.5)
     qtbot.addWidget(widget)
     widget.redraw()
-    widget.resize(50,200)
+    widget.resize(50, 200)
     widget.show()
     assert widget.Vs0 == 40
     assert widget.getAirspeed() == 20
-    widget.setAirspeed(40) #redraw()
+    widget.setAirspeed(40)  # redraw()
     widget.keyPressEvent(None)
-    widget.wheelEvent(None) 
+    widget.wheelEvent(None)
 
 
 def test_numerical_airspeed_box(qtbot):
     hmi.initialize({})
     widget = airspeed.Airspeed_Box()
     qtbot.addWidget(widget)
-    widget.resize(50,50)
+    widget.resize(50, 50)
     widget.show()
     fix.db.set_value("TAS", 100)
     widget.setMode(1)
@@ -87,4 +89,3 @@ def test_numerical_airspeed_box(qtbot):
     assert widget.valueText == ""
 
     qtbot.wait(2000)
-
