@@ -62,7 +62,8 @@ Source = "https://github.com/makerplane/pyEfis"
 [tool.pytest.ini_options]
 qt_api="pyqt5"
 env = [
-  "QT_QPA_PLATFORM = offscreen"
+  "QT_QPA_PLATFORM = offscreen:size=1000x1000"
+#  "QT_QPA_PLATFORM = xcb:size=1000,1000"
 ]
 filterwarnings = [
     # I belive this is warning that pyqt needs updated if you update to python 3.12
