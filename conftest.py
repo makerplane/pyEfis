@@ -47,6 +47,25 @@ create_numbers("NUMHIGHWARN", 81.28)
 create_numbers("NUMHIGHALARM", 95.19)
 
 
+fix.db.define_item("GS", "GS", 'float', 0.0, 2000.0, 'knots', 50000, "")
+fix.db.set_value("GS", 100)
+fix.db.get_item("GS").bad = False
+fix.db.get_item("GS").fail = False
+
+fix.db.define_item("TAS", "TAS", 'float', 0.0, 2000.0, 'knots', 50000, "")
+fix.db.set_value("TAS", 105)
+fix.db.get_item("TAS").bad = False
+fix.db.get_item("TAS").fail = False
+
+fix.db.define_item("IAS", "Number", 'float', 0, 2000.0, 'knots', 50000, "Min,Max,V1,V2,Vne,Vfe,Vmc,Va,Vno,Vs,Vs0,Vx,Vy")
+fix.db.set_value("IAS", "110")
+fix.db.get_item("IAS").bad = False
+fix.db.get_item("IAS").fail = False
+fix.db.get_item("IAS").set_aux_value("Vs",45.0)
+fix.db.get_item("IAS").set_aux_value("Vs0",40.0)
+fix.db.get_item("IAS").set_aux_value("Vno",125.0)
+fix.db.get_item("IAS").set_aux_value("Vne",140.0)
+fix.db.get_item("IAS").set_aux_value("Vfe",70.0)
 
 
 
