@@ -195,7 +195,7 @@ class ArcGauge(AbstractGauge):
         if self.name_font_mask:
             f.setPointSizeF(self.nameFontSize)
         else:
-            f.setPixelSize(self.nameFontSize)
+            f.setPixelSize(int(self.nameFontSize))
         fm = QFontMetrics(f)
         if self.name_font_mask:
             if self.name_font_ghost_mask:
