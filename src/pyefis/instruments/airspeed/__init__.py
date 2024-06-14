@@ -37,6 +37,7 @@ class Airspeed(QWidget):
         self.bg_color = bg_color
         self._airspeed = 0
         self.item = fix.db.get_item("IAS")
+        self._airspeed = self.item.value
         self.item.valueChanged[float].connect(self.setAirspeed)
         self.item.oldChanged[bool].connect(self.repaint)
         self.item.badChanged[bool].connect(self.repaint)
