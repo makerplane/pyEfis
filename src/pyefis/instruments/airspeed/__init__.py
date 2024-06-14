@@ -26,9 +26,17 @@ import pyefis.hmi as hmi
 from pyefis.instruments.NumericalDisplay import NumericalDisplay
 from pyefis.instruments import helpers
 
+
 class Airspeed(QWidget):
     FULL_WIDTH = 400
-    def __init__(self, parent=None, font_percent=0.07, bg_color=Qt.black, font_family="DejaVu Sans Condensed"):
+
+    def __init__(
+        self,
+        parent=None,
+        font_percent=0.07,
+        bg_color=Qt.black,
+        font_family="DejaVu Sans Condensed",
+    ):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
@@ -44,16 +52,21 @@ class Airspeed(QWidget):
         self.item.failChanged[bool].connect(self.repaint)
 
         # V Speeds need to be init before paint
-        self.Vs = self.item.get_aux_value('Vs')
-        if self.Vs is None: self.Vs = 0
-        self.Vs0 = self.item.get_aux_value('Vs0')
-        if self.Vs0 is None: self.Vs0 = 0
-        self.Vno = self.item.get_aux_value('Vno')
-        if self.Vno is None: self.Vno = 0
-        self.Vne = self.item.get_aux_value('Vne')
-        if self.Vne is None: self.Vne = 200
-        self.Vfe = self.item.get_aux_value('Vfe')
-        if self.Vfe is None: self.Vfe = 0
+        self.Vs = self.item.get_aux_value("Vs")
+        if self.Vs is None:
+            self.Vs = 0
+        self.Vs0 = self.item.get_aux_value("Vs0")
+        if self.Vs0 is None:
+            self.Vs0 = 0
+        self.Vno = self.item.get_aux_value("Vno")
+        if self.Vno is None:
+            self.Vno = 0
+        self.Vne = self.item.get_aux_value("Vne")
+        if self.Vne is None:
+            self.Vne = 200
+        self.Vfe = self.item.get_aux_value("Vfe")
+        if self.Vfe is None:
+            self.Vfe = 0
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
@@ -68,7 +81,7 @@ class Airspeed(QWidget):
         dial = QPainter(self)
         dial.setRenderHint(QPainter.Antialiasing)
 
-        #Draw the Black Background
+        # Draw the Black Background
         dial.fillRect(0, 0, w, h, QColor(self.bg_color))
 
         # Setup Pens
@@ -78,21 +91,21 @@ class Airspeed(QWidget):
         fontMetrics = QFontMetricsF(f)
 
         dialPen = QPen(QColor(Qt.white))
-        dialPen.setWidthF(s*0.01)
+        dialPen.setWidthF(s * 0.01)
 
         needleBrush = QBrush(QColor(Qt.white))
 
         vnePen = QPen(QColor(Qt.red))
-        vnePen.setWidthF(s*0.025)
+        vnePen.setWidthF(s * 0.025)
 
         vsoPen = QPen(QColor(Qt.white))
-        vsoPen.setWidthF(s*0.015)
+        vsoPen.setWidthF(s * 0.015)
 
         vnoPen = QPen(QColor(Qt.green))
-        vnoPen.setWidthF(s*0.015)
+        vnoPen.setWidthF(s * 0.015)
 
         yellowPen = QPen(QColor(Qt.yellow))
-        yellowPen.setWidthF(s*0.015)
+        yellowPen.setWidthF(s * 0.015)
 
         # Dial Setup
 
@@ -103,22 +116,24 @@ class Airspeed(QWidget):
         Vno_angle = (-(((self.Vno - 30) * 2.5) + 25) + 90) * 16
         Vne_angle = (-(((self.Vne - 30) * 2.5) + 25) + 90) * 16
 
-        radius = int(round(min(w,h) * .45))
-        diameter = radius*2
+        radius = int(round(min(w, h) * 0.45))
+        diameter = radius * 2
         inner_offset = 3
-        center_x = w/2
-        center_y = h/2
+        center_x = w / 2
+        center_y = h / 2
 
         # Vspeeds Arcs
         dial.setPen(vnoPen)
-        dial_rect = QRectF(center_x-radius, center_y-radius,
-                            diameter, diameter)
+        dial_rect = QRectF(center_x - radius, center_y - radius, diameter, diameter)
         dial.drawArc(dial_rect, qRound(Vs_angle), qRound(-(Vs_angle - Vno_angle)))
         dial.setPen(vsoPen)
-        inner_rect = QRectF(center_x-radius+inner_offset, center_y-radius+inner_offset,
-                            diameter-inner_offset*3, diameter-inner_offset*3)
-        dial.drawArc(inner_rect,
-                            qRound(Vs0_angle), qRound(-(Vs0_angle - Vfe_angle)))
+        inner_rect = QRectF(
+            center_x - radius + inner_offset,
+            center_y - radius + inner_offset,
+            diameter - inner_offset * 3,
+            diameter - inner_offset * 3,
+        )
+        dial.drawArc(inner_rect, qRound(Vs0_angle), qRound(-(Vs0_angle - Vfe_angle)))
         dial.setPen(yellowPen)
         dial.drawArc(dial_rect, qRound(Vno_angle), qRound(-(Vno_angle - Vne_angle)))
         dial.save()
@@ -129,21 +144,20 @@ class Airspeed(QWidget):
         a_s = 0
         while count < 360:
             if count % 25 == 0 and a_s <= 140:
-                dial.drawLine(0, -radius, 0, -(radius-15))
+                dial.drawLine(0, -radius, 0, -(radius - 15))
                 x = fontMetrics.width(str(a_s)) / 2
                 y = f.pixelSize()
-                dial.drawText(qRound(-x), qRound(-(radius-15 - y)),
-                           str(a_s))
+                dial.drawText(qRound(-x), qRound(-(radius - 15 - y)), str(a_s))
                 a_s += 10
                 if count == 0:
                     a_s = 30
                     count = count + 19
                     dial.rotate(19)
             elif count % 12.5 == 0 and a_s <= 140:
-                dial.drawLine(0, -(radius), 0, -(radius-10))
+                dial.drawLine(0, -(radius), 0, -(radius - 10))
             if count == (-Vne_angle / 16) + 90:
                 dial.setPen(vnePen)
-                dial.drawLine(0, -(radius), 0, -(radius-15))
+                dial.drawLine(0, -(radius), 0, -(radius - 15))
                 dial.setPen(dialPen)
             dial.rotate(0.5)
             count += 0.5
@@ -151,10 +165,10 @@ class Airspeed(QWidget):
         if self.item.fail:
             warn_font = QFont(self.font_family, 30, QFont.Bold)
             dial.resetTransform()
-            dial.setPen (QPen(QColor(Qt.red)))
-            dial.setBrush (QBrush(QColor(Qt.red)))
-            dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "XXX")
+            dial.setPen(QPen(QColor(Qt.red)))
+            dial.setBrush(QBrush(QColor(Qt.red)))
+            dial.setFont(warn_font)
+            dial.drawText(0, 0, w, h, Qt.AlignCenter, "XXX")
             dial.restore()
             return
 
@@ -165,9 +179,10 @@ class Airspeed(QWidget):
         else:
             dial.setPen(QPen(QColor(Qt.white)))
             dial.setBrush(QBrush(QColor(Qt.white)))
-        #Needle Movement
-        needle = QPolygon([QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0),
-                            QPoint(0, -(radius-15))])
+        # Needle Movement
+        needle = QPolygon(
+            [QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0), QPoint(0, -(radius - 15))]
+        )
 
         if self.airspeed <= 30:  # Airspeeds Below 30 Knots
             needle_angle = self._airspeed * 0.83
@@ -204,18 +219,20 @@ class Airspeed(QWidget):
 
     airspeed = property(getAirspeed, setAirspeed)
 
-    def setAsOld(self,b):
+    def setAsOld(self, b):
         pass
 
-    def setAsBad(self,b):
+    def setAsBad(self, b):
         pass
 
-    def setAsFail(self,b):
+    def setAsFail(self, b):
         pass
 
 
 class Airspeed_Tape(QGraphicsView):
-    def __init__(self, parent=None, font_percent=None,font_family="DejaVu Sans Condensed"):
+    def __init__(
+        self, parent=None, font_percent=None, font_family="DejaVu Sans Condensed"
+    ):
         super(Airspeed_Tape, self).__init__(parent)
         self.myparent = parent
         self.font_family = font_family
@@ -232,22 +249,27 @@ class Airspeed_Tape(QGraphicsView):
         self._airspeed = self.item.value
 
         # V Speeds
-        self.Vs = self.item.get_aux_value('Vs')
-        if self.Vs is None: self.Vs = 0
-        self.Vs0 = self.item.get_aux_value('Vs0')
-        if self.Vs0 is None: self.Vs0 = 0
-        self.Vno = self.item.get_aux_value('Vno')
-        if self.Vno is None: self.Vno = 0
-        self.Vne = self.item.get_aux_value('Vne')
-        if self.Vne is None: self.Vne = 200
-        self.Vfe = self.item.get_aux_value('Vfe')
-        if self.Vfe is None: self.Vfe = 0
+        self.Vs = self.item.get_aux_value("Vs")
+        if self.Vs is None:
+            self.Vs = 0
+        self.Vs0 = self.item.get_aux_value("Vs0")
+        if self.Vs0 is None:
+            self.Vs0 = 0
+        self.Vno = self.item.get_aux_value("Vno")
+        if self.Vno is None:
+            self.Vno = 0
+        self.Vne = self.item.get_aux_value("Vne")
+        if self.Vne is None:
+            self.Vne = 200
+        self.Vfe = self.item.get_aux_value("Vfe")
+        if self.Vfe is None:
+            self.Vfe = 0
 
-        self.max = int(round(self.Vne*1.25))
+        self.max = int(round(self.Vne * 1.25))
 
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
-        self.pph = 10 # Pixels per unit
+        self.pph = 10  # Pixels per unit
         self.fontsize = 15
         self.majorDiv = 10
         self.minorDiv = 5
@@ -262,71 +284,96 @@ class Airspeed_Tape(QGraphicsView):
         self.markWidth = w / 5
         f = QFont(self.font_family)
         if self.font_mask:
-            self.fontsize = helpers.fit_to_mask(self.width()*.50,self.height()*0.05,self.font_mask,self.font_family)
+            self.fontsize = helpers.fit_to_mask(
+                self.width() * 0.50,
+                self.height() * 0.05,
+                self.font_mask,
+                self.font_family,
+            )
             f.setPointSizeF(self.fontsize)
         else:
             f.setPixelSize(self.fontsize)
         tape_height = self.max * self.pph + h
-        tape_start = self.max * self.pph + h/2
+        tape_start = self.max * self.pph + h / 2
 
         dialPen = QPen(QColor(Qt.white))
 
         self.scene = QGraphicsScene(0, 0, w, tape_height)
-        x = self.scene.addRect(0, 0, w, tape_height,
-                            QPen(QColor(32, 32, 32)), QBrush(QColor(32, 32, 32)))
+        x = self.scene.addRect(
+            0, 0, w, tape_height, QPen(QColor(32, 32, 32)), QBrush(QColor(32, 32, 32))
+        )
         x.setOpacity(self.backgroundOpacity)
 
         # Add Markings
         # Green Bar
-        r = QRectF(QPointF(0,              -self.Vno * self.pph + tape_start),
-                   QPointF(self.markWidth, -self.Vs0 * self.pph + tape_start))
-        x = self.scene.addRect(r, QPen(QColor(0,155,0)), QBrush(QColor(0,155,0)))
+        r = QRectF(
+            QPointF(0, -self.Vno * self.pph + tape_start),
+            QPointF(self.markWidth, -self.Vs0 * self.pph + tape_start),
+        )
+        x = self.scene.addRect(r, QPen(QColor(0, 155, 0)), QBrush(QColor(0, 155, 0)))
         x.setOpacity(self.foregroundOpacity)
 
         # White Bar
-        r = QRectF(QPointF(self.markWidth / 2, -self.Vfe * self.pph + tape_start),
-                   QPointF(self.markWidth,     -self.Vs0 * self.pph + tape_start))
+        r = QRectF(
+            QPointF(self.markWidth / 2, -self.Vfe * self.pph + tape_start),
+            QPointF(self.markWidth, -self.Vs0 * self.pph + tape_start),
+        )
         x = self.scene.addRect(r, QPen(Qt.white), QBrush(Qt.white))
         x.setOpacity(self.foregroundOpacity)
 
-
         # Yellow Bar
-        r = QRectF(QPointF(0,              -self.Vno * self.pph + tape_start),
-                   QPointF(self.markWidth, -self.Vne * self.pph + tape_start))
+        r = QRectF(
+            QPointF(0, -self.Vno * self.pph + tape_start),
+            QPointF(self.markWidth, -self.Vne * self.pph + tape_start),
+        )
         x = self.scene.addRect(r, QPen(Qt.yellow), QBrush(Qt.yellow))
         x.setOpacity(self.foregroundOpacity)
 
         # Draw the little white lines and the text
         for i in range(self.max, -1, -1):
             if i % self.majorDiv == 0:
-                l = self.scene.addLine(0, (- i * self.pph) + tape_start, w / 2,
-                                      (- i * self.pph) + tape_start, dialPen)
+                l = self.scene.addLine(
+                    0,
+                    (-i * self.pph) + tape_start,
+                    w / 2,
+                    (-i * self.pph) + tape_start,
+                    dialPen,
+                )
                 l.setOpacity(self.foregroundOpacity)
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.white))
                 t.setX(w - t.boundingRect().width())
-                t.setY(((- i * self.pph) + tape_start)
-                       - t.boundingRect().height() / 2)
+                t.setY(((-i * self.pph) + tape_start) - t.boundingRect().height() / 2)
                 t.setOpacity(self.foregroundOpacity)
-            elif i % self.minorDiv ==0:
-                l = self.scene.addLine(0, (- i * self.pph) + tape_start,
-                                   w / 3, (- i * self.pph) + tape_start, dialPen)
+            elif i % self.minorDiv == 0:
+                l = self.scene.addLine(
+                    0,
+                    (-i * self.pph) + tape_start,
+                    w / 3,
+                    (-i * self.pph) + tape_start,
+                    dialPen,
+                )
                 l.setOpacity(self.foregroundOpacity)
         # Red Line
         vnePen = QPen(QColor(Qt.red))
         vnePen.setWidth(4)
-        l = self.scene.addLine(0, -self.Vne * self.pph + tape_start,
-                               30, -self.Vne * self.pph + tape_start, vnePen)
+        l = self.scene.addLine(
+            0,
+            -self.Vne * self.pph + tape_start,
+            30,
+            -self.Vne * self.pph + tape_start,
+            vnePen,
+        )
         l.setOpacity(self.foregroundOpacity)
 
         self.numerical_display = NumericalDisplay(self)
-        nbh = w/2
-        self.numerical_display.resize (qRound(w/2), qRound(nbh))
-        self.numeric_box_pos = QPoint(qRound(w-w/2), qRound(h/2-nbh/2))
+        nbh = w / 2
+        self.numerical_display.resize(qRound(w / 2), qRound(nbh))
+        self.numeric_box_pos = QPoint(qRound(w - w / 2), qRound(h / 2 - nbh / 2))
         self.numerical_display.move(self.numeric_box_pos)
-        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y()+nbh/2))
+        self.numeric_box_pos.setY(qRound(self.numeric_box_pos.y() + nbh / 2))
         self.numerical_display.show()
         self.numerical_display.value = self._airspeed
         self.setAsOld(self.item.old)
@@ -334,8 +381,7 @@ class Airspeed_Tape(QGraphicsView):
         self.setAsFail(self.item.fail)
 
         self.setScene(self.scene)
-        self.centerOn(self.scene.width() / 2,
-                      -self._airspeed * self.pph + tape_start)
+        self.centerOn(self.scene.width() / 2, -self._airspeed * self.pph + tape_start)
         self.item.valueChanged[float].connect(self.setAirspeed)
         self.item.oldChanged[bool].connect(self.setAsOld)
         self.item.badChanged[bool].connect(self.setAsBad)
@@ -344,11 +390,10 @@ class Airspeed_Tape(QGraphicsView):
     def redraw(self):
         if not self.isVisible():
             return
-        tape_start = self.max * self.pph + self.height()/2
+        tape_start = self.max * self.pph + self.height() / 2
 
         self.resetTransform()
-        self.centerOn(self.scene.width() / 2,
-                      -self._airspeed * self.pph + tape_start)
+        self.centerOn(self.scene.width() / 2, -self._airspeed * self.pph + tape_start)
         self.numerical_display.value = self._airspeed
 
     #  Index Line that doesn't move to make it easy to read the airspeed.
@@ -363,10 +408,16 @@ class Airspeed_Tape(QGraphicsView):
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
         p.setBrush(QBrush(Qt.black))
-        triangle_size = w/8
-        p.drawConvexPolygon(QPolygon([QPoint(0, qRound(-triangle_size-3)),
-                             QPoint(0, qRound(triangle_size-2)),
-                             QPoint(qRound(-triangle_size), -1)]))
+        triangle_size = w / 8
+        p.drawConvexPolygon(
+            QPolygon(
+                [
+                    QPoint(0, qRound(-triangle_size - 3)),
+                    QPoint(0, qRound(triangle_size - 2)),
+                    QPoint(qRound(-triangle_size), -1),
+                ]
+            )
+        )
 
     def getAirspeed(self):
         return self._airspeed
@@ -378,13 +429,13 @@ class Airspeed_Tape(QGraphicsView):
 
     airspeed = property(getAirspeed, setAirspeed)
 
-    def setAsOld(self,b):
+    def setAsOld(self, b):
         self.numerical_display.old = b
 
-    def setAsBad(self,b):
+    def setAsBad(self, b):
         self.numerical_display.bad = b
 
-    def setAsFail(self,b):
+    def setAsFail(self, b):
         self.numerical_display.fail = b
 
     # We don't want this responding to keystrokes
@@ -398,8 +449,9 @@ class Airspeed_Tape(QGraphicsView):
 
 class Airspeed_Box(QWidget):
     """Represents a simple numeric display type gauge.  The benefit of using this
-       over a normal text display is that this will change colors properly when
-       limits are reached or when failures occur"""
+    over a normal text display is that this will change colors properly when
+    limits are reached or when failures occur"""
+
     def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(Airspeed_Box, self).__init__(parent)
         self.font_family = font_family
@@ -411,7 +463,7 @@ class Airspeed_Box(QWidget):
         self.fix_item.valueChanged[float].connect(self.setASData)
 
         self.alignment = Qt.AlignLeft | Qt.AlignVCenter
-        self.valueAlignment = Qt.AlignRight  | Qt.AlignVCenter
+        self.valueAlignment = Qt.AlignRight | Qt.AlignVCenter
         self.small_font_percent = 0.4
         self.color = Qt.white
         self.modeText = self.modes[self._modeIndicator]
@@ -424,9 +476,10 @@ class Airspeed_Box(QWidget):
         self.smallFont.setPixelSize(qRound(self.height() * self.small_font_percent))
         qm = QFontMetrics(self.smallFont)
 
-        self.modeTextRect = QRectF(0, 0, self.width()-5, self.height()*0.4)
-        self.valueTextRect = QRectF(0, self.height()*0.5,
-                                        self.width()-5, self.height()*0.4)
+        self.modeTextRect = QRectF(0, 0, self.width() - 5, self.height() * 0.4)
+        self.valueTextRect = QRectF(
+            0, self.height() * 0.5, self.width() - 5, self.height() * 0.4
+        )
 
     def paintEvent(self, event):
         p = QPainter(self)
@@ -444,7 +497,7 @@ class Airspeed_Box(QWidget):
         opt = QTextOption(self.alignment)
         p.drawText(self.modeTextRect, self.modeText, opt)
 
-        #Draw Value
+        # Draw Value
         p.setFont(self.smallFont)
         opt = QTextOption(self.valueAlignment)
         p.drawText(self.valueTextRect, self.valueText, opt)
@@ -453,7 +506,8 @@ class Airspeed_Box(QWidget):
         if Mode == "":
             self.fix_item.valueChanged[float].disconnect(self.setASData)
             self._modeIndicator += 1
-            if self._modeIndicator == 3: self._modeIndicator = 0
+            if self._modeIndicator == 3:
+                self._modeIndicator = 0
         else:
             if Mode != self._modeIndicator:
                 self.fix_item.valueChanged[float].disconnect(self.setASData)
