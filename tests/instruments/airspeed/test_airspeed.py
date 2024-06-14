@@ -88,4 +88,3 @@ def test_numerical_airspeed_box(qtbot):
     fix.db.set_value("TAS", 102)
     assert widget.valueText == ""
 
-    qtbot.wait(2000)
