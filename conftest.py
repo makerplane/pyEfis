@@ -58,6 +58,8 @@ create_numbers("NUMLOWALARM", 5.37)
 create_numbers("NUMHIGHWARN", 81.28)
 create_numbers("NUMHIGHALARM", 95.19)
 
+# Number with no Aux
+fix.db.define_item("NUM", "NUM", "float", 0.0, 100.0, "degC", 50000, "")
 
 fix.db.define_item("GS", "GS", "float", 0.0, 2000.0, "knots", 50000, "")
 fix.db.set_value("GS", 100)
