@@ -6,8 +6,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 
 from pyefis.instruments.misc import StaticText, ValueDisplay
-import time
-import subprocess
 import os
 import pyavtools.fix as fix
 
