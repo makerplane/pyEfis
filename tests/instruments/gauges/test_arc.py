@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QBrush, QPen, QPaintEvent, QFontMetrics
 from pyefis.instruments import gauges
-import pyavtools.fix as fix
 import pyefis.hmi as hmi
 from tests.utils import track_calls
 
@@ -17,7 +16,7 @@ def app(qtbot):
     return test_app
 
 
-def test_arc_gauge(qtbot):
+def test_arc_gauge(fix,qtbot):
     widget = gauges.ArcGauge()
     assert widget.getRatio() == 2
 

@@ -7,7 +7,6 @@ from PyQt5.QtGui import QColor
 
 from pyefis.instruments.misc import StaticText, ValueDisplay
 import os
-import pyavtools.fix as fix
 
 
 @pytest.fixture
@@ -18,7 +17,7 @@ def app(qtbot):
     return test_app
 
 
-def test_save_screenshot(qtbot, request):
+def test_save_screenshot(fix, qtbot, request):
     widget1 = StaticText(text="Testing!")
     widget1.font_mask = "XXXXXXXX"
     widget1.color = QColor(Qt.black)
@@ -36,7 +35,7 @@ def test_save_screenshot(qtbot, request):
     )
 
 
-def test_static_text_default(qtbot):
+def test_static_text_default(fix, qtbot):
     widget = StaticText(text="Testing!")
     widget.font_mask = "0.0"
     widget.font_ghost_mask = "0.0"
@@ -53,7 +52,7 @@ def test_static_text_default(qtbot):
     assert widget.color.alpha() != 50
 
 
-def test_static_text_resize(qtbot):
+def test_static_text_resize(fix, qtbot):
     widget = StaticText(text="Test", fontsize=1.0)
     qtbot.addWidget(widget)
 
@@ -65,7 +64,7 @@ def test_static_text_resize(qtbot):
     assert widget.height() == 100
 
 
-def test_value_display_default(qtbot):
+def test_value_display_default(fix, qtbot):
     widget = ValueDisplay()
     qtbot.addWidget(widget)
 
@@ -79,7 +78,7 @@ def test_value_display_default(qtbot):
     widget.show()
     assert widget.isVisible()
 
-def test_value_display_font_mask(qtbot):
+def test_value_display_font_mask(fix, qtbot):
     widget = ValueDisplay()
     widget.font_size = 100
     widget.font_mask = "0.0"
@@ -92,7 +91,7 @@ def test_value_display_font_mask(qtbot):
     assert widget.isVisible()
     assert widget.font_size != 100
 
-def test_value_display_set_value(qtbot):
+def test_value_display_set_value(fix, qtbot):
     widget = ValueDisplay()
     fix.db.set_value("TEST",42.0)
     fix.db.get_item("TEST").fail = False
@@ -107,7 +106,7 @@ def test_value_display_set_value(qtbot):
 
 #@mock.patch("pyefis.instruments.misc.fix")
 #def test_value_display_flags(mock_fix, qtbot):
-def test_value_display_flags( qtbot):
+def test_value_display_flags(fix, qtbot):
     #mock_item = mock.Mock()
     #mock_item.value = 100.0
     #mock_fix.db.get_item.return_value = mock_item
@@ -115,7 +114,6 @@ def test_value_display_flags( qtbot):
 
     fix.db.set_value("TEST",100)
     widget.setDbkey("TEST")
-
     qtbot.addWidget(widget)
 
     widget.failFlag(True)
