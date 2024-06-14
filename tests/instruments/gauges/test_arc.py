@@ -2,11 +2,11 @@ import pytest
 from unittest import mock
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QBrush, QPen
+from PyQt5.QtGui import QColor, QBrush, QPen, QPaintEvent
 from pyefis.instruments import gauges
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
-
+from tests.utils import track_calls
 
 @pytest.fixture
 def app(qtbot):
@@ -65,10 +65,15 @@ def test_arc_gauge(qtbot):
 
     #with mock.patch("PyQt5.QtGui.QPen") as patch_mock:
     widget.segments = 28
-    widget.paintEvent(None)
+    #widget.paintEvent(None)
     #patch_mock.setWidth.assert_called_once()
     #patch_mock.setColor.assert_called_once_with(Qt.black)
+    event = QPaintEvent(widget.rect())
+    with track_calls(QPen, 'setColor') as tracker:
+        widget.paintEvent(event)
 
+    assert tracker.was_called_with('setColor', QColor(Qt.black))
+    assert tracker.was_called_with('setColor', QColor(0, 0, 0, widget.segment_alpha))
     widget.name_font_ghost_mask = "0000"
     widget.paintEvent(None)
 
