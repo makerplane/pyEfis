@@ -11,7 +11,7 @@
 <header>
     <div class="content">
         <h1>Coverage report:
-            <span class="pc_cov">26%</span>
+            <span class="pc_cov">25%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -26,6 +26,8 @@
                         <kbd>s</kbd>
                         <kbd>m</kbd>
                         <kbd>x</kbd>
+                        <kbd>b</kbd>
+                        <kbd>p</kbd>
                         <kbd>c</kbd>
                         &nbsp; change column sorting
                     </p>
@@ -54,7 +56,7 @@
         </h2>
         <p class="text">
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.3">coverage.py v7.5.3</a>,
-            created at 2024-06-15 01:54 +0000
+            created at 2024-06-15 02:34 +0000
         </p>
     </div>
 </header>
@@ -66,6 +68,8 @@
                 <th id="statements" aria-sort="none" data-default-sort-order="descending" data-shortcut="s">statements<span class="arrows"></span></th>
                 <th id="missing" aria-sort="none" data-default-sort-order="descending" data-shortcut="m">missing<span class="arrows"></span></th>
                 <th id="excluded" aria-sort="none" data-default-sort-order="descending" data-shortcut="x">excluded<span class="arrows"></span></th>
+                <th id="branches" aria-sort="none" data-default-sort-order="descending" data-shortcut="b">branches<span class="arrows"></span></th>
+                <th id="partial" aria-sort="none" data-default-sort-order="descending" data-shortcut="p">partial<span class="arrows"></span></th>
                 <th id="coverage" class="right" aria-sort="none" data-shortcut="c">coverage<span class="arrows"></span></th>
             </tr>
         </thead>
@@ -75,6 +79,8 @@
                 <td>1</td>
                 <td>0</td>
                 <td>0</td>
+                <td>0</td>
+                <td>0</td>
                 <td class="right" data-ratio="1 1">100%</td>
             </tr>
             <tr class="region">
@@ -82,46 +88,60 @@
                 <td>79</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="79 79">100%</td>
+                <td>72</td>
+                <td>6</td>
+                <td class="right" data-ratio="145 151">96%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_af8430b731ab02fa___init___py.html">src/pyefis/common/__init__.py</a></td>
                 <td>10</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="10 10">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="14 14">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_92affc2a3b34b1bb_gui_py.html">src/pyefis/gui.py</a></td>
                 <td>189</td>
                 <td>189</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 189">0%</td>
+                <td>60</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 249">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_abcbd0a8f0ce4239___init___py.html">src/pyefis/hmi/__init__.py</a></td>
                 <td>13</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="13 13">100%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="15 15">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_abcbd0a8f0ce4239_actionclass_py.html">src/pyefis/hmi/actionclass.py</a></td>
                 <td>30</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="30 30">100%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="34 34">100%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_abcbd0a8f0ce4239_data_py.html">src/pyefis/hmi/data.py</a></td>
                 <td>77</td>
                 <td>62</td>
                 <td>0</td>
-                <td class="right" data-ratio="15 77">19%</td>
+                <td>34</td>
+                <td>0</td>
+                <td class="right" data-ratio="15 111">14%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_abcbd0a8f0ce4239_functions_py.html">src/pyefis/hmi/functions.py</a></td>
                 <td>15</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="15 15">100%</td>
@@ -131,67 +151,87 @@
                 <td>50</td>
                 <td>37</td>
                 <td>0</td>
-                <td class="right" data-ratio="13 50">26%</td>
+                <td>24</td>
+                <td>0</td>
+                <td class="right" data-ratio="13 74">18%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_abcbd0a8f0ce4239_menu_py.html">src/pyefis/hmi/menu.py</a></td>
                 <td>176</td>
                 <td>141</td>
                 <td>0</td>
-                <td class="right" data-ratio="35 176">20%</td>
+                <td>50</td>
+                <td>0</td>
+                <td class="right" data-ratio="35 226">15%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_92affc2a3b34b1bb_hooks_py.html">src/pyefis/hooks.py</a></td>
                 <td>14</td>
                 <td>14</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 14">0%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 18">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_dfa7caf9bb792556___init___py.html">src/pyefis/instruments/NumericalDisplay/__init__.py</a></td>
                 <td>202</td>
                 <td>1</td>
                 <td>0</td>
-                <td class="right" data-ratio="201 202">99%</td>
+                <td>42</td>
+                <td>0</td>
+                <td class="right" data-ratio="243 244">99%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_bec00151798af317_VirtualVfr_py.html">src/pyefis/instruments/ai/VirtualVfr.py</a></td>
                 <td>816</td>
                 <td>816</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 816">0%</td>
+                <td>250</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 1066">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_bec00151798af317___init___py.html">src/pyefis/instruments/ai/__init__.py</a></td>
                 <td>397</td>
                 <td>397</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 397">0%</td>
+                <td>72</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 469">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_4335419f415bb06c___init___py.html">src/pyefis/instruments/airspeed/__init__.py</a></td>
                 <td>346</td>
                 <td>1</td>
                 <td>0</td>
-                <td class="right" data-ratio="345 346">99%</td>
+                <td>72</td>
+                <td>9</td>
+                <td class="right" data-ratio="408 418">98%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_44db6b362c5669a8___init___py.html">src/pyefis/instruments/altimeter/__init__.py</a></td>
-                <td>259</td>
-                <td>259</td>
+                <td>261</td>
+                <td>164</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 259">0%</td>
+                <td>52</td>
+                <td>6</td>
+                <td class="right" data-ratio="107 313">34%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_f83e94ecc1c40283___init___py.html">src/pyefis/instruments/button/__init__.py</a></td>
                 <td>257</td>
                 <td>257</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 257">0%</td>
+                <td>134</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 391">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a52039128fd4f1f2___init___py.html">src/pyefis/instruments/gauges/__init__.py</a></td>
                 <td>5</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="5 5">100%</td>
@@ -201,179 +241,231 @@
                 <td>451</td>
                 <td>211</td>
                 <td>0</td>
-                <td class="right" data-ratio="240 451">53%</td>
+                <td>176</td>
+                <td>15</td>
+                <td class="right" data-ratio="289 627">46%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a52039128fd4f1f2_arc_py.html">src/pyefis/instruments/gauges/arc.py</a></td>
                 <td>224</td>
                 <td>2</td>
                 <td>0</td>
-                <td class="right" data-ratio="222 224">99%</td>
+                <td>68</td>
+                <td>5</td>
+                <td class="right" data-ratio="285 292">98%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a52039128fd4f1f2_egt_py.html">src/pyefis/instruments/gauges/egt.py</a></td>
                 <td>70</td>
                 <td>60</td>
                 <td>0</td>
-                <td class="right" data-ratio="10 70">14%</td>
+                <td>34</td>
+                <td>0</td>
+                <td class="right" data-ratio="10 104">10%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a52039128fd4f1f2_horizontalBar_py.html">src/pyefis/instruments/gauges/horizontalBar.py</a></td>
                 <td>131</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="131 131">100%</td>
+                <td>34</td>
+                <td>4</td>
+                <td class="right" data-ratio="161 165">98%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a52039128fd4f1f2_numeric_py.html">src/pyefis/instruments/gauges/numeric.py</a></td>
                 <td>60</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="60 60">100%</td>
+                <td>10</td>
+                <td>1</td>
+                <td class="right" data-ratio="69 70">99%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_a52039128fd4f1f2_verticalBar_py.html">src/pyefis/instruments/gauges/verticalBar.py</a></td>
                 <td>245</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="245 245">100%</td>
+                <td>74</td>
+                <td>6</td>
+                <td class="right" data-ratio="313 319">98%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_f32a2e4e5d34fc0c___init___py.html">src/pyefis/instruments/helpers/__init__.py</a></td>
                 <td>49</td>
                 <td>11</td>
                 <td>0</td>
-                <td class="right" data-ratio="38 49">78%</td>
+                <td>12</td>
+                <td>3</td>
+                <td class="right" data-ratio="47 61">77%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_fc8f799f5d046ff6___init___py.html">src/pyefis/instruments/hsi/__init__.py</a></td>
                 <td>461</td>
                 <td>461</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 461">0%</td>
+                <td>102</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 563">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_f3cd9c45e7f60115___init___py.html">src/pyefis/instruments/listbox/__init__.py</a></td>
                 <td>211</td>
                 <td>211</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 211">0%</td>
+                <td>60</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 271">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_636cc9296e567e93___init___py.html">src/pyefis/instruments/misc/__init__.py</a></td>
                 <td>167</td>
                 <td>0</td>
                 <td>0</td>
-                <td class="right" data-ratio="167 167">100%</td>
+                <td>22</td>
+                <td>2</td>
+                <td class="right" data-ratio="187 189">99%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_ba48ab790d267e81___init___py.html">src/pyefis/instruments/pa/__init__.py</a></td>
                 <td>70</td>
                 <td>70</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 70">0%</td>
+                <td>10</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 80">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_25dc114ee2e42cd5___init___py.html">src/pyefis/instruments/tc/__init__.py</a></td>
                 <td>220</td>
                 <td>220</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 220">0%</td>
+                <td>40</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 260">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_c91b076bd5fedfd3___init___py.html">src/pyefis/instruments/vsi/__init__.py</a></td>
                 <td>382</td>
                 <td>382</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 382">0%</td>
+                <td>68</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 450">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_5c4843b5baa13b0b___init___py.html">src/pyefis/instruments/weston/__init__.py</a></td>
                 <td>41</td>
                 <td>41</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 41">0%</td>
+                <td>10</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 51">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_92affc2a3b34b1bb_main_py.html">src/pyefis/main.py</a></td>
                 <td>158</td>
                 <td>158</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 158">0%</td>
+                <td>70</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 228">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_ems_sm_py.html">src/pyefis/screens/ems_sm.py</a></td>
                 <td>99</td>
                 <td>99</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 99">0%</td>
+                <td>36</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 135">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_epfd_py.html">src/pyefis/screens/epfd.py</a></td>
                 <td>104</td>
                 <td>104</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 104">0%</td>
+                <td>12</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 116">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_pfd_py.html">src/pyefis/screens/pfd.py</a></td>
                 <td>123</td>
                 <td>123</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 123">0%</td>
+                <td>14</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 137">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_pfd_sm_py.html">src/pyefis/screens/pfd_sm.py</a></td>
                 <td>108</td>
                 <td>108</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 108">0%</td>
+                <td>14</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 122">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_r582_sm_py.html">src/pyefis/screens/r582_sm.py</a></td>
                 <td>98</td>
                 <td>98</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 98">0%</td>
+                <td>36</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 134">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_screenbuilder_py.html">src/pyefis/screens/screenbuilder.py</a></td>
                 <td>700</td>
                 <td>700</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 700">0%</td>
+                <td>442</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 1142">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_sixpack_py.html">src/pyefis/screens/sixpack.py</a></td>
                 <td>53</td>
                 <td>53</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 53">0%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 55">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_934b478e6c106426_test_py.html">src/pyefis/screens/test.py</a></td>
                 <td>21</td>
                 <td>21</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 21">0%</td>
+                <td>2</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 23">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_eb6d924ac5f99d5f_composite_py.html">src/pyefis/user/hooks/composite.py</a></td>
                 <td>103</td>
                 <td>103</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 103">0%</td>
+                <td>28</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 131">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_eb6d924ac5f99d5f_keys_py.html">src/pyefis/user/hooks/keys.py</a></td>
                 <td>19</td>
                 <td>19</td>
                 <td>0</td>
-                <td class="right" data-ratio="0 19">0%</td>
+                <td>4</td>
+                <td>0</td>
+                <td class="right" data-ratio="0 23">0%</td>
             </tr>
             <tr class="region">
                 <td class="name left"><a href="z_92affc2a3b34b1bb_version_py.html">src/pyefis/version.py</a></td>
                 <td>2</td>
+                <td>0</td>
+                <td>0</td>
                 <td>0</td>
                 <td>0</td>
                 <td class="right" data-ratio="2 2">100%</td>
@@ -382,10 +474,12 @@
         <tfoot>
             <tr class="total">
                 <td class="name left">Total</td>
-                <td>7306</td>
-                <td>5429</td>
+                <td>7308</td>
+                <td>5334</td>
                 <td>0</td>
-                <td class="right" data-ratio="1877 7306">26%</td>
+                <td>2256</td>
+                <td>57</td>
+                <td class="right" data-ratio="2413 9564">25%</td>
             </tr>
         </tfoot>
     </table>
@@ -398,7 +492,7 @@
     <div class="content">
         <p>
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.3">coverage.py v7.5.3</a>,
-            created at 2024-06-15 01:54 +0000
+            created at 2024-06-15 02:34 +0000
         </p>
     </div>
     <aside class="hidden">
