@@ -1,4 +1,4 @@
-|Website snapcraft.io|
+|Website snapcraft.io| |Coverage Badge|
 
 .. |Website snapcraft.io| image:: https://snapcraft.io/pyefis/badge.svg
    :target: https://snapcraft.io/pyefis
