@@ -17,7 +17,7 @@ def app(qtbot):
     return test_app
 
 
-def test_save_screenshot_numeric_display(qtbot, request):
+def test_save_screenshot_numeric_display(fix, qtbot, request):
     with open("tests/screenshots/configs/pyefis.instruments.gauges.NumericDisplay.yaml") as cf:
         config = yaml.safe_load(cf)
     #widget = Screen("TEST", "pyefis.screens.screenbuilder", config)
