@@ -21,3 +21,7 @@ def test_altimeter(fix,qtbot):
     assert widget.getRatio() == 1
     qtbot.addWidget(widget)
     assert widget.item.value == 0
+    widget.resize(200,200)
+    widget.show()
+    qtbot.waitExposed(widget)
+    qtbot.wait(3000)
