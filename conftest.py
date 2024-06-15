@@ -106,6 +106,8 @@ def fix():
         ""
     )
     fix.db.set_value("ALT", 0)
+    fix.db.get_item("ALT").bad = False 
+    fix.db.get_item("ALT").fail = False
 
     return fix
 
