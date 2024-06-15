@@ -95,5 +95,17 @@ def fix():
     fix.db.get_item("IAS").set_aux_value("Vne", 140.0)
     fix.db.get_item("IAS").set_aux_value("Vfe", 70.0)
 
+    fix.db.define_item(
+        "ALT",
+        "Indicated Altitude",
+        "float",
+        -2000.0,
+        60000.0,
+        "ft",
+        50000,
+        ""
+    )
+    fix.db.set_value("ALT", 0)
+
     return fix
 
