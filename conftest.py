@@ -109,5 +109,33 @@ def fix():
     fix.db.get_item("ALT").bad = False 
     fix.db.get_item("ALT").fail = False
 
-    return fix
 
+    fix.db.define_item(
+        "LAT",
+        "Latitude",
+        "float",
+        -90.0,
+        90.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("LAT", 0)
+    fix.db.get_item("LAT").bad = False
+    fix.db.get_item("LAT").fail = False
+
+    fix.db.define_item(
+        "LONG",
+        "Longitude",
+        "float",
+        -180.0,
+        180.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("LONG", 0)
+    fix.db.get_item("LONG").bad = False
+    fix.db.get_item("LONG").fail = False
+
+    return fix
