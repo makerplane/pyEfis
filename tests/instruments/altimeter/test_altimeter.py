@@ -24,4 +24,6 @@ def test_altimeter(fix,qtbot):
     widget.resize(200,200)
     widget.show()
     qtbot.waitExposed(widget)
+    widget.paintEvent(None)
+
     qtbot.wait(3000)
