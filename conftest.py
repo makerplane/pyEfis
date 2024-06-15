@@ -208,4 +208,32 @@ def fix():
     fix.db.get_item("GSI").bad = False
     fix.db.get_item("GSI").fail = False
 
+    fix.db.define_item(
+        "CDI",
+        "Course Deviation Indicator",
+        "float",
+        -1.0,
+        1.0,
+        "",
+        50000,
+        "" 
+    )
+    fix.db.set_value("GSI", 0)
+    fix.db.get_item("GSI").bad = False
+    fix.db.get_item("GSI").fail = False
+
+    fix.db.define_item(
+        "COURSE",
+        "Selected Course",
+        "float",
+        0.0,
+        359.9,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("COURSE", 0)
+    fix.db.get_item("COURSE").bad = False
+    fix.db.get_item("COURSE").fail = False
+
     return fix
