@@ -69,7 +69,11 @@ filterwarnings = [
     # I belive this is warning that pyqt needs updated if you update to python 3.12
     "ignore:sipPyTypeDict.*:DeprecationWarning:.*:"
 ]
-addopts = "-vv --cov=src --cov-report term-missing --cov-branch --cov-report xml --cov-report term --strict-markers -rfE"
+addopts = """
+    --cov-report term-missing --cov-branch --cov-report html --cov-report term
+    --cov=pyefis --cov-context=test -vv --strict-markers -rfE
+    --ignore=tests/end_to_end/repo
+"""
 
 [tool.coverage.run]
 relative_files = true
