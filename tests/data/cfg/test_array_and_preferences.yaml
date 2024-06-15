@@ -1,0 +1,5 @@
+ARRAYS:
+  include:
+    - test_array_and_preferencesC.yaml
+    - PREFERENCEA
+    - sub/test_array_and_preferencesD.yaml

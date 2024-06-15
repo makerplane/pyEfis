@@ -1,0 +1,5 @@
+test:
+  - include: B
+  - include: C
+  - 5
+  - Ten

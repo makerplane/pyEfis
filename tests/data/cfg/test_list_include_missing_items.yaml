@@ -1,0 +1,3 @@
+list_of_items:
+  - test: true
+  - include: test_list_include_missing_itemsA.yaml

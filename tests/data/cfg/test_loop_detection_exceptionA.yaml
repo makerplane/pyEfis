@@ -1,0 +1,2 @@
+loop1a:
+  include: test_loop_detection_exception.yaml
