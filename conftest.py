@@ -138,4 +138,47 @@ def fix():
     fix.db.get_item("LONG").bad = False
     fix.db.get_item("LONG").fail = False
 
+    fix.db.define_item(
+        "PITCH",
+        "Pitch Angle",
+        "float",
+        -90.0,
+        90.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("PITCH", 0)
+    fix.db.get_item("PITCH").bad = False
+    fix.db.get_item("PITCH").fail = False
+
+    fix.db.define_item(
+        "ROLL",
+        "Roll Angle",
+        "float",
+        -180.0,
+        180.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("ROLL", 0)
+    fix.db.get_item("ROLL").bad = False
+    fix.db.get_item("ROLL").fail = False
+
+    fix.db.define_item(
+        "ALAT",
+        "Lateral Acceleration",
+        "float",
+        -30.0,
+        30.0,
+        "g",
+        50000,
+        ""
+    )
+    fix.db.set_value("ALAT", 0)
+    fix.db.get_item("ALAT").bad = False
+    fix.db.get_item("ALAT").fail = False
+
+
     return fix
