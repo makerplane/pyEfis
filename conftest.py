@@ -180,5 +180,32 @@ def fix():
     fix.db.get_item("ALAT").bad = False
     fix.db.get_item("ALAT").fail = False
 
+    fix.db.define_item(
+        "HEAD",
+        "Current Aircraft Magnetic Heading",
+        "float",
+        0.0,
+        359.9,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("HEAD", 0)
+    fix.db.get_item("HEAD").bad = False
+    fix.db.get_item("HEAD").fail = False
+
+    fix.db.define_item(
+        "GSI",
+        "Glideslope Indicator",
+        "float",
+        -1.0,
+        1.0,
+        "",
+        50000,
+        ""
+    )
+    fix.db.set_value("GSI", 0)
+    fix.db.get_item("GSI").bad = False
+    fix.db.get_item("GSI").fail = False
 
     return fix
