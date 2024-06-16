@@ -1,1 +1,1 @@
-recursive-include pyefis/config *
+recursive-include src/pyefis/config *
