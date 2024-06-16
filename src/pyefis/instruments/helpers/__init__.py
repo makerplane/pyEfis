@@ -26,7 +26,6 @@ def fit_to_mask(iwidth,iheight,mask,font,units_mask=None, units_ratio=0.8):
     # IF needed, shrink until it fits
     while ( (text_width + units_width > width) or text_height > height ) and font_size > 0.5:
         font_size -= 0.2
-        print(f"too wide trying: {font_size} text_width:{text_width}, units_width:{units_width}, width:{width}")
         text_font.setPointSizeF(font_size)
         fm = QFontMetrics(text_font)
         text_width = fm.tightBoundingRect(mask).width()
@@ -39,7 +38,6 @@ def fit_to_mask(iwidth,iheight,mask,font,units_mask=None, units_ratio=0.8):
     # If needed, grow until it fills
     while (text_width + units_width < width) and text_height < height:
         font_size += 0.2
-        print(f"Not wide enough, trying {font_size} text_width:{text_width}, units_width:{units_width}, width:{width}")
         text_font.setPointSizeF(font_size)
         fm = QFontMetrics(text_font)
         text_width = fm.tightBoundingRect(mask).width()
@@ -55,7 +53,6 @@ def fit_to_mask(iwidth,iheight,mask,font,units_mask=None, units_ratio=0.8):
     # The above took care of the width, this addresses the height:
     while (text_height >= height) and font_size > 0.5:
         font_size -= 0.2
-        print(f"too high, trying {font_size} text_height:{text_height}, height:{height}")
         text_font.setPointSizeF(font_size)
         fm = QFontMetrics(text_font)
         text_width = fm.tightBoundingRect(mask).width()
