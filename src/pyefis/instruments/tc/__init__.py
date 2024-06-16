@@ -276,8 +276,8 @@ class TurnCoordinator_Tape(QWidget):
         self.boxHalfWidth = (self.r - length) * math.cos(math.radians(30))
         self.boxTop = self.center.y() + (self.r - length) * math.sin(
                       math.radians(30)) + thickness
-        rect = QRectF(QPoint(self.center.x() - self.boxHalfWidth, self.boxTop),
-                     QPoint(self.center.x() + self.boxHalfWidth,
+        rect = QRectF(QPointF(self.center.x() - self.boxHalfWidth, self.boxTop),
+                     QPointF(self.center.x() + self.boxHalfWidth,
                             self.boxTop + length))
         p.drawRect(rect)
         # Draw the little airplane center
@@ -286,10 +286,10 @@ class TurnCoordinator_Tape(QWidget):
         pen.setColor(QColor(Qt.black))
         pen.setWidth(4)
         p.setPen(pen)
-        p.drawLine(self.center.x() - 30, self.boxTop,
-                   self.center.x() - 30, self.boxTop + length + 2)
-        p.drawLine(self.center.x() + 30, self.boxTop,
-                   self.center.x() + 30, self.boxTop + length + 2)
+        p.drawLine(qRound(self.center.x() - 30), qRound(self.boxTop),
+                   qRound(self.center.x() - 30), qRound(self.boxTop + length + 2))
+        p.drawLine(qRound(self.center.x() + 30), qRound(self.boxTop),
+                   qRound(self.center.x() + 30), qRound(self.boxTop + length + 2))
 
     def paintEvent(self, event):
 

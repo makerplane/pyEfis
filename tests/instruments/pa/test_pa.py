@@ -14,7 +14,7 @@ def app(qtbot):
     return test_app
 
 
-def test_arc_gauge(fix,qtbot):
+def test_pa(fix,qtbot):
     widget = pa.Panel_Annunciator()
     qtbot.addWidget(widget)
     widget.setWARNING_Name("Pull UP!")

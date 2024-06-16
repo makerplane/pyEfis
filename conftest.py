@@ -236,4 +236,18 @@ def fix():
     fix.db.get_item("COURSE").bad = False
     fix.db.get_item("COURSE").fail = False
 
+    fix.db.define_item(
+        "ROT",
+        "Rate of Turn",
+        "float",
+        -3000,
+        3000,
+        "Deg/sec",
+        50000,
+        ""
+    )
+    fix.db.set_value("ROT", 0)
+    fix.db.get_item("ROT").bad = False
+    fix.db.get_item("ROT").fail = False
+
     return fix
