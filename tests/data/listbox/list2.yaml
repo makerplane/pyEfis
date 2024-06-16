@@ -1,0 +1,49 @@
+display:
+  # The column names must be single word
+  # The exact name defined here is used for the key names 
+  # in the list below
+  columns:
+    - name: Name
+      size: 15
+      sort: true
+    - name: Identifier
+      size: 4
+      sort: true
+    - name: Frequency
+      size: 11
+      sort: false #False is the default
+# Enables nearest selector where it will
+# sort by distance from your current location
+# Requires LONG and LAT keys on each entry to work.
+
+  location: true
+list:
+  - Name: Rickenbacker Int Tower
+    Identifier: KLCK
+    Frequency:  120.050 Mhz
+    lat: 39.8137881
+    long: -82.9278164
+    set:
+      COMACTFREQSET{radio_id}: 12050
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Rickenbacker Int ASOS
+    Identifier: KLCK
+    Frequency: 132.75 Mhz
+    lat: 39.8137881
+    long: -82.9278164
+    set:
+      COMACTFREQSET{radio_id}: 132750
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Chapman Memorial
+    Identifier: K6CM
+    Frequency: 122.900 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122.900 
+      COMACTNAMESET{radio_id}: "{Name}"
+  - Name: Marion Municipal
+    Identifier: KMNN
+    Frequency: 122.800 Mhz
+    set:
+      COMACTFREQSET{radio_id}: 122.800
+      COMACTNAMESET{radio_id}: "{Name}"
+

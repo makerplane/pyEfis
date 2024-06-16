@@ -67,14 +67,14 @@ class Altimeter(QWidget):
 
         # Draw the Black Background
         dial.fillRect(0, 0, w, h, QColor(self.bg_color))
-
+        dialPen = QPen()
         # Setup Pens
         if self.item.old or self.item.bad:
             warn_font = QFont(self.font_family, 30, QFont.Bold)
-            dialPen = QPen(QColor(Qt.gray))
+            dialPen.setColor(QColor(Qt.gray))
             dialBrush = QBrush(QColor(Qt.gray))
         else:
-            dialPen = QPen(QColor(Qt.white))
+            dialPen.setColor(QColor(Qt.white))
             dialBrush = QBrush(QColor(Qt.white))
         dialPen.setWidth(2)
 
@@ -105,6 +105,9 @@ class Altimeter(QWidget):
                 )
                 altimeter_numbers += 1
             else:
+                # Do not think this code is needed
+                # count starts at 0, increments by 36
+                # The if would never be false to get here
                 dial.drawLine(0, -(radius), 0, -(radius - 10))
 
             dial.rotate(36)

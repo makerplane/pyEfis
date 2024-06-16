@@ -106,6 +106,163 @@ def fix():
         ""
     )
     fix.db.set_value("ALT", 0)
+    fix.db.get_item("ALT").bad = False 
+    fix.db.get_item("ALT").fail = False
+
+
+    fix.db.define_item(
+        "LAT",
+        "Latitude",
+        "float",
+        -90.0,
+        90.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("LAT", 0)
+    fix.db.get_item("LAT").bad = False
+    fix.db.get_item("LAT").fail = False
+
+    fix.db.define_item(
+        "LONG",
+        "Longitude",
+        "float",
+        -180.0,
+        180.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("LONG", 0)
+    fix.db.get_item("LONG").bad = False
+    fix.db.get_item("LONG").fail = False
+
+    fix.db.define_item(
+        "PITCH",
+        "Pitch Angle",
+        "float",
+        -90.0,
+        90.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("PITCH", 0)
+    fix.db.get_item("PITCH").bad = False
+    fix.db.get_item("PITCH").fail = False
+
+    fix.db.define_item(
+        "ROLL",
+        "Roll Angle",
+        "float",
+        -180.0,
+        180.0,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("ROLL", 0)
+    fix.db.get_item("ROLL").bad = False
+    fix.db.get_item("ROLL").fail = False
+
+    fix.db.define_item(
+        "ALAT",
+        "Lateral Acceleration",
+        "float",
+        -30.0,
+        30.0,
+        "g",
+        50000,
+        ""
+    )
+    fix.db.set_value("ALAT", 0)
+    fix.db.get_item("ALAT").bad = False
+    fix.db.get_item("ALAT").fail = False
+
+    fix.db.define_item(
+        "HEAD",
+        "Current Aircraft Magnetic Heading",
+        "float",
+        0.0,
+        359.9,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("HEAD", 0)
+    fix.db.get_item("HEAD").bad = False
+    fix.db.get_item("HEAD").fail = False
+
+    fix.db.define_item(
+        "GSI",
+        "Glideslope Indicator",
+        "float",
+        -1.0,
+        1.0,
+        "",
+        50000,
+        ""
+    )
+    fix.db.set_value("GSI", 0)
+    fix.db.get_item("GSI").bad = False
+    fix.db.get_item("GSI").fail = False
+
+    fix.db.define_item(
+        "CDI",
+        "Course Deviation Indicator",
+        "float",
+        -1.0,
+        1.0,
+        "",
+        50000,
+        "" 
+    )
+    fix.db.set_value("GSI", 0)
+    fix.db.get_item("GSI").bad = False
+    fix.db.get_item("GSI").fail = False
+
+    fix.db.define_item(
+        "COURSE",
+        "Selected Course",
+        "float",
+        0.0,
+        359.9,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("COURSE", 0)
+    fix.db.get_item("COURSE").bad = False
+    fix.db.get_item("COURSE").fail = False
+
+    fix.db.define_item(
+        "ROT",
+        "Rate of Turn",
+        "float",
+        -3000,
+        3000,
+        "Deg/sec",
+        50000,
+        ""
+    )
+    fix.db.set_value("ROT", 0)
+    fix.db.get_item("ROT").bad = False
+    fix.db.get_item("ROT").fail = False
+
+    fix.db.define_item(
+        "VS",
+        "Vertical Speed",
+        "float",
+        -30000,
+        30000,
+        "ft/min",
+        50000,
+        "Min,Max" 
+    )
+    fix.db.set_value("ROT", 0)
+    fix.db.get_item("ROT").bad = False
+    fix.db.get_item("ROT").fail = False
+
 
     return fix
-
