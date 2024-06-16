@@ -250,4 +250,19 @@ def fix():
     fix.db.get_item("ROT").bad = False
     fix.db.get_item("ROT").fail = False
 
+    fix.db.define_item(
+        "VS",
+        "Vertical Speed",
+        "float",
+        -30000,
+        30000,
+        "ft/min",
+        50000,
+        "Min,Max" 
+    )
+    fix.db.set_value("ROT", 0)
+    fix.db.get_item("ROT").bad = False
+    fix.db.get_item("ROT").fail = False
+
+
     return fix
