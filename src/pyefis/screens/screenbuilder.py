@@ -420,8 +420,8 @@ class Screen(QWidget):
                and 'row' in i \
                and 'column' in i:
                 grid_x, grid_y, grid_width, grid_height = self.get_grid_coordinates( i['column'], i['row'])
-                weston_width = int(grid_width * i['span']['columns'])
-                weston_height = int(grid_height * i['span']['rows'])
+                weston_width = qRound(grid_width * i['span']['columns'])
+                weston_height = qRound(grid_height * i['span']['rows'])
                 # span rows/columns are required for weston to work properly and they need to be at least 200px x 200px
                 self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'],wide=weston_width,high=weston_height)
             else:
