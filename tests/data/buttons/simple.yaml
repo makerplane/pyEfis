@@ -1,0 +1,29 @@
+type: simple
+text: "Units"
+dbkey: TSBTN{id}0
+condition_keys:
+- HIDEBUTTON
+conditions:
+  - when: "HIDEBUTTON"
+    actions:
+      #- button: disable
+      - set text: "Show\nMenu"
+      #- set bg color: "#00000000"
+      #- set fg color: "#00000000"
+    continue: true
+  - when: "not HIDEBUTTON"
+    actions:
+      #- button: enable
+      - set text: "Units"
+      #- set bg color: lightgray
+      #- set fg color: black
+    continue: true
+  - when: "CLICKED eq true and HIDEBUTTON"
+    actions:
+      - set text: Units
+      - set value: HIDEBUTTON,False
+  - when: "CLICKED eq true and not HIDEBUTTON"
+    actions:
+      - Set Instrument Units: "OAT,OILT1,Temperature,Pressure,Altitude:Toggle"
+      - set value: HIDEBUTTON,False
+

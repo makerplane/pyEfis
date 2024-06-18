@@ -264,5 +264,106 @@ def fix():
     fix.db.get_item("ROT").bad = False
     fix.db.get_item("ROT").fail = False
 
+    fix.db.define_item(
+        "HIDEBUTTON",
+        "Hide or show buttons",
+        "bool",
+        None,
+        None,
+        '',
+        50000,
+        ''
+    )
+    fix.db.set_value("HIDEBUTTON", False)
+    fix.db.get_item("HIDEBUTTON").bad = False
+    fix.db.get_item("HIDEBUTTON").fail = False
+
+    for i in range(5):
+        fix.db.define_item(
+            f"TSBTN1{i}",
+            f"Touch Button {i}",
+            "bool",
+            None,
+            None,
+            '',
+            50000,
+            ''
+        )
+        fix.db.set_value(f"TSBTN1{i}", False)
+        fix.db.get_item(f"TSBTN1{i}").bad = False
+        fix.db.get_item(f"TSBTN1{i}").fail = False
+
+
+    fix.db.define_item(
+        "MAVREQADJ",
+        "",
+        "bool",
+        None,
+        None,
+        '',
+        50000,
+        ''
+    )
+    fix.db.set_value("MAVREQADJ", False)
+    fix.db.get_item("MAVREQADJ").bad = False
+    fix.db.get_item("MAVREQADJ").fail = False
+
+
+    fix.db.define_item(
+        "MAVADJ",
+        "",
+        "bool",
+        None,
+        None,
+        '',
+        50000,
+        ''
+    )
+    fix.db.set_value("MAVADJ", False)
+    fix.db.get_item("MAVADJ").bad = False
+    fix.db.get_item("MAVADJ").fail = False
+
+
+    fix.db.define_item(
+        "MAVSTATE",
+        "",
+        "str",
+        None,
+        None,
+        '',
+        50000,
+        ''
+    )
+    fix.db.set_value("MAVSTATE", "INIT")
+    fix.db.get_item("MAVSTATE").bad = False
+    fix.db.get_item("MAVSTATE").fail = False
+
+    fix.db.define_item(
+        "MAVMODE",
+        "",
+        "str",
+        None,
+        None,
+        '',
+        50000,
+        ''
+    )
+    fix.db.set_value("MAVMODE", "TRIM")
+    fix.db.get_item("MAVMODE").bad = False
+    fix.db.get_item("MAVMODE").fail = False
+
+    fix.db.define_item(
+        "BARO",
+        "",
+        "float",
+        0,
+        35.0,
+        'inHg',
+        50000,
+        ''
+    )
+    fix.db.set_value("BARO", 29.92)
+    fix.db.get_item("BARO").bad = False
+    fix.db.get_item("BARO").fail = False
 
     return fix
