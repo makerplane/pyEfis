@@ -9,12 +9,12 @@ instruments:
     row: 0
     column: 29
     span:
-      rows: 4
+      rows: 5
       columns: 27
     preferences: TEXT3
     options:
       text: "Active:"
-      font_mask: "XXXXXX:"
+      font_mask: "XXXXXXX:"
       alignment: AlignLeft
   - type: static_text
     row: 0
