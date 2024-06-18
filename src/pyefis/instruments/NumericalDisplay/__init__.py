@@ -158,7 +158,6 @@ class NumericalDisplay(QGraphicsView):
         if self._bad or self._old:
             prest = ""
         self.pre_scroll_text.setText(prest)
-        print(dir(self.pre_scroll_text.text))
         if not (self._bad or self._old or self._fail):
             self.scrolling_area.value = scroll_value
 
