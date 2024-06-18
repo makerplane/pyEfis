@@ -33,6 +33,7 @@ class ListBox(QGraphicsView):
 
         self.active_list = list(self.tlists.keys())[0]
         self.header = misc.StaticText(text=self.active_list, color=QColor(Qt.white), parent=self)
+        self.header.font_mask = self.active_list
         self.selected_row = 0
         self.columns = len(self.tlists[self.active_list]['display']['columns'])
         self.rows = len(self.tlists[self.active_list]['list'])
@@ -196,6 +197,7 @@ class ListBox(QGraphicsView):
         self.table.setRowCount(0)
         self.header.hide()
         self.header.text = self.active_list
+        self.header.font_mask = self.active_list
         self.header.show()
 
         self.column_names = [ item['name'] for item in self.tlists[self.active_list]['display']['columns'] ]
