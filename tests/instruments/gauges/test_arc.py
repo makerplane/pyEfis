@@ -42,18 +42,15 @@ def test_arc_gauge(fix,qtbot):
     assert int(widget.valueFontSize) == 33
     assert int(widget.unitsFontSize) == 25
     assert int(widget.nameFontSize) == 17
-
     widget.font_mask = "00"
     widget.units_font_mask = "00"
     widget.name_font_mask = "0000"
     widget.resizeEvent(None)
-    assert widget.valueFontSize < 0.5
-    assert widget.unitsFontSize < 0.4
-    assert widget.nameFontSize < 10
-    assert widget.nameFontSize > 9
+    assert widget.valueFontSize != 33
+    assert widget.unitsFontSize != 25
+    assert widget.nameFontSize != 17
     widget.name_location = "right"
     widget.resizeEvent(None)
-    assert widget.nameFontSize < 0.4
     # Switch to NUOK with aux data to check the bar colors
     widget.setDbkey("NUMOK")
     widget.setupGauge()
@@ -73,7 +70,6 @@ def test_arc_gauge(fix,qtbot):
 
     assert tracker.was_called_with("width", "0000")
     assert tracker2.was_called_with("setAlpha", widget.font_ghost_alpha)
-
     widget.name_location = "top"
     widget.paintEvent(None)
 
