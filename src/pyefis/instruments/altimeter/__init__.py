@@ -262,8 +262,7 @@ class Altimeter_Tape(QGraphicsView):
     def resizeEvent(self, event):
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
-        self.pph = self.fontsize / (self.height() / 20)
-
+        self.pph = self.height() / 1000
         w = self.width()
         w_2 = w / 2
         h = self.height()
@@ -281,7 +280,6 @@ class Altimeter_Tape(QGraphicsView):
         self.height_pixel = (
             self.maxalt * 2 * self.pph + h
         )  # + abs(self.minalt*self.pph)
-
         dialPen = QPen(QColor(Qt.white))
         dialPen.setWidth(int(self.height() * 0.005))
 
