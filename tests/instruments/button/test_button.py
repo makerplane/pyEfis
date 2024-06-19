@@ -43,7 +43,16 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     assert widget._title == "Units"
     with qtbot.waitSignal(hmi.actions.setInstUnits, timeout=2000):
         qtbot.mouseClick(widget._button, Qt.LeftButton)
-
+    widget.enc_highlight(True)
+    assert widget._style['bg_override'] == QColor('orange')
+    with qtbot.waitSignal(hmi.actions.setInstUnits, timeout=2000):
+        widget.enc_select()
+    fix.db.set_value("HIDEBUTTON", True)
+    assert fix.db.get_item("HIDEBUTTON").value == True
+    assert widget._buttonhide == True
+    widget.enterEvent(None)
+    assert fix.db.get_item("HIDEBUTTON").value == False
+    #qtbot.wait(2000)
 
 
 def test_toggle_button(fix,mock_parent_widget,qtbot):
@@ -56,12 +65,24 @@ def test_toggle_button(fix,mock_parent_widget,qtbot):
     widget.resize(100,80)
     widget.show()
     qtbot.waitExposed(widget)
+    widget.enterEvent(None)
     assert widget._title == "AP\nAdjust"
     assert widget.config['dbkey'] == 'TSBTN{id}2'
     assert widget._toggle == True
     assert widget._button.isCheckable() == True
     assert widget._style['bg'] == QColor("#5d5b59")
     assert widget.isEnabled() == False
+    fix.db.set_value("MAVMODE","HH")
+    fix.db.set_value("MAVSTATE","ARMED")
+    widget.enc_highlight(True)
+    assert widget._style['bg_override'] == QColor('orange')
+    widget.enc_select()
+    assert widget._style['bg'] == QColor('yellow')
+    fix.db.set_value("MAVADJ",True)
+    assert widget._style['bg'] == QColor('green')
+    widget.enc_highlight(False)
+    assert widget._style['bg_override'] == None
+    assert widget.enc_selectable() == True
     #qtbot.wait(2000)
 
 
@@ -88,7 +109,7 @@ def test_repeat_button(fix,mock_parent_widget,qtbot):
     assert baro.value == before + 0.01
     before = baro.value
     fix.db.get_item("TSBTN13").value = True
-    qtbot.wait(1000)
+    #qtbot.wait(1000)
     fix.db.get_item("TSBTN13").value = False
     assert round(baro.value,2) >= round(before + 0.03,2)
 
