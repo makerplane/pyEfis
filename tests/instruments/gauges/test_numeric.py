@@ -31,6 +31,7 @@ def test_numeric_gauge(fix,qtbot):
     assert widget.font_size != 200
     oldvalueTextRect = widget.valueTextRect
     widget.show_units = True
+    widget.units_font_mask = "XXX"
     widget.resizeEvent(None)
     assert oldvalueTextRect != widget.valueTextRect
     widget.font_ghost_mask = "0000"

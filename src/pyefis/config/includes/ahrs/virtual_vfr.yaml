@@ -298,7 +298,7 @@ instruments:
       columns: 9
     options:
       text: "pyefis:"
-      font_mask: "pyefis:"
+      font_mask: "gateway:"
       alignment: AlignRight
   - type: value_text
     disabled: VERSION_DISPLAY
@@ -312,7 +312,7 @@ instruments:
       font_mask: X.X.XX
   - type: static_text
     disabled: VERSION_DISPLAY
-    row: 107
+    row: 107.5
     column: 0
     span:
       rows: 2.5
@@ -323,7 +323,7 @@ instruments:
       alignment: AlignRight
   - type: value_text
     disabled: VERSION_DISPLAY
-    row: 107
+    row: 107.5
     column: 9
     span:
       rows: 2.5

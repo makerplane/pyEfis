@@ -277,8 +277,7 @@ class Airspeed_Tape(QGraphicsView):
     def resizeEvent(self, event):
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
-            self.pph = qRound(self.fontsize * 0.4)
-
+        self.pph = self.height() / 100
         w = self.width()
         h = self.height()
         self.markWidth = w / 5

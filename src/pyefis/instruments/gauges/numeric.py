@@ -38,7 +38,7 @@ class NumericDisplay(AbstractGauge):
         self.font_size = self.height()
         
         if self.font_mask:
-            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family,self.units_font_mask,self.small_font_percent)
+            self.font_size = helpers.fit_to_mask(self.width(),self.height(),self.font_mask,self.font_family,self.units_font_mask,self.small_font_percent,True)
         self.bigFont = QFont(self.font_family)
         self.bigFont.setPointSizeF(self.font_size)
         self.smallFont = QFont(self.font_family)
