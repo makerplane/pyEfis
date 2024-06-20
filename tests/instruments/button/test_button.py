@@ -56,6 +56,8 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     assert widget._db_data["INT.old"] == True
     fix.db.get_item("INT").bad = False
     assert widget._db_data["INT.bad"] == False
+    fix.db.get_item("INT").value = 66
+    assert widget._db_data["INT"] == 66
     fix.db.get_item("TSBTN10").bad = True
     fix.db.get_item("TSBTN10").value = True
     assert widget._dbkey.bad == True
@@ -71,6 +73,8 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     fix.db.get_item("NUMOK").set_aux_value("highAlarm", 95)
     assert widget._db_data["NUMOK.aux.highAlarm"] == 95
     assert widget.getTitle() == widget._title
+    fix.db.get_item("NUMOK").value = 33.3
+    assert widget._db_data["NUMOK"] == 33.3
     fix.db.set_value("TSBTN10", True)
     fix.db.set_value("TSBTN10", True)
     assert fix.db.get_item("TSBTN10").value == False
