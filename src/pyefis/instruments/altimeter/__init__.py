@@ -381,8 +381,6 @@ class Altimeter_Tape(QGraphicsView):
         hmi.actions.setInstUnits.connect(self.setUnits)
         if self.isVisible():
             self.update()
-        else: # pragma: no cover
-            pass
 
     def setUnits(self, args):
         x = args.split(":")

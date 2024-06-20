@@ -17,7 +17,7 @@ def app(qtbot):
 
 
 def test_arc_gauge(fix,qtbot):
-    widget = gauges.ArcGauge()
+    widget = gauges.ArcGauge(min_size=True)
     assert widget.getRatio() == 2
 
     # Test with no aux data first
@@ -96,3 +96,19 @@ def test_arc_gauge(fix,qtbot):
             widget.font_ghost_mask = "0000"
             widget.paintEvent(None)
             assert tracker2.was_called_with("setAlpha", widget.font_ghost_alpha)
+
+
+def test_arc_gauge_branches(fix,qtbot):
+    widget = gauges.ArcGauge(min_size=False)
+    assert widget.getRatio() == 2
+
+    # Test with no aux data first
+    widget.setDbkey("NUM")
+    widget.setupGauge()
+    qtbot.addWidget(widget)
+    widget.name_location = 'top'
+    widget.name_font_mask = 'XXXX'
+    widget.resize(100, 101)
+    widget.show()
+    qtbot.waitExposed(widget)
+    qtbot.wait(2000)

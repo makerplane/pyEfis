@@ -52,9 +52,6 @@ class ArcGauge(AbstractGauge):
         if self.width() < self.height():
             self.r_height = self.get_height(self.width())
             self.r_width = self.width()
-            if self.height() < self.r_height:
-                self.r_height = self.height()
-                self.r_width = self.get_width(self.height())
         else:
             self.r_width = self.get_width(self.height())
             self.r_height = self.height()
@@ -245,7 +242,8 @@ class ArcGauge(AbstractGauge):
                 #p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
             else:
                 p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.1)  ), self.name)
-
+        else: # pragma: no cover
+            pass
         # Main value text
         if self.font_mask:
             opt = QTextOption(Qt.AlignRight)

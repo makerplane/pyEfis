@@ -121,3 +121,20 @@ def test_vertical_bar_gauge(fix,qtbot):
     widget.paintEvent(None)
     widget.normalize_range = 400
     widget.paintEvent(None)
+
+def test_vertical_bar_gauge_min_size_false(fix,qtbot):
+    widget = gauges.VerticalBar(min_size=False)
+    assert widget.getRatio() == 0.35
+    widget.setDbkey("NUM")
+    widget.setupGauge()
+    qtbot.addWidget(widget)
+    widget.resize(300, 200)
+    widget.show()
+    qtbot.waitExposed(widget)
+    widget.resizeEvent(None)
+    widget.show_value = False
+    widget.resizeEvent(None)
+    widget.show_units = False
+    widget.resizeEvent(None)
+    widget.paintEvent(None)
+
