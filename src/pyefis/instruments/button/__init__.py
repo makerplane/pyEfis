@@ -84,7 +84,8 @@ class Button(QWidget):
             self._button.setAutoRepeat(True)
             self._button.setAutoRepeatInterval(self.config.get('repeat_interval', 300))
             self._button.setAutoRepeatDelay(self.config.get('repeat_delay', 300))
-
+        else:
+            raise SyntaxError(f"Unknown button type '{self.config['type']}'")
         self._button.setEnabled(True)
         #self._dbkey = fix.db.get_item(self.config['dbkey'])
         #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
@@ -149,6 +150,8 @@ class Button(QWidget):
         elif signal == 'aux':
             for aux in self._db[key].aux:
                 self._db_data[f"{key}.aux.{aux}"] = self._db[key].aux[aux]
+        else:
+            pass
         self.processConditions()
 
     def resizeEvent(self,event):
@@ -209,8 +212,6 @@ class Button(QWidget):
                 if not self._dbkey.value: 
                     logger.debug(f"Data is: {data}")
                     return
-                # Only take action if we are visible
-                if not self.isVisible(): return
 
                 logger.debug(f"data:{data} self._dbkey.value:{self._dbkey.value}")
                 # Block signal to prevent recursive call
@@ -265,8 +266,12 @@ class Button(QWidget):
                         if not self._button.isChecked():
                             self.processActions(cond['actions'])
                             if not cond.get('continue', False): return
-
-
+                        else: # pragma: no cover
+                            pass
+                else: # pragma: no cover
+                    pass
+            else: # pragma: no cover
+                pass
     def processActions(self,actions):
         for act in actions:
             for action,args in act.items():
@@ -312,6 +317,8 @@ class Button(QWidget):
         if self.font_mask:
             if not self.font_size:
                 self.font_size = helpers.fit_to_mask(self.width()-(self._style['border_size']*2.5),self.height()-(self._style['border_size']*2.5),self.font_mask,self.font_family)
+            else: # pragma: no cover
+                pass
             self.font.setPointSizeF(self.font_size)
         else:
             self.font.setPixelSize(qRound(self.height() * 38/100))

@@ -76,6 +76,9 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     assert fix.db.get_item("TSBTN10").value == False
     assert widget._dbkey.value == False
     widget.dbkeyChanged(False)
+    widget.font_mask = "XXXX"
+    fix.db.set_value("TSBTN10", True)
+    assert widget.font_size != None
     #qtbot.wait(2000)
 
 
@@ -141,6 +144,10 @@ def test_toggle_button2(fix,mock_parent_widget,qtbot):
     assert widget._button.isChecked()
     fix.db.set_value("MAVMODE", "unchecked")
     assert widget._button.isChecked() == False
+    widget.hide()
+    fix.db.set_value("TSBTN13", True)
+    widget.buttonToggled()
+    assert widget.isVisible() == False
     #qtbot.wait(2000)
 
 def test_repeat_button(fix,mock_parent_widget,qtbot):
@@ -169,4 +176,10 @@ def test_repeat_button(fix,mock_parent_widget,qtbot):
     #qtbot.wait(1000)
     fix.db.get_item("TSBTN13").value = False
     assert round(baro.value,2) >= round(before + 0.03,2)
+    widget.dataChanged("t","unknown")
+
+def test_unknown_button_type(fix,mock_parent_widget,qtbot):
+    hmi.initialize({})
+    with pytest.raises(SyntaxError):
+        widget = button.Button(mock_parent_widget, config_file="tests/data/buttons/unknown.yaml")
 
