@@ -190,6 +190,8 @@ class VirtualVfr(AI):
 
         if not self.rendering_prohibited():
             self.pov.render(self)
+        else: # pragma: no cover
+            pass
 
     def get_largest_font_size(self, width):
         max_size = self.height() * 0.08 #25

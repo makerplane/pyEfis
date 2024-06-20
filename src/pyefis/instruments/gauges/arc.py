@@ -93,7 +93,8 @@ class ArcGauge(AbstractGauge):
                 self.nameFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
             elif self.name_location == 'right':
                 self.nameFontSize = helpers.fit_to_mask(self.r_width / 2.1, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
-
+            else: # pragma: no cover
+                pass
         
     def paintEvent(self, e):
         start = self.startAngle

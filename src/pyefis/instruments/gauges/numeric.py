@@ -92,3 +92,5 @@ class NumericDisplay(AbstractGauge):
                 pen.setColor(self.textColor)
                 p.setPen(pen)
             p.drawText(self.unitsTextRect, self.units, opt)
+        else: # pragma: no cover
+            pass

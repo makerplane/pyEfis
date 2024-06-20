@@ -172,6 +172,8 @@ class ValueDisplay(QWidget):
                 self._value = cvalue
                 self.setColors()
                 self.update()
+            else: # pragma: no cover
+                pass
 
     value = property(getValue, setValue)
 

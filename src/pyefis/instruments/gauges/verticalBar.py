@@ -99,7 +99,8 @@ class VerticalBar(AbstractGauge):
         elif args.lower() == "normal":
                 self.normalizeMode = False
                 self.peakMode = False
-
+        else: # pragma: no cover
+            pass
 
 
     def resizeEvent(self, event):
