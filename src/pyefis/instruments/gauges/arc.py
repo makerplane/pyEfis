@@ -90,8 +90,8 @@ class ArcGauge(AbstractGauge):
                 self.nameFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
             elif self.name_location == 'right':
                 self.nameFontSize = helpers.fit_to_mask(self.r_width / 2.1, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
-            else: # pragma: no cover
-                pass
+            else:
+                raise SyntaxError(f"Unknown location: {self.name_location}")
         
     def paintEvent(self, e):
         start = self.startAngle
@@ -242,8 +242,8 @@ class ArcGauge(AbstractGauge):
                 #p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
             else:
                 p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.1)  ), self.name)
-        else: # pragma: no cover
-            pass
+        else:
+            raise SyntaxError(f"Unknown location: {self.name_location}")
         # Main value text
         if self.font_mask:
             opt = QTextOption(Qt.AlignRight)
