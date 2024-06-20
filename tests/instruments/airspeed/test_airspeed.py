@@ -59,6 +59,10 @@ def test_numerical_airspeed(fix, qtbot):
     widget.setAsBad(True)
     widget.setAsFail(True)
     assert widget.getAirspeed() == 20
+    # Test branch
+    widget.setAirspeed(20)
+    widget.setAirspeed(41)
+    assert widget._airspeed == 41
     qtbot.wait(200)
 
 
@@ -75,7 +79,11 @@ def test_numerical_airspeed_tape(qtbot):
     widget.setAirspeed(40)  # redraw()
     widget.keyPressEvent(None)
     widget.wheelEvent(None)
-
+    assert widget._airspeed == 40
+    # Test branch
+    widget.setAirspeed(40)
+    widget.setAirspeed(41)
+    assert widget._airspeed == 41
 
 def test_numerical_airspeed_box(fix, qtbot):
     hmi.initialize({})

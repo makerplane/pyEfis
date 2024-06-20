@@ -216,8 +216,6 @@ class Airspeed(QWidget):
         if airspeed != self._airspeed:
             self._airspeed = airspeed
             self.update()
-        else: # pragma: no cover
-            pass
 
     airspeed = property(getAirspeed, setAirspeed)
 
