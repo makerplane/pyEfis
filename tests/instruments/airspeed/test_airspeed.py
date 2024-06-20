@@ -48,6 +48,8 @@ def test_numerical_airspeed(fix, qtbot):
     widget.show()
     qtbot.waitExposed(widget)
     qtbot.wait(500)
+    widget.resize(200, 201)
+    widget.paintEvent(None)
     assert widget.item.key == "IAS"
     assert widget.Vs == 45
     fix.db.get_item("IAS").fail = True
@@ -55,6 +57,7 @@ def test_numerical_airspeed(fix, qtbot):
     fix.db.get_item("IAS").old = True
     fix.db.get_item("IAS").old = False
     fix.db.set_value("IAS", "20")
+    widget.paintEvent(None)
     widget.setAsOld(True)
     widget.setAsBad(True)
     widget.setAsFail(True)
