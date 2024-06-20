@@ -110,7 +110,13 @@ def test_numerical_airspeed_box(fix, qtbot):
     assert widget.valueText == "140"
     widget.setMode("")
     assert widget._modeIndicator == 0
-
+    widget.setMode("")
+    assert widget._modeIndicator == 1
+    widget.setMode("")
+    assert widget._modeIndicator == 2
+    widget.setMode("")
+    assert widget._modeIndicator == 0
+    widget.setMode(0)
     fix.db.get_item("TAS").fail = True
     fix.db.set_value("TAS", 101)
     assert widget.valueText == "XXX"
