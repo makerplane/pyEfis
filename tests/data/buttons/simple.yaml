@@ -4,6 +4,8 @@ dbkey: TSBTN{id}0
 hover_show: True
 condition_keys:
 - HIDEBUTTON
+- INT
+- NUMOK
 conditions:
   - when: "HIDEBUTTON"
     actions:

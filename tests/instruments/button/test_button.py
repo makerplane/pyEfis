@@ -52,6 +52,30 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     assert widget._buttonhide == True
     widget.enterEvent(None)
     assert fix.db.get_item("HIDEBUTTON").value == False
+    fix.db.get_item("INT").old = True
+    assert widget._db_data["INT.old"] == True
+    fix.db.get_item("INT").bad = False
+    assert widget._db_data["INT.bad"] == False
+    fix.db.get_item("TSBTN10").bad = True
+    fix.db.get_item("TSBTN10").value = True
+    assert widget._dbkey.bad == True
+    widget.hide()
+    fix.db.get_item("TSBTN10").bad = False
+    fix.db.get_item("TSBTN10").value = False
+    assert widget.isVisible() == False
+    widget.show()
+    fix.db.get_item("INT").fail = False
+    assert widget._db_data["INT.fail"] == False
+    fix.db.get_item("INT").annunciate = True
+    assert widget._db_data["INT.annunciate"] == True
+    fix.db.get_item("NUMOK").set_aux_value("highAlarm", 95)
+    assert widget._db_data["NUMOK.aux.highAlarm"] == 95
+    assert widget.getTitle() == widget._title
+    fix.db.set_value("TSBTN10", True)
+    fix.db.set_value("TSBTN10", True)
+    assert fix.db.get_item("TSBTN10").value == False
+    assert widget._dbkey.value == False
+    widget.dbkeyChanged(False)
     #qtbot.wait(2000)
 
 
@@ -83,8 +107,41 @@ def test_toggle_button(fix,mock_parent_widget,qtbot):
     widget.enc_highlight(False)
     assert widget._style['bg_override'] == None
     assert widget.enc_selectable() == True
+    assert widget._button.isChecked() == True
+    fix.db.set_value('TSBTN12', True)
+    assert widget._dbkey.value == True
+    # Test that when already set true, setting True does nothing
+    widget._db_data['CLICKED'] = False
+    widget._button.setChecked(False)
+    widget.dbkeyChanged(True)
+    assert widget._db_data['CLICKED'] == True
+    widget._db_data['CLICKED'] = False
+    widget.dbkeyChanged(True)
+    assert widget._db_data['CLICKED'] == False
+    # End already set test
+    #fix.db.set_value('TSBTN12', True)
     #qtbot.wait(2000)
 
+
+def test_toggle_button2(fix,mock_parent_widget,qtbot):
+    hmi.initialize({})
+    widget = button.Button(mock_parent_widget, config_file="tests/data/buttons/toggle2.yaml")
+    qtbot.addWidget(mock_parent_widget)
+    qtbot.addWidget(widget)
+    mock_parent_widget.resize(200,200)
+    mock_parent_widget.show()
+    widget.resize(100,80)
+    widget.show()
+    qtbot.waitExposed(widget)
+    assert widget._title == "False" 
+    fix.db.set_value("TSBTN13", True)
+    assert widget._title == "True"
+    fix.db.set_value("TSBTN13", False)
+    fix.db.set_value("MAVMODE", "checked")
+    assert widget._button.isChecked()
+    fix.db.set_value("MAVMODE", "unchecked")
+    assert widget._button.isChecked() == False
+    #qtbot.wait(2000)
 
 def test_repeat_button(fix,mock_parent_widget,qtbot):
     hmi.initialize({})
