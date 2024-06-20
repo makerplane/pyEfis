@@ -60,7 +60,6 @@ class Button(QWidget):
         # button names per node without having 
         # to duplicate all buttons.
         self._dbkey = fix.db.get_item(self.config['dbkey'].replace('{id}', str(self.parent.parent.nodeID)))
-        self.block_data = False
         time.sleep(0.01)
         #self._button.setChecked(self._dbkey.value)
 
@@ -177,14 +176,11 @@ class Button(QWidget):
 
         # Toggle button toggled
         if self._toggle and self._button.isChecked() != self._dbkey.value:
-            self.block_data = True
-            fix.db.set_value(self._dbkey.key, self._button.isChecked())
-            #self._dbkey.set_value = self._button.isChecked()
-            self._dbkey.output_value()
-            self.block_data = False
+            with QSignalBlocker(self._dbkey):
+                fix.db.set_value(self._dbkey.key, self._button.isChecked())
+                self._dbkey.output_value()
             # Now we evaluate conditions and update the button style/text/state
             self.processConditions(True)
-            #fix.db.set_value(self._dbkey.key, self._button.isChecked())
 
         elif not self._toggle:
             # Simple button
@@ -192,9 +188,6 @@ class Button(QWidget):
 
 
     def dbkeyChanged(self,data):
-        if self.block_data: 
-            logger.debug(f"{self._button.text()}:dbkeyChanged:data={data}:self._button.isChecked({self._button.isChecked()}) - processing blocked!")
-            return
         if self._dbkey.bad:
             return
         # The same button configuration might be used on multiple screens
@@ -277,21 +270,15 @@ class Button(QWidget):
     def processActions(self,actions):
         for act in actions:
             for action,args in act.items():
-                set_block = False
-                if action == 'set value':
-                    args_data = args.split(',')
-                    if args_data[0] in self._db or args_data[0] == self._dbkey.key:
-                        self.block_data = True
-                        set_block = True
-                try:
-                    logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Tried")
-                    hmi.actions.trigger(action, args)
-                    logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Success")
-                except:
-                    self.setStyle(action,args)
-                    logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:STYLE:{action}:{args}")
-                if set_block:
-                    self.block_data = False
+                # Prevent recursive calls to self
+                with QSignalBlocker(self._dbkey):
+                    try:
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Tried")
+                        hmi.actions.trigger(action, args)
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:HMI:{action}:{args} Success")
+                    except:
+                        self.setStyle(action,args)
+                        logger.debug(f"{self.parent.parent.getRunningScreen()}:{self._dbkey.key}:STYLE:{action}:{args}")
 
     def setStyle(self,action='',args=None):
 
