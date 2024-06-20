@@ -187,3 +187,13 @@ def test_unknown_button_type(fix,mock_parent_widget,qtbot):
     with pytest.raises(SyntaxError):
         widget = button.Button(mock_parent_widget, config_file="tests/data/buttons/unknown.yaml")
 
+def test_unknown_button_condition(fix,mock_parent_widget,qtbot):
+    hmi.initialize({})
+    with pytest.raises(SyntaxError):
+        widget = button.Button(mock_parent_widget, config_file="tests/data/buttons/unknown_condition.yaml")
+
+def test_unknown_button_condition2(fix,mock_parent_widget,qtbot):
+    hmi.initialize({})
+    with pytest.raises(SyntaxError):
+        widget = button.Button(mock_parent_widget, config_file="tests/data/buttons/unknown_condition2.yaml")
+

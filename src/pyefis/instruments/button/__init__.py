@@ -266,12 +266,10 @@ class Button(QWidget):
                         if not self._button.isChecked():
                             self.processActions(cond['actions'])
                             if not cond.get('continue', False): return
-                        else: # pragma: no cover
-                            pass
-                else: # pragma: no cover
-                    pass
-            else: # pragma: no cover
-                pass
+                else:
+                    raise SyntaxError(f"condition must be a string or boolean, not: {cond['when']}")
+            else:
+                raise SyntaxError(f"Unknown confition: {cond}")           
     def processActions(self,actions):
         for act in actions:
             for action,args in act.items():
@@ -317,8 +315,6 @@ class Button(QWidget):
         if self.font_mask:
             if not self.font_size:
                 self.font_size = helpers.fit_to_mask(self.width()-(self._style['border_size']*2.5),self.height()-(self._style['border_size']*2.5),self.font_mask,self.font_family)
-            else: # pragma: no cover
-                pass
             self.font.setPointSizeF(self.font_size)
         else:
             self.font.setPixelSize(qRound(self.height() * 38/100))
