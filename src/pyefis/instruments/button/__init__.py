@@ -67,7 +67,6 @@ class Button(QWidget):
         #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
 
         self._repeat = False
-        self.simple_state = False
         if self.config['type'] == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
@@ -213,25 +212,17 @@ class Button(QWidget):
         else:
             logger.debug(f"{self._button.text()}:toggled:data={data}:self._button.isChecked({self._button.isChecked()})")
             if not self._repeat and not self._toggle:
-                # A simple button
-                # The logic in here is for dealing with physical buttons
                 # Only take action if changing from False to True
                 if not self._dbkey.value: 
                     logger.debug(f"Data is: {data}")
-                    # Always save current state when it is false
-                    self.simple_state = False
                     return
                 # Only take action if we are visible
                 if not self.isVisible(): return
 
                 logger.debug(f"data:{data} self._dbkey.value:{self._dbkey.value}")
-                # If we are already True, nothing new to do, we need to become false before performing another action.
-                if self.simple_state: return
-                # Save current state
-                self.simple_state = self._dbkey.value
-                # Set value back to false to prevent recursive calls
-                # Physical buttons should not repeat sending True for simple buttons
-                self._dbkey.value = False
+                # Block signal to prevent recursive call
+                with QSignalBlocker(self._dbkey):
+                    self._dbkey.value = False
             self._button.setChecked(self._dbkey.value) 
             self.processConditions(True)
             if self._repeat:
