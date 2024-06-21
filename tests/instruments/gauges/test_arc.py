@@ -112,3 +112,17 @@ def test_arc_gauge_branches(fix,qtbot):
     widget.show()
     qtbot.waitExposed(widget)
     qtbot.wait(2000)
+
+
+def test_unknown_location(fix,qtbot):
+    widget = gauges.ArcGauge(min_size=False)
+    assert widget.getRatio() == 2
+    widget.setDbkey("NUM")
+    widget.setupGauge()
+    qtbot.addWidget(widget)
+    widget.name_location = 'unknown'
+    widget.name_font_mask = "XXX"
+    hmi.initialize({})
+    widget.resize(100,100)
+    widget.show()
+    widget.paintEvent(None)
