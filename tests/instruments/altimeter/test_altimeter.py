@@ -89,7 +89,6 @@ def test_altimeter_tape(fix,qtbot):
     qtbot.waitExposed(widget)
     widget.font_mask = None
     widget.resize(90,200)
-
     #widget.paintEvent(None)
 
 
@@ -127,4 +126,5 @@ def test_altimeter_tape_unit_switching(fix,qtbot):
     widget.setUnitSwitching()
     widget.keyPressEvent(None)
     widget.wheelEvent(None)
-
+    widget.hide()
+    widget.setUnitSwitching()

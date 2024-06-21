@@ -42,3 +42,6 @@ def test_numeric_gauge(fix,qtbot):
         widget.units_font_ghost_mask = "0000"
         widget.paintEvent(None)
         assert tracker.was_called_with("setAlpha", widget.font_ghost_alpha)
+    widget.show_units = False
+    widget.paintEvent(None)
+

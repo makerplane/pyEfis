@@ -52,9 +52,6 @@ class ArcGauge(AbstractGauge):
         if self.width() < self.height():
             self.r_height = self.get_height(self.width())
             self.r_width = self.width()
-            if self.height() < self.r_height:
-                self.r_height = self.height()
-                self.r_width = self.get_width(self.height())
         else:
             self.r_width = self.get_width(self.height())
             self.r_height = self.height()
@@ -93,7 +90,9 @@ class ArcGauge(AbstractGauge):
                 self.nameFontSize = helpers.fit_to_mask(self.r_width / 6, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
             elif self.name_location == 'right':
                 self.nameFontSize = helpers.fit_to_mask(self.r_width / 2.1, (self.r_height / 2.8)/2, self.name_font_mask, self.font_family)
-
+            else:
+                # Should we throw exception or log error here?
+                pass 
         
     def paintEvent(self, e):
         start = self.startAngle
@@ -244,7 +243,9 @@ class ArcGauge(AbstractGauge):
                 #p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.2)  ), self.name)
             else:
                 p.drawText(QPointF( self.lrcx - x, self.lrcy - (y/1.1)  ), self.name)
-
+        else:
+            # Should we throw exception or log error here?
+            pass
         # Main value text
         if self.font_mask:
             opt = QTextOption(Qt.AlignRight)

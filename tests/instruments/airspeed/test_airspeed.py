@@ -48,6 +48,8 @@ def test_numerical_airspeed(fix, qtbot):
     widget.show()
     qtbot.waitExposed(widget)
     qtbot.wait(500)
+    widget.resize(200, 201)
+    widget.paintEvent(None)
     assert widget.item.key == "IAS"
     assert widget.Vs == 45
     fix.db.get_item("IAS").fail = True
@@ -55,10 +57,15 @@ def test_numerical_airspeed(fix, qtbot):
     fix.db.get_item("IAS").old = True
     fix.db.get_item("IAS").old = False
     fix.db.set_value("IAS", "20")
+    widget.paintEvent(None)
     widget.setAsOld(True)
     widget.setAsBad(True)
     widget.setAsFail(True)
     assert widget.getAirspeed() == 20
+    # Test branch
+    widget.setAirspeed(20)
+    widget.setAirspeed(41)
+    assert widget._airspeed == 41
     qtbot.wait(200)
 
 
@@ -75,7 +82,11 @@ def test_numerical_airspeed_tape(qtbot):
     widget.setAirspeed(40)  # redraw()
     widget.keyPressEvent(None)
     widget.wheelEvent(None)
-
+    assert widget._airspeed == 40
+    # Test branch
+    widget.setAirspeed(40)
+    widget.setAirspeed(41)
+    assert widget._airspeed == 41
 
 def test_numerical_airspeed_box(fix, qtbot):
     hmi.initialize({})
@@ -99,7 +110,13 @@ def test_numerical_airspeed_box(fix, qtbot):
     assert widget.valueText == "140"
     widget.setMode("")
     assert widget._modeIndicator == 0
-
+    widget.setMode("")
+    assert widget._modeIndicator == 1
+    widget.setMode("")
+    assert widget._modeIndicator == 2
+    widget.setMode("")
+    assert widget._modeIndicator == 0
+    widget.setMode(0)
     fix.db.get_item("TAS").fail = True
     fix.db.set_value("TAS", 101)
     assert widget.valueText == "XXX"

@@ -366,4 +366,7 @@ def fix():
     fix.db.get_item("BARO").bad = False
     fix.db.get_item("BARO").fail = False
 
+    fix.db.define_item("INT", "Testing key", "int", 0, 100, "", 50000, "")
+    fix.db.set_value("INT", 29)
+
     return fix

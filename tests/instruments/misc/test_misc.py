@@ -102,7 +102,18 @@ def test_value_display_set_value(fix, qtbot):
 
     fix.db.set_value("TEST",3.14)
     assert widget.getValue() == 3.14
-
+    widget.setValue(20)
+    assert widget._value == 20
+    widget.conversionFunction = lambda x: x*2
+    widget.setValue(10)
+    assert widget._value == 20
+    widget.font_ghost_mask = None
+    widget.resize(100,100)
+    widget.show()
+    widget.paintEvent(None)
+    widget.font_ghost_mask = "XXXX"
+    widget.paintEvent(None)
+    qtbot.waitExposed(widget)
 
 #@mock.patch("pyefis.instruments.misc.fix")
 #def test_value_display_flags(mock_fix, qtbot):

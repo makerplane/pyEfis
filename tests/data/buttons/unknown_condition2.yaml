@@ -7,7 +7,7 @@ condition_keys:
 - INT
 - NUMOK
 conditions:
-  - when: "HIDEBUTTON"
+  - when: 100
     actions:
       #- button: disable
       - set text: "Show\nMenu"

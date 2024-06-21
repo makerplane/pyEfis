@@ -15,15 +15,24 @@ def app(qtbot):
 
 
 def test_numerical_display_default(qtbot):
-    widget = NumericalDisplay(total_decimals=4, scroll_decimal=2)
+    widget = NumericalDisplay(total_decimals=4, scroll_decimal=0)
     qtbot.addWidget(widget)
     assert widget.total_decimals == 4
-    assert widget.scroll_decimal == 2
+    assert widget.scroll_decimal == 0
     assert widget._bad == False
     assert widget.value == 0
     widget.show()
+    widget.resize(100,400)
+    widget.redraw()
     qtbot.waitExposed(widget)
     assert widget.isVisible()
+    widget.setFail(True)
+    widget.setFail(True)
+    widget.setBad(True)
+    widget.setBad(True)
+    widget.setOld(True)
+    widget.setOld(True)
+
 
 
 def test_numerical_display_decimals(qtbot):

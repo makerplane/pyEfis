@@ -1,0 +1,36 @@
+type: toggle
+text: "Test"
+dbkey: TSBTN{id}3
+condition_keys:
+  - MAVMODE
+  - MAVSTATE
+  - MAVADJ
+conditions:
+  - when: "MAVMODE eq 'checked'"
+    actions:
+      - button: checked
+      - set bg color: blue
+  - when: "MAVMODE eq 'unchecked'"
+    actions:
+      - button: unchecked
+      - set bg color: orange
+  - when: True
+    actions:
+      - set text: "True"
+    continue: true
+  - when: True
+    actions:
+      - set bg color: green
+      - set fg color: white
+  - when: False
+    actions:
+      - set text: "False"
+    continue: true
+  - when: False
+    actions:
+      - set bg color: red
+  - when: "MAVMODE eq 'checked'"
+    actions:
+      - button: checked
+      - set bg color: blue
+  - unknown:

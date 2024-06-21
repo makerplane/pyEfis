@@ -287,7 +287,7 @@ class NumericalScrollDisplay(QGraphicsView):
         self.centerOn(self.width() / 2, self.y_offset(scroll_value))
 
     def getValue(self):
-        return self._value
+        return self._value # pragma: no cover
 
     def setValue(self, val):
         self._value = val
