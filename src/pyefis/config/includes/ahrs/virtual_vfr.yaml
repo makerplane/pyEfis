@@ -154,7 +154,7 @@ instruments:
       columns: 10
     options:
       text: "Baro:"
-      font_mask: "Baro:"
+      font_mask: "XXXXX"
       alignment: AlignRight
   - type: numeric_display
     disabled: BARO_CONTROLS
@@ -164,7 +164,7 @@ instruments:
       rows: 4
       columns: 12
     options:
-      font_mask: "00.00"
+      font_mask: "XXXXXX"
       dbkey: BARO
       decimal_places: 2
       pressure: true
@@ -200,7 +200,7 @@ instruments:
       columns: 10
     options:
       text: "DALT:"
-      font_mask: "DALT:"
+      font_mask: "XXXXX"
       alignment: AlignRight
   - type: numeric_display
     disabled: PRESSURE_DISPLAY
@@ -208,9 +208,9 @@ instruments:
     column: 129
     span:
       rows: 4
-      columns: 15
+      columns: 12
     options:
-      font_mask: "10000"
+      font_mask: "XXXXXX"
       dbkey: DALT
       decimal_places: 0
       altitude: true
@@ -223,7 +223,7 @@ instruments:
       columns: 10
     options:
       text: "PALT:"
-      font_mask: "PALT:"
+      font_mask: "XXXXX"
       alignment: AlignRight
   - type: numeric_display
     disabled: PRESSURE_DISPLAY
@@ -231,9 +231,9 @@ instruments:
     column: 129
     span:
       rows: 4
-      columns: 15
+      columns: 12
     options:
-      font_mask: "10000"
+      font_mask: "XXXXXX"
       dbkey: PALT
       decimal_places: 0
       altitude: true
@@ -246,7 +246,7 @@ instruments:
       columns: 10
     options:
       text: "OAT:"
-      font_mask: "OAT:"
+      font_mask: "XXXXX"
       alignment: AlignRight
   - type: numeric_display
     disabled: PRESSURE_DISPLAY
@@ -254,9 +254,9 @@ instruments:
     column: 129
     span:
       rows: 4
-      columns: 10
+      columns: 8
     options:
-      font_mask: "100"
+      font_mask: "XXX"
       units_font_mask: "oF"
       dbkey: OAT
       temperature: true
