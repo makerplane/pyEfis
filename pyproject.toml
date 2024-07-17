@@ -37,10 +37,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "geomag==0.9.2015",
     "geopy==2.4.1",
 # Until this revision is published to PyPy get it from git:
-    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@b00273a9016e9a4b975f8efe51d63405103d58fb",
+    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@51c381b26ab47c9a975be8db4261a5483a73bf77",
     "pycond==20230212",
     "PyQt5==5.15.10",
     "PyYAML==6.0.1",
@@ -62,8 +61,8 @@ Source = "https://github.com/makerplane/pyEfis"
 [tool.pytest.ini_options]
 qt_api="pyqt5"
 env = [
-  "QT_QPA_PLATFORM = offscreen:size=1000x1000"
-#  "QT_QPA_PLATFORM = xcb:size=1000,1000"
+#  "QT_QPA_PLATFORM = offscreen:size=1000x1000"
+  "QT_QPA_PLATFORM = xcb:size=1000,1000"
 ]
 filterwarnings = [
     # I belive this is warning that pyqt needs updated if you update to python 3.12

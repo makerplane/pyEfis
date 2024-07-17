@@ -22,8 +22,6 @@ import os
 import yaml
 import datetime
 
-from geomag import declination
-
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -71,7 +69,7 @@ class VirtualVfr(AI):
 
         self.lng_item = fix.db.get_item("LONG")
         self.lat_item = fix.db.get_item("LAT")
-        self.head_item = fix.db.get_item("HEAD")
+        self.head_item = fix.db.get_item("COURSE")
         self.alt_item = fix.db.get_item("ALT")
         self.gsi_item = fix.db.get_item("GSI")
         self._VFROld['LONG'] = self.lng_item.old
@@ -107,8 +105,6 @@ class VirtualVfr(AI):
         self._VFRFail['ALT'] = self.alt_item.fail
         self.altitude = self.alt_item.value
 
-        self.last_mag_update = 0
-        self.magnetic_declination = None
         self.missing_lat = self.lat == 0.0
         self.missing_lng = self.lng == 0.0
   
@@ -562,20 +558,7 @@ class VirtualVfr(AI):
             self.pov.render(self)
             self.update()
     def setHeading(self, heading):
-        curtime = time.time()
-        #log.debug(f"setHeading( {heading} ): curtime:{curtime} self.last_mag_update:{self.last_mag_update} self.magnetic_declination:{self.magnetic_declination}")
-        if curtime - self.last_mag_update > 60 or self.magnetic_declination is None:
-            # update every minute at the most
-            #log.debug(f"self.missing_lat:{self.missing_lat} self.missing_lng:{self.missing_lng}")
-            if not (self.missing_lat or self.missing_lng):
-                #log.debug("Updated declination")
-                self.last_mag_update = curtime
-                self.magnetic_declination = declination (self.lat, self.lng, self.altitude)
-        md = self.magnetic_declination
-        if md is None:
-            md = 0
-        #log.debug(f"heading:{heading} md:{md}")
-        self.pov.update_heading (heading + md)
+        self.pov.update_heading (heading)
         if not self.rendering_prohibited():
             #log.debug("Rendering")
             self.pov.render(self)
