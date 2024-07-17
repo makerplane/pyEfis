@@ -39,7 +39,7 @@ classifiers = [
 dependencies = [
     "geopy==2.4.1",
 # Until this revision is published to PyPy get it from git:
-    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@51c381b26ab47c9a975be8db4261a5483a73bf77",
+    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@ae79ef3a971d62cc43cedcfb5f303ced2dd09fbf",
     "pycond==20230212",
     "PyQt5==5.15.10",
     "PyYAML==6.0.1",
