@@ -99,8 +99,7 @@ enabled:
   CYLINDER_3: true
   CYLINDER_4: true
   DIMMER: false
-  BUTTONS: true # enabled/disable navigation buttons
-  #PORTRAIT_MODE: false # switch to portrait mode NOT implemented yet
+  BUTTONS: true  # enabled/disable navigation buttons
 
 # Here you can define what include files are used to render some
 # portion of the screen so you can customize as needed easily
