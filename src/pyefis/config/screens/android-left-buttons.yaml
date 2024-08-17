@@ -48,9 +48,21 @@ ANDROID:
         args:
           - show-full-ui
     - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      disabled: BUTTONS
       row: 0
       column: 14.5
+      span:
+        rows: 70
+        columns: 30
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      disabled: not BUTTONS
+      row: 0
+      column: 0
+      span:
+        rows: 70
+        columns: 44.5
     - type: include,BUTTON_GROUP1
+      disabled: BUTTONS
       row: 0
       column: 0
     - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml

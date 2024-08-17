@@ -9,6 +9,7 @@ SIXPACK:
     draw_grid: false
   instruments:
     - type: include,BUTTON_GROUP1
+      disabled: BUTTONS
       row: 0
       column: 0
     -
