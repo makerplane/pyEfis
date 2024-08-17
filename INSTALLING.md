@@ -84,16 +84,20 @@ sudo snap connect fixgateway:serial-port snapd:serial-name-here
 
 ### Managing auto start
 By default fixgateway and pyefis will auto start on reboot.<br>
-To disable this edit the config files and change `auto start` to `false`
+To disable this edit the config files and change `AUTOSTART` to `false`
+```
+enabled:
+  AUTO_START: true
+```
 
 pyefis config:
 ```
-~/makerplane/pyefis/config/default.yaml
+~/makerplane/pyefis/config/preferences.yaml.custom
 ```
 
 fixgateway config:
 ```
-~/makerplane/fixgw/config/default.yaml
+~/makerplane/fixgw/config/preferences.yaml.custom
 ```
 
 Below are commands to start/stop pyefis and fixgateway
@@ -120,66 +124,50 @@ sudo snap start fixgateway.daemon
 ### Customizing or using different configuration file
 Currently it is not possible to change the configuration filename with the auto start feature.<br>
 You can edit the default, your changes will not be overwritten when the system is updated.<br>
-In my case I have a `left.yaml` and `right.yaml` file for the left and right screens. I simply created a `default.yaml` symlink to the correct file on each side.
+In my case I have a `preferences.yaml.custom.left` and `preferences.yaml.custom.right` file for the left and right screens. I simply created a `preferences.yaml.custom` symlink to the correct file on each side.
 
 On the left side I did:
 ```
 cd ~/makerplane/pyefis/config
-rm default.yaml
-ln -s left.yaml default.yaml
+rm preferences.yaml.custom
+ln -s preferences.yaml.custom.left preferences.yaml.custom
 ```
 
-Now when it auto starts it uses the `left.yaml` config
+Now when it auto starts it uses the `preferences.yaml.custom.left` config
+
+If you are starting new or only have a single display just edit the `preferences.yaml.custom` file to make customizations.
+<br>
+For more information on how to customize the display see [Screen Builder Documentation](https://github.com/makerplane/pyEfis/blob/master/docs/screenbuilder.md)
 
 
-
-### Get data needed for Virtual VFR
-The virtual VFR feature uses FAA data to display runways and glide slop indicators in the atitude indicator.
-
-#### Create directory for the CIFP data
-```
-mkdir ~/makerplane/pyefis/CIFP/
-cd ~/makerplane/pyefis/CIFP/
-```
-
-#### Download the CIFP Data
-Visit https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/ and copy the link to the latest data.
-
-Download the latest data using the link you copied and unzip it
-```
-wget https://aeronav.faa.gov/Upload_313-d/cifp/CIFP_231228.zip
-unzip CIFP_231228.zip
-```
-
-Create the index:
-```
-pyefis.makecifpindex FAACIFP18
-```
-
-When updating in the future just delete the CIFP directory and start over at the beginning of this section
-
+### Data needed for Virtual VFR
+The virtual VFR feature uses FAA CIFP data to display runways and glide slop indicators in the atitude indicator.<br>
+When using the snap installation method, outlined above, this data is automatically downloaded and periodically auto updated.
 
 ### Important information:
 NOTE: Upon starting a folder named makerplane will be created in your home folder and default configs copied into that folder.<br>
 It will not overwrite any file that currently exists so your customizations are safe. If you would like to get updated default configs you could delete the old configs and then start pyefis and fixgateway.<br>
 
 Directories you need to know:
-pyefis configs: ~/makerplane/pyefis/config
-fixgateway configs: ~/makerplane/fixgw/config
-flight data recorder logs: ~/makerplane/pyefis/fdr
+
+  * pyefis configs: ~/makerplane/pyefis/config
+  * fixgateway configs: ~/makerplane/fixgw/config
+  * flight data recorder logs: ~/makerplane/pyefis/fdr
 
 Commands:
-* stop fixgateway: `sudo snap stop fixgateway.daemon` 
-* start fixgateway: `sudo snap start fixgateway.daemon`
-* stop pyefis: `sudo snap stop pyefis.daemon`
-* start pyefis: `sudo snap start pyefis.daemon`
-* While stopped you can run them manually to see real time debug output:
-* pyefis: `pyefis.server --config-file=$HOME/makerplane/pyefis/config/default.yaml --debug`
-* fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
-* fixgateway client: `fixgateway.client`
-* CIFP index builder: `pyefis.makecifpindex`
 
-Installing pyefis and fixgateway updates:
+  * stop fixgateway: `sudo snap stop fixgateway.daemon` 
+  * start fixgateway: `sudo snap start fixgateway.daemon`
+  * stop pyefis: `sudo snap stop pyefis.daemon`
+  * start pyefis: `sudo snap start pyefis.daemon`
+  * While stopped you can run them manually to see real time debug output:
+  * pyefis: `pyefis.server --config-file=$HOME/makerplane/pyefis/config/default.yaml --debug`
+  * fixgateway: `fixgateway.server --config-file=$HOME/makerplane/fixgw/config/default.yaml --debug`
+  * fixgateway client: `fixgateway.client`
+  * running fixgateway in FDR playback mode: `sudo snap start fixgateway.daemon; fixgateway.server --playback-start-time 2024-07-13-18:51:10`
+  * CIFP index builder: `pyefis.makecifpindex`
+
+Installing pyefis, FAA CIFP data, and fixgateway updates:
 ```
 snap refresh
 ```

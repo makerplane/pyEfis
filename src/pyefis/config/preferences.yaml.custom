@@ -10,6 +10,7 @@ style:
   segmented: true
 
 enabled:
+  AUTO_START: true
   VSI_BALL: false
   VSI_TAPE: true
 
