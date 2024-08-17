@@ -30,12 +30,35 @@ RADIO:
         rows: 70
         columns: 125
     - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      disabled: BUTTONS
       row: 0
       column: 155
+      span:
+        columns: 30
+        rows: 70
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      disabled: not BUTTONS
+      row: 0
+      column: 162.5
+      span:
+        columns: 37.5
+        rows: 70
     - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+      disabled: BUTTONS
       row: 0
       column: 125
+      span:
+        columns: 30
+        rows: 70
+    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+      disabled: not BUTTONS
+      row: 0
+      column: 125
+      span:
+        columns: 37.5
+        rows: 70
     - type: include,BUTTON_GROUP1
+      disabled: BUTTONS
       row: 0
       column: 185.5
     - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml

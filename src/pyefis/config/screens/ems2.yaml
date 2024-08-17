@@ -61,6 +61,7 @@ EMS2:
       preferences: ARC14
     -
       type: ganged_horizontal_bar_gauge
+      disabled: BUTTONS
       gang_type: vertical
       row: 0
       column: 142
@@ -74,6 +75,23 @@ EMS2:
               preferences: BAR7
             -
               preferences: BAR8
+    -
+      type: ganged_horizontal_bar_gauge
+      disabled: not BUTTONS
+      gang_type: vertical
+      row: 0
+      column: 142
+      span:
+        rows: 50
+        columns: 55
+      groups:
+        - name: Oil
+          instruments:
+            -
+              preferences: BAR7
+            -
+              preferences: BAR8
+
     -
       type: static_text
       row: 45
@@ -112,6 +130,7 @@ EMS2:
         text: FUEL
     -
       type: ganged_vertical_bar_gauge
+      disabled: BUTTONS
       gang_type: horizontal
       ratio: 0.2
       row: 51
@@ -154,8 +173,54 @@ EMS2:
               preferences: BAR20
             -
               preferences: BAR21
+    -
+      type: ganged_vertical_bar_gauge
+      disabled: not BUTTONS
+      gang_type: horizontal
+      ratio: 0.2
+      row: 51
+      column: 0
+      span:
+        rows: 50
+        columns: 200
+      groups:
+        - name: Power
+          instruments:
+            -
+              preferences: BAR9
+            -
+              preferences: BAR10
+        - name: EGT
+          instruments:
+            -
+              preferences: BAR11
+            -
+              preferences: BAR12
+            -
+              preferences: BAR13
+            -
+              preferences: BAR14
+        - name: CHT
+          instruments:
+            -
+              preferences: BAR15
+            -
+              preferences: BAR16
+            -
+              preferences: BAR17
+            -
+              preferences: BAR18
+        - name: FUEL
+          instruments:
+            -
+              preferences: BAR19
+            -
+              preferences: BAR20
+            -
+              preferences: BAR21
 
     - type: include,BUTTON_GROUP1
+      disabled: BUTTONS
       row: 0
       column: 185.5
 
