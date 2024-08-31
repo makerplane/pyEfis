@@ -1,4 +1,11 @@
 instruments:
+  - type: minimal_size
+    disabled: true
+    row: 0
+    column: 0
+    span:
+      rows: 32
+      columns: 32
   - type: numeric_display
     gang_type: horizontal
     row: 0

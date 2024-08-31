@@ -29,34 +29,6 @@ RADIO:
       span:
         rows: 45
         columns: 200
-    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
-      disabled: BUTTONS
-      row: 0
-      column: 155
-      span:
-        columns: 30
-        rows: 70
-    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
-      disabled: not BUTTONS
-      row: 0
-      column: 162.5
-      span:
-        columns: 37.5
-        rows: 70
-    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
-      disabled: BUTTONS
-      row: 0
-      column: 125
-      span:
-        columns: 30
-        rows: 70
-    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
-      disabled: not BUTTONS
-      row: 0
-      column: 125
-      span:
-        columns: 37.5
-        rows: 70
     - type: include,BUTTON_GROUP1
       disabled: BUTTONS
       row: 100
@@ -64,22 +36,29 @@ RADIO:
     - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
       row: 70
       column: 155
-    - type: include,RADIO_COMBINED
+    - type: include,RADIO_VOLUMES
+      replace:
+        radio_id: 1
+      row: 75
+      column: 0
+      span:
+        rows: 23
+        columns: 50
+    - type: include,RADIO_LISTBOX
+      row: 75
+      column: 51
+      span:
+        rows: 23
+        columns: 148
+    - type: include,RADIO_COMBINED_MINIMAL
       replace:
         radio_id: 1 # {radio_id} is replaced anywhere it appears in the included config
                     # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
       row: 45
       column: 0
-    # This only exists as an example of how to setup more than one radio interface
-    # it is disabled and non-functional bydefault
-    - type: include,RADIO_COMBINED
-      disabled: true
-      replace:
-        radio_id: 2 # {radio_id} is replaced anywhere it appears in the included config
-                    # Maybe you have two radios COMACTTX{radio_id} -> COMACTTX1
-      row: 0
-      column: 0
       span:
-        rows: 18
-        columns: 75
+        rows: 30
+        columns: 200
+
+
 
