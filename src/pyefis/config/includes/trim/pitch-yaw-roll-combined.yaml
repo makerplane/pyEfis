@@ -10,11 +10,20 @@ instruments:
     disabled: PITCH_TRIM
     row: 0
     column: 0
+    span:
+      rows: 32
+      columns: 13
   - type: include,includes/trim/roll-slider-button-control.yaml
     disabled: ROLL_TRIM
     row: 12
     column: 12
+    span:
+      rows: 10
+      columns: 29
   - type: include,includes/trim/yaw-slider-button-control.yaml
     disabled: YAW_TRIM
     row: 22
-    column: 12 
+    column: 12
+    span:
+      rows: 10
+      columns: 29 

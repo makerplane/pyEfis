@@ -1,5 +1,7 @@
-EMS2:
-  include: HMI_ENCODER_BUTTONS
+EMS:
+  include:
+  - screens/virtualvfr_db.yaml
+  - HMI_ENCODER_BUTTONS
   module: pyefis.screens.screenbuilder
   title: Engine Management New
   layout:
@@ -10,152 +12,190 @@ EMS2:
     - type: value_text
       disabled: DEMO_TESTING_TEXT
       row: 100
-      column: 95
+      column: 0
       span:
         rows: 10
-        columns: 140
+        columns: 80
       options:
         dbkey: MAVMSG
         font_percent: 0.9
-    - type: ganged_button
-      gang_type: horizontal
-      row: 103
-      column: 50
-#        move:
-#          shrink: 25
-#          justify: top
+    - type: include,includes/ahrs/virtual_vfr.yaml
+      row: 0
+      column: 75
       span:
-        rows: 4
-        columns: 45
+        rows: 70
+        columns: 125
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      disabled: BUTTONS
+      row: 0
+      column: 44.5
+      span:
+        columns: 30
+        rows: 70
+    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+      disabled: not BUTTONS
+      row: 0
+      column: 37
+      span:
+        columns: 37.5
+        rows: 70
+    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+      disabled: BUTTONS
+      row: 0
+      column: 14.5
+      span:
+        columns: 30
+        rows: 70
+    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+      disabled: not BUTTONS
+      row: 0
+      column: 14.5
+      span:
+        columns: 37.5
+        rows: 70
+    - type: include,BUTTON_GROUP1
+      disabled: BUTTONS
+      row: 0
+      column: 0
+    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
+      row: 70
+      column: 155
+    - type: include,includes/bars/vertical/4_CHT.yaml
+      row: 70
+      column: 123
+      span:
+        rows: 40
+        columns: 30
+    - type: include,includes/bars/vertical/4_EGT.yaml
+      row: 70
+      column: 91
+      span:
+        rows: 40
+        columns: 30
+    - type: ganged_button
+      #disabled: true
+      gang_type: vertical
+      row: 74
+      column: 80
+      #move:
+      #  shrink: 25
+      #  justify: top
+      span:
+        rows: 30
+        columns: 10
       groups:
         - name: Buttons
-          gap: 4
+          gap: 12
+          common_options:
+            font_mask: Normalize
           instruments:
             -
               options:
                 config: buttons/egt-Normalize.yaml
+                encoder_order: 600031
             -
               options:
                 config: buttons/egt-Lean.yaml
+                encoder_order: 600032
             -
               options:
                 config: buttons/egt-Peak.yaml
+                encoder_order: 600033
             -
               options:
                 config: buttons/egt-reset-peak.yaml
-    -
-      type: arc_gauge
-      row: 0
-      column: 15
-      span:
-        rows: 45
-        columns: 70
-      preferences: ARC13
-    -
-      type: arc_gauge
-      row: 0
-      column: 86
-      span:
-        rows: 45
-        columns: 70
-      preferences: ARC14
-    -
-      type: ganged_horizontal_bar_gauge
-      gang_type: vertical
-      row: 0
-      column: 157
-      span:
-        rows: 50
-        columns: 40
-      groups:
-        - name: Oil
-          instruments:
-            -
-              preferences: BAR7
-            -
-              preferences: BAR8
-    -
-      type: static_text
-      row: 45
-      column: 18
-      span:
-        columns: 21
-        rows: 5
-      options:
-        text: Power
-    -
-      type: static_text
-      row: 45
-      column: 67
-      span:
-        columns: 12
-        rows: 5
-      options:
-        text: EGT
-    -
-      type: static_text
-      row: 45
-      column: 124
-      span:
-        columns: 12
-        rows: 5
-      options:
-        text: CHT
-    -
-      type: static_text
-      row: 45
-      column: 174
-      span:
-        columns: 14
-        rows: 5
-      options:
-        text: FUEL
+                encoder_order: 600034
     -
       type: ganged_vertical_bar_gauge
+      disabled: DEMO_TESTING_TEXT
       gang_type: horizontal
-      ratio: 0.2
-      row: 51
-      column: 15
-      span:
-        rows: 50
-        columns: 186
-      groups:
-        - name: Power
-          instruments:
-            -
-              preferences: BAR9
-            -
-              preferences: BAR10
-        - name: EGT
-          instruments:
-            -
-              preferences: BAR11
-            -
-              preferences: BAR12
-            -
-              preferences: BAR13
-            -
-              preferences: BAR14
-        - name: CHT
-          instruments:
-            -
-              preferences: BAR15
-            -
-              preferences: BAR16
-            -
-              preferences: BAR17
-            -
-              preferences: BAR18
-        - name: FUEL
-          instruments:
-            -
-              preferences: BAR19
-            -
-              preferences: BAR20
-            -
-              preferences: BAR21
-
-    - type: include,BUTTON_GROUP1
-      row: 0
+      row: 70
       column: 0
+      span:
+        rows: 30
+        columns: 80
+      groups:
+        - name: RPM
+          gap: 0
+          instruments:
+            -
+              preferences: BAR28
+            -
+              preferences: BAR29
+        - name: Engine
+          gap: 0
+          instruments:
+            -
+              preferences: BAR22
+            -
+              preferences: BAR23
+            -
+              preferences: BAR24
+            -
+              preferences: BAR25
+            -
+              preferences: BAR26
+
+        - name: Temps
+          gap: 0
+          instruments:
+            -
+              preferences: BAR27
+    -
+      type: ganged_vertical_bar_gauge
+      disabled: not DEMO_TESTING_TEXT
+      ratio: 0.2
+      gang_type: horizontal
+      row: 72
+      column: 0
+      span:
+        rows: 38
+        columns: 80
+      groups:
+        - name: RPM
+          gap: 0
+          common_options:
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            small_font_percent: 0.060 
+            big_font_percent: 0.085   
+          instruments:
+            -
+              preferences: BAR28
+            -
+              preferences: BAR29
+        - name: Engine
+          common_options:
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+          gap: 0
+          instruments:
+            -
+              preferences: BAR22
+            -
+              preferences: BAR23
+            -
+              preferences: BAR24
+            -
+              preferences: BAR25
+            -
+              preferences: BAR26
+
+        - name: Temps
+          common_options:
+            bar_width_percent: 0.5
+            line_width_percent: 0.7
+            text_gap: 8
+            small_font_percent: 0.060
+            big_font_percent: 0.085
+          gap: 0
+          instruments:
+          gap: 0
+          instruments:
+            -
+              preferences: BAR27
 
