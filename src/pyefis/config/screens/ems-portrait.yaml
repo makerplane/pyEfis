@@ -23,69 +23,69 @@ EMS:
       row: 0
       column: 0
       span:
-        rows: 70
-        columns: 125
-    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+        rows: 45
+        columns: 200
+    - type: include,includes/arcs/horizontal/four_wide_two_states_preferences_ARC1-8.yaml
       disabled: BUTTONS
-      row: 0
-      column: 155
+      row: 45
+      column: 0
       span:
-        columns: 30
-        rows: 70
-    - type: include,includes/arcs/vertical/four_high_two_states_preferences_ARC1-8.yaml
+        columns: 195.5
+        rows: 15
+    - type: include,includes/arcs/horizontal/four_wide_two_states_preferences_ARC1-8.yaml
       disabled: not BUTTONS
-      row: 0
-      column: 162.5
+      row: 45
+      column: 0
       span:
-        columns: 37.5
-        rows: 70
-    - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
+        columns: 195.5
+        rows: 15
+    - type: include,includes/arcs/horizontal/four_wide_one_state_preferences_ARC9-12.yaml
       disabled: BUTTONS
-      row: 0
-      column: 125
+      row: 60
+      column: 0
       span:
-        columns: 30
-        rows: 70
+        columns: 195.5
+        rows: 15
     - type: include,includes/arcs/vertical/four_high_one_state_preferences_ARC9-12.yaml
       disabled: not BUTTONS
-      row: 0
-      column: 125
+      row: 60
+      column: 0
       span:
-        columns: 37.5
-        rows: 70
-    - type: include,BUTTON_GROUP1
+        columns: 195.5
+        rows: 15
+    - type: include,BUTTON_GROUP2
       disabled: BUTTONS 
-      row: 0
-      column: 185.5
-    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
-      row: 70
-      column: 155
+      row: 100
+      column: 0
+#    - type: include,includes/bars/vertical/six_wide_preferences_BAR1-6.yaml
+#      row: 75
+#      column: 0
     - type: include,includes/bars/vertical/4_CHT.yaml
-      row: 70
-      column: 123
+      row: 75
+      column: 100
       span:
-        rows: 40
-        columns: 30
+        rows: 20
+        columns: 100
     - type: include,includes/bars/vertical/4_EGT.yaml
-      row: 70
-      column: 91
+      row: 75
+      column: 0
       span:
-        rows: 40
-        columns: 30
+        rows: 20
+        columns: 100
     - type: ganged_button
       #disabled: true
-      gang_type: vertical
-      row: 74
-      column: 80
+      gang_type: horizontal
+      row: 95.5
+      column: 5
       #move:
       #  shrink: 25
       #  justify: top
       span:
-        rows: 30
-        columns: 10
+        rows: 4
+        columns: 100
       groups:
         - name: Buttons
-          gap: 12
+          gap: 2
           common_options:
             font_mask: Normalize
           instruments:
@@ -144,7 +144,7 @@ EMS:
 
     -
       type: ganged_vertical_bar_gauge
-      disabled: not DEMO_TESTING_TEXT
+      disabled: true #not DEMO_TESTING_TEXT
       ratio: 0.2
       gang_type: horizontal
       row: 72

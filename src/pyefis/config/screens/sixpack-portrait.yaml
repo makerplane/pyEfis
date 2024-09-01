@@ -1,0 +1,84 @@
+SIXPACK:
+  module: pyefis.screens.screenbuilder
+  title: Standard Instrument Panel New
+  include:
+  - HMI_ENCODER_BUTTONS
+  layout:
+    rows: 110
+    columns: 200
+    draw_grid: false
+  instruments:
+    - type: include,BUTTON_GROUP2
+      disabled: BUTTONS
+      row: 100
+      column: 0
+    -
+      type: airspeed_dial
+      row: 0
+      column: 0
+      span:
+        rows: 30
+        columns: 100
+      options:
+        bg_color: "#00000000"
+    - type: atitude_indicator
+      row: 30
+      column: 0
+      span:
+        rows: 30
+        columns: 100
+    -
+      type: altimeter_dial
+      row: 0
+      column: 100
+      span:
+        rows: 30
+        columns: 100
+      options:
+        altitude: true
+    -
+      type: turn_coordinator
+      row: 30
+      column: 100
+      span:
+        rows: 30
+        columns: 100
+    - 
+      type: horizontal_situation_indicator
+      row: 64
+      column: 0
+      span:
+        rows: 30
+        columns: 100
+      move:
+        shrink: 11
+        justify:
+          - bottom
+      options:
+        gsi_enabled: true
+        cdi_enabled: true
+        font_percent: 0.07
+    -
+      type: heading_display
+      column: 40
+      row: 60
+      span:
+        rows: 5
+        columns: 14
+    -
+      type: vsi_dial
+      row: 64
+      column: 100
+      span:
+        rows: 30
+        columns: 100
+    - type: value_text
+      disabled: DEMO_TESTING_TEXT
+      row: 100
+      column: 60
+      span:
+        rows: 10
+        columns: 140
+      options:
+        dbkey: MAVMSG
+        font_percent: 0.9

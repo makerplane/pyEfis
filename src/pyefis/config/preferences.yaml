@@ -116,15 +116,17 @@ includes:
   SCREENS_CONFIG: screens/default_list.yaml
   # The include for the main navigations buttons:
   BUTTON_GROUP1: includes/buttons/vertical/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+  BUTTON_GROUP2: includes/buttons/horizontal/screen_changing_PFD-EMS-EMS2-ANDROID-RADIO-SIXPACK-Units.yaml
+
   # The include for the encoder button control feature
   HMI_ENCODER_BUTTONS: hmi/encoder_input.yaml
   # The screen config files to load for the various default screens:
-  SCREEN_SIXPACK: screens/sixpack.yaml
-  SCREEN_ANDROID: screens/android.yaml
-  SCREEN_PFD: screens/pfd.yaml
-  SCREEN_RADIO: screens/radio.yaml
-  SCREEN_EMS: screens/ems.yaml
-  SCREEN_EMS2: screens/ems2.yaml
+  SCREEN_SIXPACK: screens/sixpack.yaml       # screens/sixpack-portrait.yaml
+  SCREEN_ANDROID: screens/android.yaml       # screens/android-portrait.yaml
+  SCREEN_PFD: screens/pfd.yaml               # screens/pfd-portrait.yaml
+  SCREEN_RADIO: screens/radio.yaml           # screens/radio-portrait.yaml
+  SCREEN_EMS: screens/ems.yaml               # screens/ems-portrait.yaml
+  SCREEN_EMS2: screens/ems2.yaml             # screens/ems2-portrait.yaml
   # Include file for logging configuration
   LOGGING_CONFIG: logging/stderr-info.yaml
   # File that defines what lists are included in the radio listbox
@@ -132,7 +134,8 @@ includes:
   RADIO_ACTIVE: includes/mgl/v16/square-active-radio-display.yaml
   RADIO_STANDBY: includes/mgl/v16/square-standby-radio-display.yaml
   RADIO_VOLUMES: includes/mgl/v16/radio-volumes-controls-display.yaml
-  RADIO_COMBINED: includes/mgl/v16/rectangle-radio-volume-primary-secondary-display.yaml
+  RADIO_COMBINED_MINIMAL: includes/mgl/v16/rectangle-radio-primary-secondary-display.yaml
+  RADIO_COMBINED: includes/mgl/v16/rectangle-radio-volume-primary-secondary-listbox-display.yaml
 
 #  columns: 35 for square
 #  29 + 35 = 64

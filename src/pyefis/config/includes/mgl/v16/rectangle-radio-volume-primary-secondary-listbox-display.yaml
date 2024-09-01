@@ -30,12 +30,15 @@ instruments:
   - type: include,RADIO_ACTIVE
     row: 5
     column: 28
-#    span:
-#      rows: 27
-#      columns: 42
+    span:
+      rows: 27
+      columns: 42
   - type: include,RADIO_STANDBY
     row: 5
     column: 64
+    span:
+      rows: 27
+      columns: 42
   - type: button
     row: 26
     column: 64

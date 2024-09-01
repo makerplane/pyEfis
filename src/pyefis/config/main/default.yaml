@@ -23,6 +23,10 @@
   #screenWidth: 1920
   #screenHeight: 1080
 
+  # portrait testing
+  #screenHeight: 960
+  #screenWidth: 540
+
   # Set EFIS to occupy the entire screen without system border / menu
   screenFullSize: True
 

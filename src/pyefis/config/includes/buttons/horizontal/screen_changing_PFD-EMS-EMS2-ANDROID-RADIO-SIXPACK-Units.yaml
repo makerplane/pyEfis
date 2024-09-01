@@ -1,0 +1,39 @@
+instruments:
+  - type: ganged_button
+    gang_type: horizontal
+    row: 0
+    column: 0
+    span:
+      rows: 9
+      columns: 200
+    groups:
+      - name: Side Buttons
+        gap: 1
+        common_options:
+            font_mask: "ANDROID"
+        instruments:
+          -
+            options:
+              config: buttons/screen-ems-pfd.yaml
+              encoder_order: 100011
+          -
+            options:
+              config: buttons/screen-ems2-pfd.yaml
+              encoder_order: 100012
+          -
+            options:
+              config: buttons/screen-android-pfd.yaml
+              encoder_order: 100013
+          -
+            options:
+              config: buttons/screen-radio-pfd.yaml
+              encoder_order: 100014
+          -
+            options:
+              config: buttons/screen-sixpack-pfd.yaml
+              encoder_order: 100015
+          -
+            options:
+              config: buttons/units.yaml
+              encoder_order: 100016
+

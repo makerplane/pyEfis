@@ -1,0 +1,55 @@
+instruments:
+  - type: minimal_size
+    disabled: true
+    row: 0
+    column: 0
+    span:
+      rows: 37
+      columns: 67
+  - type: static_text
+    row: 0
+    column: 0
+    span:
+      rows: 5
+      columns: 27
+    preferences: TEXT3
+    options:
+      text: "Active:"
+      font_mask: "XXXXXXX:"
+      alignment: AlignLeft
+  - type: static_text
+    row: 0
+    column: 35
+    span:
+      rows: 5
+      columns: 27
+    preferences: TEXT4
+    options:
+      text: "Standby:"
+      font_mask: "XXXXXXX:"
+      alignment: AlignLeft
+  - type: include,RADIO_ACTIVE
+    row: 5
+    column: 0
+    span:
+      rows: 32
+      columns: 32
+  - type: include,RADIO_STANDBY
+    row: 5
+    column: 35
+    span:
+      rows: 32
+      columns: 32
+  - type: button
+    row: 26
+    column: 35
+    span:
+      rows: 6
+      columns: 6
+    #move:
+    #  shrink: 14
+    options:
+      config: buttons/mgl/v16/swap-active-standby.yaml
+      font_mask: "SWAP"
+      encoder_order: 400026
+
