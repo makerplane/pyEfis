@@ -45,6 +45,8 @@ RADIO:
         rows: 23
         columns: 50
     - type: include,RADIO_LISTBOX
+      replace:
+        radio_id: 1
       row: 75
       column: 51
       span:

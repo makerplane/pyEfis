@@ -41,7 +41,7 @@ def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8, numeric
             else:
                 break
         font_size = font_size * factor
-    return font_size
+    return font_size * 0.98
 
 
 
