@@ -53,7 +53,7 @@ EMS:
       span:
         columns: 195.5
         rows: 15
-    - type: include,BUTTON_GROUP1
+    - type: include,BUTTON_GROUP2
       disabled: BUTTONS 
       row: 100
       column: 0

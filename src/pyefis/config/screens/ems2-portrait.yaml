@@ -233,7 +233,7 @@ EMS2:
             -
               preferences: BAR21
 
-    - type: include,BUTTON_GROUP1
+    - type: include,BUTTON_GROUP2
       disabled: BUTTONS
       row: 100
       column: 0

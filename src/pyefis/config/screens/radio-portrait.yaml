@@ -29,7 +29,7 @@ RADIO:
       span:
         rows: 45
         columns: 200
-    - type: include,BUTTON_GROUP1
+    - type: include,BUTTON_GROUP2
       disabled: BUTTONS
       row: 100
       column: 0
