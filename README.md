@@ -44,7 +44,7 @@
 | src/pyefis/screens/pfd.py                               |      123 |      123 |       14 |        0 |      0% |    17-224 |
 | src/pyefis/screens/pfd\_sm.py                           |      108 |      108 |       14 |        0 |      0% |    17-169 |
 | src/pyefis/screens/r582\_sm.py                          |       98 |       98 |       36 |        0 |      0% |    17-210 |
-| src/pyefis/screens/screenbuilder.py                     |      700 |      700 |      442 |        0 |      0% |    17-956 |
+| src/pyefis/screens/screenbuilder.py                     |      719 |      719 |      450 |        0 |      0% |    17-978 |
 | src/pyefis/screens/sixpack.py                           |       53 |       53 |        2 |        0 |      0% |     17-88 |
 | src/pyefis/screens/test.py                              |       21 |       21 |        2 |        0 |      0% |     17-48 |
 | src/pyefis/user/\_\_init\_\_.py                         |        0 |        0 |        0 |        0 |    100% |           |
@@ -53,7 +53,7 @@
 | src/pyefis/user/hooks/keys.py                           |       19 |       19 |        4 |        0 |      0% |     20-53 |
 | src/pyefis/user/screens/\_\_init\_\_.py                 |        0 |        0 |        0 |        0 |    100% |           |
 | src/pyefis/version.py                                   |        2 |        0 |        0 |        0 |    100% |           |
-|                                               **TOTAL** | **7276** | **3288** | **2244** |  **115** | **50%** |           |
+|                                               **TOTAL** | **7295** | **3307** | **2252** |  **115** | **50%** |           |
 
 
 ## Setup coverage badge
