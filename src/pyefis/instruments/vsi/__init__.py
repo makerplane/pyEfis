@@ -16,9 +16,9 @@
 
 import time
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 
 import pyavtools.fix as fix
@@ -30,7 +30,7 @@ class VSI_Dial(QWidget):
         super(VSI_Dial, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.fontSize = fontsize
         self._roc = 0
         self.maxRange = 2000
@@ -53,14 +53,14 @@ class VSI_Dial(QWidget):
         f.setPixelSize(fs)
         fm = QFontMetrics(f)
         p = QPainter(self.background)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setFont(f)
-        pen = QPen(QColor(Qt.white))
+        pen = QPen(QColor(Qt.GlobalColor.white))
         pen.setWidth(2)
         p.setPen(pen)
         self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
 
-        p.fillRect(0, 0, self.width(), self.height(), Qt.black)
+        p.fillRect(0, 0, self.width(), self.height(), Qt.GlobalColor.black)
         p.drawEllipse(self.center, self.r, self.r)
 
         # Draw tick marks and text
@@ -72,7 +72,7 @@ class VSI_Dial(QWidget):
         textRect = QRectF(-40, -self.r + self.fontSize, 80, self.fontSize + 10)
         textRInv = QRectF(40, self.r - self.fontSize, -80, -self.fontSize - 10)
 
-        pixelsWide = fm.width("0")
+        pixelsWide = fm.horizontalAdvance("0")
         pixelsHigh = fm.height()
         p.translate(self.center)
         p.save()
@@ -85,9 +85,9 @@ class VSI_Dial(QWidget):
                             - pixelsHigh / 2)
         p.setTransform(transform)
         p.drawText(0, 0, pixelsWide, pixelsHigh,
-                   Qt.AlignCenter, '0')
+                   Qt.AlignmentFlag.AlignCenter, '0')
 
-        pixelsWide = fm.width("2.0")
+        pixelsWide = fm.horizontalAdvance("2.0")
         transform = QTransform()
         transform.translate(p.device().width() / 2,
                             p.device().height() / 2)
@@ -95,7 +95,7 @@ class VSI_Dial(QWidget):
                             - pixelsHigh / 2)
         p.setTransform(transform)
         p.drawText(0, 0, pixelsWide, pixelsHigh,
-                   Qt.AlignCenter, '2.0')
+                   Qt.AlignmentFlag.AlignCenter, '2.0')
 
         p.restore()
         p.rotate(-90)
@@ -104,7 +104,7 @@ class VSI_Dial(QWidget):
             if each % 5 == 0:
                 p.drawLine(longLine)
                 if each != 20:
-                    p.drawText(textRect, Qt.AlignCenter,
+                    p.drawText(textRect, Qt.AlignmentFlag.AlignCenter,
                                str(each))
             else:
                 p.drawLine(shortLine)
@@ -116,7 +116,7 @@ class VSI_Dial(QWidget):
                 p.drawLine(longLine)
                 if each != 20:
                     p.scale(-1.0, -1.0)
-                    p.drawText(textRInv, Qt.AlignCenter,
+                    p.drawText(textRInv, Qt.AlignmentFlag.AlignCenter,
                                str(each))
                     p.scale(-1.0, -1.0)
             else:
@@ -126,10 +126,10 @@ class VSI_Dial(QWidget):
         w = self.width()
         h = self.height()
         dial = QPainter(self)
-        dial.setRenderHint(QPainter.Antialiasing)
+        dial.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Draw the Black Background
-        dial.fillRect(0, 0, w, h, Qt.black)
+        dial.fillRect(0, 0, w, h, Qt.GlobalColor.black)
 
         # Insert Background
         dial.drawPixmap(0, 0, self.background)
@@ -139,24 +139,24 @@ class VSI_Dial(QWidget):
         f.setPixelSize(self.fontSize)
 
         if self.item.old or self.item.bad:
-            warn_font = QFont(self.font_family, 30, QFont.Bold)
-            dialPen = QPen(QColor(Qt.gray))
-            dialBrush = QBrush(QColor(Qt.gray))
+            warn_font = QFont(self.font_family, 30, QFont.Weight.Bold)
+            dialPen = QPen(QColor(Qt.GlobalColor.gray))
+            dialBrush = QBrush(QColor(Qt.GlobalColor.gray))
         else:
-            dialPen = QPen(QColor(Qt.white))
-            dialBrush = QBrush(QColor(Qt.white))
+            dialPen = QPen(QColor(Qt.GlobalColor.white))
+            dialBrush = QBrush(QColor(Qt.GlobalColor.white))
         dialPen.setWidth(2)
         dial.setPen(dialPen)
         dial.setFont(f)
         dial.setBrush(dialBrush)
 
         if self.item.fail:
-            warn_font = QFont(self.font_family, 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Weight.Bold)
             dial.resetTransform()
-            dial.setPen (QPen(QColor(Qt.red)))
-            dial.setBrush (QBrush(QColor(Qt.red)))
+            dial.setPen (QPen(QColor(Qt.GlobalColor.red)))
+            dial.setBrush (QBrush(QColor(Qt.GlobalColor.red)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "XXX")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "XXX")
             return
 
         # Needle Movement
@@ -175,13 +175,13 @@ class VSI_Dial(QWidget):
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "BAD")
         elif self.item.old:
             dial.resetTransform()
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "OLD")
         """
 
 
@@ -201,7 +201,7 @@ class VSI_PFD(QWidget):
         super(VSI_PFD, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.font_family = font_family
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.fontSize = int(self.width() * font_percent)
         self.font_mask = "1000"
         self.marks = [(500,"500"),(1000,"1000"),(1500,"1500"),(2000,"2000")]
@@ -219,7 +219,7 @@ class VSI_PFD(QWidget):
         h = self.height()
         # We use a pixmap for the static background
         self.background = QPixmap(self.width(), self.height())
-        self.background.fill(Qt.transparent)
+        self.background.fill(Qt.GlobalColor.transparent)
         f = QFont(self.font_family)
         if self.font_mask:
             self.fontSize = helpers.fit_to_mask(self.width()*.60,self.height()*0.05,self.font_mask,self.font_family)
@@ -228,13 +228,13 @@ class VSI_PFD(QWidget):
             f.setPixelSize(self.fontSize)
         fm = QFontMetrics(f)
         p = QPainter(self.background)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setFont(f)
-        pen = QPen(QColor(Qt.white))
+        pen = QPen(QColor(Qt.GlobalColor.white))
         pen.setWidth(int(self.width() * 0.03))
         p.setPen(pen)
-        p.setBrush(QColor(Qt.white))
-        pixelsWidth = fm.width("0000")
+        p.setBrush(QColor(Qt.GlobalColor.white))
+        pixelsWidth = fm.horizontalAdvance("0000")
         pixelsHigh = fm.height()
 
         # find max
@@ -246,7 +246,7 @@ class VSI_PFD(QWidget):
 
         def drawMark(y, s):
             p.drawLine(0, qRound(y), qRound(w-pixelsWidth*1.5), qRound(y))
-            p.drawText(0, qRound(y - pixelsHigh/2), qRound(w-2), qRound(y + pixelsHigh/2), Qt.AlignRight, s)
+            p.drawText(0, qRound(y - pixelsHigh/2), qRound(w-2), qRound(y + pixelsHigh/2), Qt.AlignmentFlag.AlignRight, s)
 
         drawMark(h/2, "0")
         for mark in self.marks:
@@ -260,7 +260,7 @@ class VSI_PFD(QWidget):
         w = self.width()
         h = self.height()
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Draw the Black Background
         p.fillRect(0, 0, w, h, QColor(0,0,0,40))
@@ -277,12 +277,12 @@ class VSI_PFD(QWidget):
             else:
                 y = h/2 + (abs(self._value)**self.scaleRoot / self.max**self.scaleRoot) * self.dy
                 if y > h: y = h
-            p.setPen(Qt.magenta)
-            p.setBrush(Qt.magenta)
+            p.setPen(Qt.GlobalColor.magenta)
+            p.setBrush(Qt.GlobalColor.magenta)
             p.drawEllipse(QRectF(2,y-int(dot_size/2),dot_size,dot_size))
         except ZeroDivisionError:
-            p.setPen(Qt.gray)
-            p.setBrush(Qt.gray)
+            p.setPen(Qt.GlobalColor.gray)
+            p.setBrush(Qt.GlobalColor.gray)
             p.drawEllipse(QRectF(2,h/2,dot_size,dot_size))
 
     def getValue(self):
@@ -310,10 +310,10 @@ class AS_Trend_Tape(QGraphicsView):
         super(AS_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._airspeed = 0
         self._airspeed_diff = 0
         self._airspeed_trend = []
@@ -323,13 +323,13 @@ class AS_Trend_Tape(QGraphicsView):
         w = self.width()
         h = self.height()
         self.pph = 10
-        self.zeroPen = QPen(QColor(Qt.white))
+        self.zeroPen = QPen(QColor(Qt.GlobalColor.white))
         self.zeroPen.setWidth(4)
 
         self.scene = QGraphicsScene(0, 0, w, h)
 
         self.scene.addRect(0, 0, w, h,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+                           QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.black)))
 
         self.scene.addLine(0, h / 2,
                            w, h / 2,
@@ -340,7 +340,7 @@ class AS_Trend_Tape(QGraphicsView):
     def redraw(self):
         self.scene.clear()
         self.scene.addRect(0, 0, self.width(), self.height(),
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+                           QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.black)))
 
         self.scene.addLine(0, self.height() / 2,
                            self.width(), self.height() / 2,
@@ -355,7 +355,7 @@ class AS_Trend_Tape(QGraphicsView):
         self.scene.addRect(self.width() / 2, self.height() / 2,
                            self.width() / 2 + 5,
                            self._airspeed_diff * -self.pph,
-                           QPen(QColor(Qt.white)), QBrush(QColor(Qt.white)))
+                           QPen(QColor(Qt.GlobalColor.white)), QBrush(QColor(Qt.GlobalColor.white)))
 
         self.setScene(self.scene)
 
@@ -383,10 +383,10 @@ class Alt_Trend_Tape(QGraphicsView):
         super(Alt_Trend_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.item = fix.db.get_item("VS")
         self._vs = self.item.value
@@ -419,17 +419,17 @@ class Alt_Trend_Tape(QGraphicsView):
         self.scene = QGraphicsScene(0, 0, w, h)
         self.scene.setFont(f)
         self.scene.addRect(0, 0, self.width(), h,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+                           QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.black)))
         t = self.scene.addText("VSI")
         t.setFont(f)
-        t.setDefaultTextColor(QColor(Qt.white))
+        t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
         t.setX(0)
         t.setY(0)
         y = t.boundingRect().height() * .6
 
         self.vstext = self.scene.addText(str(self._vs))
         self.vstext.setFont(bf)
-        self.vstext.setDefaultTextColor(QColor(Qt.white))
+        self.vstext.setDefaultTextColor(QColor(Qt.GlobalColor.white))
         self.vstext.setX(0)
         self.vstext.setY(y)
         self.setVsText()
@@ -439,14 +439,14 @@ class Alt_Trend_Tape(QGraphicsView):
 
         self.pph = float(remaining_height) / (self.maxvs * 2)
 
-        tapePen = QPen(QColor(Qt.white))
+        tapePen = QPen(QColor(Qt.GlobalColor.white))
         for i in range(self.maxvs, -self.maxvs - 1, -100):
             y = self.y_offset(i)
             if i % 200 == 0:
                 self.scene.addLine(w_2 + 5, y, w, y, tapePen)
                 t = self.scene.addText(str(int(i / 100)))
                 t.setFont(f)
-                t.setDefaultTextColor(QColor(Qt.white))
+                t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                 t.setX(0)
                 t.setY(y - t.boundingRect().height() / 2)
             else:
@@ -485,8 +485,8 @@ class Alt_Trend_Tape(QGraphicsView):
                 self.indicator_line = None
         elif self.indicator_line is None:
             self.indicator_line = self.scene.addRect(x, top, width, height,
-                                                     QPen(QColor(Qt.white)),
-                                                     QBrush(QColor(Qt.white)))
+                                                     QPen(QColor(Qt.GlobalColor.white)),
+                                                     QBrush(QColor(Qt.GlobalColor.white)))
         else:
             self.indicator_line.setRect(x, top, width, height)
         self.setVsText()
@@ -501,7 +501,7 @@ class Alt_Trend_Tape(QGraphicsView):
     def setVsText(self):
         if self._fail:
             self.vstext.setPlainText("XXX")
-            self.vstext.setDefaultTextColor (QColor(Qt.red))
+            self.vstext.setDefaultTextColor (QColor(Qt.GlobalColor.red))
         elif self._bad:
             self.vstext.setPlainText("")
             self.vstext.setDefaultTextColor (QColor(255, 150, 0))
@@ -510,7 +510,7 @@ class Alt_Trend_Tape(QGraphicsView):
             self.vstext.setDefaultTextColor (QColor(255, 150, 0))
         else:
             self.vstext.setPlainText(str(int(self._vs)))
-            self.vstext.setDefaultTextColor (QColor(Qt.white))
+            self.vstext.setDefaultTextColor (QColor(Qt.GlobalColor.white))
 
     def getBad(self):
         return self._bad

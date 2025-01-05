@@ -39,9 +39,9 @@ classifiers = [
 dependencies = [
     "geopy==2.4.1",
 # Until this revision is published to PyPy get it from git:
-    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@ae79ef3a971d62cc43cedcfb5f303ced2dd09fbf",
+    "pyavtools @ git+https://github.com/e100/pyAvTools/@0fe16fa52cd00baf11403b782305ab4c4d2dba24",
     "pycond==20230212",
-    "PyQt5==5.15.10",
+    "PyQt6==6.8.0",
     "PyYAML==6.0.1",
 ]
 
@@ -59,7 +59,7 @@ Source = "https://github.com/makerplane/pyEfis"
 
 
 [tool.pytest.ini_options]
-qt_api="pyqt5"
+qt_api="pyqt6"
 env = [
   "QT_QPA_PLATFORM = offscreen:size=1000x1000"
 #  "QT_QPA_PLATFORM = xcb:size=1000,1000"

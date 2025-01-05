@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 from pyefis.instruments import ai
 from pyefis.instruments import weston
@@ -922,7 +922,7 @@ class GridOverlay(QWidget):
     def __init__(self, parent=None,layout=None):
         super(GridOverlay, self).__init__(parent)
         self.layout = layout
-        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WindowType.WindowType.WidgetAttribute.WA_TransparentForMouseEvents)
         self.Font = QFont()
 
     def paintEvent(self,event):
@@ -946,8 +946,8 @@ class GridOverlay(QWidget):
         grid_x = leftm# + grid_width)
         grid_y = topm# + grid_height)
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setPen(QPen(Qt.red,1))
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(QPen(Qt.GlobalColor.red,1))
         self.Font.setPixelSize(qRound(grid_height*5))
         painter.setFont(self.Font)
         x = 0
@@ -958,7 +958,7 @@ class GridOverlay(QWidget):
             if (x) % 10 == 0:
                 painter.setPen(QPen(QColor("#9900ff00"),3))
                 self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
-                painter.drawText(self.textRect, str(x),QTextOption(Qt.AlignCenter))
+                painter.drawText(self.textRect, str(x),QTextOption(Qt.AlignmentFlag.AlignCenter))
                 painter.setPen(QPen(QColor("#99ff0000"),3))
             painter.drawLine(qRound(grid_x), qRound(grid_y), qRound(grid_x), self.height())
             x += 5
@@ -971,7 +971,7 @@ class GridOverlay(QWidget):
                 if y > 0:
                     painter.setPen(QPen(QColor("#9900ff00"),3))
                     self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
-                    painter.drawText(self.textRect, str(y),QTextOption(Qt.AlignCenter))
+                    painter.drawText(self.textRect, str(y),QTextOption(Qt.AlignmentFlag.AlignCenter))
 
                 painter.setPen(QPen(QColor("#99ff0000"),3))
             painter.drawLine(qRound(grid_x), qRound(grid_y), self.width(),  qRound(grid_y))

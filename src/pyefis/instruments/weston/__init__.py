@@ -1,6 +1,6 @@
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 import subprocess
 import time
 import re
@@ -35,8 +35,8 @@ class Weston(QWidget):
                 m = re.fullmatch(r'^.*(0x[0-9a-f]+) \"Weston Compositor - .*', line)
                 if m:
                     win = QWindow.fromWinId(int(m.group(1), 16))
-                    win.setFlag(Qt.FramelessWindowHint, True)
-                    wid = QWidget.createWindowContainer(win, self, Qt.FramelessWindowHint)
+                    win.setFlag(Qt.WindowType.FramelessWindowHint, True)
+                    wid = QWidget.createWindowContainer(win, self, Qt.WindowType.FramelessWindowHint)
                     self.layout().addWidget(wid)
                     loop_count = loop_limit + 1
                     break

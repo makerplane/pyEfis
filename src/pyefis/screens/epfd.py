@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import pyavtools.fix as fix
 
@@ -110,12 +110,12 @@ class CheckEngine(QGraphicsView):
     def __init__(self, parent=None):
         super(CheckEngine, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.fontSize = 30
-        font = QFont("FixedSys", 10, QFont.Bold)
+        font = QFont("FixedSys", 10, QFont.Weight.Bold)
         self.text = "Check Engine"
         t = QGraphicsSimpleTextItem (self.text)
         t.setFont (font)
@@ -124,8 +124,8 @@ class CheckEngine(QGraphicsView):
         self.resize(qRound(self.w), qRound(self.h))
         self.scene = QGraphicsScene(0, 0, self.w, self.h)
         t = self.scene.addSimpleText (self.text, font)
-        t.setPen(QPen(QColor(Qt.red)))
-        t.setBrush(QBrush(QColor(Qt.red)))
+        t.setPen(QPen(QColor(Qt.GlobalColor.red)))
+        t.setBrush(QBrush(QColor(Qt.GlobalColor.red)))
         self.setScene(self.scene)
         self.fix_items = None
         self.hide()

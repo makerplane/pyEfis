@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import pyavtools.fix as fix
 from pyefis.instruments import helpers
@@ -31,7 +31,7 @@ class StaticText(QWidget):
         self,
         text="",
         fontsize=1.0,
-        color=QColor(Qt.white),
+        color=QColor(Qt.GlobalColor.white),
         parent=None,
         font_family="DejaVu Sans Condensed",
     ):
@@ -58,15 +58,15 @@ class StaticText(QWidget):
 
     def paintEvent(self, event):
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         pen = QPen()
         pen.setWidth(1)
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         p.setPen(pen)
 
         # Draw Text
-        self.align = getattr(Qt, self.alignment)
+        self.align = getattr(Qt.AlignmentFlag, self.alignment)
         opt = QTextOption(self.align)
         p.setFont(self.Font)
         if self.font_ghost_mask:
@@ -100,20 +100,20 @@ class ValueDisplay(QWidget):
         self.conversionFunction = lambda x: x
 
         # These properties can be modified by the parent
-        self.outlineColor = QColor(Qt.darkGray)
+        self.outlineColor = QColor(Qt.GlobalColor.darkGray)
         # These are the colors that are used when the value's
         # quality is marked as good
-        self.bgGoodColor = QColor(Qt.black)
-        self.textGoodColor = QColor(Qt.white)
-        self.highlightGoodColor = QColor(Qt.magenta)
+        self.bgGoodColor = QColor(Qt.GlobalColor.black)
+        self.textGoodColor = QColor(Qt.GlobalColor.white)
+        self.highlightGoodColor = QColor(Qt.GlobalColor.magenta)
 
         # These colors are used for bad and fail
-        self.bgBadColor = QColor(Qt.black)
-        self.textBadColor = QColor(Qt.gray)
-        self.highlightBadColor = QColor(Qt.darkMagenta)
+        self.bgBadColor = QColor(Qt.GlobalColor.black)
+        self.textBadColor = QColor(Qt.GlobalColor.gray)
+        self.highlightBadColor = QColor(Qt.GlobalColor.darkMagenta)
 
         # Annunciate changes the text color
-        self.textAnnunciateColor = QColor(Qt.red)
+        self.textAnnunciateColor = QColor(Qt.GlobalColor.red)
 
         # The following properties should not be changed by the user.
         # These are the colors that are actually used
@@ -137,16 +137,16 @@ class ValueDisplay(QWidget):
 
     def paintEvent(self, event):
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         pen = QPen()
         pen.setWidth(int(self.height() * 0.01))
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         p.setPen(pen)
 
         # Draw Value
         p.setFont(self.font)
-        self.align = getattr(Qt, self.alignment)
+        self.align = getattr(Qt.AlignmentFlag, self.alignment)
         opt = QTextOption(self.align)
         if self.font_ghost_mask:
             alpha = self.textColor.alpha()

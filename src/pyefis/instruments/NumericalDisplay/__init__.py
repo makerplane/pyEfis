@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 
 class NumericalDisplay(QGraphicsView):
@@ -31,10 +31,10 @@ class NumericalDisplay(QGraphicsView):
         super(NumericalDisplay, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.scroll_decimal = scroll_decimal
         self.total_decimals = total_decimals
         self.f = QFont(font_family, font_size)
@@ -73,10 +73,10 @@ class NumericalDisplay(QGraphicsView):
         self.scene = QGraphicsScene(0, 0, self.w, self.h)
         border_width = 1
         top = (self.h - font_height) / 2
-        rect_pen = QPen(QColor(Qt.white))
+        rect_pen = QPen(QColor(Qt.GlobalColor.white))
         rect_pen.setWidth(border_width)
         self.scene.addRect(
-            0, top, self.w, font_height, rect_pen, QBrush(QColor(Qt.black))
+            0, top, self.w, font_height, rect_pen, QBrush(QColor(Qt.GlobalColor.black))
         )
         self.setScene(self.scene)
         self.scrolling_area = NumericalScrollDisplay(
@@ -93,8 +93,8 @@ class NumericalDisplay(QGraphicsView):
         if self._bad or self._old:
             prest = ""
         self.pre_scroll_text = self.scene.addSimpleText(prest, self.f)
-        self.pre_scroll_text.setPen(QPen(QColor(Qt.white)))
-        self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
+        self.pre_scroll_text.setPen(QPen(QColor(Qt.GlobalColor.white)))
+        self.pre_scroll_text.setBrush(QBrush(QColor(Qt.GlobalColor.white)))
 
         self.pre_scroll_text.setX(0)
         self.pre_scroll_text.setY((self.h - font_height) / 2.0)
@@ -113,12 +113,12 @@ class NumericalDisplay(QGraphicsView):
         # Get a failure scene ready in case it's needed
         self.fail_scene = QGraphicsScene(0, 0, self.w, self.h)
         self.fail_scene.addRect(
-            0, 0, self.w, self.h, QPen(QColor(Qt.white)), QBrush(QColor(50, 50, 50))
+            0, 0, self.w, self.h, QPen(QColor(Qt.GlobalColor.white)), QBrush(QColor(50, 50, 50))
         )
-        warn_font = QFont(self.font_family, 10, QFont.Bold)
+        warn_font = QFont(self.font_family, 10, QFont.Weight.Bold)
         t = self.fail_scene.addSimpleText("XXX", warn_font)
-        t.setPen(QPen(QColor(Qt.red)))
-        t.setBrush(QBrush(QColor(Qt.red)))
+        t.setPen(QPen(QColor(Qt.GlobalColor.red)))
+        t.setBrush(QBrush(QColor(Qt.GlobalColor.red)))
         r = t.boundingRect()
         t.setPos((self.w - r.width()) / 2, (self.h - r.height()) / 2)
 
@@ -176,7 +176,7 @@ class NumericalDisplay(QGraphicsView):
             self.pre_scroll_text.setText("")
             self.scrolling_area.hide()
         else:
-            self.pre_scroll_text.setBrush(QBrush(QColor(Qt.white)))
+            self.pre_scroll_text.setBrush(QBrush(QColor(Qt.GlobalColor.white)))
             self.redraw()
             self.scrolling_area.show()
 
@@ -227,10 +227,10 @@ class NumericalScrollDisplay(QGraphicsView):
     def __init__(self, parent=None, scroll_decimal=1, font_family="Sans", font_size=10):
         super(NumericalScrollDisplay, self).__init__()
         self.setStyleSheet("border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.scroll_decimal = scroll_decimal
         self.f = QFont(font_family, font_size)
         self._value = 0
@@ -247,7 +247,7 @@ class NumericalScrollDisplay(QGraphicsView):
         nsh = self.digit_vertical_spacing * 12 + self.h
         self.scene = QGraphicsScene(0, 0, self.w, nsh)
         self.scene.addRect(
-            0, 0, self.w, nsh, QPen(QColor(Qt.black)), QBrush(QColor(Qt.black))
+            0, 0, self.w, nsh, QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.black))
         )
         for i in range(20):
             y = self.y_offset(i) - font_height / 2
@@ -259,8 +259,8 @@ class NumericalScrollDisplay(QGraphicsView):
                 text = text + "0" * add0s
             t = self.scene.addSimpleText(text, self.f)
             t.setX(2)
-            t.setPen(QPen(QColor(Qt.white)))
-            t.setBrush(QBrush(QColor(Qt.white)))
+            t.setPen(QPen(QColor(Qt.GlobalColor.white)))
+            t.setBrush(QBrush(QColor(Qt.GlobalColor.white)))
             t.setY(y)
         for i in range(9, 0, -1):
             sv = i - 10
@@ -272,8 +272,8 @@ class NumericalScrollDisplay(QGraphicsView):
                 add0s = self.scroll_decimal - len(text)
                 text = text + "0" * add0s
             t = self.scene.addSimpleText(text, self.f)
-            t.setPen(QPen(QColor(Qt.white)))
-            t.setBrush(QBrush(QColor(Qt.white)))
+            t.setPen(QPen(QColor(Qt.GlobalColor.white)))
+            t.setBrush(QBrush(QColor(Qt.GlobalColor.white)))
             t.setX(2)
             t.setY(y)
         self.setScene(self.scene)

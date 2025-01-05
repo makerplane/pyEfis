@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 
 from .abstract import AbstractGauge
@@ -62,16 +62,16 @@ class HorizontalBar(AbstractGauge):
 
     def paintEvent(self, event):
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen()
         pen.setWidth(1)
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         #pen.setColor(self.textColor)
         #p.setPen(pen)
         p.setFont(self.smallFont)
         if self.show_name: 
             if self.name_font_ghost_mask:
-                opt = QTextOption(Qt.AlignLeft)
+                opt = QTextOption(Qt.AlignmentFlag.AlignLeft)
                 alpha = self.textColor.alpha()
                 self.textColor.setAlpha(self.font_ghost_alpha)
                 pen.setColor(self.textColor)
@@ -84,7 +84,7 @@ class HorizontalBar(AbstractGauge):
 
         # Units
         p.setFont(self.unitsFont)
-        opt = QTextOption(Qt.AlignRight)
+        opt = QTextOption(Qt.AlignmentFlag.AlignRight)
         if self.show_units: 
             if self.units_font_ghost_mask:
                 alpha = self.textColor.alpha()
@@ -101,7 +101,7 @@ class HorizontalBar(AbstractGauge):
         p.setFont(self.bigFont)
         #pen.setColor(self.valueColor)
         #p.setPen(pen)
-        opt = QTextOption(Qt.AlignLeft | Qt.AlignBottom)
+        opt = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
         if self.show_value: 
             if self.font_ghost_mask:
                 alpha = self.valueColor.alpha()
@@ -115,7 +115,7 @@ class HorizontalBar(AbstractGauge):
             p.drawText(self.valueTextRect, self.valueText, opt)
 
         # Draws the bar
-        p.setRenderHint(QPainter.Antialiasing, False)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
         pen.setColor(self.safeColor)
         brush = self.safeColor
         p.setPen(pen)
@@ -151,16 +151,16 @@ class HorizontalBar(AbstractGauge):
         if self.segments > 0:
             segment_gap = self.width() * self.segment_gap_percent
             segment_size = (self.width() - (segment_gap * (self.segments - 1)))/self.segments
-            p.setRenderHint(QPainter.Antialiasing, False)
-            pen.setColor(Qt.black)
+            p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            pen.setColor(Qt.GlobalColor.black)
             p.setPen(pen)
-            p.setBrush(Qt.black)
+            p.setBrush(Qt.GlobalColor.black)
             for segment in range(self.segments - 1):
                 seg_left = ((segment + 1) * segment_size) + (segment * segment_gap)
                 p.drawRect(QRectF(seg_left, self.barTop, segment_gap, self.barHeight))
 
         # Indicator Line
-        pen.setColor(QColor(Qt.darkGray))
+        pen.setColor(QColor(Qt.GlobalColor.darkGray))
         brush = QBrush(self.penColor)
         pen.setWidth(1)
         p.setPen(pen)
