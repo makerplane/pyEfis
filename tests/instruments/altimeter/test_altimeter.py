@@ -1,9 +1,9 @@
 import pytest
 from unittest import mock
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, qRound
-from PyQt5.QtGui import QColor, QBrush, QPen, QFont, QPainter, QPaintEvent, QFontMetrics
-from PyQt5 import QtGui
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt, qRound
+from PyQt6.QtGui import QColor, QBrush, QPen, QFont, QPainter, QPaintEvent, QFontMetrics
+from PyQt6 import QtGui
 from pyefis.instruments import altimeter
 import pyefis.hmi as hmi
 from tests.utils import track_calls
@@ -30,19 +30,19 @@ def test_altimeter(fix,qtbot):
     qtbot.waitExposed(widget)
     with track_calls(QPen, "setColor") as tracker:
         widget.paintEvent(None)
-        assert tracker.was_called_with("setColor",QColor(Qt.white))
+        assert tracker.was_called_with("setColor",QColor(Qt.GlobalColor.white))
         fix.db.get_item("ALT").bad = True
         widget.paintEvent(None)
-        assert tracker.was_called_with("setColor",QColor(Qt.gray))
+        assert tracker.was_called_with("setColor",QColor(Qt.GlobalColor.gray))
         fix.db.get_item("ALT").bad = False
         fix.db.get_item("ALT").old = True
         widget.paintEvent(None)
-        assert tracker.was_called_with("setColor",QColor(Qt.gray))
+        assert tracker.was_called_with("setColor",QColor(Qt.GlobalColor.gray))
         fix.db.get_item("ALT").old = False
         fix.db.get_item("ALT").fail = True
         with track_calls(QPainter, "setBrush") as tracker2:
             widget.paintEvent(None)
-            assert tracker2.was_called_with("setBrush",QBrush(QColor(Qt.red)))
+            assert tracker2.was_called_with("setBrush",QBrush(QColor(Qt.GlobalColor.red)))
 
 def test_altimeter_unit_switching(fix,qtbot):
     hmi.initialize({})

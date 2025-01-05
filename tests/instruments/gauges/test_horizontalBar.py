@@ -1,8 +1,8 @@
 import pytest
 from unittest import mock
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, qRound
-from PyQt5.QtGui import QColor, QBrush, QPen, QFont, QPaintEvent, QFontMetrics
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt, qRound
+from PyQt6.QtGui import QColor, QBrush, QPen, QFont, QPaintEvent, QFontMetrics
 from pyefis.instruments import gauges
 import pyefis.hmi as hmi
 from tests.utils import track_calls
@@ -68,4 +68,4 @@ def test_horizontal_bar_gauge(fix, qtbot):
     with track_calls(QPen, "setColor") as tracker:
         widget.paintEvent(None)
 
-    assert tracker.was_called_with("setColor", QColor(Qt.black))
+    assert tracker.was_called_with("setColor", QColor(Qt.GlobalColor.black))

@@ -58,15 +58,17 @@ class NumericalDisplay(QGraphicsView):
             self.font_size -= 0.1
             self.f.setPointSizeF(self.font_size)
             t.setFont(self.f)
-            font_width = t.boundingRect().width()
-            font_height = t.boundingRect().height()
+            rect = t.boundingRect()
+            font_width = rect.width()
+            font_height = rect.height()
 
         while font_width * (self.total_decimals) <= self.w - 0.1:
             self.font_size += 0.1
             self.f.setPointSizeF(self.font_size)
             t.setFont(self.f)
-            font_width = t.boundingRect().width()
-            font_height = t.boundingRect().height()
+            rect = t.boundingRect()
+            font_width = rect.width()
+            font_height = rect.height()
         self.font_size = qRound(self.font_size)
         self.f = QFont(self.font_family, self.font_size)
 
