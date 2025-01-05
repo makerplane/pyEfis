@@ -223,9 +223,9 @@ class Button(QWidget):
                 # Send press even while true, send release event when false
                 # Physical button would need to only set True while button is pressed, then set to False when released
                 if self._dbkey.value:
-                    event = QMouseEvent(QEvent.Type.MouseButtonPress, QPoint(0,0), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier);
+                    event = QMouseEvent(QEvent.Type.MouseButtonPress, QPointF(0,0), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier);
                 else:
-                    event = QMouseEvent(QEvent.Type.MouseButtonRelease, QPoint(0,0), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier);
+                    event = QMouseEvent(QEvent.Type.MouseButtonRelease, QPointF(0,0), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier);
                 QApplication.sendEvent(self._button, event);
 
     def showEvent(self,event):

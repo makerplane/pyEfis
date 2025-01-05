@@ -98,7 +98,7 @@ class Altimeter(QWidget):
         while count < 360:
             if count % 36 == 0:
                 dial.drawLine(0, -(radius), 0, -(radius - 15))
-                x = fontMetrics.width(str(altimeter_numbers)) / 2
+                x = fontMetrics.horizontalAdvance(str(altimeter_numbers)) / 2
                 y = f.pixelSize()
                 dial.drawText(
                     qRound(-x), qRound(-(radius - 15 - y)), str(altimeter_numbers)
