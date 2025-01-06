@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt6.QtGui import *
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QColor, QTextOption
+from PyQt6.QtCore import Qt, QTimer, qRound, QRectF
+from PyQt6.QtWidgets import QWidget
 
 from pyefis.instruments import ai
 from pyefis.instruments import weston
@@ -46,13 +46,13 @@ import yaml
 from operator import itemgetter
 import time
 
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-funcTempF = lambda x: x * (9.0/5.0) + 32.0 
+funcTempF = lambda x: x * (9.0/5.0) + 32.0
 funcTempC = lambda x: x
 
-funcPressHpa = lambda x: x * 33.863889532610884 
+funcPressHpa = lambda x: x * 33.863889532610884
 funcPressInHg = lambda x: x
 
 funcAltitudeMeters = lambda x: x / 3.28084
@@ -585,7 +585,7 @@ class Screen(QWidget):
         if inst == 'heading_display':
             return {'font_size': 17}
         
-        return false
+        return False
 
     def get_grid_margins(self):
         topm = 0
