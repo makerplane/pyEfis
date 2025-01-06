@@ -14,16 +14,14 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt6.QtGui import *
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QColor
+from PyQt6.QtCore import QObject, pyqtSignal, QEvent, QCoreApplication
+from PyQt6.QtWidgets import QMainWindow, QApplication, QWidget
 
 import time
 import importlib
 import logging
 import sys
-import os
-from pyefis import hooks
 from pyefis import hmi
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
@@ -33,6 +31,8 @@ screens = []
 # This class is just a structure to hold information about a single
 # screen that will be loaded.
 class Screen(QObject):
+
+
     screenShow = pyqtSignal()
     screenHide = pyqtSignal()
 
@@ -60,7 +60,7 @@ class Main(QMainWindow):
     keyRelease = pyqtSignal(QEvent)
     windowShow = pyqtSignal(QEvent)
     windowClose = pyqtSignal(QEvent)
-    #change_asd_mode = pyqtSignal(QEvent)
+    # change_asd_mode = pyqtSignal(QEvent)
 
     def __init__(self, config, config_path, preferences, parent=None):
         super(Main, self).__init__(parent)
@@ -68,7 +68,7 @@ class Main(QMainWindow):
         self.config_path = config_path
         self.screenWidth = int(config["main"].get("screenWidth", False))
         self.screenHeight = int(config["main"].get("screenHeight", False))
-        if not ( self.screenWidth and self.screenHeight ):
+        if not(self.screenWidth and self.screenHeight):
             # screenWidth and screenHeight are not defined in the config file
             # go full screen
             pscreen = QApplication.primaryScreen()
@@ -86,15 +86,15 @@ class Main(QMainWindow):
 
         p = w.palette()
         if self.screenColor:
-             p.setColor(w.backgroundRole(), QColor(self.screenColor))
-             w.setPalette(p)
-             w.setAutoFillBackground(True)
+            p.setColor(w.backgroundRole(), QColor(self.screenColor))
+            w.setPalette(p)
+            w.setAutoFillBackground(True)
         # Init the variable to prvent exception in getRunningScreen()
         self.running_screen = None
         for idx, scr in enumerate(screens):
 
             scr.object = scr.module.Screen(self)
-            setattr(scr.object,'screenName',scr.name)
+            setattr(scr.object, 'screenName', scr.name)
             log.debug("Loading Screen {0}".format(scr.name))
             # TODO Figure out how to have different size screens
             scr.object.resize(self.width(), self.height())
@@ -207,7 +207,7 @@ def setDefaultScreen(s):
     return found
 
 
-def initialize(config,config_path,preferences):
+def initialize(config, config_path, preferences):
     global mainWindow
     global log
     log = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ def initialize(config,config_path,preferences):
 
     setDefaultScreen(d)
 
-    mainWindow = Main(config,config_path,preferences)
+    mainWindow = Main(config, config_path, preferences)
     hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)
     hmi.actions.showPrevScreen.connect(mainWindow.showPrevScreen)
     hmi.actions.showScreen.connect(mainWindow.showScreen)
@@ -242,14 +242,14 @@ def initialize(config,config_path,preferences):
 
     if 'FMS' in config:
         sys.path.insert(0, config["FMS"]["module_dir"])
-        ui = importlib.import_module ("qtui")
+        ui = importlib.import_module("qtui")
         uiwidget = ui.FMSUI(config["FMS"]["flight_plan_dir"], mainWindow)
         ui_width = 1000
         if 'ui_width' in config['FMS']:
             ui_width = config['FMS']['ui_width']
-        uiwidget.resize (ui_width, 65)
-        uiwidget.move (30, 32)
-        menu.register_target ("FMS", uiwidget)
+        uiwidget.resize(ui_width, 65)
+        uiwidget.move(30, 32)
+        menu.register_target("FMS", uiwidget)
 
     screen = bool(config["main"]["screenFullSize"])
     if screen:
