@@ -6,6 +6,8 @@ import time
 import re
 import os
 
+from Xlib import X, display
+
 class Weston(QWidget):
     def __init__(self, parent=None, socket=None, ini=None, command=None, args=None, wide=None, high=None):
         super(Weston, self).__init__(parent)
@@ -37,6 +39,23 @@ class Weston(QWidget):
                     win = QWindow.fromWinId(int(m.group(1), 16))
                     win.setFlag(Qt.WindowType.FramelessWindowHint, True)
                     wid = QWidget.createWindowContainer(win, self, Qt.WindowType.FramelessWindowHint)
+                    self.layout().addWidget(wid)
+
+                    # Get X11 Window ID and parent container
+                    x11_window_id = int(win.winId())
+                    container_id = int(wid.winId())
+
+                    dpy = display.Display()
+                    x11_window = dpy.create_resource_object('window', x11_window_id)
+                    container_window = dpy.create_resource_object('window', container_id)
+                    x11_window.reparent(container_window, 0, 0)
+
+                    # Map (show) the window
+                    x11_window.map()
+
+                    # Flush X server requests
+                    dpy.flush()
+
                     self.layout().addWidget(wid)
                     loop_count = loop_limit + 1
                     break

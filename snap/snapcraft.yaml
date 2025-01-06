@@ -95,6 +95,7 @@ parts:
       craftctl default
       craftctl set version=$(python3 src/pyefis/version.py)
     stage-packages:
+      - python3-xlib
       - libxcb-cursor0
       - libqt6core6
       - libqt6qml6
