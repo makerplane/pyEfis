@@ -30,8 +30,8 @@ screens = []
 
 # This class is just a structure to hold information about a single
 # screen that will be loaded.
-class Screen(QObject):
 
+class Screen(QObject):
 
     screenShow = pyqtSignal()
     screenHide = pyqtSignal()
@@ -68,7 +68,7 @@ class Main(QMainWindow):
         self.config_path = config_path
         self.screenWidth = int(config["main"].get("screenWidth", False))
         self.screenHeight = int(config["main"].get("screenHeight", False))
-        if not(self.screenWidth and self.screenHeight):
+        if not (self.screenWidth and self.screenHeight):
             # screenWidth and screenHeight are not defined in the config file
             # go full screen
             pscreen = QApplication.primaryScreen()
@@ -98,7 +98,7 @@ class Main(QMainWindow):
             log.debug("Loading Screen {0}".format(scr.name))
             # TODO Figure out how to have different size screens
             scr.object.resize(self.width(), self.height())
-            scr.object.move(0,0)
+            scr.object.move(0, 0)
             if scr.default:
                 scr.show()
                 self.running_screen = idx
@@ -106,11 +106,10 @@ class Main(QMainWindow):
                 scr.hide()
                 # This is to force screen builder to parse its configs now
                 # instead of waiting to do so just before it is first shown.
-                # Without this the user will often see a delay when navigating 
+                # Without this the user will often see a delay when navigating
                 # to a screen for the first time
                 if callable(getattr(scr.object, 'initScreen', None)):
                     scr.object.initScreen()
-
 
     def showScreen(self, scr):
         found = None
@@ -267,7 +266,7 @@ def initialize(config, config_path, preferences):
 
     def button_timeout_reset():
         if not button_key.value:
-            #When set to False reset timer    
+            # When set to False reset timer
             button_timer.start()
 
     if config['main'].get('button_timeout', False):
@@ -280,5 +279,3 @@ def initialize(config, config_path, preferences):
         button_key = fix.db.get_item('HIDEBUTTON')
         button_timer.add_callback(button_timeout)
         button_key.valueWrite[bool].connect(button_timeout_reset)
-
-

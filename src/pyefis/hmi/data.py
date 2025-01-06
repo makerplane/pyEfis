@@ -14,8 +14,6 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt6.QtGui import *
-from PyQt6.QtCore import *
 
 import operator
 import logging
@@ -28,11 +26,11 @@ __bindings = []
 
 
 class DataBinding(object):
-    __COMPARE_FUNCTIONS = {"=":operator.eq,
-                           "<":operator.lt,
-                           "<=":operator.le,
-                           ">":operator.gt,
-                           ">=":operator.ge}
+    __COMPARE_FUNCTIONS = {"=": operator.eq,
+                           "<": operator.lt,
+                           "<=": operator.le,
+                           ">": operator.gt,
+                           ">=": operator.ge}
 
     def __init__(self, config):
         self.key = config['key']
@@ -51,7 +49,7 @@ class DataBinding(object):
 
         if 'args' in config:
             self.args = str(config['args'])
-        if self.args == None: self.args = ""
+        if self.args is None: self.args = ""
         if self.args.lower() == "<value>":
             self.args = None
 
@@ -60,7 +58,7 @@ class DataBinding(object):
 
         # If we are unconditionally sending the value then we need to send
         # an initial one here in case the receiver needs it.
-        if self.args == None and self.compare == None:
+        if self.args is None and self.compare is None:
             hmi.actions.trigger(self.action, str(self.item.value))
 
         self.item.valueChanged[self.item.dtype].connect(self.changeFunctionFactory())
@@ -71,7 +69,7 @@ class DataBinding(object):
             cfunc = self.__COMPARE_FUNCTIONS[self.compare]
 
         def actionTrigger(value):
-            if self.args == None:
+            if self.args is None:
                 hmi.actions.trigger(self.action, str(value))
             else:
                 hmi.actions.trigger(self.action, self.args)
@@ -84,7 +82,7 @@ class DataBinding(object):
             else:
                 self.lastResult = False
 
-        if self.compare == None:
+        if self.compare is None:
             return actionTrigger
         else:
             return compareFunction
@@ -95,10 +93,10 @@ class DataBinding(object):
             self.value = condition
             self.compare = "="
         else:
-            s = condition.replace(" ","")
+            s = condition.replace(" ", "")
             op = ""
             val = ""
-            for x,c in enumerate(s):
+            for x, c in enumerate(s):
                 if c in "=><":
                     op += c
                 else:
@@ -119,7 +117,7 @@ class DataBinding(object):
 
 
 def initialize(config):
-    if config == None: return
+    if config is None: return
     for x in config:
         try:
             d = DataBinding(x)
