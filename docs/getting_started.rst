@@ -4,7 +4,9 @@ Getting Started
 
 pyEfis is an Electronic Flight Information System written in Python.
 
-It was created for use in the MakerPlane Open Source Aircraft Project.
+It was created for use in the MakerPlane Open Source Aircraft Project, and the
+first target platform is the Raspberry Pi, although any other similar system
+could be used.
 
 It does not have any method of reading flight information directly from the
 hardware but instead uses FIX Gateway as it's source of information.  FIX
