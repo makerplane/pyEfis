@@ -1,8 +1,8 @@
 import pytest
 from unittest import mock
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QBrush
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QBrush
 from pyefis.instruments.NumericalDisplay import NumericalDisplay
 
 
@@ -38,7 +38,7 @@ def test_numerical_display_default(qtbot):
 def test_numerical_display_decimals(qtbot):
     widget = NumericalDisplay(total_decimals=5, scroll_decimal=2, font_size=20)
     qtbot.addWidget(widget)
-    widget.resize(80, 50)
+    widget.resize(100, 80)
     widget.show()
     widget.setValue(val=1234)
     qtbot.waitExposed(widget)
@@ -69,7 +69,7 @@ def test_numerical_display_decimals(qtbot):
 
     widget.setBad(False)
     widget.setValue(val=54321)
-    assert widget.pre_scroll_text.brush() == QBrush(QColor(Qt.white))
+    assert widget.pre_scroll_text.brush() == QBrush(QColor(Qt.GlobalColor.white))
 
     widget.setValue(val=-5432)
     assert widget.pre_scroll_text.text() == "-54"

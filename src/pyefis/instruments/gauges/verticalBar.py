@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 
 from .abstract import AbstractGauge
@@ -37,13 +37,13 @@ class VerticalBar(AbstractGauge):
         self.text_gap = 3
         self.small_font_percent = 0.08
         self.big_font_percent = 0.10
-        self.normalizePenColor = QColor(Qt.blue)
+        self.normalizePenColor = QColor(Qt.GlobalColor.blue)
         self.normalize_range = 0
         self.normalizeReference = 0
         self._normalizeMode = False
         self.peakValue = 0.0
         self._peakMode = False
-        self.peakColor = QColor(Qt.magenta)
+        self.peakColor = QColor(Qt.GlobalColor.magenta)
         self._oldpencolor = self.pen_good_color
         self.segments = 0
         self.segment_gap_percent = 0.012
@@ -146,10 +146,10 @@ class VerticalBar(AbstractGauge):
         self.ballCenter = QPointF(self.barLeft + (self.barWidth / 2), self.barBottom - (self.barWidth/2))
 
     def drawValue(self, p, pen):
-        value_align = Qt.AlignCenter
+        value_align = Qt.AlignmentFlag.AlignCenter
         p.setFont(self.bigFont)
         if self.font_ghost_mask:
-            value_align = Qt.AlignRight
+            value_align = Qt.AlignmentFlag.AlignRight
             alpha = self.valueColor.alpha()
             self.valueColor.setAlpha(self.font_ghost_alpha)
             pen.setColor(self.valueColor)
@@ -168,16 +168,16 @@ class VerticalBar(AbstractGauge):
                 self.highlight = False
 
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         pen = QPen()
         pen.setWidth(1)
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         p.setPen(pen)
-        opt = QTextOption(Qt.AlignCenter)
+        opt = QTextOption(Qt.AlignmentFlag.AlignCenter)
         if self.show_name:
             if self.name_font_ghost_mask:
-                opt = QTextOption(Qt.AlignLeft)
+                opt = QTextOption(Qt.AlignmentFlag.AlignLeft)
                 alpha = self.textColor.alpha()
                 self.textColor.setAlpha(self.font_ghost_alpha)
                 pen.setColor(self.textColor)
@@ -204,13 +204,13 @@ class VerticalBar(AbstractGauge):
                 # Draw Value
                 self.drawValue(p, pen)
 
-        opt = QTextOption(Qt.AlignCenter)
+        opt = QTextOption(Qt.AlignmentFlag.AlignCenter)
         pen.setColor(self.textColor)
         p.setPen(pen)
         if self.show_units:
             # Units
             if self.units_font_mask:
-                opt = QTextOption(Qt.AlignRight)
+                opt = QTextOption(Qt.AlignmentFlag.AlignRight)
                 p.setFont(self.unitsFont)
                 if self.units_font_ghost_mask:
                     alpha = self.textColor.alpha()
@@ -228,7 +228,7 @@ class VerticalBar(AbstractGauge):
                 p.drawText(self.unitsTextRect, self.units, opt)
 
         # Draws the bar
-        p.setRenderHint(QPainter.Antialiasing, False)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
         pen.setColor(self.safeColor)
         brush = self.safeColor
         p.setPen(pen)
@@ -268,16 +268,16 @@ class VerticalBar(AbstractGauge):
         if self.segments > 0:
             segment_gap = self.barHeight * self.segment_gap_percent
             segment_size = (self.barHeight - (segment_gap * (self.segments - 1)))/self.segments
-            p.setRenderHint(QPainter.Antialiasing, False)
-            pen.setColor(Qt.black)
+            p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            pen.setColor(Qt.GlobalColor.black)
             p.setPen(pen)
-            p.setBrush(Qt.black)
+            p.setBrush(Qt.GlobalColor.black)
             for segment in range(self.segments - 1):
                 seg_top = self.barTop + ((segment + 1) * segment_size) + (segment * segment_gap)
                 p.drawRect(QRectF(self.barLeft, seg_top, self.barWidth, segment_gap))
         # Highlight Ball
         if self.highlight:
-            pen.setColor(Qt.black)
+            pen.setColor(Qt.GlobalColor.black)
             pen.setWidth(1)
             p.setPen(pen)
             p.setBrush(self.highlightColor)
@@ -286,7 +286,7 @@ class VerticalBar(AbstractGauge):
 
         # Draw Peak Value Line and text
         if self.peakMode:
-            pen.setColor(QColor(Qt.white))
+            pen.setColor(QColor(Qt.GlobalColor.white))
             brush = QBrush(self.peakColor)
             pen.setWidth(1)
             p.setPen(pen)
@@ -306,13 +306,13 @@ class VerticalBar(AbstractGauge):
         pen.setWidth(1)
         p.setBrush(brush)
         if self.normalizeMode and self.normalize_range > 0:
-            pen.setColor(QColor(Qt.gray))
+            pen.setColor(QColor(Qt.GlobalColor.gray))
             p.setPen(pen)
             nval = self._value - self.normalizeReference
             start = self.barTop + self.barHeight / 2
             x = start - (nval * self.barHeight / self.normalize_range)
         else:
-            pen.setColor(QColor(Qt.darkGray))
+            pen.setColor(QColor(Qt.GlobalColor.darkGray))
             p.setPen(pen)
             x = self.barTop + (self.barHeight - self.interpolate(self._value, self.barHeight))
         if x < self.barTop: x = self.barTop

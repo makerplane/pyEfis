@@ -42,11 +42,11 @@ test: init
 .PHONY: test
 
 clean:
-	rm -rfI venv
-	rm -fI extras/extras/test_results/*.html
-	rm -fI extras/extras/test_results/*.png
-	rm -rfI extras/extras/test_results/htmlcov/
-	rm -f init-build.marker
-	rm -f init.marker
-	rm -f venv.marker
+	rm -rfI venv || true
+	rm -fI extras/extras/test_results/*.html || true
+	rm -fI extras/extras/test_results/*.png || true
+	rm -rfI extras/extras/test_results/htmlcov/ || true
+	rm -f init-build.marker || true
+	rm -f init.marker || true
+	rm -f venv.marker || true
 .PHONY: clean

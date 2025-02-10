@@ -1,9 +1,9 @@
 import pytest
 import warnings
 from unittest import mock
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
 
 from pyefis.instruments.misc import StaticText, ValueDisplay
 import os
@@ -20,7 +20,7 @@ def app(qtbot):
 def test_save_screenshot(fix, qtbot, request):
     widget1 = StaticText(text="Testing!")
     widget1.font_mask = "XXXXXXXX"
-    widget1.color = QColor(Qt.black)
+    widget1.color = QColor(Qt.GlobalColor.black)
     widget1.move(0, 0)
     widget1.resize(100, 50)
     qtbot.addWidget(widget1)
@@ -43,7 +43,7 @@ def test_static_text_default(fix, qtbot):
 
     assert widget.text == "Testing!"
     assert widget.font_family == "DejaVu Sans Condensed"
-    assert widget.color == QColor(Qt.white)
+    assert widget.color == QColor(Qt.GlobalColor.white)
     widget.resizeEvent(None)
     widget.paintEvent(None)
     widget.show()

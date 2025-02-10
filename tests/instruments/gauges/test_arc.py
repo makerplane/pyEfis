@@ -1,8 +1,8 @@
 import pytest
 from unittest import mock
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QBrush, QPen, QPaintEvent, QFontMetrics
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QBrush, QPen, QPaintEvent, QFontMetrics
 from pyefis.instruments import gauges
 import pyefis.hmi as hmi
 from tests.utils import track_calls
@@ -60,15 +60,15 @@ def test_arc_gauge(fix,qtbot):
     with track_calls(QPen, "setColor") as tracker:
         widget.paintEvent(None)
 
-    assert tracker.was_called_with("setColor", QColor(Qt.black))
+    assert tracker.was_called_with("setColor", QColor(Qt.GlobalColor.black))
     assert tracker.was_called_with("setColor", QColor(0, 0, 0, widget.segment_alpha))
 
     widget.name_font_ghost_mask = "0000"
-    with track_calls(QFontMetrics, "width") as tracker:
+    with track_calls(QFontMetrics, "horizontalAdvance") as tracker:
         with track_calls(QColor, "setAlpha") as tracker2:
             widget.paintEvent(None)
 
-    assert tracker.was_called_with("width", "0000")
+    assert tracker.was_called_with("horizontalAdvance", "0000")
     assert tracker2.was_called_with("setAlpha", widget.font_ghost_alpha)
     widget.name_location = "top"
     widget.paintEvent(None)
@@ -81,12 +81,12 @@ def test_arc_gauge(fix,qtbot):
     widget.paintEvent(None)
 
     # widget.units_font_mask = None
-    with track_calls(QFontMetrics, "width") as tracker:
+    with track_calls(QFontMetrics, "horizontalAdvance") as tracker:
         widget.paintEvent(None)
-        assert tracker.was_called_with("width", widget.units_font_mask)
+        assert tracker.was_called_with("horizontalAdvance", widget.units_font_mask)
         widget.units_font_mask = None
         widget.paintEvent(None)
-        assert tracker.was_called_with("width", widget.units)
+        assert tracker.was_called_with("horizontalAdvance", widget.units)
 
         with track_calls(QColor, "setAlpha") as tracker2:
             widget.units_font_ghost_mask = "0000"

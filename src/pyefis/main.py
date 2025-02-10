@@ -21,8 +21,8 @@ import sys, os
 import logging
 import logging.config
 import argparse
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 import yaml
 import importlib
@@ -240,7 +240,7 @@ def main():
     hooks.initialize(config['hooks'])
 
     # Main program loop
-    result = app.exec_()
+    result = app.exec()
 
     # Clean up and get out
     fix.stop()

@@ -89,27 +89,28 @@ parts:
   pyefis:
     plugin: python
     source: .
-    # Use the OS provided pyqt5 to reduce build issues
+    # Use the OS provided pyqt6 to reduce build issues
     override-build: |
-      sed -i 's/"PyQt5==5.15.10",//' pyproject.toml
+      sed -i 's/"PyQt6==6.8.0",//' pyproject.toml
       craftctl default
       craftctl set version=$(python3 src/pyefis/version.py)
     stage-packages:
-      - libqt5core5t64
-      - libqt5qml5
-      - libqt5qmlmodels5
-      - libqt5quick5
-      - libqt5svg5
-      - libqt5waylandclient5
-      - libqt5waylandcompositor5
-      - libqt5x11extras5
+      - python3-xlib
+      - libxcb-cursor0
+      - libqt6core6
+      - libqt6qml6
+      - libqt6qmlmodels6
+      - libqt6quick6
+      - libqt6svg6
+      - libqt6waylandclient6
+      - libqt6waylandcompositor6
       - python3.12-minimal
       - libpython3.12-minimal
       - libpython3.12-stdlib
       - python3-venv
       - python3-minimal
       - python3-pkg-resources
-      - python3-pyqt5
+      - python3-pyqt6
       - x11-utils
       - weston
       - fonts-dejavu-core
@@ -183,7 +184,7 @@ apps:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
-      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/ 
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins/ 
 
   server:
     command-chain:
@@ -204,7 +205,7 @@ apps:
       PATH: $SNAP/bin:$SNAP/usr/bin:$SNAP/usr/local/bin:$PATH
       PYTHONPATH: $SNAP/lib/python3.12/site-packages:$SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
       QT_QPA_PLATFORM: xcb
-      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt5/plugins/
+      QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins/
 
   makecifpindex:
     command: bin/makecifpindex

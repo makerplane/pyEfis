@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 from pyefis.instruments import gauges
 from pyefis.instruments import misc
@@ -278,18 +278,18 @@ class Screen(QWidget):
         # self.hobbs.name = "Hobbs"
         # self.hobbs.decimal_places = 1
         # self.hobbs.dbkey = "HOBBS1"
-        # self.hobbs.alignment = Qt.AlignRight | Qt.AlignVCenter
+        # self.hobbs.alignment = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
         # self.hobbs.show_units = True
         # self.hobbs.small_font_percent = 0.6
         #
         # self.oatlabel = misc.StaticText("OAT", parent=self)
-        # self.oatlabel.alignment = Qt.AlignLeft | Qt.AlignVCenter
+        # self.oatlabel.alignment = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         #
         # self.oat = gauges.NumericDisplay(self)
         # self.oat.name = "OAT"
         # self.oat.decimal_places = 1
         # self.oat.dbkey = "OAT"
-        # self.oat.alignment = Qt.AlignLeft | Qt.AlignVCenter
+        # self.oat.alignment = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         # self.oat.conversionFunction1 = lambda x: x * (9.0/5.0) + 32.0
         # self.oat.conversionFunction2 = lambda x: x
         # self.oat.unitsOverride1 = u'\N{DEGREE SIGN}F'

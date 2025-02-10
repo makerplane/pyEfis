@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 
 from .abstract import AbstractGauge
@@ -29,8 +29,8 @@ class NumericDisplay(AbstractGauge):
     def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(NumericDisplay, self).__init__(parent)
         self.font_family = font_family
-        self.alignment = Qt.AlignLeft | Qt.AlignVCenter
-        self.unitsAlignment = Qt.AlignRight  | Qt.AlignVCenter
+        self.alignment = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        self.unitsAlignment = Qt.AlignmentFlag.AlignRight  | Qt.AlignmentFlag.AlignVCenter
         self.show_units = False
         self.small_font_percent = 0.4
 
@@ -44,7 +44,7 @@ class NumericDisplay(AbstractGauge):
         self.smallFont = QFont(self.font_family)
         self.smallFont.setPointSizeF(qRound(self.font_size * self.small_font_percent))
         qm = QFontMetrics(self.smallFont)
-        unitsWidth = qm.width(self.units)
+        unitsWidth = qm.horizontalAdvance(self.units)
 
         if self.show_units:
             # TODO Edit to get the units closer to the value 
@@ -56,17 +56,17 @@ class NumericDisplay(AbstractGauge):
 
     def paintEvent(self, event):
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         pen = QPen()
         pen.setWidth(1)
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         p.setPen(pen)
 
         # Draw Value
         p.setFont(self.bigFont)
         opt = QTextOption(self.alignment)
-        opt.setWrapMode(QTextOption.NoWrap)
+        opt.setWrapMode(QTextOption.WrapMode.NoWrap)
         if self.font_ghost_mask:
             alpha = self.valueColor.alpha()
             self.valueColor.setAlpha(self.font_ghost_alpha)

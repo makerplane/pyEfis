@@ -1,8 +1,8 @@
 import pytest
 from unittest import mock
-from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtCore import Qt, qRound
-from PyQt5.QtGui import QColor, QBrush, QPen, QFont, QPaintEvent, QFontMetrics
+from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtCore import Qt, qRound
+from PyQt6.QtGui import QColor, QBrush, QPen, QFont, QPaintEvent, QFontMetrics
 from pyefis.instruments import button
 import pyefis.hmi as hmi
 from tests.utils import track_calls
@@ -39,10 +39,10 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     assert widget._button.isCheckable() == False
     fix.db.get_item("HIDEBUTTON").value = True
     assert widget._title == "Show\nMenu"
-    qtbot.mouseClick(widget._button, Qt.LeftButton)
+    qtbot.mouseClick(widget._button, Qt.MouseButton.LeftButton)
     assert widget._title == "Units"
     with qtbot.waitSignal(hmi.actions.setInstUnits, timeout=2000):
-        qtbot.mouseClick(widget._button, Qt.LeftButton)
+        qtbot.mouseClick(widget._button, Qt.MouseButton.LeftButton)
     widget.enc_highlight(True)
     assert widget._style['bg_override'] == QColor('orange')
     with qtbot.waitSignal(hmi.actions.setInstUnits, timeout=2000):
@@ -173,7 +173,7 @@ def test_repeat_button(fix,mock_parent_widget,qtbot):
     assert widget._button.autoRepeatInterval() == 200
     baro = fix.db.get_item("BARO")
     before = baro.value
-    qtbot.mouseClick(widget._button, Qt.LeftButton)
+    qtbot.mouseClick(widget._button, Qt.MouseButton.LeftButton)
     assert baro.value == before + 0.01
     before = baro.value
     fix.db.get_item("TSBTN13").value = True

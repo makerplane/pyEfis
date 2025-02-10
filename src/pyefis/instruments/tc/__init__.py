@@ -15,9 +15,9 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import math
 import pyavtools.fix as fix
@@ -35,7 +35,7 @@ class TurnCoordinator(QWidget):
         else:
             pass
             #self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
         if filter_depth:
@@ -65,15 +65,15 @@ class TurnCoordinator(QWidget):
         self.background = QPixmap(self.width(), self.height())
 
         p = QPainter(self.background)
-        p.setRenderHint(QPainter.Antialiasing)
-        pen = QPen(QColor(Qt.white))
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        pen = QPen(QColor(Qt.GlobalColor.white))
         pen.setWidth(2)
-        brush = QBrush(QColor(Qt.white))
+        brush = QBrush(QColor(Qt.GlobalColor.white))
         p.setPen(pen)
         self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
         self.r = min(self.width(), self.height()) * .45
 
-        p.fillRect(0, 0, self.width(), self.height(), Qt.black)
+        p.fillRect(0, 0, self.width(), self.height(), Qt.GlobalColor.black)
         if self.render_as_dial:
             p.drawEllipse(self.center, self.r, self.r)
 
@@ -108,7 +108,7 @@ class TurnCoordinator(QWidget):
                       qRound(self.boxTop + self.boxHeight)))
         p.drawRect(rect)
         # vertical black lines on TC
-        pen.setColor(QColor(Qt.black))
+        pen.setColor(QColor(Qt.GlobalColor.black))
         pen.setWidth(3)
         p.setPen(pen)
         ball_rad = self.boxHeight / 2
@@ -128,7 +128,7 @@ class TurnCoordinator(QWidget):
     def paintEvent(self, event):
 
         p = QPainter(self)
-        #p.setRenderHint(QPainter.Antialiasing)
+        #p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Just to make it a bit easier
         thickness = self.tick_thickness
@@ -136,19 +136,19 @@ class TurnCoordinator(QWidget):
 
         # Insert Background
         if not self.render_as_dial:
-            p.setCompositionMode(QPainter.CompositionMode_ColorDodge)
+            p.setCompositionMode(QPainter.CompositionMode.CompositionMode_ColorDodge)
         p.drawPixmap(0, 0, self.background)
 
         # Draw TC Ball
-        p.setCompositionMode(QPainter.CompositionMode_SourceOver)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         ball_rad = self.boxHeight / 2
         if self.alat_item.bad or self.alat_item.old:
-            pen = QPen(QColor(Qt.gray))
-            brush = QBrush(QColor(Qt.gray))
+            pen = QPen(QColor(Qt.GlobalColor.gray))
+            brush = QBrush(QColor(Qt.GlobalColor.gray))
         else:
-            pen = QPen(QColor(Qt.black))
-            brush = QBrush(QColor(Qt.black))
+            pen = QPen(QColor(Qt.GlobalColor.black))
+            brush = QBrush(QColor(Qt.GlobalColor.black))
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)
@@ -165,12 +165,12 @@ class TurnCoordinator(QWidget):
         center = QPointF(centerball,
                          self.boxTop + ball_rad)
         if self.alat_item.fail:
-            warn_font = QFont(self.font_family, qRound(self.boxHeight), QFont.Bold)
-            p.setPen (QPen(QColor(Qt.red)))
-            p.setBrush (QBrush(QColor(Qt.red)))
+            warn_font = QFont(self.font_family, qRound(self.boxHeight), QFont.Weight.Bold)
+            p.setPen (QPen(QColor(Qt.GlobalColor.red)))
+            p.setBrush (QBrush(QColor(Qt.GlobalColor.red)))
             p.setFont (warn_font)
             p.drawText (QRectF(self.center.x()-self.boxHalfWidth,self.boxTop,self.boxHalfWidth*2,self.boxHeight),
-                    Qt.AlignCenter, "XXX")
+                    Qt.AlignmentFlag.AlignCenter, "XXX")
         else:
             p.drawEllipse(center, ball_rad, ball_rad)
 
@@ -178,11 +178,11 @@ class TurnCoordinator(QWidget):
             return
         # the little airplane
         if self.rot_item.bad or self.rot_item.old:
-            pen.setColor(QColor(Qt.gray))
-            brush.setColor(QColor(Qt.gray))
+            pen.setColor(QColor(Qt.GlobalColor.gray))
+            brush.setColor(QColor(Qt.GlobalColor.gray))
         else:
-            pen.setColor(QColor(Qt.white))
-            brush.setColor(QColor(Qt.white))
+            pen.setColor(QColor(Qt.GlobalColor.white))
+            brush.setColor(QColor(Qt.GlobalColor.white))
         p.setPen(pen)
         p.setBrush(brush)
 
@@ -192,12 +192,12 @@ class TurnCoordinator(QWidget):
             self._rate = -5
         x = self.r - length - thickness / 2
         if self.rot_item.fail:
-            warn_font = QFont(self.font_family, 20, QFont.Bold)
-            p.setPen (QPen(QColor(Qt.red)))
-            p.setBrush (QBrush(QColor(Qt.red)))
+            warn_font = QFont(self.font_family, 20, QFont.Weight.Bold)
+            p.setPen (QPen(QColor(Qt.GlobalColor.red)))
+            p.setBrush (QBrush(QColor(Qt.GlobalColor.red)))
             p.setFont (warn_font)
             p.drawText (0,0,self.width(),self.height(),
-                    Qt.AlignCenter, "XXX")
+                    Qt.AlignmentFlag.AlignCenter, "XXX")
         else:
             poly = QPolygonF([QPointF(0, -thickness / 3),
                              QPointF(-x, -thickness / 8),
@@ -244,7 +244,7 @@ class TurnCoordinator_Tape(QWidget):
     def __init__(self, parent=None):
         super(TurnCoordinator_Tape, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(32, 32, 32, 75%)")
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._rate = 0.0
         self._latAcc = 0.0
 
@@ -254,10 +254,10 @@ class TurnCoordinator_Tape(QWidget):
         self.background = QPixmap(self.width(), self.height())
 
         p = QPainter(self.background)
-        p.setRenderHint(QPainter.Antialiasing)
-        pen = QPen(QColor(Qt.white))
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        pen = QPen(QColor(Qt.GlobalColor.white))
         pen.setWidth(2)
-        brush = QBrush(QColor(Qt.white))
+        brush = QBrush(QColor(Qt.GlobalColor.white))
         p.setPen(pen)
         self.center = QPointF(p.device().width() / 2, p.device().height() / 2)
         self.r = min(self.width(), self.height()) / 2 - 25
@@ -283,7 +283,7 @@ class TurnCoordinator_Tape(QWidget):
         # Draw the little airplane center
         p.drawEllipse(self.center, thickness, thickness)
         # vertical black lines on TC
-        pen.setColor(QColor(Qt.black))
+        pen.setColor(QColor(Qt.GlobalColor.black))
         pen.setWidth(4)
         p.setPen(pen)
         p.drawLine(qRound(self.center.x() - 30), qRound(self.boxTop),
@@ -294,7 +294,7 @@ class TurnCoordinator_Tape(QWidget):
     def paintEvent(self, event):
 
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Just to make it a bit easier
         thickness = self.tick_thickness
@@ -304,8 +304,8 @@ class TurnCoordinator_Tape(QWidget):
         p.drawPixmap(0, 0, self.background)
 
         # Draw TC Ball
-        pen = QPen(QColor(Qt.black))
-        brush = QBrush(QColor(Qt.black))
+        pen = QPen(QColor(Qt.GlobalColor.black))
+        brush = QBrush(QColor(Qt.GlobalColor.black))
         pen.setWidth(2)
         p.setPen(pen)
         p.setBrush(brush)

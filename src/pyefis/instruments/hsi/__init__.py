@@ -17,9 +17,9 @@
 import math
 import time
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 
 from pyefis import common
@@ -32,14 +32,14 @@ from pyefis.instruments import helpers
 
 
 class HSI(QGraphicsView):
-    def __init__(self, parent=None, font_size=15, font_percent=None, fg_color=Qt.white, bg_color=Qt.black, gsi_enabled=False, cdi_enabled=False, font_family="DejaVu Sans Condensed"):
+    def __init__(self, parent=None, font_size=15, font_percent=None, fg_color=Qt.GlobalColor.white, bg_color=Qt.GlobalColor.black, gsi_enabled=False, cdi_enabled=False, font_family="DejaVu Sans Condensed"):
         super(HSI, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.font_family = font_family
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.font_percent = None
         if font_percent:
             self.font_percent = font_percent
@@ -152,8 +152,8 @@ class HSI(QGraphicsView):
         compassBrush = QBrush(QColor(self.bg_color))
         nobrush = QBrush()
 
-        headingPen = QPen(QColor(Qt.magenta))
-        headingBrush = QBrush(QColor(Qt.magenta))
+        headingPen = QPen(QColor(Qt.GlobalColor.magenta))
+        headingBrush = QBrush(QColor(Qt.GlobalColor.magenta))
         headingPen.setWidth(1)
 
 
@@ -208,19 +208,19 @@ class HSI(QGraphicsView):
 
         # Draws the static overlay stuff to a pixmap
         self.map = QPixmap(self.width(), self.height())
-        self.map.fill(Qt.transparent)
+        self.map.fill(Qt.GlobalColor.transparent)
         p = QPainter(self.map)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         # set the width and height for conveinience
         # w = self.width()
         # h = self.height()
 
         p.setPen(QPen(QColor(self.fg_color),self.fontSize * 0.07))
-        p.setBrush(QColor(Qt.transparent))
+        p.setBrush(QColor(Qt.GlobalColor.transparent))
         # Outer ring
         p.drawEllipse(QRectF(self.cx-self.r, self.cy-self.r, self.r*2.0, self.r*2.0))
         # Draw the pointer marks
-        p.setPen(QPen(QColor(Qt.yellow), 3))
+        p.setPen(QPen(QColor(Qt.GlobalColor.yellow), 3))
         if self.visiblePointers[0]:
             # Top Pointer
             p.drawLine(QLineF(self.cx, self.cy - self.r - 5,
@@ -268,9 +268,9 @@ class HSI(QGraphicsView):
 
         compassPen = QPen(QColor(self.fg_color))
         compassBrush = QBrush(QColor(self.bg_color))
-        cdiPen = QPen(QColor(Qt.yellow))
+        cdiPen = QPen(QColor(Qt.GlobalColor.yellow))
         cdiPen.setWidth(3)
-        c.setRenderHint(QPainter.Antialiasing)
+        c.setRenderHint(QPainter.RenderHint.Antialiasing)
 
 
         # GSI index tics
@@ -441,10 +441,10 @@ class HSI(QGraphicsView):
 
 
 class HeadingDisplay(QWidget):
-    def __init__(self, parent=None, fg_color=Qt.gray, bg_color=Qt.black, font_family="DejaVu Sans Condensed" ):
+    def __init__(self, parent=None, fg_color=Qt.GlobalColor.gray, bg_color=Qt.GlobalColor.black, font_family="DejaVu Sans Condensed" ):
         super(HeadingDisplay, self).__init__(parent)
         self.font_family = font_family
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.fg_color = fg_color
         self.bg_color = bg_color
 
@@ -486,8 +486,8 @@ class HeadingDisplay(QWidget):
         c.drawRect(tr)
         if self._Fail:
             heading_text = "XXX"
-            c.setBrush(QBrush(QColor(Qt.red)))
-            c.setPen(QPen(QColor(Qt.red)))
+            c.setBrush(QBrush(QColor(Qt.GlobalColor.red)))
+            c.setPen(QPen(QColor(Qt.GlobalColor.red)))
         elif self._Bad:
             heading_text = ""
             c.setBrush(QBrush(QColor(255, 150, 0)))
@@ -499,7 +499,7 @@ class HeadingDisplay(QWidget):
         else:
             heading_text = str(int(self._heading))
 
-        c.drawText(tr, Qt.AlignHCenter | Qt.AlignVCenter, heading_text)
+        c.drawText(tr, Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, heading_text)
 
     def getHeading(self):
         return self._heading
@@ -531,10 +531,10 @@ class DG_Tape(QGraphicsView):
         super(DG_Tape, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.fontsize = 20
         self._heading = 1
         self._headingSelect = 1
@@ -552,10 +552,10 @@ class DG_Tape(QGraphicsView):
         w = self.width()
         h = self.height()
 
-        compassPen = QPen(QColor(Qt.white))
+        compassPen = QPen(QColor(Qt.GlobalColor.white))
         compassPen.setWidth(2)
 
-        headingPen = QPen(QColor(Qt.red))
+        headingPen = QPen(QColor(Qt.GlobalColor.red))
         headingPen.setWidth(8)
 
         f = QFont(self.font_family)
@@ -563,7 +563,7 @@ class DG_Tape(QGraphicsView):
 
         self.scene = QGraphicsScene(0, 0, 5000, h)
         self.scene.addRect(0, 0, 5000, h,
-                           QPen(QColor(Qt.black)), QBrush(QColor(Qt.black)))
+                           QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.black)))
 
         self.setScene(self.scene)
 
@@ -575,14 +575,14 @@ class DG_Tape(QGraphicsView):
                     t = self.scene.addText(str(i - 360))
                     t.setFont(f)
                     self.scene.setFont(f)
-                    t.setDefaultTextColor(QColor(Qt.white))
+                    t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                     t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
                     t.setY(h - t.boundingRect().height())
                 elif i < 1:
                     t = self.scene.addText(str(i + 360))
                     t.setFont(f)
                     self.scene.setFont(f)
-                    t.setDefaultTextColor(QColor(Qt.white))
+                    t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                     t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
                     t.setY(h - t.boundingRect().height())
                 else:
@@ -590,14 +590,14 @@ class DG_Tape(QGraphicsView):
                         t = self.scene.addText(self.cardinal[int(i / 90)])
                         t.setFont(f)
                         self.scene.setFont(f)
-                        t.setDefaultTextColor(QColor(Qt.cyan))
+                        t.setDefaultTextColor(QColor(Qt.GlobalColor.cyan))
                         t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
                         t.setY(h - t.boundingRect().height())
                     else:
                         t = self.scene.addText(str(i))
                         t.setFont(f)
                         self.scene.setFont(f)
-                        t.setDefaultTextColor(QColor(Qt.white))
+                        t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                         t.setX(((i * 10) + w / 2) - t.boundingRect().width() / 2)
                         t.setY(h - t.boundingRect().height())
             else:

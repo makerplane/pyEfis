@@ -2,9 +2,9 @@
 # Could be used to select a frequency from a list or destination etc
 
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import logging
 import pyavtools.fix as fix
@@ -32,7 +32,7 @@ class ListBox(QGraphicsView):
         self.tlists = yaml.load(list_str, Loader=yaml.SafeLoader)
 
         self.active_list = list(self.tlists.keys())[0]
-        self.header = misc.StaticText(text=self.active_list, color=QColor(Qt.white), parent=self)
+        self.header = misc.StaticText(text=self.active_list, color=QColor(Qt.GlobalColor.white), parent=self)
         self.header.font_mask = self.active_list
         self.selected_row = 0
         self.columns = len(self.tlists[self.active_list]['display']['columns'])
@@ -40,10 +40,10 @@ class ListBox(QGraphicsView):
         self.sort = False
         self.table = QTableWidget(self)
 
-        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
         #self.table.horizontalHeader().setFont(QFont(self.font_family))
-        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.verticalHeader().setVisible(False)
 
         self.table.doubleClicked.connect(self.clicked)
@@ -116,7 +116,7 @@ class ListBox(QGraphicsView):
         if onoff:
             self.header.color = QColor('orange')
         else:
-            self.header.color = QColor(Qt.white)
+            self.header.color = QColor(Qt.GlobalColor.white)
         self.update()
 
     def enc_clicked(self):
@@ -209,14 +209,14 @@ class ListBox(QGraphicsView):
         self.table.setRowCount( self.rows + len( self.sort_options ) + len(self.tlists) - 1 + loc) 
         #self.table.setMinimumWidth(500)
         self.table.setHorizontalHeaderLabels( self.column_names )
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         #self.table.horizontalHeader().stretchLastSection()
         self.table.horizontalHeader().setMaximumSectionSize(int(self.width() * 36/100))
         self.table.horizontalHeader().setMinimumSectionSize(int(self.width() * 26/100))
         self.table.horizontalHeader().setStretchLastSection(True) 
-        #self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        #self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        #self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        #self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        #self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        #self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         index = 0
         self.actions = []
         if len(self.tlists) > 1:

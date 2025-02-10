@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
@@ -95,28 +95,28 @@ class AbstractGauge(QWidget):
         self.conversionFunction2 = lambda x: x
         self.decimal_places = 1
         # All these colors can be modified by the parent
-        #self.outline_color = Qt.darkGray
+        #self.outline_color = Qt.GlobalColor.darkGray
         # These are the colors that are used when the value's
         # quality is marked as good
-        self.bg_good_color = Qt.black
-        self.safe_good_color = Qt.green
-        self.warn_good_color = Qt.yellow
-        self.alarm_good_color = Qt.red
-        self.text_good_color = Qt.white
-        self.pen_good_color = Qt.white
-        self.highlight_good_color = Qt.magenta
+        self.bg_good_color = Qt.GlobalColor.black
+        self.safe_good_color = Qt.GlobalColor.green
+        self.warn_good_color = Qt.GlobalColor.yellow
+        self.alarm_good_color = Qt.GlobalColor.red
+        self.text_good_color = Qt.GlobalColor.white
+        self.pen_good_color = Qt.GlobalColor.white
+        self.highlight_good_color = Qt.GlobalColor.magenta
 
         # These colors are used for bad and fail
-        self.bg_bad_color = Qt.black
-        self.safe_bad_color = Qt.darkGray
-        self.warn_bad_color = Qt.darkYellow
-        self.alarm_bad_color = Qt.darkRed
-        self.text_bad_color = Qt.gray
-        self.pen_bad_color = Qt.gray
-        self.highlight_bad_color = Qt.darkMagenta
+        self.bg_bad_color = Qt.GlobalColor.black
+        self.safe_bad_color = Qt.GlobalColor.darkGray
+        self.warn_bad_color = Qt.GlobalColor.darkYellow
+        self.alarm_bad_color = Qt.GlobalColor.darkRed
+        self.text_bad_color = Qt.GlobalColor.gray
+        self.pen_bad_color = Qt.GlobalColor.gray
+        self.highlight_bad_color = Qt.GlobalColor.darkMagenta
 
         # Annunciate changes the text color
-        self.text_annunciate_color = Qt.red
+        self.text_annunciate_color = Qt.GlobalColor.red
 
         # The following properties should not be changed by the user.
         # These are set real time based on changes in different states

@@ -16,9 +16,9 @@
 
 import time
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import pyavtools.fix as fix
 
@@ -31,12 +31,12 @@ class Altimeter(QWidget):
     FULL_WIDTH = 300
 
     def __init__(
-        self, parent=None, bg_color=Qt.black, font_family="DejaVu Sans Condensed"
+        self, parent=None, bg_color=Qt.GlobalColor.black, font_family="DejaVu Sans Condensed"
     ):
         super(Altimeter, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._altimeter = 0
         self.bg_color = bg_color
         self.item = fix.db.get_item("ALT")
@@ -59,7 +59,7 @@ class Altimeter(QWidget):
         w = self.width()
         h = self.height()
         dial = QPainter(self)
-        dial.setRenderHint(QPainter.Antialiasing)
+        dial.setRenderHint(QPainter.RenderHint.Antialiasing)
         radius = int(round(min(w, h) * 0.45))
         diameter = radius * 2
         center_x = w / 2
@@ -70,12 +70,12 @@ class Altimeter(QWidget):
         dialPen = QPen()
         # Setup Pens
         if self.item.old or self.item.bad:
-            warn_font = QFont(self.font_family, 30, QFont.Bold)
-            dialPen.setColor(QColor(Qt.gray))
-            dialBrush = QBrush(QColor(Qt.gray))
+            warn_font = QFont(self.font_family, 30, QFont.Weight.Bold)
+            dialPen.setColor(QColor(Qt.GlobalColor.gray))
+            dialBrush = QBrush(QColor(Qt.GlobalColor.gray))
         else:
-            dialPen.setColor(QColor(Qt.white))
-            dialBrush = QBrush(QColor(Qt.white))
+            dialPen.setColor(QColor(Qt.GlobalColor.white))
+            dialBrush = QBrush(QColor(Qt.GlobalColor.white))
         dialPen.setWidth(2)
 
         # Dial Setup
@@ -98,7 +98,7 @@ class Altimeter(QWidget):
         while count < 360:
             if count % 36 == 0:
                 dial.drawLine(0, -(radius), 0, -(radius - 15))
-                x = fontMetrics.width(str(altimeter_numbers)) / 2
+                x = fontMetrics.horizontalAdvance(str(altimeter_numbers)) / 2
                 y = f.pixelSize()
                 dial.drawText(
                     qRound(-x), qRound(-(radius - 15 - y)), str(altimeter_numbers)
@@ -120,12 +120,12 @@ class Altimeter(QWidget):
             count += 7.2
 
         if self.item.fail:
-            warn_font = QFont(self.font_family, 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Weight.Bold)
             dial.resetTransform()
-            dial.setPen(QPen(QColor(Qt.red)))
-            dial.setBrush(QBrush(QColor(Qt.red)))
+            dial.setPen(QPen(QColor(Qt.GlobalColor.red)))
+            dial.setBrush(QBrush(QColor(Qt.GlobalColor.red)))
             dial.setFont(warn_font)
-            dial.drawText(0, 0, w, h, Qt.AlignCenter, "XXX")
+            dial.drawText(0, 0, w, h, Qt.AlignmentFlag.AlignCenter, "XXX")
             return
 
         dial.setBrush(dialBrush)
@@ -170,13 +170,13 @@ class Altimeter(QWidget):
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "BAD")
         elif self.item.old:
             dial.resetTransform()
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "OLD")
         """
 
     def setUnitSwitching(self):
@@ -231,10 +231,10 @@ class Altimeter_Tape(QGraphicsView):
         self.setStyleSheet("background: transparent")
         self.font_family = font_family
         self.font_mask = "00000"
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.font_percent = font_percent
         if self.font_percent:
             self.fontsize = qRound(self.width() * self.font_percent)
@@ -280,7 +280,7 @@ class Altimeter_Tape(QGraphicsView):
         self.height_pixel = (
             self.maxalt * 2 * self.pph + h
         )  # + abs(self.minalt*self.pph)
-        dialPen = QPen(QColor(Qt.white))
+        dialPen = QPen(QColor(Qt.GlobalColor.white))
         dialPen.setWidth(int(self.height() * 0.005))
 
         self.scene = QGraphicsScene(0, 0, w, self.height_pixel)
@@ -302,7 +302,7 @@ class Altimeter_Tape(QGraphicsView):
                 t = self.scene.addText(str(i - self.maxalt))
                 t.setFont(f)
                 self.scene.setFont(f)
-                t.setDefaultTextColor(QColor(Qt.white))
+                t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                 t.setX(0)
                 t.setY(y - t.boundingRect().height() / 2)
                 t.setOpacity(self.foregroundOpacity)
@@ -356,12 +356,12 @@ class Altimeter_Tape(QGraphicsView):
         w = self.width()
         h = self.height()
         p = QPainter(self.viewport())
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        marks = QPen(Qt.white, 1)
+        marks = QPen(Qt.GlobalColor.white, 1)
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
-        p.setBrush(QBrush(Qt.black))
+        p.setBrush(QBrush(Qt.GlobalColor.black))
         triangle_size = w / 8
         p.drawConvexPolygon(
             QPolygonF(

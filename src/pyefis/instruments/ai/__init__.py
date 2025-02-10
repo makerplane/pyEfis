@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import math
 import time
@@ -67,10 +67,10 @@ class AI(QGraphicsView):
         self.bankAngleMaximum = 25  # Largest bank angle that will be indicated
 
         self.setStyleSheet("border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Assume True until told otherwise
         self._AIOld = dict()
@@ -140,11 +140,11 @@ class AI(QGraphicsView):
             self.bankAngleRadius = self.height() / 3
         # Get a failure scene ready in case it's needed
         self.fail_scene = QGraphicsScene(0, 0, sceneWidth, sceneHeight)
-        self.fail_scene.addRect(0,0, sceneWidth, sceneHeight, QPen(QColor(Qt.white)), QBrush(QColor(50,50,50)))
-        font = QFont(self.font_family, 80, QFont.Bold)
+        self.fail_scene.addRect(0,0, sceneWidth, sceneHeight, QPen(QColor(Qt.GlobalColor.white)), QBrush(QColor(50,50,50)))
+        font = QFont(self.font_family, 80, QFont.Weight.Bold)
         t = self.fail_scene.addSimpleText("XXX", font)
-        t.setPen (QPen(QColor(Qt.red)))
-        t.setBrush (QBrush(QColor(Qt.red)))
+        t.setPen (QPen(QColor(Qt.GlobalColor.red)))
+        t.setBrush (QBrush(QColor(Qt.GlobalColor.red)))
         r = t.boundingRect()
         t.setPos ((sceneWidth-r.width())/2, (sceneHeight-r.height())/2)
 
@@ -152,13 +152,13 @@ class AI(QGraphicsView):
         gradientBlue = QLinearGradient(0, 0, 0, sceneHeight / 2)
         gradientBlue.setColorAt(0.7, QColor(0, 51, 102))
         gradientBlue.setColorAt(1.0, QColor(51, 153, 255))
-        gradientBlue.setSpread(0)
-        self.blue_pen = QPen(QColor(Qt.blue))
+        gradientBlue.setSpread(QGradient.Spread.PadSpread)
+        self.blue_pen = QPen(QColor(Qt.GlobalColor.blue))
         self.gblue_brush = QBrush(gradientBlue)
         gradientLGray = QLinearGradient(0, 0, 0, sceneHeight / 2)
         gradientLGray.setColorAt(0.7, QColor(100, 100, 100))
         gradientLGray.setColorAt(1.0, QColor(153, 153, 153))
-        gradientLGray.setSpread(0)
+        gradientLGray.setSpread(QGradient.Spread.PadSpread)
         self.gray_sky = QBrush(gradientLGray)
         if self.getAIOld() or self.getAIBad():
             brush = self.gray_sky
@@ -169,13 +169,13 @@ class AI(QGraphicsView):
         gradientBrown = QLinearGradient(0, sceneHeight / 2, 0, sceneHeight)
         gradientBrown.setColorAt(0.0, QColor(105, 46, 1))
         gradientBrown.setColorAt(0.3, QColor(244, 164, 96))
-        gradientBrown.setSpread(0)
+        gradientBrown.setSpread(QGradient.Spread.PadSpread)
         self.brown_pen = QPen(QColor(160, 82, 45))  # Brown Color
         self.gbrown_brush = QBrush(gradientBrown)
         gradientDGray = QLinearGradient(0, sceneHeight / 2, 0, sceneHeight)
         gradientDGray.setColorAt(0.0, QColor(20, 20, 20))
         gradientDGray.setColorAt(0.2, QColor(75, 75, 75))
-        gradientDGray.setSpread(0)
+        gradientDGray.setSpread(QGradient.Spread.PadSpread)
         self.gray_land = QBrush(gradientDGray)
         if self.getAIOld() or self.getAIBad():
             brush = self.gray_land
@@ -187,11 +187,11 @@ class AI(QGraphicsView):
         self.setScene(self.scene)
 
         #Draw the main horizontal line
-        pen = QPen(QColor(Qt.white))
+        pen = QPen(QColor(Qt.GlobalColor.white))
         pen.setWidth(qRound(self.fontSize * 0.05))
         self.scene.addLine(0, sceneHeight / 2, sceneWidth, sceneHeight / 2, pen)
         # draw the degree hash marks
-        pen.setColor(Qt.white)
+        pen.setColor(Qt.GlobalColor.white)
         w = self.scene.width()
         h = self.scene.height()
         f = QFont(self.font_family)
@@ -212,7 +212,7 @@ class AI(QGraphicsView):
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
-                t.setDefaultTextColor(Qt.white)
+                t.setDefaultTextColor(Qt.GlobalColor.white)
                 t.setX(right + 5)
                 t.setY(y - t.boundingRect().height() / 2)
                 t.setZValue(1)
@@ -221,7 +221,7 @@ class AI(QGraphicsView):
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
-                t.setDefaultTextColor(Qt.white)
+                t.setDefaultTextColor(Qt.GlobalColor.white)
                 t.setX(left - (t.boundingRect().width() + 5))
                 t.setY(y - t.boundingRect().height() / 2)
                 t.setZValue(1)
@@ -246,23 +246,23 @@ class AI(QGraphicsView):
 
         # Draws the static overlay stuff to a pixmap
         self.map = QPixmap(self.width(), self.height())
-        self.map.fill(Qt.transparent)
+        self.map.fill(Qt.GlobalColor.transparent)
         p = QPainter(self.map)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         # change width and height to the view instead of the scene
         w = self.width()
         h = self.height()
         r = self.bankAngleRadius
-        p.setPen(QColor(Qt.black))
-        p.setBrush(QColor(Qt.yellow))
+        p.setPen(QColor(Qt.GlobalColor.black))
+        p.setBrush(QColor(Qt.GlobalColor.yellow))
         p.drawRect(QRectF(w / 4, h / 2 - 3, w / 6, 6))
         p.drawRect(QRectF(w - w / 4 - w / 6, h / 2 - 3, w / 6, 6))
         p.drawEllipse(QRectF(w / 2 - 3, h / 2 - 3, 9, 9))
-        # p.setPen(QColor(Qt.black))
-        # p.setBrush(QColor(Qt.white))
+        # p.setPen(QColor(Qt.GlobalColor.black))
+        # p.setBrush(QColor(Qt.GlobalColor.white))
 
         m = self.bankMarkSize
-        p.setBrush(QColor(Qt.white))
+        p.setBrush(QColor(Qt.GlobalColor.white))
         p.translate(w / 2, h/2 - r)
         triangle = QPolygonF([QPointF(m,  m*2),
                              QPointF(-m, m*2),
@@ -300,28 +300,28 @@ class AI(QGraphicsView):
         r = self.bankAngleRadius
         m = self.bankMarkSize
         p = QPainter(self.viewport())
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         # Put the static overlay image on the view
         p.drawImage(self.rect(), self.overlay)
 
-        pen = QPen(Qt.white)
+        pen = QPen(Qt.GlobalColor.white)
         pen.setWidth(qRound(self.fontSize * 0.025))
         p.setPen(pen)
-        p.setBrush(QColor(Qt.white))
-        marks = QPen(Qt.white)
+        p.setBrush(QColor(Qt.GlobalColor.white))
+        marks = QPen(Qt.GlobalColor.white)
 
         p.translate(w / 2, h / 2)
 
         # Slip / Skid ball
-        p.setPen(QColor(Qt.black))
-        p.setBrush(QColor(Qt.white))
+        p.setPen(QColor(Qt.GlobalColor.black))
+        p.setBrush(QColor(Qt.GlobalColor.white))
         p.drawEllipse(QPointF(self._latAccel * -m*12, -r + m*3), m*0.8, m*0.8)
 
         p.rotate(self._rollAngle * -1.0)
         # Add moving Bank Angle Markers
         marks.setWidth(qRound(self.fontSize * 0.05))
         p.setPen(marks)
-        p.setBrush(QColor(Qt.white))
+        p.setBrush(QColor(Qt.GlobalColor.white))
         smallMarks = [10, 20, 45]
         largeMarks = [30, 60]
         shortLine = QLineF(0, -r, 0, -(r-m))
@@ -351,7 +351,7 @@ class AI(QGraphicsView):
                                 QPointF(-m*0.8, -(r+m*0.8)),
                                 QPointF(-0, -r - m*1.6),
                                 QPointF(m*0.8, -(r+m*0.8))])
-            p.setBrush(Qt.transparent)
+            p.setBrush(Qt.GlobalColor.transparent)
             p.rotate(a)
             p.drawPolygon(diamond)
             p.rotate(-2 * a)
@@ -508,10 +508,10 @@ class FDTarget(QGraphicsView):
     def __init__(self, center, pixelsPerDeg, parent=None):
         super(FDTarget, self).__init__(parent)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0%); border: 0px")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.aicenter = center
         self.pixelsPerDeg = pixelsPerDeg
 
@@ -525,8 +525,8 @@ class FDTarget(QGraphicsView):
                            ,(-self.w/2, polyheight/2)]
 
         self.scene = QGraphicsScene(0, 0, self.w*2, self.w*2)
-        pen = QPen(QColor(Qt.black))
-        brush = QBrush (QColor (Qt.magenta))
+        pen = QPen(QColor(Qt.GlobalColor.black))
+        brush = QBrush (QColor (Qt.GlobalColor.magenta))
         ps = [QPointF (x,y) for x,y in self.poly_points]
         fdpoly = QPolygonF (ps)
         self.poly = self.scene.addPolygon (fdpoly, pen, brush)

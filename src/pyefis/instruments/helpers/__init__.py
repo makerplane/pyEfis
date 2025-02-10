@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
 
 def fit_to_mask(width,height,mask,font,units_mask=None, units_ratio=0.8, numeric=False):
     font_size = 100
