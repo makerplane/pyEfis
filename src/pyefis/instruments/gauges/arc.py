@@ -15,9 +15,9 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import math
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 from .abstract import AbstractGauge, drawCircle
 from pyefis.instruments import helpers
@@ -122,10 +122,10 @@ class ArcGauge(AbstractGauge):
         centerX = self.arcCenter.x()
         centerY = self.arcCenter.y()
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen()
         pen.setWidth(qRound(self.r_height * 0.18))
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
 
         # Red Arcs
         pen.setColor(self.alarmColor)
@@ -154,7 +154,7 @@ class ArcGauge(AbstractGauge):
             pen.setWidth(qRound(self.r_height * 0.2))
             segment_gap = (sweep) * self.segment_gap_percent
             segment_size = ((sweep) - (segment_gap * (self.segments - 1)))/self.segments
-            pen.setColor(Qt.black)
+            pen.setColor(Qt.GlobalColor.black)
             p.setPen(pen)
             for segment in range(self.segments - 1):
                 ds = start + ((segment + 1) * segment_size) + (segment * segment_gap)
@@ -169,7 +169,7 @@ class ArcGauge(AbstractGauge):
         #if not self.segments > 0:
         if self.segments > 0:
             pen.setWidth(qRound(self.r_height * 0.2))
-            pen.setCapStyle(Qt.FlatCap)
+            pen.setCapStyle(Qt.PenCapStyle.FlatCap)
             pen.setColor(QColor(0, 0, 0, self.segment_alpha))
             p.setPen(pen)
             p.setBrush(QColor(0, 0, 0, self.segment_alpha))
@@ -178,7 +178,7 @@ class ArcGauge(AbstractGauge):
 
 
         brush = QBrush(self.penColor)
-        pen.setColor(QColor(Qt.black))
+        pen.setColor(QColor(Qt.GlobalColor.black))
         pen.setWidth(1)
         p.setPen(pen)
         p.setBrush(brush)
@@ -198,11 +198,11 @@ class ArcGauge(AbstractGauge):
         fm = QFontMetrics(f)
         if self.name_font_mask:
             if self.name_font_ghost_mask:
-                x = fm.width(self.name_font_ghost_mask)
+                x = fm.horizontalAdvance(self.name_font_ghost_mask)
             else: 
-                x = fm.width(self.name_font_mask)
+                x = fm.horizontalAdvance(self.name_font_mask)
         else:
-            x = fm.width(self.name)
+            x = fm.horizontalAdvance(self.name)
         p.setFont(f)
         #if self.font_ghost_mask:
         #    alpha = self.textColor.alpha()
@@ -210,7 +210,7 @@ class ArcGauge(AbstractGauge):
             
         if self.name_location == 'top':
             if self.name_font_mask:
-                opt = QTextOption(Qt.AlignLeft)
+                opt = QTextOption(Qt.AlignmentFlag.AlignLeft)
                 if self.name_font_ghost_mask:
                     alpha = self.textColor.alpha()
                     self.textColor.setAlpha(self.font_ghost_alpha)
@@ -225,7 +225,7 @@ class ArcGauge(AbstractGauge):
                 p.drawText(QPointF(self.tlcx + (self.r_width / 20),self.tlcy + f.pixelSize()), self.name)
         elif self.name_location == 'right':
             if self.name_font_mask:
-                opt = QTextOption(Qt.AlignRight)
+                opt = QTextOption(Qt.AlignmentFlag.AlignRight)
                 if self.name_font_ghost_mask:
                     alpha = self.textColor.alpha()
                     self.textColor.setAlpha(self.font_ghost_alpha)
@@ -248,14 +248,14 @@ class ArcGauge(AbstractGauge):
             pass
         # Main value text
         if self.font_mask:
-            opt = QTextOption(Qt.AlignRight)
+            opt = QTextOption(Qt.AlignmentFlag.AlignRight)
         else:
-            opt = QTextOption(Qt.AlignCenter)
+            opt = QTextOption(Qt.AlignmentFlag.AlignCenter)
         path = QPainterPath()
         brush = QBrush(self.valueColor)
         p.setBrush(brush)
         pen.setColor(self.valueColor)
-        #pen.setColor(QColor(Qt.black))
+        #pen.setColor(QColor(Qt.GlobalColor.black))
         p.setPen(pen)
 
         #f.setPixelSize(qRound(self.r_height / 2.6))
@@ -266,9 +266,9 @@ class ArcGauge(AbstractGauge):
 
         fm = QFontMetrics(f)
         if self.font_mask:
-            x = fm.width(self.font_mask)
+            x = fm.horizontalAdvance(self.font_mask)
         else:
-            x = fm.width(self.valueText)
+            x = fm.horizontalAdvance(self.valueText)
         ux = 0
         if self.show_units:
             #f.setPixelSize(qRound(self.height() / 4))
@@ -277,12 +277,12 @@ class ArcGauge(AbstractGauge):
             if self.units_font_mask:
                 f.setPointSizeF(self.unitsFontSize)
                 fmu = QFontMetrics(f)
-                ux = fmu.width(self.units_font_mask)
+                ux = fmu.horizontalAdvance(self.units_font_mask)
             else:
                 #f.setPointSizeF(self.valueFontSize/2)
                 f.setPixelSize(qRound(self.height() / 4))
                 fmu = QFontMetrics(f)
-                ux = fmu.width(self.units)
+                ux = fmu.horizontalAdvance(self.units)
             uy = fmu.ascent() - fmu.descent()
             #path.addText(QPointF( self.lrcx - ux, self.lrcy - uy),f, self.units)
             if self.units_font_ghost_mask:

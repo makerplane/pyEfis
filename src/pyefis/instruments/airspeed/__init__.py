@@ -17,9 +17,9 @@
 import sys
 import time
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import pyavtools.fix as fix
 import pyefis.hmi as hmi
@@ -34,13 +34,13 @@ class Airspeed(QWidget):
         self,
         parent=None,
         font_percent=0.07,
-        bg_color=Qt.black,
+        bg_color=Qt.GlobalColor.black,
         font_family="DejaVu Sans Condensed",
     ):
         super(Airspeed, self).__init__(parent)
         self.setStyleSheet("border: 0px")
         self.font_family = font_family
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.font_percent = font_percent
         self.bg_color = bg_color
         self._airspeed = 0
@@ -79,7 +79,7 @@ class Airspeed(QWidget):
         if w > h:
             s = h
         dial = QPainter(self)
-        dial.setRenderHint(QPainter.Antialiasing)
+        dial.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Draw the Black Background
         dial.fillRect(0, 0, w, h, QColor(self.bg_color))
@@ -90,21 +90,21 @@ class Airspeed(QWidget):
         f.setPixelSize(fs)
         fontMetrics = QFontMetricsF(f)
 
-        dialPen = QPen(QColor(Qt.white))
+        dialPen = QPen(QColor(Qt.GlobalColor.white))
         dialPen.setWidthF(s * 0.01)
 
-        needleBrush = QBrush(QColor(Qt.white))
+        needleBrush = QBrush(QColor(Qt.GlobalColor.white))
 
-        vnePen = QPen(QColor(Qt.red))
+        vnePen = QPen(QColor(Qt.GlobalColor.red))
         vnePen.setWidthF(s * 0.025)
 
-        vsoPen = QPen(QColor(Qt.white))
+        vsoPen = QPen(QColor(Qt.GlobalColor.white))
         vsoPen.setWidthF(s * 0.015)
 
-        vnoPen = QPen(QColor(Qt.green))
+        vnoPen = QPen(QColor(Qt.GlobalColor.green))
         vnoPen.setWidthF(s * 0.015)
 
-        yellowPen = QPen(QColor(Qt.yellow))
+        yellowPen = QPen(QColor(Qt.GlobalColor.yellow))
         yellowPen.setWidthF(s * 0.015)
 
         # Dial Setup
@@ -145,7 +145,7 @@ class Airspeed(QWidget):
         while count < 360:
             if count % 25 == 0 and a_s <= 140:
                 dial.drawLine(0, -radius, 0, -(radius - 15))
-                x = fontMetrics.width(str(a_s)) / 2
+                x = fontMetrics.horizontalAdvance(str(a_s)) / 2
                 y = f.pixelSize()
                 dial.drawText(qRound(-x), qRound(-(radius - 15 - y)), str(a_s))
                 a_s += 10
@@ -163,22 +163,22 @@ class Airspeed(QWidget):
             count += 0.5
 
         if self.item.fail:
-            warn_font = QFont(self.font_family, 30, QFont.Bold)
+            warn_font = QFont(self.font_family, 30, QFont.Weight.Bold)
             dial.resetTransform()
-            dial.setPen(QPen(QColor(Qt.red)))
-            dial.setBrush(QBrush(QColor(Qt.red)))
+            dial.setPen(QPen(QColor(Qt.GlobalColor.red)))
+            dial.setBrush(QBrush(QColor(Qt.GlobalColor.red)))
             dial.setFont(warn_font)
-            dial.drawText(0, 0, w, h, Qt.AlignCenter, "XXX")
+            dial.drawText(0, 0, w, h, Qt.AlignmentFlag.AlignCenter, "XXX")
             dial.restore()
             return
 
         if self.item.old or self.item.bad:
-            warn_font = QFont(self.font_family, 30, QFont.Bold)
-            dial.setPen(QPen(QColor(Qt.gray)))
-            dial.setBrush(QBrush(QColor(Qt.gray)))
+            warn_font = QFont(self.font_family, 30, QFont.Weight.Bold)
+            dial.setPen(QPen(QColor(Qt.GlobalColor.gray)))
+            dial.setBrush(QBrush(QColor(Qt.GlobalColor.gray)))
         else:
-            dial.setPen(QPen(QColor(Qt.white)))
-            dial.setBrush(QBrush(QColor(Qt.white)))
+            dial.setPen(QPen(QColor(Qt.GlobalColor.white)))
+            dial.setBrush(QBrush(QColor(Qt.GlobalColor.white)))
         # Needle Movement
         needle = QPolygon(
             [QPoint(5, 0), QPoint(0, +5), QPoint(-5, 0), QPoint(0, -(radius - 15))]
@@ -198,13 +198,13 @@ class Airspeed(QWidget):
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "BAD")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "BAD")
         elif self.item.old:
             dial.resetTransform()
             dial.setPen (QPen(QColor(255, 150, 0)))
             dial.setBrush (QBrush(QColor(255, 150, 0)))
             dial.setFont (warn_font)
-            dial.drawText (0,0,w,h, Qt.AlignCenter, "OLD")
+            dial.drawText (0,0,w,h, Qt.AlignmentFlag.AlignCenter, "OLD")
         """
 
         dial.restore()
@@ -241,10 +241,10 @@ class Airspeed_Tape(QGraphicsView):
         self.font_percent = font_percent
         # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
         self.setStyleSheet("background: transparent")
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.item = fix.db.get_item("IAS")
         self._airspeed = self.item.value
 
@@ -295,7 +295,7 @@ class Airspeed_Tape(QGraphicsView):
         tape_height = self.max * self.pph + h
         tape_start = self.max * self.pph + h / 2
 
-        dialPen = QPen(QColor(Qt.white))
+        dialPen = QPen(QColor(Qt.GlobalColor.white))
 
         self.scene = QGraphicsScene(0, 0, w, tape_height)
         x = self.scene.addRect(
@@ -317,7 +317,7 @@ class Airspeed_Tape(QGraphicsView):
             QPointF(self.markWidth / 2, -self.Vfe * self.pph + tape_start),
             QPointF(self.markWidth, -self.Vs0 * self.pph + tape_start),
         )
-        x = self.scene.addRect(r, QPen(Qt.white), QBrush(Qt.white))
+        x = self.scene.addRect(r, QPen(Qt.GlobalColor.white), QBrush(Qt.GlobalColor.white))
         x.setOpacity(self.foregroundOpacity)
 
         # Yellow Bar
@@ -325,7 +325,7 @@ class Airspeed_Tape(QGraphicsView):
             QPointF(0, -self.Vno * self.pph + tape_start),
             QPointF(self.markWidth, -self.Vne * self.pph + tape_start),
         )
-        x = self.scene.addRect(r, QPen(Qt.yellow), QBrush(Qt.yellow))
+        x = self.scene.addRect(r, QPen(Qt.GlobalColor.yellow), QBrush(Qt.GlobalColor.yellow))
         x.setOpacity(self.foregroundOpacity)
 
         # Draw the little white lines and the text
@@ -342,7 +342,7 @@ class Airspeed_Tape(QGraphicsView):
                 t = self.scene.addText(str(i))
                 t.setFont(f)
                 self.scene.setFont(f)
-                t.setDefaultTextColor(QColor(Qt.white))
+                t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                 t.setX(w - t.boundingRect().width())
                 t.setY(((-i * self.pph) + tape_start) - t.boundingRect().height() / 2)
                 t.setOpacity(self.foregroundOpacity)
@@ -356,7 +356,7 @@ class Airspeed_Tape(QGraphicsView):
                 )
                 l.setOpacity(self.foregroundOpacity)
         # Red Line
-        vnePen = QPen(QColor(Qt.red))
+        vnePen = QPen(QColor(Qt.GlobalColor.red))
         vnePen.setWidth(4)
         l = self.scene.addLine(
             0,
@@ -401,12 +401,12 @@ class Airspeed_Tape(QGraphicsView):
         w = self.width()
         h = self.height()
         p = QPainter(self.viewport())
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        marks = QPen(Qt.white, 1)
+        marks = QPen(Qt.GlobalColor.white, 1)
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
         p.setPen(marks)
-        p.setBrush(QBrush(Qt.black))
+        p.setBrush(QBrush(Qt.GlobalColor.black))
         triangle_size = w / 8
         p.drawConvexPolygon(
             QPolygon(
@@ -461,10 +461,10 @@ class Airspeed_Box(QWidget):
         self.valueText = str(int(self.fix_item.value))
         self.fix_item.valueChanged[float].connect(self.setASData)
 
-        self.alignment = Qt.AlignLeft | Qt.AlignVCenter
-        self.valueAlignment = Qt.AlignRight | Qt.AlignVCenter
+        self.alignment = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        self.valueAlignment = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
         self.small_font_percent = 0.4
-        self.color = Qt.white
+        self.color = Qt.GlobalColor.white
         self.modeText = self.modes[self._modeIndicator]
         hmi.actions.setAirspeedMode.connect(self.setMode)
 
@@ -482,11 +482,11 @@ class Airspeed_Box(QWidget):
 
     def paintEvent(self, event):
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         pen = QPen()
         pen.setWidth(1)
-        pen.setCapStyle(Qt.FlatCap)
+        pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         p.setPen(pen)
 
         # Draw Mode

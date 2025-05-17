@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 from pyefis.instruments import ai
 # from pyefis.instruments import gauges
@@ -50,8 +50,8 @@ class Screen(QWidget):
 
         self.tc = tc.TurnCoordinator(self)
 
-        self.hsi = hsi.HSI(self, font_size=12, fg_color=Qt.white)
-        self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fg_color=Qt.white)
+        self.hsi = hsi.HSI(self, font_size=12, fg_color=Qt.GlobalColor.white)
+        self.heading_disp = hsi.HeadingDisplay(self, font_size=17, fg_color=Qt.GlobalColor.white)
 
         self.vsi = vsi.VSI_Dial(self)
 

@@ -1,9 +1,6 @@
 import pytest
 from unittest import mock
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt, qRound
-from PyQt5.QtGui import QColor, QBrush, QPen, QFont, QPainter, QPaintEvent, QFontMetrics
-from PyQt5 import QtGui
+from PyQt6.QtWidgets import QApplication
 from pyefis.instruments import ai
 import pyefis.hmi as hmi
 from tests.utils import track_calls

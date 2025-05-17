@@ -18,9 +18,9 @@
 #       functionality since that is more user configurable
 
 try:
-    from PyQt5.QtCore import *
+    from PyQt6.QtCore import *
 except:
-    from PyQt4.QtCore import *
+    from PyQt5.QtCore import *
 
 import logging
 
@@ -35,18 +35,18 @@ log = logging.getLogger(__name__)
 def keyPress(event):
     log.debug("KeyPress {} {}".format(event.key(),event.text()))
 
-    if event.key() == Qt.Key_BracketRight:
+    if event.key() == Qt.Key.Key_BracketRight:
         x = fix.db.get_item("BARO")
         x.value = x.value + 0.01
 
     #  Decrease Altimeter Setting
-    elif event.key() == Qt.Key_BracketLeft:
+    elif event.key() == Qt.Key.Key_BracketLeft:
         x = fix.db.get_item("BARO")
         x.value = x.value - 0.01
 
 
 # def keyRelease(event):
-#     if event.key() == Qt.Key_Q:
+#     if event.key() == Qt.Key.Key_Q:
 #         fix.db.set_value("BTN16", False)
 
 
