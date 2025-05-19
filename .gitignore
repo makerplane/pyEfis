@@ -7,9 +7,11 @@
 doc/_*
 .ropeproject/*
 .directory
+config/
 
 # IDE artifacts
 .vscode/
+.code-worksapce
 
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -24,9 +26,14 @@ __pycache__/
 # C extensions
 *.so
 
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+
 # Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -70,9 +77,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-
-# Python virtual env
-venv/
 
 # Makefile markers
 *.marker

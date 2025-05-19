@@ -41,7 +41,7 @@ dependencies = [
 # Until this revision is published to PyPy get it from git:
     "pyavtools @ git+https://github.com/makerplane/pyAvTools/@b3a4c05f0379f751fff8e2080431eff5ba13f8f1",
     "pycond==20230212",
-    "PyQt6==6.8.0",
+    # "PyQt6==6.8.0",
     "PyYAML==6.0.1",
     "python-xlib==0.33"
 ]
@@ -49,6 +49,9 @@ dependencies = [
 [project.optional-dependencies]
 build = [
     "build==1.2.1",
+]
+qt = [
+    "PyQt6==6.8.0",
 ]
 
 [project.scripts]
