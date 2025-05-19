@@ -23,6 +23,7 @@ venv.marker:
 	fi
 	venv/bin/pip install --upgrade pip
 	venv/bin/pip install --upgrade send2trash
+	venv/bin/pip install flake8
 	venv/bin/pip install black
 	venv/bin/pip install pytest
 	venv/bin/pip install pytest-qt
@@ -72,6 +73,8 @@ wheel: init-build
 
 
 test: init
+	source venv/bin/activate ; flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+	source venv/bin/activate ; flake8 src tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 	venv/bin/pytest
 
 .PHONY: test
