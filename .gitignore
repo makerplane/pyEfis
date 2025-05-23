@@ -11,7 +11,7 @@ config/
 
 # IDE artifacts
 .vscode/
-.code-worksapce
+.code-workspace
 
 ### Python template
 # Byte-compiled / optimized / DLL files
