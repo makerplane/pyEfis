@@ -1,0 +1,19 @@
+{
+  "name": "pyEfis (light) Codespace",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "postCreateCommand": "sudo apt update && sudo apt install -y python3-pyqt6",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "shutdownAction": "stopContainer",
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb"
+  }
+}
