@@ -30,7 +30,8 @@ venv.marker:
 	venv/bin/pip install pytest-env
 	venv/bin/pip install pytest-cov
 	touch venv.marker
-	echo -e "\nRun:\nsource venv/bin/activate (you may also have to add ';export DISPLAY=:0' if any display errors are encountered)"
+	@echo -e "\nRun:\nsource venv/bin/activate"
+	@echo -e "\nRun (if any display errors are encountered):\nsource venv/bin/activate;export DISPLAY=:0"
 venv: venv.marker
 .PHONY: venv
 
@@ -51,10 +52,10 @@ init.marker: pyproject.toml
 	    else \
 		echo "...xwininfo is installed"; \
 	    fi; \
-	    venv/bin/pip install -e .[install]; \
+	    venv/bin/pip install --extra-index-url https://www.piwheels.org/simple -e .[install]; \
 	else \
 	    echo "Standard environment found, will install PyQt6 via PyPI"; \
-	    venv/bin/pip install -e .[qt]; \
+	    venv/bin/pip install --extra-index-url https://www.piwheels.org/simple -e .[qt]; \
 	fi
 	touch init.marker
 init: venv.marker init.marker
@@ -62,7 +63,7 @@ init: venv.marker init.marker
 
 #################################### W H E E L   T A R G E T S ####################################
 init-build.marker: init
-	venv/bin/pip install -e .[build]
+	venv/bin/pip install --extra-index-url https://www.piwheels.org/simple -e .[build]
 	touch init-build.marker
 
 init-build: init-build.marker
