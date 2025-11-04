@@ -15,7 +15,6 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import time
-import threading
 
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
@@ -48,6 +47,10 @@ class Menu(QWidget):
         # Dangerous. Don't set this to True unless you really know what you're doing
         self.allow_evals = False if 'allow_evals' not in config else bool(config['allow_evals'])
         self.show_time = None if 'show_time' not in config else config['show_time']
+        # Use a Qt timer (in GUI thread) to avoid threading issues on hide
+        self.hide_timer = QTimer(self)
+        self.hide_timer.setSingleShot(True)
+        self.hide_timer.timeout.connect(self._on_hide_timeout)
         # Sizing and moving the box around the buttons allows screen buttons
         # to be clicked that might be above or to the left of the menu buttons.
         # If one uses the trick of having a negative button spacing, so the menu can
@@ -114,15 +117,19 @@ class Menu(QWidget):
         self.show_begin_time = time.time()
         self.hiding_menu = False
         if self.show_time is not None:
-            t = threading.Thread(target=self.hide_menu)
-            t.start()
+            self.hide_timer.start(int(self.show_time * 1000))
         self.adjustSize()
-    def hide_menu(self):
-        time.sleep(self.show_time + .1)
-        if time.time() - self.show_begin_time >= self.show_time:
-            for b in self.buttons:
-                b.hide()
-            self.hiding_menu = True
+    def _on_hide_timeout(self):
+        # Hide buttons when the timer fires (runs in GUI thread)
+        for b in self.buttons:
+            b.hide()
+        self.hiding_menu = True
+
+    def closeEvent(self, event):
+        # Ensure timer is stopped in the GUI thread before destruction
+        if hasattr(self, 'hide_timer'):
+            self.hide_timer.stop()
+        super().closeEvent(event)
 
     def show_menu(self):
         for i,button in enumerate(self.current_menu):
@@ -193,8 +200,7 @@ class Menu(QWidget):
                     perform = True
             self.show_begin_time = time.time()
             if self.show_time is not None:
-                t = threading.Thread(target=self.hide_menu)
-                t.start()
+                self.hide_timer.start(int(self.show_time * 1000))
             if perform:
                 self.last_button_clicked = btn_num
                 self.perform_action(self.button_actions[btn_num], self.button_args[btn_num])

@@ -215,14 +215,46 @@ def main():
     log.info("Starting pyEFIS")
 
     fix.initialize(config)
-    loaded = False
-    while not loaded:
-        try:
-            fix.db.get_item("ZZLOADER")
-            loaded = True
-        except:
-            log.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
-            time.sleep(2)
+    # Wait for FIX Gateway database to be ready (presence of a loader key),
+    # but avoid an endless loop and provide clearer diagnostics.
+    main_cfg = config.get('main', {}) if isinstance(config, dict) else {}
+    loader_key = main_cfg.get('loaderKey', 'ZZLOADER')
+    wait_for_loader = main_cfg.get('waitForLoader', True)
+    loader_timeout = float(main_cfg.get('loaderTimeout', 60))
+    fix_host = main_cfg.get('FixServer', 'localhost')
+    fix_port = main_cfg.get('FixPort', '3490')
+
+    if wait_for_loader:
+        start_ts = time.monotonic()
+        loaded = False
+        last_log = 0.0
+        while not loaded and (time.monotonic() - start_ts) < loader_timeout:
+            try:
+                fix.db.get_item(loader_key)
+                loaded = True
+                break
+            except Exception as e:
+                # Throttle log messages to once every ~2 seconds
+                now = time.monotonic()
+                if now - last_log > 2.0:
+                    log.info(
+                        "Waiting for FIX Gateway (%s:%s) key '%s' to become available: %s",
+                        fix_host,
+                        fix_port,
+                        loader_key,
+                        str(e),
+                    )
+                    last_log = now
+                time.sleep(0.5)
+
+        if not loaded:
+            log.warning(
+                "Timed out (%.1fs) waiting for FIX Gateway (%s:%s) key '%s'. Continuing startup — verify fixgateway is running and database.yaml defines this key.",
+                loader_timeout,
+                fix_host,
+                fix_port,
+                loader_key,
+            )
     pyefis_ver = fix.db.get_item('PYEFIS_VERSION')
     pyefis_ver.value = __version__
     pyefis_ver.output_value()

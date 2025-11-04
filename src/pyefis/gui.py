@@ -15,7 +15,7 @@
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from PyQt6.QtGui import QColor
-from PyQt6.QtCore import QObject, pyqtSignal, QEvent, QCoreApplication
+from PyQt6.QtCore import QObject, pyqtSignal, QEvent, QCoreApplication, QTimer
 from PyQt6.QtWidgets import QMainWindow, QApplication, QWidget
 
 import time
@@ -152,14 +152,33 @@ class Main(QMainWindow):
         # For example waydroid/weston if they are in use
         for s in screens:
             s.object.close()
+        # Stop any remaining QTimers in the UI hierarchy to avoid shutdown warnings
+        self._stop_all_qtimers()
+        for s in screens:
+            try:
+                for t in s.object.findChildren(QTimer):
+                    t.stop()
+            except Exception:
+                pass
+        # Final sweep: stop any stray timers across all widgets
+        try:
+            for w in QApplication.topLevelWidgets():
+                for t in w.findChildren(QTimer):
+                    t.stop()
+        except Exception:
+            pass
         # Close down fix connections
         # This needs done before the main event loop is stopped below
+        try:
+            if hasattr(scheduler, 'scheduler') and hasattr(scheduler.scheduler, 'stop'):
+                scheduler.scheduler.stop()
+        except Exception:
+            pass
         fix.stop()
-        # Allow external processes to exit
-        time.sleep(5)
-        # This termiates the main event loop and can prevent
-        # close events from finishing if called too soon
-        QCoreApplication.quit()
+        # Pump any pending events from close handlers
+        QApplication.processEvents()
+        # Defer quit slightly to allow async cleanup to complete without blocking UI
+        QTimer.singleShot(300, QCoreApplication.quit)
 
     # We send signals for these events so everybody can play.
     def showEvent(self, event):
@@ -167,7 +186,57 @@ class Main(QMainWindow):
 
     def closeEvent(self, event):
         log.debug("Window Close event received")
+        # Prevent double cleanup
+        if not hasattr(self, "_closing"):
+            self._closing = False
+        if not self._closing:
+            self._closing = True
+            try:
+                # Close screens so their widgets can stop timers in their closeEvent
+                for s in screens:
+                    try:
+                        s.object.close()
+                    except Exception:
+                        pass
+                # Stop any remaining QTimers across the UI
+                self._stop_all_qtimers()
+                for s in screens:
+                    try:
+                        for t in s.object.findChildren(QTimer):
+                            t.stop()
+                    except Exception:
+                        pass
+                # Stop FIX client before the app tears down
+                try:
+                    fix.stop()
+                except Exception:
+                    pass
+                # Final sweep: stop any stray timers across all widgets
+                try:
+                    for w in QApplication.topLevelWidgets():
+                        for t in w.findChildren(QTimer):
+                            t.stop()
+                except Exception:
+                    pass
+                # Stop background scheduler if present
+                try:
+                    if hasattr(scheduler, 'scheduler') and hasattr(scheduler.scheduler, 'stop'):
+                        scheduler.scheduler.stop()
+                except Exception:
+                    pass
+            finally:
+                pass
         self.windowClose.emit(event)
+        # Proceed with default handling
+        super().closeEvent(event)
+
+    def _stop_all_qtimers(self):
+        try:
+            # Stop timers under this window
+            for t in self.findChildren(QTimer):
+                t.stop()
+        except Exception:
+            pass
 
     def keyPressEvent(self, event):
         self.keyPress.emit(event)

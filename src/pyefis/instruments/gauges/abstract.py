@@ -79,7 +79,8 @@ class AbstractGauge(QWidget):
         self.encoder_num_digit_selected = 0
         self.encoder_num_digit_options = []
         self.encoder_num_blink = False
-        self.encoder_num_blink_timer = QTimer()
+        # Parent the timer to this widget so it is destroyed safely on close
+        self.encoder_num_blink_timer = QTimer(self)
         self.encoder_num_blink_timer.timeout.connect(self.encoder_blink_event)
         self.encoder_num_require_confirm = False
         self.encoder_num_confirmed = False
@@ -219,6 +220,15 @@ class AbstractGauge(QWidget):
             return self.unitsOverride
         else:
             return self._units
+
+    def closeEvent(self, event):
+        # Ensure timers are stopped before destruction to avoid warnings/crashes
+        try:
+            if hasattr(self, 'encoder_num_blink_timer') and self.encoder_num_blink_timer is not None:
+                self.encoder_num_blink_timer.stop()
+        except Exception:
+            pass
+        super().closeEvent(event)
 
     def setUnits(self, value):
         self._units = value
