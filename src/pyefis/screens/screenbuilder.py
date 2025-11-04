@@ -104,10 +104,14 @@ class Screen(QWidget):
     def closeEvent(self, event):
         try:
             if hasattr(self, 'encoder_timer') and self.encoder_timer is not None:
-                self.encoder_timer.stop()
+                if self.encoder_timer.isActive():
+                    self.encoder_timer.stop()
         except Exception:
             pass
-        super().closeEvent(event)
+        try:
+            super().closeEvent(event)
+        except Exception:
+            pass
 
     def calc_includes(self,i,p_rows,p_cols):
         args = i['type'].split(',')

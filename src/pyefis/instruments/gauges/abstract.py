@@ -225,10 +225,14 @@ class AbstractGauge(QWidget):
         # Ensure timers are stopped before destruction to avoid warnings/crashes
         try:
             if hasattr(self, 'encoder_num_blink_timer') and self.encoder_num_blink_timer is not None:
-                self.encoder_num_blink_timer.stop()
+                if self.encoder_num_blink_timer.isActive():
+                    self.encoder_num_blink_timer.stop()
         except Exception:
             pass
-        super().closeEvent(event)
+        try:
+            super().closeEvent(event)
+        except Exception:
+            pass
 
     def setUnits(self, value):
         self._units = value

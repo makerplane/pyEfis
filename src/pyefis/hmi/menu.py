@@ -127,9 +127,16 @@ class Menu(QWidget):
 
     def closeEvent(self, event):
         # Ensure timer is stopped in the GUI thread before destruction
-        if hasattr(self, 'hide_timer'):
-            self.hide_timer.stop()
-        super().closeEvent(event)
+        try:
+            if hasattr(self, 'hide_timer') and self.hide_timer is not None:
+                if self.hide_timer.isActive():
+                    self.hide_timer.stop()
+        except Exception:
+            pass
+        try:
+            super().closeEvent(event)
+        except Exception:
+            pass
 
     def show_menu(self):
         for i,button in enumerate(self.current_menu):
