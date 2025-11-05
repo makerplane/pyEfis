@@ -30,6 +30,15 @@ class HorizontalBarSimple(HorizontalBarBase):
     
     def __init__(self, parent=None, min_size=True, font_family="DejaVu Sans Condensed"):
         super().__init__(parent, min_size, font_family)
+        # Force segments to 0 to prevent any segment drawing
+        self._segments_locked = True
+        self.segments = 0
+    
+    def __setattr__(self, name, value):
+        # Prevent segments from being changed after initialization
+        if name == 'segments' and hasattr(self, '_segments_locked'):
+            return  # Ignore any attempts to set segments
+        super().__setattr__(name, value)
     
     def _getBarColor(self):
         """

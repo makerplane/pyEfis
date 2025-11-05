@@ -427,6 +427,10 @@ class Screen(QWidget):
                             i['options'] = i.get('options',dict())|pref
             # Merge gauge specific settings
             i['options'] = i.get('options',dict())|specific_pref
+            
+            # Allow type override from preferences
+            if 'type' in specific_pref:
+                i['type'] = specific_pref['type']
 
             if 'styles' in specific_pref:
                 for style in self.parent.preferences['style']:
