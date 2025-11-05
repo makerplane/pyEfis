@@ -17,6 +17,8 @@
 
 from .horizontalBar import HorizontalBar
 from .verticalBar import VerticalBar
+from .horizontalBarImproved import HorizontalBarImproved
+from .verticalBarImproved import VerticalBarImproved
 from .arc import ArcGauge
 from .numeric import NumericDisplay
 from .egt import EGTGroup
