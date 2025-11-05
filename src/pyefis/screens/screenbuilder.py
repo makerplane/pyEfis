@@ -512,10 +512,14 @@ class Screen(QWidget):
             self.instruments[count] = gauges.HorizontalBar(self,min_size=False,font_family=font_family)
         elif i['type'] == 'horizontal_bar_gauge_improved':
             self.instruments[count] = gauges.HorizontalBarImproved(self,min_size=False,font_family=font_family)
+        elif i['type'] == 'horizontal_bar_gauge_simple':
+            self.instruments[count] = gauges.HorizontalBarSimple(self,min_size=False,font_family=font_family)
         elif i['type'] == 'vertical_bar_gauge':
             self.instruments[count] = gauges.VerticalBar(self,min_size=False,font_family=font_family)
         elif i['type'] == 'vertical_bar_gauge_improved':
             self.instruments[count] = gauges.VerticalBarImproved(self,min_size=False,font_family=font_family)
+        elif i['type'] == 'vertical_bar_gauge_simple':
+            self.instruments[count] = gauges.VerticalBarSimple(self,min_size=False,font_family=font_family)
         elif i['type'] == 'virtual_vfr':
             self.instruments[count] = VirtualVfr(self,font_percent=font_percent,font_family=font_family)
 
