@@ -35,20 +35,30 @@ class VerticalBarImproved(VerticalBarBase):
         """
         Calculate pixel position for a threshold value with consistent rounding.
         Returns position from barTop (0 = top of bar, barHeight = bottom).
+        
+        Uses integer arithmetic throughout to ensure consistent positioning
+        across bars with identical thresholds.
         """
         if value is None or self.highRange == self.lowRange:
+            return None
+        
+        # Use integer barHeight to ensure consistent calculations
+        barHeight = int(self.barHeight)
+        if barHeight <= 0:
             return None
         
         # Calculate normalized position (0.0 to 1.0)
         normalized = (value - self.lowRange) / (self.highRange - self.lowRange)
         normalized = max(0.0, min(1.0, normalized))  # Clamp to valid range
         
-        # Convert to pixel position (inverted: high values = low pixels)
-        pixelFromBottom = normalized * self.barHeight
-        pixelFromTop = self.barHeight - pixelFromBottom
+        # Convert to pixel position using integer math for consistency
+        # Scale by 1000 to maintain precision, then divide back
+        scaledPosition = int(normalized * 1000)
+        pixelFromBottom = (scaledPosition * barHeight) // 1000
+        pixelFromTop = barHeight - pixelFromBottom
         
-        # Round to nearest pixel for consistent positioning
-        return round(pixelFromTop)
+        # Add barTop offset as integer
+        return int(self.barTop) + pixelFromTop
     
     def paintEvent(self, event):
         # Check highlight status
@@ -122,14 +132,20 @@ class VerticalBarImproved(VerticalBarBase):
         # ===== IMPROVED BAR DRAWING WITH CONSISTENT ALIGNMENT =====
         p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
         
+        # Convert bar boundaries to integers for pixel-perfect alignment
+        barTop = int(self.barTop)
+        barBottom = int(self.barBottom)
+        barLeft = int(self.barLeft)
+        barWidth = int(self.barWidth)
+        
         # Calculate all threshold positions once with consistent rounding
         lowAlarmPixel = self._calculateThresholdPixel(self.lowAlarm) if self.lowAlarm and self.lowAlarm >= self.lowRange else None
         lowWarnPixel = self._calculateThresholdPixel(self.lowWarn) if self.lowWarn and self.lowWarn >= self.lowRange else None
         highWarnPixel = self._calculateThresholdPixel(self.highWarn) if self.highWarn and self.highWarn <= self.highRange else None
         highAlarmPixel = self._calculateThresholdPixel(self.highAlarm) if self.highAlarm and self.highAlarm <= self.highRange else None
         
-        # Draw the bar in sections from top to bottom
-        currentTop = self.barTop
+        # Draw the bar in sections from top to bottom using integer coordinates
+        currentTop = barTop
         
         # Top alarm zone (high alarm)
         if highAlarmPixel is not None:
@@ -138,7 +154,7 @@ class VerticalBarImproved(VerticalBarBase):
                 pen.setColor(self.alarmColor)
                 p.setPen(pen)
                 p.setBrush(self.alarmColor)
-                p.drawRect(QRectF(self.barLeft, currentTop, self.barWidth, alarmHeight))
+                p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
                 currentTop = highAlarmPixel
         
         # High warning zone
@@ -148,38 +164,38 @@ class VerticalBarImproved(VerticalBarBase):
                 pen.setColor(self.warnColor)
                 p.setPen(pen)
                 p.setBrush(self.warnColor)
-                p.drawRect(QRectF(self.barLeft, currentTop, self.barWidth, warnHeight))
+                p.drawRect(barLeft, currentTop, barWidth, warnHeight)
                 currentTop = highWarnPixel
         
         # Safe zone (middle)
-        safeBottom = lowWarnPixel if lowWarnPixel is not None else self.barBottom
+        safeBottom = lowWarnPixel if lowWarnPixel is not None else barBottom
         safeHeight = safeBottom - currentTop
         if safeHeight > 0:
             pen.setColor(self.safeColor)
             p.setPen(pen)
             p.setBrush(self.safeColor)
-            p.drawRect(QRectF(self.barLeft, currentTop, self.barWidth, safeHeight))
+            p.drawRect(barLeft, currentTop, barWidth, safeHeight)
             currentTop = safeBottom
         
         # Low warning zone
         if lowWarnPixel is not None:
-            lowWarnBottom = lowAlarmPixel if lowAlarmPixel is not None else self.barBottom
+            lowWarnBottom = lowAlarmPixel if lowAlarmPixel is not None else barBottom
             warnHeight = lowWarnBottom - currentTop
             if warnHeight > 0:
                 pen.setColor(self.warnColor)
                 p.setPen(pen)
                 p.setBrush(self.warnColor)
-                p.drawRect(QRectF(self.barLeft, currentTop, self.barWidth, warnHeight))
+                p.drawRect(barLeft, currentTop, barWidth, warnHeight)
                 currentTop = lowWarnBottom
         
         # Bottom alarm zone (low alarm)
         if lowAlarmPixel is not None:
-            alarmHeight = self.barBottom - currentTop
+            alarmHeight = barBottom - currentTop
             if alarmHeight > 0:
                 pen.setColor(self.alarmColor)
                 p.setPen(pen)
                 p.setBrush(self.alarmColor)
-                p.drawRect(QRectF(self.barLeft, currentTop, self.barWidth, alarmHeight))
+                p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
 
         # Draw segments if needed (simplified)
         if self.segments > 1:  # Only draw if > 1
