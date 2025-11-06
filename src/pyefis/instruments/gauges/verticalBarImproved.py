@@ -14,8 +14,12 @@
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
+import sys
+import logging
 
 from .verticalBar import VerticalBar as VerticalBarBase
+
+log = logging.getLogger(__name__)
 
 
 class VerticalBarImproved(VerticalBarBase):
@@ -30,7 +34,8 @@ class VerticalBarImproved(VerticalBarBase):
     
     def __init__(self, parent=None, min_size=True, font_family="DejaVu Sans Condensed"):
         super().__init__(parent, min_size, font_family)
-    
+        self._bar_left = -1
+
     def _calculateThresholdPixel(self, value):
         """
         Calculate pixel position for a threshold value with consistent rounding.
@@ -132,11 +137,60 @@ class VerticalBarImproved(VerticalBarBase):
         # ===== IMPROVED BAR DRAWING WITH CONSISTENT ALIGNMENT =====
         p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
         
+        # CRITICAL: Set pen to no outline for color bands
+        # A 1-pixel pen draws on the rectangle border and can cause misalignment
+        pen.setWidth(0)  # No outline
+        pen.setStyle(Qt.PenStyle.NoPen)  # Disable pen completely
+        
         # Convert bar boundaries to integers for pixel-perfect alignment
         barTop = int(self.barTop)
         barBottom = int(self.barBottom)
-        barLeft = int(self.barLeft)
-        barWidth = int(self.barWidth)
+
+        widgetWidth = int(self.width())
+
+        # Start with local geometry based on this widget alone.
+        barWidth = max(1, int(round(widgetWidth * self.bar_width_percent)))
+        barWidth = min(barWidth, widgetWidth)
+        barLeft = (widgetWidth - barWidth) // 2
+        lineWidth = max(1, int(round(widgetWidth * self.line_width_percent)))
+        lineWidth = min(lineWidth, widgetWidth)
+        lineLeft = (widgetWidth - lineWidth) // 2
+
+        # When part of a ganged layout, align using the parent container width so
+        # every bar paints using the exact same geometry regardless of its own widget width.
+        parent_obj = self.parent()
+        if parent_obj is not None and hasattr(parent_obj, 'bars'):
+            try:
+                bars = parent_obj.bars
+                barCount = len(bars)
+                if barCount > 0:
+                    index = bars.index(self)
+                    parentWidth = max(1, parent_obj.width())
+                    slotWidth = parentWidth / barCount
+
+                    barWidth = max(1, int(round(slotWidth * self.bar_width_percent)))
+                    barWidth = min(barWidth, widgetWidth)
+                    lineWidth = max(1, int(round(slotWidth * self.line_width_percent)))
+                    lineWidth = min(lineWidth, widgetWidth)
+
+                    slotLeft = slotWidth * index
+                    desiredBarLeft = slotLeft + (slotWidth - barWidth) / 2.0
+                    desiredLineLeft = slotLeft + (slotWidth - lineWidth) / 2.0
+
+                    # Translate global coordinates back into the widget's local space.
+                    barLeft = int(round(desiredBarLeft - self.x()))
+                    lineLeft = int(round(desiredLineLeft - self.x()))
+            except ValueError:
+                # Bar not found in parent list; keep local geometry.
+                pass
+
+        # Clamp to ensure drawing stays inside this widget.
+        barLeft = max(0, min(widgetWidth - barWidth, barLeft))
+        lineLeft = max(0, min(widgetWidth - lineWidth, lineLeft))
+
+        # Calculate ball geometry from the aligned bar values.
+        ballRadius = max(1, int(round(barWidth * 0.40)))
+        ballCenter = QPointF(barLeft + (barWidth / 2.0), self.barBottom - (barWidth / 2.0))
         
         # Calculate all threshold positions once with consistent rounding
         lowAlarmPixel = self._calculateThresholdPixel(self.lowAlarm) if self.lowAlarm and self.lowAlarm >= self.lowRange else None
@@ -144,37 +198,87 @@ class VerticalBarImproved(VerticalBarBase):
         highWarnPixel = self._calculateThresholdPixel(self.highWarn) if self.highWarn and self.highWarn <= self.highRange else None
         highAlarmPixel = self._calculateThresholdPixel(self.highAlarm) if self.highAlarm and self.highAlarm <= self.highRange else None
         
+        # DEBUG: Print pixel positions for specific bars (limited to avoid spam)
+        # Looking for CHT11 or OILP1, but checking actual bar names
+        if hasattr(self, 'name'):
+            # Check if this is a bar we're interested in
+            debug_this = False
+            if 'ted' in str(self.name):
+                debug_this = True
+            
+            if debug_this:
+                log.warning(f"=== {self.name} Bar Debug ===")
+                log.warning(f"  Widget width: {widgetWidth}, self.width(): {self.width()}")
+                log.warning(f"  Original self.barLeft: {self.barLeft}, self.barWidth: {self.barWidth}")
+                log.warning(f"  Calculated barLeft: {barLeft}, barWidth: {barWidth} (using bar_width_percent={self.bar_width_percent})")
+                log.warning(f"  Bar dimensions: top={barTop}, bottom={barBottom}, left={barLeft}, width={barWidth}, height={barBottom-barTop}")
+                log.warning(f"  Range: {self.lowRange} to {self.highRange}")
+                log.warning(f"  Thresholds: lowAlarm={self.lowAlarm}, lowWarn={self.lowWarn}, highWarn={self.highWarn}, highAlarm={self.highAlarm}")
+                log.warning(f"  Threshold pixels: lowAlarm={lowAlarmPixel}, lowWarn={lowWarnPixel}, highWarn={highWarnPixel}, highAlarm={highAlarmPixel}")
+        
         # Draw the bar in sections from top to bottom using integer coordinates
         currentTop = barTop
-        
+
+        # 1) Snap to device pixels (Python/PyQt)
+        try:
+            dpr = p.device().devicePixelRatioF()
+        except Exception:
+            try:
+                dpr = self.devicePixelRatioF()
+            except Exception:
+                dpr = 1.0
+
+        def snap(v: float) -> float:
+            return round(v * dpr) / dpr
+
+        # 2) Paint stacked bars with fillRect (no borders), AA off
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        p.setPen(Qt.PenStyle.NoPen)
+
+        def draw_bar(x: float, y: float, w: float, h: float, color):
+            r = QRectF(snap(x), snap(y), snap(w), snap(h))
+            p.fillRect(r, color)
+
         # Top alarm zone (high alarm)
         if highAlarmPixel is not None:
             alarmHeight = highAlarmPixel - currentTop
             if alarmHeight > 0:
-                pen.setColor(self.alarmColor)
-                p.setPen(pen)
-                p.setBrush(self.alarmColor)
-                p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                # DEBUG: Print alarm zone rect
+                if hasattr(self, 'name'):
+                    if 'ted' in str(self.name):
+                        log.warning(f"  High Alarm rect: x={barLeft}, y={currentTop}, w={barWidth}, h={alarmHeight}")
+                #p.setPen(Qt.PenStyle.NoPen)
+                #p.setBrush(self.alarmColor)
+                #p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                draw_bar(barLeft, currentTop, barWidth, alarmHeight, self.alarmColor)
                 currentTop = highAlarmPixel
         
         # High warning zone
         if highWarnPixel is not None:
             warnHeight = highWarnPixel - currentTop
             if warnHeight > 0:
-                pen.setColor(self.warnColor)
-                p.setPen(pen)
-                p.setBrush(self.warnColor)
-                p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                # DEBUG: Print warning zone rect
+                if hasattr(self, 'name'):
+                    if 'ted' in str(self.name):
+                        log.warning(f"  High Warn rect: x={barLeft}, y={currentTop}, w={barWidth}, h={warnHeight}")
+                #p.setPen(Qt.PenStyle.NoPen)
+                #p.setBrush(self.warnColor)
+                #p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                draw_bar(barLeft, currentTop, barWidth, warnHeight, self.warnColor)
                 currentTop = highWarnPixel
         
         # Safe zone (middle)
         safeBottom = lowWarnPixel if lowWarnPixel is not None else barBottom
         safeHeight = safeBottom - currentTop
         if safeHeight > 0:
-            pen.setColor(self.safeColor)
-            p.setPen(pen)
-            p.setBrush(self.safeColor)
-            p.drawRect(barLeft, currentTop, barWidth, safeHeight)
+            # DEBUG: Print safe zone rect
+            if hasattr(self, 'name'):
+                if 'ted' in str(self.name):
+                    log.warning(f"  Safe Zone rect: x={barLeft}, y={currentTop}, w={barWidth}, h={safeHeight}")
+            #p.setPen(Qt.PenStyle.NoPen)
+            #p.setBrush(self.safeColor)
+            #p.drawRect(barLeft, currentTop, barWidth, safeHeight)
+            draw_bar(barLeft, currentTop, barWidth, safeHeight, self.safeColor)
             currentTop = safeBottom
         
         # Low warning zone
@@ -182,20 +286,26 @@ class VerticalBarImproved(VerticalBarBase):
             lowWarnBottom = lowAlarmPixel if lowAlarmPixel is not None else barBottom
             warnHeight = lowWarnBottom - currentTop
             if warnHeight > 0:
-                pen.setColor(self.warnColor)
-                p.setPen(pen)
-                p.setBrush(self.warnColor)
-                p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                if hasattr(self, 'name'):
+                    if 'ted' in str(self.name):
+                        log.warning(f"  Low Warn rect: x={barLeft}, y={currentTop}, w={barWidth}, h={warnHeight}")
+                #p.setPen(Qt.PenStyle.NoPen)
+                #p.setBrush(self.warnColor)
+                #p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                draw_bar(barLeft, currentTop, barWidth, warnHeight, self.warnColor)
                 currentTop = lowWarnBottom
         
         # Bottom alarm zone (low alarm)
         if lowAlarmPixel is not None:
             alarmHeight = barBottom - currentTop
             if alarmHeight > 0:
-                pen.setColor(self.alarmColor)
-                p.setPen(pen)
-                p.setBrush(self.alarmColor)
-                p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                if hasattr(self, 'name'):
+                    if 'ted' in str(self.name):
+                        log.warning(f"  Low Alarm rect: x={barLeft}, y={currentTop}, w={barWidth}, h={alarmHeight}")
+                #p.setPen(Qt.PenStyle.NoPen)
+                #p.setBrush(self.alarmColor)
+                #p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                draw_bar(barLeft, currentTop, barWidth, alarmHeight, self.alarmColor)
 
         # Draw segments if needed (simplified)
         if self.segments > 1:  # Only draw if > 1
@@ -204,11 +314,12 @@ class VerticalBarImproved(VerticalBarBase):
             pen.setColor(Qt.GlobalColor.black)
             p.setPen(pen)
             p.setBrush(Qt.GlobalColor.black)
-            
+
+            gap_height = max(1, int(round(segment_gap)))  # At least 1 pixel
             for segment in range(self.segments - 1):
-                seg_top = self.barTop + round((segment + 1) * segment_size + segment * segment_gap)
-                gap_height = max(1, round(segment_gap))  # At least 1 pixel
-                p.drawRect(QRectF(self.barLeft, seg_top, self.barWidth, gap_height))
+                seg_top = int(self.barTop + round((segment + 1) * segment_size + segment * segment_gap))
+                #p.drawRect(barLeft, seg_top, barWidth, gap_height)
+                draw_bar(barLeft, seg_top, barWidth, gap_height, t.GlobalColor.black)
         
         # Highlight ball
         if self.highlight:
@@ -216,7 +327,7 @@ class VerticalBarImproved(VerticalBarBase):
             pen.setWidth(1)
             p.setPen(pen)
             p.setBrush(self.highlightColor)
-            p.drawEllipse(self.ballCenter, self.ballRadius, self.ballRadius)
+            p.drawEllipse(ballCenter, ballRadius, ballRadius)
 
         # Peak value line
         if self.peakMode:
@@ -232,7 +343,7 @@ class VerticalBarImproved(VerticalBarBase):
             else:
                 y = self.barTop + (self.barHeight - self.interpolate(self.peakValue, self.barHeight))
             y = max(self.barTop, min(self.barBottom, y))
-            p.drawRect(qRound(self.lineLeft), qRound(y - 2), qRound(self.lineWidth), qRound(4))
+            #p.drawRect(qRound(lineLeft), qRound(y - 2), qRound(lineWidth), qRound(4))
 
         # Indicator (filled bar effect or line)
         brush = QBrush(self.penColor)
@@ -252,14 +363,16 @@ class VerticalBarImproved(VerticalBarBase):
         
         valuePixel = max(self.barTop, min(self.barBottom, valuePixel))
         
+        valuePixelInt = int(valuePixel)
+        
         if self.segments > 0:
             # Filled bar effect - darken above the value
             pen.setColor(QColor(0, 0, 0, self.segment_alpha))
             p.setPen(pen)
             p.setBrush(QColor(0, 0, 0, self.segment_alpha))
-            darkenHeight = valuePixel - self.barTop
+            darkenHeight = valuePixelInt - barTop
             if darkenHeight > 0:
-                p.drawRect(QRectF(self.barLeft, self.barTop, self.barWidth, darkenHeight))
+                p.drawRect(barLeft, barTop, barWidth, darkenHeight)
         else:
             # Traditional line indicator
-            p.drawRect(QRectF(self.lineLeft, valuePixel - 2, self.lineWidth, 4))
+            p.drawRect(lineLeft, valuePixelInt - 2, lineWidth, 4)

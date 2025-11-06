@@ -87,10 +87,23 @@ class EGTGroup(QWidget):
 
     def resizeEvent(self, event):
         cylcount = len(self.bars)
-        barwidth = self.width() / cylcount
-        barheight = self.height()
-        x = 0
-        for bar in self.bars:
-            bar.resize(qRound(barwidth), qRound(barheight))
-            bar.move(qRound(barwidth * x), 0)
-            x += 1
+        if cylcount == 0:
+            return
+
+        total_width = self.width()
+        total_height = self.height()
+
+        # Distribute integer pixel widths deterministically so the sum matches total_width.
+        base_width = total_width // cylcount
+        remainder = total_width - (base_width * cylcount)
+
+        current_x = 0
+        for index, bar in enumerate(self.bars):
+            # Spread the remaining pixels one-per-bar from the left.
+            extra_pixel = 1 if index < remainder else 0
+            bar_width = base_width + extra_pixel
+
+            bar.resize(bar_width, total_height)
+            bar.move(current_x, 0)
+
+            current_x += bar_width
