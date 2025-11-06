@@ -100,9 +100,17 @@ class AbstractGauge(QWidget):
         # These are the colors that are used when the value's
         # quality is marked as good
         self.bg_good_color = Qt.GlobalColor.black
+
+        #Qt.GlobalColor.green
+        #QColor(  0, 180,  60)
         self.safe_good_color = Qt.GlobalColor.green
+        #Qt.GlobalColor.yellow
+        #QColor(255, 200,  40)
         self.warn_good_color = Qt.GlobalColor.yellow
+        #Qt.GlobalColor.red
+        #QColor(220,  60,  40)
         self.alarm_good_color = Qt.GlobalColor.red
+
         self.text_good_color = Qt.GlobalColor.white
         self.pen_good_color = Qt.GlobalColor.white
         self.highlight_good_color = Qt.GlobalColor.magenta

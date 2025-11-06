@@ -236,7 +236,12 @@ class VerticalBarImproved(VerticalBarBase):
         p.setPen(Qt.PenStyle.NoPen)
 
         def draw_bar(x: float, y: float, w: float, h: float, color):
-            r = QRectF(snap(x), snap(y), snap(w), snap(h))
+            snx = snap(x)
+            sny = snap(y)
+            snw = snap(w)
+            snh = snap(h)
+            log.warning(f"  Snapped {self.name}: x={snx:.4f}, y={sny:.4f}, w={snw:.4f}, h={snh:.4f}")
+            r = QRectF(snx, sny, snw, snh)
             p.fillRect(r, color)
 
         # Top alarm zone (high alarm)
@@ -319,7 +324,7 @@ class VerticalBarImproved(VerticalBarBase):
             for segment in range(self.segments - 1):
                 seg_top = int(self.barTop + round((segment + 1) * segment_size + segment * segment_gap))
                 #p.drawRect(barLeft, seg_top, barWidth, gap_height)
-                draw_bar(barLeft, seg_top, barWidth, gap_height, t.GlobalColor.black)
+                draw_bar(barLeft, seg_top, barWidth, gap_height, Qt.GlobalColor.black)
         
         # Highlight ball
         if self.highlight:
@@ -376,3 +381,22 @@ class VerticalBarImproved(VerticalBarBase):
         else:
             # Traditional line indicator
             p.drawRect(lineLeft, valuePixelInt - 2, lineWidth, 4)
+
+        # Draw 1-pixel grey guide lines on the sides of the bar.
+        # Left: full bar height; Right: tracks the top of the colored bar (current value).
+        # p.save()
+        # p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        # p.setPen(Qt.PenStyle.NoPen)
+        # p.setBrush(QColor(160, 160, 160))  # grey
+        # # Left edge (full height)
+        # p.drawRect(barLeft, barTop, 1, barBottom - barTop)
+        # # Right edge (from current value to bottom)
+        # right_x = barLeft + barWidth - 1
+        # start_y = valuePixelInt if isinstance(valuePixelInt, int) else int(valuePixel)
+        # # Clamp to bar bounds
+        # if start_y < barTop:
+        #     start_y = barTop
+        # if start_y > barBottom:
+        #     start_y = barBottom
+        # p.drawRect(right_x, start_y, 1, barBottom - start_y)
+        # p.restore()
