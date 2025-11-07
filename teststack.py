@@ -15,15 +15,15 @@ WINDOW_HEIGHT = 600
 
 # Bar configuration
 BAR_COUNT = 6  # Number of bars to display side by side
-BAR_WIDTH = 40
-BAR_HEIGHT = 400
+BAR_WIDTH = 20
+BAR_HEIGHT = 160
 BAR_SPACING = 20  # Space between bars
 BAR_START_X = 50  # Left margin
 BAR_START_Y = 100  # Top margin
 
 # Simulate widget height variations (each bar might be slightly different height in pyEfis)
 # This simulates how different widgets might round font sizes differently
-WIDGET_HEIGHTS = [400, 400, 400, 400, 400, 400]  # Slight variations
+WIDGET_HEIGHTS = [160, 160, 160, 160, 160, 160]  # Slight variations
 SHOW_NAME = True
 SHOW_VALUE = True
 SHOW_UNITS = True
@@ -45,9 +45,9 @@ HIGH_ALARM = 232
 CURRENT_VALUE = 180
 
 # Colors
-SAFE_COLOR = QColor(0, 255, 0) #Qt.GlobalColor.green #QColor(0, 255, 0)      # Green
-WARN_COLOR = QColor(255, 255, 0) #Qt.GlobalColor.yellow #QColor(255, 255, 0)    # Yellow
-ALARM_COLOR = QColor(255, 0, 0) #Qt.GlobalColor.red #QColor(255, 0, 0)     # Red
+SAFE_COLOR = QColor("#00FF00") #Qt.GlobalColor.green #QColor(0, 255, 0)      # Green
+WARN_COLOR = QColor("#FFFF00") #Qt.GlobalColor.yellow #QColor(255, 255, 0)    # Yellow
+ALARM_COLOR = QColor("#FF0000") #Qt.GlobalColor.red #QColor(255, 0, 0)     # Red
 BG_COLOR = QColor(40, 40, 40) #Qt.GlobalColor.black #QColor(40, 40, 40)       # Dark gray background
 
 # Font
@@ -185,7 +185,8 @@ class VerticalBarTest(QWidget):
                 pen.setColor(ALARM_COLOR)
                 p.setPen(pen)
                 p.setBrush(ALARM_COLOR)
-                p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                #p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                p.fillRect(QRectF(barLeft, currentTop, barWidth, alarmHeight),ALARM_COLOR) 
                 currentTop = highAlarmPixel
         
         # High warning zone
@@ -197,7 +198,8 @@ class VerticalBarTest(QWidget):
                 pen.setColor(WARN_COLOR)
                 p.setPen(pen)
                 p.setBrush(WARN_COLOR)
-                p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                #p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                p.fillRect(QRectF(barLeft, currentTop, barWidth, warnHeight), WARN_COLOR)
                 currentTop = highWarnPixel
         
         # Safe zone (middle)
@@ -209,7 +211,8 @@ class VerticalBarTest(QWidget):
             pen.setColor(SAFE_COLOR)
             p.setPen(pen)
             p.setBrush(SAFE_COLOR)
-            p.drawRect(barLeft, currentTop, barWidth, safeHeight)
+            #p.drawRect(barLeft, currentTop, barWidth, safeHeight)
+            p.fillRect(QRectF(barLeft, currentTop, barWidth, safeHeight), SAFE_COLOR)
             currentTop = safeBottom
         
         # Low warning zone
@@ -222,7 +225,8 @@ class VerticalBarTest(QWidget):
                 pen.setColor(WARN_COLOR)
                 p.setPen(pen)
                 p.setBrush(WARN_COLOR)
-                p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                #p.drawRect(barLeft, currentTop, barWidth, warnHeight)
+                p.fillRect(QRectF(barLeft, currentTop, barWidth, warnHeight), WARN_COLOR)
                 currentTop = lowWarnBottom
         
         # Bottom alarm zone (low alarm)
@@ -234,17 +238,18 @@ class VerticalBarTest(QWidget):
                 pen.setColor(ALARM_COLOR)
                 p.setPen(pen)
                 p.setBrush(ALARM_COLOR)
-                p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                #p.drawRect(barLeft, currentTop, barWidth, alarmHeight)
+                p.fillRect(QRectF(barLeft, currentTop, barWidth, alarmHeight), ALARM_COLOR)
         
         # Draw current value indicator
-        valuePixel = self._calculateThresholdPixel(CURRENT_VALUE, barTop, barBottom)
-        if valuePixel is not None:
-            pen.setColor(QColor(255, 255, 255))  # White
-            pen.setWidth(2)
-            p.setPen(pen)
-            lineLeft = barLeft - 5
-            lineRight = barLeft + barWidth + 5
-            p.drawLine(lineLeft, int(valuePixel), lineRight, int(valuePixel))
+        # valuePixel = self._calculateThresholdPixel(CURRENT_VALUE, barTop, barBottom)
+        # if valuePixel is not None:
+        #     pen.setColor(QColor(255, 255, 255))  # White
+        #     pen.setWidth(2)
+        #     p.setPen(pen)
+        #     lineLeft = barLeft - 5
+        #     lineRight = barLeft + barWidth + 5
+        #     p.drawLine(lineLeft, int(valuePixel), lineRight, int(valuePixel))
         
         # Draw label below bar
         p.setRenderHint(QPainter.RenderHint.Antialiasing, True)

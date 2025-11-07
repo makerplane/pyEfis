@@ -103,13 +103,18 @@ class AbstractGauge(QWidget):
 
         #Qt.GlobalColor.green
         #QColor(  0, 180,  60)
-        self.safe_good_color = Qt.GlobalColor.green
+        #self.safe_good_color = Qt.GlobalColor.green
+        self.safe_good_color = QColor(  0, 255,  0)
+
         #Qt.GlobalColor.yellow
         #QColor(255, 200,  40)
-        self.warn_good_color = Qt.GlobalColor.yellow
+        #self.warn_good_color = Qt.GlobalColor.yellow
+        self.warn_good_color = QColor(  255, 255,  0)
+
         #Qt.GlobalColor.red
         #QColor(220,  60,  40)
-        self.alarm_good_color = Qt.GlobalColor.red
+        #self.alarm_good_color = Qt.GlobalColor.red
+        self.alarm_good_color = QColor(  220, 60,  40)
 
         self.text_good_color = Qt.GlobalColor.white
         self.pen_good_color = Qt.GlobalColor.white
