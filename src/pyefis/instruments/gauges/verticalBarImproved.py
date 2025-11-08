@@ -240,7 +240,7 @@ class VerticalBarImproved(VerticalBarBase):
             sny = snap(y)
             snw = snap(w)
             snh = snap(h)
-            log.warning(f"  Snapped {self.name}: x={snx:.4f}, y={sny:.4f}, w={snw:.4f}, h={snh:.4f}")
+            # log.warning(f"  Snapped {self.name}: x={snx:.4f}, y={sny:.4f}, w={snw:.4f}, h={snh:.4f}")
             r = QRectF(snx, sny, snw, snh)
             p.fillRect(r, color)
 

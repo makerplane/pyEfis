@@ -35,6 +35,14 @@ class HorizontalBar(AbstractGauge):
         self.segment_gap_percent = 0.01
         self.segment_alpha = 180
         self.bar_divisor = 4.5
+        # New options: place value/dbkey text on the left side of the bar
+        self.value_on_bar_left = False
+        self.value_on_bar_left_width_percent = 0.25  # portion of width reserved for left label
+        self.show_dbkey_text = False  # when true, show dbkey text instead of numeric value on left label
+        # Internals computed on resize
+        self._bar_left = 0
+        self._bar_width = 0
+        self.barValueRect = QRectF()
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
         return 2
@@ -57,10 +65,32 @@ class HorizontalBar(AbstractGauge):
         self.barHeight = self.section_size * self.bar_divisor
         self.barTop = self.section_size * 2.7
         self.nameTextRect = QRectF(1, 0, self.width(), self.section_size * 2.4)
-        self.valueTextRect = QRectF(1, self.section_size * 8,
-                                    self.width()-5, self.section_size * 4)
+        self.valueTextRect = QRectF(1, self.section_size * 8, self.width()-5, self.section_size * 4)
+        # Geometry is recalculated in paintEvent as well to reflect dynamic late-applied flags
+        self._recompute_geometry()
+
+    def _recompute_geometry(self):
+        """Recalculate geometry based on current flags.
+        Called in resizeEvent and paintEvent to handle preferences applied after initial resize."""
+        self._bar_left = 0
+        self._bar_width = self.width()
+        if self.value_on_bar_left:
+            pct = max(0.05, min(0.5, float(getattr(self, 'value_on_bar_left_width_percent', 0.25) or 0.25)))
+            left_w = int(self.width() * pct)
+            gap = 4
+            self.barValueRect = QRectF(2, self.barTop, max(0, left_w - gap), self.barHeight)
+            self._bar_left = left_w
+            self._bar_width = max(0, self.width() - self._bar_left)
+        else:
+            self.barValueRect = QRectF()
+
+    def get_bar_geometry(self):
+        """Return (left, top, width, height) for the drawable bar region, respecting left label space."""
+        return (int(self._bar_left), int(self.barTop), int(self._bar_width), int(self.barHeight))
 
     def paintEvent(self, event):
+        # Ensure geometry reflects any preference attributes set after construction
+        self._recompute_geometry()
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen()
@@ -97,22 +127,29 @@ class HorizontalBar(AbstractGauge):
             p.setPen(pen)
             p.drawText(self.valueTextRect, self.units, opt)
 
-        # Main Value
-        p.setFont(self.bigFont)
-        #pen.setColor(self.valueColor)
-        #p.setPen(pen)
-        opt = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
-        if self.show_value: 
-            if self.font_ghost_mask:
-                alpha = self.valueColor.alpha()
-                self.valueColor.setAlpha(self.font_ghost_alpha)
+        # Main Value (standard position) unless moved to left of bar
+        if not self.value_on_bar_left:
+            p.setFont(self.bigFont)
+            opt = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
+            if self.show_value: 
+                if self.font_ghost_mask:
+                    alpha = self.valueColor.alpha()
+                    self.valueColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.valueColor)
+                    p.setPen(pen)
+                    p.drawText(self.valueTextRect, self.font_ghost_mask, opt)
+                    self.valueColor.setAlpha(alpha)
                 pen.setColor(self.valueColor)
                 p.setPen(pen)
-                p.drawText(self.valueTextRect, self.font_ghost_mask, opt)
-                self.valueColor.setAlpha(alpha)
-            pen.setColor(self.valueColor)
+                p.drawText(self.valueTextRect, self.valueText, opt)
+        else:
+            # Draw value or dbkey as a label area to the left of the bar
+            label_text = self.dbkey if self.show_dbkey_text else self.valueText
+            p.setFont(self.bigFont)
+            pen.setColor(self.valueColor if not self.show_dbkey_text else self.textColor)
             p.setPen(pen)
-            p.drawText(self.valueTextRect, self.valueText, opt)
+            opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            p.drawText(self.barValueRect, label_text, opt_left)
 
         # Draws the bar
         p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
@@ -120,44 +157,45 @@ class HorizontalBar(AbstractGauge):
         brush = self.safeColor
         p.setPen(pen)
         p.setBrush(brush)
-        p.drawRect(QRectF(0, self.barTop, self.width(), self.barHeight))
+        bar_left, bar_top, bar_width, bar_height = self.get_bar_geometry()
+        p.drawRect(QRectF(bar_left, bar_top, bar_width, bar_height))
         pen.setColor(self.warnColor)
         brush = self.warnColor
         p.setPen(pen)
         p.setBrush(brush)
         if(self.lowWarn):
-            p.drawRect(QRectF(0, self.barTop,
-                              self.interpolate(self.lowWarn, self.width()),
-                              self.barHeight))
+            p.drawRect(QRectF(bar_left, bar_top,
+                              self.interpolate(self.lowWarn, bar_width),
+                              bar_height))
         if(self.highWarn):
-            x = self.interpolate(self.highWarn, self.width())
-            p.drawRect(QRectF(x, self.barTop,
-                              self.width() - x, self.barHeight))
+            x = bar_left + self.interpolate(self.highWarn, bar_width)
+            p.drawRect(QRectF(x, bar_top,
+                              (bar_left + bar_width) - x, bar_height))
         pen.setColor(self.alarmColor)
         brush = self.alarmColor
         p.setPen(pen)
         p.setBrush(brush)
         if(self.lowAlarm):
-            p.drawRect(QRectF(0, self.barTop,
-                              self.interpolate(self.lowAlarm, self.width()),
-                              self.barHeight))
+            p.drawRect(QRectF(bar_left, bar_top,
+                              self.interpolate(self.lowAlarm, bar_width),
+                              bar_height))
         if(self.highAlarm):
-            x = self.interpolate(self.highAlarm, self.width())
-            p.drawRect(QRectF(x, self.barTop,
-                              self.width() - x, self.barHeight))
+            x = bar_left + self.interpolate(self.highAlarm, bar_width)
+            p.drawRect(QRectF(x, bar_top,
+                              (bar_left + bar_width) - x, bar_height))
 
 
         # Draw black bars to create segments
         if self.segments > 0:
-            segment_gap = self.width() * self.segment_gap_percent
-            segment_size = (self.width() - (segment_gap * (self.segments - 1)))/self.segments
+            segment_gap = bar_width * self.segment_gap_percent
+            segment_size = (bar_width - (segment_gap * (self.segments - 1)))/self.segments
             p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
             pen.setColor(Qt.GlobalColor.black)
             p.setPen(pen)
             p.setBrush(Qt.GlobalColor.black)
             for segment in range(self.segments - 1):
-                seg_left = ((segment + 1) * segment_size) + (segment * segment_gap)
-                p.drawRect(QRectF(seg_left, self.barTop, segment_gap, self.barHeight))
+                seg_left = bar_left + (((segment + 1) * segment_size) + (segment * segment_gap))
+                p.drawRect(QRectF(seg_left, bar_top, segment_gap, bar_height))
 
         # Indicator Line
         pen.setColor(QColor(Qt.GlobalColor.darkGray))
@@ -165,15 +203,15 @@ class HorizontalBar(AbstractGauge):
         pen.setWidth(1)
         p.setPen(pen)
         p.setBrush(brush)
-        x = self.interpolate(self._value, self.width())
+        x = bar_left + self.interpolate(self._value, bar_width)
         if x < 0: x = 0
-        if x > self.width(): x = self.width()
+        if x > (bar_left + bar_width): x = (bar_left + bar_width)
         if not self.segments > 0:
-            p.drawRect(QRectF(x-2, self.barTop-4, 4, self.barHeight+8))
+            p.drawRect(QRectF(x-2, bar_top-4, 4, bar_height+8))
         else:
             # IF segmented, darken the top part of the bars from the line up
             pen.setColor(QColor(0, 0, 0, self.segment_alpha))
             p.setPen(pen)
             p.setBrush(QColor(0, 0, 0, self.segment_alpha))
-            p.drawRect(QRectF(x, self.barTop, self.width() - x, self.barHeight))
+            p.drawRect(QRectF(x, bar_top, (bar_left + bar_width) - x, bar_height))
 

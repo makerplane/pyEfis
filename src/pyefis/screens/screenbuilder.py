@@ -541,7 +541,7 @@ class Screen(QWidget):
                 if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
                     hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
                     next
-                if 'dbkey' in option:
+                if option == 'dbkey':
                     if callable(getattr(self.instruments[count], 'setDbkey', None)): 
                         self.instruments[count].setDbkey(value)
                     else:

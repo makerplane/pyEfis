@@ -28,8 +28,8 @@ class HorizontalBarImproved(HorizontalBar):
         """Calculate pixel position for a threshold value with consistent rounding."""
         if value is None or self.highRange == self.lowRange:
             return None
-        
-        barWidth = int(self.width())
+        # Use the drawable bar width (excludes left label area when enabled)
+        _, _, barWidth, _ = self.get_bar_geometry()
         if barWidth <= 0:
             return None
         
@@ -42,6 +42,8 @@ class HorizontalBarImproved(HorizontalBar):
         return pixelFromLeft
     
     def paintEvent(self, event):
+        # Ensure geometry reflects any preference attributes set after construction
+        self._recompute_geometry()
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen()
@@ -75,27 +77,33 @@ class HorizontalBarImproved(HorizontalBar):
             pen.setColor(self.textColor)
             p.setPen(pen)
             p.drawText(self.valueTextRect, self.units, opt)
-
-        p.setFont(self.bigFont)
-        opt = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
-        if self.show_value: 
-            if self.font_ghost_mask:
-                alpha = self.valueColor.alpha()
-                self.valueColor.setAlpha(self.font_ghost_alpha)
+        # Draw value either in standard position or inside left label area
+        if not self.value_on_bar_left:
+            p.setFont(self.bigFont)
+            opt = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom)
+            if self.show_value: 
+                if self.font_ghost_mask:
+                    alpha = self.valueColor.alpha()
+                    self.valueColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.valueColor)
+                    p.setPen(pen)
+                    p.drawText(self.valueTextRect, self.font_ghost_mask, opt)
+                    self.valueColor.setAlpha(alpha)
                 pen.setColor(self.valueColor)
                 p.setPen(pen)
-                p.drawText(self.valueTextRect, self.font_ghost_mask, opt)
-                self.valueColor.setAlpha(alpha)
-            pen.setColor(self.valueColor)
+                p.drawText(self.valueTextRect, self.valueText, opt)
+        else:
+            label_text = self.dbkey if self.show_dbkey_text else self.valueText
+            p.setFont(self.bigFont)
+            pen.setColor(self.valueColor if not self.show_dbkey_text else self.textColor)
             p.setPen(pen)
-            p.drawText(self.valueTextRect, self.valueText, opt)
+            opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            p.drawText(self.barValueRect, label_text, opt_left)
 
         p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
-        
-        barTop = int(self.barTop)
-        barHeight = int(self.barHeight)
-        barWidth = int(self.width())
-        
+
+        bar_left, barTop, barWidth, barHeight = self.get_bar_geometry()
+
         lowAlarmPixel = self._calculateThresholdPixel(self.lowAlarm) if self.lowAlarm else None
         lowWarnPixel = self._calculateThresholdPixel(self.lowWarn) if self.lowWarn else None
         highWarnPixel = self._calculateThresholdPixel(self.highWarn) if self.highWarn else None
@@ -105,27 +113,27 @@ class HorizontalBarImproved(HorizontalBar):
         brush = self.safeColor
         p.setPen(pen)
         p.setBrush(brush)
-        p.drawRect(0, barTop, barWidth, barHeight)
+        p.drawRect(bar_left, barTop, barWidth, barHeight)
         
         pen.setColor(self.warnColor)
         brush = self.warnColor
         p.setPen(pen)
         p.setBrush(brush)
         if lowWarnPixel is not None:
-            p.drawRect(0, barTop, lowWarnPixel, barHeight)
+            p.drawRect(bar_left, barTop, lowWarnPixel, barHeight)
         if highWarnPixel is not None:
             warnWidth = barWidth - highWarnPixel
-            p.drawRect(highWarnPixel, barTop, warnWidth, barHeight)
+            p.drawRect(bar_left + highWarnPixel, barTop, warnWidth, barHeight)
         
         pen.setColor(self.alarmColor)
         brush = self.alarmColor
         p.setPen(pen)
         p.setBrush(brush)
         if lowAlarmPixel is not None:
-            p.drawRect(0, barTop, lowAlarmPixel, barHeight)
+            p.drawRect(bar_left, barTop, lowAlarmPixel, barHeight)
         if highAlarmPixel is not None:
             alarmWidth = barWidth - highAlarmPixel
-            p.drawRect(highAlarmPixel, barTop, alarmWidth, barHeight)
+            p.drawRect(bar_left + highAlarmPixel, barTop, alarmWidth, barHeight)
 
         if self.segments > 0:
             segment_gap = barWidth * self.segment_gap_percent
@@ -135,7 +143,7 @@ class HorizontalBarImproved(HorizontalBar):
             p.setBrush(Qt.GlobalColor.black)
             for segment in range(self.segments - 1):
                 seg_left = int(((segment + 1) * segment_size) + (segment * segment_gap))
-                p.drawRect(seg_left, barTop, int(segment_gap), barHeight)
+                p.drawRect(bar_left + seg_left, barTop, int(segment_gap), barHeight)
 
         pen.setColor(QColor(Qt.GlobalColor.darkGray))
         brush = QBrush(self.penColor)
@@ -148,6 +156,7 @@ class HorizontalBarImproved(HorizontalBar):
             if x is None:
                 x = 0
             x = max(0, min(barWidth, x))
+            x = bar_left + x
             
             if not self.segments > 0:
                 p.drawRect(x-2, barTop-4, 4, barHeight+8)
@@ -155,4 +164,5 @@ class HorizontalBarImproved(HorizontalBar):
                 pen.setColor(QColor(0, 0, 0, self.segment_alpha))
                 p.setPen(pen)
                 p.setBrush(QColor(0, 0, 0, self.segment_alpha))
-                p.drawRect(x, barTop, barWidth - x, barHeight)
+                # Darken from the indicator to the end of the bar area
+                p.drawRect(x, barTop, (bar_left + barWidth) - x, barHeight)
