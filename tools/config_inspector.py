@@ -24,9 +24,25 @@ import yaml
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Tuple, Optional, Set
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QPoint, QRegularExpression
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTreeView, QWidget, QVBoxLayout, QLabel, QSplitter
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QTreeView,
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QSplitter,
+    QHBoxLayout,
+    QLineEdit,
+    QMenu,
+    QComboBox,
+    QPlainTextEdit,
+    QDialog,
+    QDialogButtonBox,
+)
+from PyQt6.QtCore import QSortFilterProxyModel
 
 
 # ---------- Utilities for preferences loading and merge tracking ----------
@@ -171,12 +187,28 @@ class ConfigWalker:
             item.setEditable(False)
             summary_root.appendRow([item, QStandardItem("") , QStandardItem(notes)])
 
-        # After building, annotate include nodes that were used multiple times
+        # After building, annotate include nodes to compact multiple [include] markers
+        # Replace any number of leading "[include] " with a single "[{n}x] " when a file is used multiple times
+        # and remove any trailing "(used nx)" legacy suffixes.
         counts: Dict[str, int] = {k: len(v.contexts) for k, v in self.includes_used.items()}
         for fpath, item in self.include_nodes:
             cnt = counts.get(fpath, 1)
+            text = item.text()
+
+            # Remove any trailing legacy suffix like " (used 6x)"
+            if " (used " in text:
+                text = text[: text.rfind(" (used ")]
+
+            # Strip all leading "[include] " prefixes
+            prefix = "[include] "
+            while text.startswith(prefix):
+                text = text[len(prefix) :]
+
+            # Re-apply compact prefix
             if cnt > 1:
-                item.setText(f"[include] {item.text()} (used {cnt}x)")
+                item.setText(f"[{cnt}x] {text}")
+            else:
+                item.setText(f"[include] {text}")
         return model
 
     def _populate_preferences_tree(self, parent: QStandardItem) -> None:
@@ -362,19 +394,218 @@ class ConfigInspectorWindow(QMainWindow):
         info = QLabel(f"Base config dir: {base_dir}\nRoot config: {os.path.relpath(root_file, base_dir)}")
         info.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
-        tree = QTreeView(self)
-        tree.setModel(model)
-        tree.setUniformRowHeights(True)
-        tree.setAlternatingRowColors(True)
-        tree.setSortingEnabled(False)
-        tree.expandToDepth(1)
-        tree.header().setStretchLastSection(True)
-        tree.header().setDefaultSectionSize(380)
+        # Filters row
+        filters_row = QWidget(self)
+        filters_layout = QHBoxLayout(filters_row)
+        filters_row.setLayout(filters_layout)
+        self.key_filter_edit = QLineEdit(self)
+        self.key_filter_edit.setPlaceholderText("Filter by key (case-sensitive substring)")
+        self.value_filter_edit = QLineEdit(self)
+        self.value_filter_edit.setPlaceholderText("Filter by value (case-sensitive substring)")
+        filters_layout.addWidget(QLabel("Key filter:"))
+        filters_layout.addWidget(self.key_filter_edit, 1)
+        filters_layout.addWidget(QLabel("Value filter:"))
+        filters_layout.addWidget(self.value_filter_edit, 1)
+
+        # Proxy model for filtering
+        self.proxy = TreeFilterProxy()
+        self.proxy.setSourceModel(model)
+        self.proxy.setRecursiveFilteringEnabled(True)
+
+        # Tree view
+        self.tree = QTreeView(self)
+        self.tree.setModel(self.proxy)
+        # Enable non-uniform rows so wrapped text can expand height if needed
+        self.tree.setUniformRowHeights(False)
+        self.tree.setAlternatingRowColors(True)
+        self.tree.setSortingEnabled(False)
+        self.tree.expandToDepth(1)
+        self.tree.header().setStretchLastSection(True)
+        self.tree.header().setDefaultSectionSize(380)
+        # Allow wrapping in cells when text has line breaks
+        self.tree.setWordWrap(True)
+        # Context menu for expand/collapse subtree
+        self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self._on_context_menu)
+
+        # Wire up filters
+        self.key_filter_edit.textChanged.connect(self._on_filters_changed)
+        self.value_filter_edit.textChanged.connect(self._on_filters_changed)
+
+        # AND/OR operator selector for filters
+        op_row = QWidget(self)
+        op_layout = QHBoxLayout(op_row)
+        op_row.setLayout(op_layout)
+        op_layout.addWidget(QLabel("Filter logic:"))
+        self.logic_combo = QComboBox(self)
+        self.logic_combo.addItems(["AND", "OR"])  # default AND
+        self.logic_combo.currentTextChanged.connect(self._on_filters_changed)
+        op_layout.addWidget(self.logic_combo)
 
         layout.addWidget(info)
-        layout.addWidget(tree)
+        layout.addWidget(filters_row)
+        layout.addWidget(op_row)
+        layout.addWidget(self.tree)
 
         self.setCentralWidget(main)
+
+    def _on_filters_changed(self, *_):
+        key_text = self.key_filter_edit.text().strip()
+        val_text = self.value_filter_edit.text().strip()
+        self.proxy.set_key_filter(key_text)
+        self.proxy.set_value_filter(val_text)
+        self.proxy.set_op_mode(self.logic_combo.currentText() or "AND")
+
+        # Optionally expand nodes that remain to show matches context (leave as-is)
+
+    def _on_context_menu(self, pos: QPoint):
+        index = self.tree.indexAt(pos)
+        if not index.isValid():
+            return
+        menu = QMenu(self)
+        act_expand = menu.addAction("All expand")
+        act_collapse = menu.addAction("All collapse")
+        act_view = menu.addAction("View full text…")
+        action = menu.exec(self.tree.viewport().mapToGlobal(pos))
+        if action == act_expand:
+            self._expand_subtree(index)
+        elif action == act_collapse:
+            self._collapse_subtree(index)
+        elif action == act_view:
+            self._open_view_dialog(index)
+
+    def _expand_subtree(self, proxy_index):
+        # Expand this node and all descendants
+        stack = [proxy_index]
+        while stack:
+            idx = stack.pop()
+            if not idx.isValid():
+                continue
+            self.tree.expand(idx)
+            for r in range(self.proxy.rowCount(idx)):
+                child = self.proxy.index(r, 0, idx)
+                stack.append(child)
+
+    def _collapse_subtree(self, proxy_index):
+        # Collapse descendants then the node
+        stack = [proxy_index]
+        order = []
+        while stack:
+            idx = stack.pop()
+            if not idx.isValid():
+                continue
+            order.append(idx)
+            for r in range(self.proxy.rowCount(idx)):
+                child = self.proxy.index(r, 0, idx)
+                stack.append(child)
+        # collapse in reverse so children first
+        for idx in reversed(order):
+            self.tree.collapse(idx)
+
+    def _open_view_dialog(self, proxy_index):
+        if not proxy_index.isValid():
+            return
+        # Gather row data
+        def col_text(c):
+            return self.proxy.data(self.proxy.index(proxy_index.row(), c, proxy_index.parent()), Qt.ItemDataRole.DisplayRole) or ""
+        key = col_text(0)
+        val = col_text(1)
+        notes = col_text(2)
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Full text")
+        dlg.resize(700, 500)
+        v = QVBoxLayout(dlg)
+        t = QPlainTextEdit(dlg)
+        t.setReadOnly(True)
+        t.setPlainText(f"Key:\n{key}\n\nValue:\n{val}\n\nNotes:\n{notes}")
+        v.addWidget(t)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok, parent=dlg)
+        buttons.accepted.connect(dlg.accept)
+        buttons.rejected.connect(dlg.reject)
+        v.addWidget(buttons)
+        dlg.exec()
+
+
+class TreeFilterProxy(QSortFilterProxyModel):
+    """Filter by key (column 0) and value (column 1) independently.
+    Both filters are AND-ed: a row matches if it matches the key filter AND the value filter.
+    Recursive filtering is enabled so parents remain if any child matches.
+    """
+    def __init__(self):
+        super().__init__()
+        self._key_re: Optional[QRegularExpression] = None
+        self._val_re: Optional[QRegularExpression] = None
+        # Case-sensitive by default per request
+        self.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseSensitive)
+        self._op_mode: str = "AND"  # or "OR"
+
+    def set_key_filter(self, text: str):
+        self._key_re = self._make_re(text)
+        self.invalidateFilter()
+
+    def set_value_filter(self, text: str):
+        self._val_re = self._make_re(text)
+        self.invalidateFilter()
+
+    def _make_re(self, text: str) -> Optional[QRegularExpression]:
+        if not text:
+            return None
+        # escape and wrap as contains
+        pattern = QRegularExpression.escape(text)
+        return QRegularExpression(f".*{pattern}.*")
+
+    def set_op_mode(self, mode: str):
+        mode = (mode or "AND").upper()
+        if mode not in ("AND", "OR"):
+            mode = "AND"
+        if mode != self._op_mode:
+            self._op_mode = mode
+            self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row: int, source_parent) -> bool:
+        model = self.sourceModel()
+        idx_key = model.index(source_row, 0, source_parent)
+        idx_val = model.index(source_row, 1, source_parent)
+
+        def text(index):
+            return model.data(index, Qt.ItemDataRole.DisplayRole) or ""
+
+        # Check self match
+        key_ok = True
+        val_ok = True
+        if self._key_re is not None:
+            key_ok = self._key_re.match(str(text(idx_key))).hasMatch()
+        if self._val_re is not None:
+            val_ok = self._val_re.match(str(text(idx_val))).hasMatch()
+
+        if self._op_mode == "AND":
+            # AND: all non-empty filters must match
+            if self._key_re is not None and not key_ok:
+                self_match = False
+            elif self._val_re is not None and not val_ok:
+                self_match = False
+            else:
+                self_match = True
+        else:  # OR
+            active = []
+            if self._key_re is not None:
+                active.append(key_ok)
+            if self._val_re is not None:
+                active.append(val_ok)
+            if not active:  # no filters active -> match everything
+                self_match = True
+            else:
+                self_match = any(active)
+
+        if self_match:
+            return True
+
+        # Otherwise, accept if any child matches recursively
+        for r in range(model.rowCount(idx_key)):
+            if self.filterAcceptsRow(r, idx_key):
+                return True
+
+        return False
 
 
 # ---------- CLI / Entry Point ----------
