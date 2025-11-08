@@ -35,6 +35,9 @@ class HorizontalBar(AbstractGauge):
         self.segment_gap_percent = 0.01
         self.segment_alpha = 180
         self.bar_divisor = 4.5
+        # Optional font scaling percents (similar to vertical bars); if set, override legacy sizing
+        self.small_font_percent = None  # fraction of widget height
+        self.big_font_percent = None    # fraction of widget height
         # New options: place value/dbkey text on the left side of the bar
         self.value_on_bar_left = False
         self.value_on_bar_left_width_percent = 0.25  # portion of width reserved for left label
@@ -50,17 +53,30 @@ class HorizontalBar(AbstractGauge):
     def resizeEvent(self, event):
         self.bigFont = QFont(self.font_family)
         self.section_size = self.height() / 12
-        self.bigFont.setPixelSize( qRound(self.section_size * 4))
+        # Big font sizing: prefer percent if provided, else legacy section-size based
+        if self.big_font_percent is not None:
+            self.bigFont.setPixelSize(qRound(self.height() * float(self.big_font_percent)))
+        else:
+            self.bigFont.setPixelSize(qRound(self.section_size * 4))
         if self.font_mask:
-            self.bigFont.setPointSizeF(helpers.fit_to_mask(self.width()-5, self.section_size * 4, self.font_mask, self.font_family))
+            # Fit to width/height constraints if a mask exists
+            self.bigFont.setPointSizeF(helpers.fit_to_mask(self.width()-5, self.bigFont.pixelSize() or (self.section_size * 4), self.font_mask, self.font_family))
+
         self.smallFont = QFont(self.font_family)
-        self.smallFont.setPixelSize(qRound(self.section_size * 2))
+        if self.small_font_percent is not None:
+            self.smallFont.setPixelSize(qRound(self.height() * float(self.small_font_percent)))
+        else:
+            self.smallFont.setPixelSize(qRound(self.section_size * 2))
         if self.name_font_mask:
-            self.smallFont.setPointSizeF(helpers.fit_to_mask(self.width(), self.section_size * 2.4, self.name_font_mask, self.font_family))
+            self.smallFont.setPointSizeF(helpers.fit_to_mask(self.width(), self.smallFont.pixelSize() or (self.section_size * 2.4), self.name_font_mask, self.font_family))
+
         self.unitsFont = QFont(self.font_family)
-        self.unitsFont.setPixelSize(qRound(self.section_size * 2))
+        if self.small_font_percent is not None:
+            self.unitsFont.setPixelSize(qRound(self.height() * float(self.small_font_percent)))
+        else:
+            self.unitsFont.setPixelSize(qRound(self.section_size * 2))
         if self.units_font_mask:
-            self.unitsFont.setPointSizeF(helpers.fit_to_mask(self.width(), self.section_size * 2.4, self.name_font_mask, self.font_family))
+            self.unitsFont.setPointSizeF(helpers.fit_to_mask(self.width(), self.unitsFont.pixelSize() or (self.section_size * 2.4), self.name_font_mask, self.font_family))
 
         self.barHeight = self.section_size * self.bar_divisor
         self.barTop = self.section_size * 2.7
@@ -84,6 +100,46 @@ class HorizontalBar(AbstractGauge):
         else:
             self.barValueRect = QRectF()
 
+    def _font_fit(self, base_font: QFont, text: str, rect: QRectF, min_px: int = 6) -> QFont:
+        """Return a copy of base_font scaled so 'text' fits within rect (no clipping).
+        Prefers pixelSize; falls back to pointSizeF if pixelSize is 0."""
+        f = QFont(base_font)
+        # Establish a starting pixel size based on height
+        start_px = f.pixelSize() if f.pixelSize() > 0 else int(f.pointSizeF())
+        if start_px <= 0:
+            # default to a reasonable size proportional to rect height
+            start_px = int(rect.height() * 0.8) if rect.height() > 0 else 12
+        # Constrain by height first
+        max_by_height = int(rect.height() * 0.9) if rect.height() > 0 else start_px
+        size = max(min(start_px, max_by_height), min_px)
+        # Quick proportional down-scale for width
+        f.setPixelSize(size)
+        fm = QFontMetrics(f)
+        # Account for small padding
+        avail_w = max(0, int(rect.width()) - 2)
+        avail_h = max(0, int(rect.height()) - 2)
+        if avail_w > 0:
+            text_w = fm.horizontalAdvance(text)
+            if text_w > 0 and text_w > avail_w:
+                scale = avail_w / text_w
+                size = max(min_px, int(size * scale))
+                f.setPixelSize(size)
+                fm = QFontMetrics(f)
+        # Ensure height fits too
+        if avail_h > 0:
+            text_h = fm.height()
+            if text_h > avail_h:
+                scale = avail_h / text_h
+                size = max(min_px, int(size * scale))
+                f.setPixelSize(size)
+        # Final safety loop to avoid off-by-one overflow
+        fm = QFontMetrics(f)
+        while (fm.horizontalAdvance(text) > avail_w or fm.height() > avail_h) and size > min_px:
+            size -= 1
+            f.setPixelSize(size)
+            fm = QFontMetrics(f)
+        return f
+
     def get_bar_geometry(self):
         """Return (left, top, width, height) for the drawable bar region, respecting left label space."""
         return (int(self._bar_left), int(self.barTop), int(self._bar_width), int(self.barHeight))
@@ -98,34 +154,60 @@ class HorizontalBar(AbstractGauge):
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         #pen.setColor(self.textColor)
         #p.setPen(pen)
-        p.setFont(self.smallFont)
-        if self.show_name: 
+        # Top row: name/dbkey followed immediately by units
+        top_rect = QRectF(self.nameTextRect)
+        name_text = (self.dbkey if self.show_dbkey_text else self.name) if self.show_name else ""
+        units_text = self.units if self.show_units else ""
+        spacer = " " if name_text and units_text else ""
+        combined_text = f"{name_text}{spacer}{units_text}"
+        # Fit font for combined text within the top rect
+        fitted_font = self._font_fit(self.smallFont, combined_text, top_rect)
+        p.setFont(fitted_font)
+        # Optional ghost masks: draw individually at computed positions
+        pen.setColor(self.textColor)
+        p.setPen(pen)
+        # Draw name/dbkey left
+        if name_text:
+            opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             if self.name_font_ghost_mask:
-                opt = QTextOption(Qt.AlignmentFlag.AlignLeft)
                 alpha = self.textColor.alpha()
                 self.textColor.setAlpha(self.font_ghost_alpha)
                 pen.setColor(self.textColor)
                 p.setPen(pen)
-                p.drawText(self.nameTextRect, self.name_font_ghost_mask, opt)
+                p.drawText(top_rect, self.name_font_ghost_mask, opt_left)
                 self.textColor.setAlpha(alpha)
-            pen.setColor(self.textColor)
-            p.setPen(pen)
-            p.drawText(self.nameTextRect, self.name)
-
-        # Units
-        p.setFont(self.unitsFont)
-        opt = QTextOption(Qt.AlignmentFlag.AlignRight)
-        if self.show_units: 
-            if self.units_font_ghost_mask:
-                alpha = self.textColor.alpha()
-                self.textColor.setAlpha(self.font_ghost_alpha)
                 pen.setColor(self.textColor)
                 p.setPen(pen)
-                p.drawText(self.valueTextRect, self.units_font_ghost_mask, opt)
-                self.textColor.setAlpha(alpha)
-            pen.setColor(self.textColor)
-            p.setPen(pen)
-            p.drawText(self.valueTextRect, self.units, opt)
+            p.drawText(top_rect, name_text, opt_left)
+            # Measure name width to position units immediately after
+            fm = QFontMetrics(fitted_font)
+            name_w = fm.horizontalAdvance(name_text + spacer)
+            if units_text:
+                units_rect = QRectF(top_rect.left() + name_w, top_rect.top(), max(0, top_rect.width() - name_w), top_rect.height())
+                if self.units_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    p.drawText(units_rect, self.units_font_ghost_mask, opt_left)
+                    self.textColor.setAlpha(alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                p.drawText(units_rect, units_text, opt_left)
+        else:
+            # No name; draw units starting at left
+            if units_text:
+                opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                if self.units_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    p.drawText(top_rect, self.units_font_ghost_mask, opt_left)
+                    self.textColor.setAlpha(alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                p.drawText(top_rect, units_text, opt_left)
 
         # Main Value (standard position) unless moved to left of bar
         if not self.value_on_bar_left:
@@ -143,43 +225,48 @@ class HorizontalBar(AbstractGauge):
                 p.setPen(pen)
                 p.drawText(self.valueTextRect, self.valueText, opt)
         else:
-            # Draw value or dbkey as a label area to the left of the bar
-            label_text = self.dbkey if self.show_dbkey_text else self.valueText
-            p.setFont(self.bigFont)
-            pen.setColor(self.valueColor if not self.show_dbkey_text else self.textColor)
+            # Draw numeric value as a label area to the left of the bar (always value here)
+            label_text = self.valueText
+            left_font = self._font_fit(self.bigFont, label_text or "", self.barValueRect)
+            p.setFont(left_font)
+            pen.setColor(self.valueColor)
             p.setPen(pen)
             opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             p.drawText(self.barValueRect, label_text, opt_left)
 
-        # Draws the bar
+        # Draws the bar (clip so nothing bleeds under left label when reserved)
         p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        bar_left, bar_top, bar_width, bar_height = self.get_bar_geometry()
+        p.save()
+        p.setClipRect(QRectF(bar_left, bar_top, bar_width, bar_height))
         pen.setColor(self.safeColor)
         brush = self.safeColor
         p.setPen(pen)
         p.setBrush(brush)
-        bar_left, bar_top, bar_width, bar_height = self.get_bar_geometry()
         p.drawRect(QRectF(bar_left, bar_top, bar_width, bar_height))
+        # Warn regions
         pen.setColor(self.warnColor)
         brush = self.warnColor
         p.setPen(pen)
         p.setBrush(brush)
-        if(self.lowWarn):
+        if self.lowWarn:
             p.drawRect(QRectF(bar_left, bar_top,
                               self.interpolate(self.lowWarn, bar_width),
                               bar_height))
-        if(self.highWarn):
+        if self.highWarn:
             x = bar_left + self.interpolate(self.highWarn, bar_width)
             p.drawRect(QRectF(x, bar_top,
                               (bar_left + bar_width) - x, bar_height))
+        # Alarm regions
         pen.setColor(self.alarmColor)
         brush = self.alarmColor
         p.setPen(pen)
         p.setBrush(brush)
-        if(self.lowAlarm):
+        if self.lowAlarm:
             p.drawRect(QRectF(bar_left, bar_top,
                               self.interpolate(self.lowAlarm, bar_width),
                               bar_height))
-        if(self.highAlarm):
+        if self.highAlarm:
             x = bar_left + self.interpolate(self.highAlarm, bar_width)
             p.drawRect(QRectF(x, bar_top,
                               (bar_left + bar_width) - x, bar_height))
@@ -214,4 +301,5 @@ class HorizontalBar(AbstractGauge):
             p.setPen(pen)
             p.setBrush(QColor(0, 0, 0, self.segment_alpha))
             p.drawRect(QRectF(x, bar_top, (bar_left + bar_width) - x, bar_height))
+        p.restore()
 

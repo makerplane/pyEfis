@@ -49,34 +49,55 @@ class HorizontalBarImproved(HorizontalBar):
         pen = QPen()
         pen.setWidth(1)
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
-        
-        p.setFont(self.smallFont)
-        if self.show_name: 
+        # Top row: name/dbkey followed immediately by units
+        top_rect = QRectF(self.nameTextRect)
+        name_text = (self.dbkey if self.show_dbkey_text else self.name) if self.show_name else ""
+        units_text = self.units if self.show_units else ""
+        spacer = " " if name_text and units_text else ""
+        combined_text = f"{name_text}{spacer}{units_text}"
+        fitted_font = self._font_fit(self.smallFont, combined_text, top_rect)
+        p.setFont(fitted_font)
+        pen.setColor(self.textColor)
+        p.setPen(pen)
+        if name_text:
+            opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             if self.name_font_ghost_mask:
-                opt = QTextOption(Qt.AlignmentFlag.AlignLeft)
                 alpha = self.textColor.alpha()
                 self.textColor.setAlpha(self.font_ghost_alpha)
                 pen.setColor(self.textColor)
                 p.setPen(pen)
-                p.drawText(self.nameTextRect, self.name_font_ghost_mask, opt)
+                p.drawText(top_rect, self.name_font_ghost_mask, opt_left)
                 self.textColor.setAlpha(alpha)
-            pen.setColor(self.textColor)
-            p.setPen(pen)
-            p.drawText(self.nameTextRect, self.name)
-
-        p.setFont(self.unitsFont)
-        opt = QTextOption(Qt.AlignmentFlag.AlignRight)
-        if self.show_units: 
-            if self.units_font_ghost_mask:
-                alpha = self.textColor.alpha()
-                self.textColor.setAlpha(self.font_ghost_alpha)
                 pen.setColor(self.textColor)
                 p.setPen(pen)
-                p.drawText(self.valueTextRect, self.units_font_ghost_mask, opt)
-                self.textColor.setAlpha(alpha)
-            pen.setColor(self.textColor)
-            p.setPen(pen)
-            p.drawText(self.valueTextRect, self.units, opt)
+            p.drawText(top_rect, name_text, opt_left)
+            fm = QFontMetrics(fitted_font)
+            name_w = fm.horizontalAdvance(name_text + spacer)
+            if units_text:
+                units_rect = QRectF(top_rect.left() + name_w, top_rect.top(), max(0, top_rect.width() - name_w), top_rect.height())
+                if self.units_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    p.drawText(units_rect, self.units_font_ghost_mask, opt_left)
+                    self.textColor.setAlpha(alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                p.drawText(units_rect, units_text, opt_left)
+        else:
+            if units_text:
+                opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                if self.units_font_ghost_mask:
+                    alpha = self.textColor.alpha()
+                    self.textColor.setAlpha(self.font_ghost_alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                    p.drawText(top_rect, self.units_font_ghost_mask, opt_left)
+                    self.textColor.setAlpha(alpha)
+                    pen.setColor(self.textColor)
+                    p.setPen(pen)
+                p.drawText(top_rect, units_text, opt_left)
         # Draw value either in standard position or inside left label area
         if not self.value_on_bar_left:
             p.setFont(self.bigFont)
@@ -93,9 +114,11 @@ class HorizontalBarImproved(HorizontalBar):
                 p.setPen(pen)
                 p.drawText(self.valueTextRect, self.valueText, opt)
         else:
-            label_text = self.dbkey if self.show_dbkey_text else self.valueText
-            p.setFont(self.bigFont)
-            pen.setColor(self.valueColor if not self.show_dbkey_text else self.textColor)
+            # Always show numeric value on left (dbkey already used as name when requested)
+            label_text = self.valueText
+            left_font = self._font_fit(self.bigFont, label_text or "", self.barValueRect)
+            p.setFont(left_font)
+            pen.setColor(self.valueColor)
             p.setPen(pen)
             opt_left = QTextOption(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             p.drawText(self.barValueRect, label_text, opt_left)
@@ -103,6 +126,8 @@ class HorizontalBarImproved(HorizontalBar):
         p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
 
         bar_left, barTop, barWidth, barHeight = self.get_bar_geometry()
+        p.save()
+        p.setClipRect(QRectF(bar_left, barTop, barWidth, barHeight))
 
         lowAlarmPixel = self._calculateThresholdPixel(self.lowAlarm) if self.lowAlarm else None
         lowWarnPixel = self._calculateThresholdPixel(self.lowWarn) if self.lowWarn else None
@@ -166,3 +191,4 @@ class HorizontalBarImproved(HorizontalBar):
                 p.setBrush(QColor(0, 0, 0, self.segment_alpha))
                 # Darken from the indicator to the end of the bar area
                 p.drawRect(x, barTop, (bar_left + barWidth) - x, barHeight)
+        p.restore()
