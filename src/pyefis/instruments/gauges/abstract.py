@@ -140,6 +140,54 @@ class AbstractGauge(QWidget):
         self.unitsOverride = None
         self.conversionFunction = lambda x: x
 
+        # Phase 2: repaint throttling and delta suppression
+        # Settings (can be overridden via YAML binding on gauges)
+        self.throttle_enabled = True            # enable coalesced repaint scheduling
+        self.max_fps = 60                       # cap paints per gauge per second
+        self.delta_threshold_abs = 0.0          # absolute change needed to repaint (0 disables)
+        self.delta_threshold_rel = 0.0          # relative change needed (0 disables)
+        self._last_painted_value = None         # last value that was actually painted
+        self._pending_repaint = False
+        self._repaint_timer = QTimer(self)
+        self._repaint_timer.setSingleShot(True)
+        self._repaint_timer.timeout.connect(self._on_repaint_timer)
+
+    # Internal: compute current throttle interval in ms
+    def _repaint_interval_ms(self):
+        try:
+            fps = float(self.max_fps) if self.max_fps else 0
+        except Exception:
+            fps = 0
+        if fps <= 0:
+            return 0
+        return max(1, int(1000.0 / fps))
+
+    # Internal: schedule a repaint respecting throttle; optionally record diagnostics if coalesced
+    def _schedule_update(self):
+        if not self.throttle_enabled:
+            super().update()
+            return
+        interval = self._repaint_interval_ms()
+        if interval <= 0:
+            # throttle disabled by config (max_fps <= 0)
+            super().update()
+            return
+        if self._repaint_timer.isActive():
+            # Already have a repaint pending, coalesce this request
+            try:
+                from pyefis.diagnostics.overlay import GaugeDiagnostics
+                GaugeDiagnostics.get().record_coalesced(self.__class__.__name__)
+            except Exception:
+                pass
+            return
+        # Start timer to coalesce multiple update() calls
+        self._repaint_timer.start(interval)
+        self._pending_repaint = True
+
+    def _on_repaint_timer(self):
+        self._pending_repaint = False
+        super().update()
+
     def interpolate(self, value, range_):
         h = float(range_)
         l = float(self.lowRange)
@@ -163,8 +211,39 @@ class AbstractGauge(QWidget):
                     self._value = common.bounds(self.lowRange, self.highRange, cvalue)
                 else:
                     self._value = cvalue
+                # Diagnostics: count incoming updates
+                try:
+                    from pyefis.diagnostics.overlay import GaugeDiagnostics
+                    GaugeDiagnostics.get().record_input(self.__class__.__name__)
+                except Exception:
+                    pass
+                # Delta suppression: if change is too small vs last painted value, skip scheduling
+                suppress = False
+                if self._last_painted_value is not None:
+                    try:
+                        delta_abs = abs(float(self._value) - float(self._last_painted_value))
+                        rel_base = max(1e-12, abs(float(self._last_painted_value)))
+                        delta_rel = delta_abs / rel_base
+                        abs_thr = float(self.delta_threshold_abs or 0.0)
+                        rel_thr = float(self.delta_threshold_rel or 0.0)
+                        if (abs_thr > 0.0 and delta_abs < abs_thr) and (rel_thr > 0.0 and delta_rel < rel_thr or rel_thr == 0.0):
+                            # meets absolute suppression and (relative not required or also under)
+                            suppress = True
+                        elif (rel_thr > 0.0 and delta_rel < rel_thr) and (abs_thr > 0.0 and delta_abs < abs_thr or abs_thr == 0.0):
+                            # meets relative suppression and (absolute not required or also under)
+                            suppress = True
+                    except Exception:
+                        suppress = False
+                # Update colors now (may affect value color); defer paint via scheduler
                 self.setColors()
-                self.update()
+                if suppress and self.throttle_enabled:
+                    try:
+                        from pyefis.diagnostics.overlay import GaugeDiagnostics
+                        GaugeDiagnostics.get().record_suppressed(self.__class__.__name__)
+                    except Exception:
+                        pass
+                else:
+                    self._schedule_update()
         if self._value > self.peakValue:
             self.peakValue = self._value
 
@@ -316,6 +395,20 @@ class AbstractGauge(QWidget):
                 # Recalculate selections
                 self.calculate_selections()
 
+        # Apply dynamic preferences if provided on instance (e.g. bound via YAML)
+        # Accept attribute names: max_fps, throttle_enabled, delta_threshold_abs, delta_threshold_rel
+        for attr in ("max_fps","throttle_enabled","delta_threshold_abs","delta_threshold_rel"):
+            try:
+                if hasattr(self, attr):
+                    # basic validation conversions
+                    val = getattr(self, attr)
+                    if attr == "throttle_enabled":
+                        setattr(self, attr, bool(val))
+                    else:
+                        setattr(self, attr, float(val))
+            except Exception:
+                pass
+
 
     def setAuxData(self, auxdata):
         if "Min" in auxdata and auxdata["Min"] != None:
@@ -330,7 +423,9 @@ class AbstractGauge(QWidget):
             self.highWarn = self.conversionFunction(auxdata["highWarn"])
         if "highAlarm" in auxdata and auxdata["highAlarm"] != None:
             self.highAlarm = self.conversionFunction(auxdata["highAlarm"])
-        self.update()
+        # Recompute colors on aux changes may be expensive; schedule repaint
+        self.setColors()
+        self._schedule_update()
 
     def setColors(self):
         if self.bad or self.fail or self.old:
@@ -362,7 +457,11 @@ class AbstractGauge(QWidget):
         if self.highAlarm != None and self.value > self.highAlarm:
             self.valueColor = self.alarmColor
 
-        self.update()
+        # Defer update when throttling is enabled
+        if self.throttle_enabled:
+            self._schedule_update()
+        else:
+            self.update()
 
     def annunciateFlag(self, flag):
         self.annunciate = flag
@@ -386,7 +485,8 @@ class AbstractGauge(QWidget):
 
     def resetPeak(self):
         self.peakValue = self.value
-        self.update()
+        # Immediate feedback not required; schedule repaint
+        self._schedule_update()
 
     def setUnitSwitching(self):
         """When this function is called the unit switching features are used"""

@@ -33,6 +33,10 @@ class GaugeDiagnostics(QObject):
         super().__init__()
         self._enabled = True
         self._stats_by_type = {}
+        self._inputs = {}
+        self._suppressed = {}
+        self._coalesced = {}
+        self._painted_values = {}
         self._last_snapshot = {}
         self._fps = 0
         self._frame_counter = 0
@@ -52,6 +56,18 @@ class GaugeDiagnostics(QObject):
         stats.add(duration_ns)
         self._frame_counter += 1
 
+    def record_input(self, gauge_type:str):
+        self._inputs[gauge_type] = self._inputs.get(gauge_type, 0) + 1
+
+    def record_suppressed(self, gauge_type:str):
+        self._suppressed[gauge_type] = self._suppressed.get(gauge_type, 0) + 1
+
+    def record_coalesced(self, gauge_type:str):
+        self._coalesced[gauge_type] = self._coalesced.get(gauge_type, 0) + 1
+
+    def record_painted_value(self, gauge_type:str, value:float):
+        self._painted_values[gauge_type] = value
+
     def _roll(self):
         # Compute FPS as frames in last second
         self._fps = self._frame_counter
@@ -62,10 +78,18 @@ class GaugeDiagnostics(QObject):
             snap[k] = {
                 'avg_ms': avg/1e6,
                 'max_ms': maxv/1e6,
-                'count': count
+                'count': count,
+                'inputs': self._inputs.get(k, 0),
+                'suppressed': self._suppressed.get(k, 0),
+                'coalesced': self._coalesced.get(k, 0),
+                'last_value': self._painted_values.get(k)
             }
             v.reset()
         self._last_snapshot = snap
+        # reset counters for next interval
+        self._inputs = {}
+        self._suppressed = {}
+        self._coalesced = {}
         self.updated.emit()
 
     def snapshot(self):
@@ -94,6 +118,7 @@ class DiagnosticsOverlay(QWidget):
         p.drawText(4,y,f"FPS: {diag['fps']}")
         y += 14
         for k,v in diag['gauges'].items():
-            p.drawText(4,y,f"{k}: avg {v['avg_ms']:.2f} ms max {v['max_ms']:.2f} ms paints {v['count']}")
+            p.drawText(4,y,(f"{k}: avg {v['avg_ms']:.2f} ms max {v['max_ms']:.2f} ms paints {v['count']} "
+                           f"in {v.get('inputs',0)} sup {v.get('suppressed',0)} coa {v.get('coalesced',0)}"))
             y += 14
         p.end()

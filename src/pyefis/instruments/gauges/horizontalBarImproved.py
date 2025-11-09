@@ -192,5 +192,7 @@ class HorizontalBarImproved(HorizontalBar):
         _t1 = perf_counter_ns()
         try:
             GaugeDiagnostics.get().record(self.__class__.__name__, _t1 - _t0)
+            GaugeDiagnostics.get().record_painted_value(self.__class__.__name__, float(self._value))
         except Exception:
             pass
+        self._last_painted_value = self._value
