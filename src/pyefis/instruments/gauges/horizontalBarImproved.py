@@ -43,19 +43,18 @@ class HorizontalBarImproved(HorizontalBar):
     
     def paintEvent(self, event):
         # Ensure geometry reflects any preference attributes set after construction
+        from time import perf_counter_ns
+        from pyefis.diagnostics.overlay import GaugeDiagnostics
+        _t0 = perf_counter_ns()
         self._recompute_geometry()
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen()
         pen.setWidth(1)
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
-        # Top row: name/dbkey followed immediately by units
+        # Top row: name/dbkey followed immediately by units (use base cache helper)
         top_rect = QRectF(self.nameTextRect)
-        name_text = (self.dbkey if self.show_dbkey_text else self.name) if self.show_name else ""
-        units_text = self.units if self.show_units else ""
-        spacer = " " if name_text and units_text else ""
-        combined_text = f"{name_text}{spacer}{units_text}"
-        fitted_font = self._font_fit(self.smallFont, combined_text, top_rect)
+        fitted_font, (name_text, units_text, spacer, name_w) = self._get_top_layout()
         p.setFont(fitted_font)
         pen.setColor(self.textColor)
         p.setPen(pen)
@@ -71,8 +70,6 @@ class HorizontalBarImproved(HorizontalBar):
                 pen.setColor(self.textColor)
                 p.setPen(pen)
             p.drawText(top_rect, name_text, opt_left)
-            fm = QFontMetrics(fitted_font)
-            name_w = fm.horizontalAdvance(name_text + spacer)
             if units_text:
                 units_rect = QRectF(top_rect.left() + name_w, top_rect.top(), max(0, top_rect.width() - name_w), top_rect.height())
                 if self.units_font_ghost_mask:
@@ -192,3 +189,8 @@ class HorizontalBarImproved(HorizontalBar):
                 # Darken from the indicator to the end of the bar area
                 p.drawRect(x, barTop, (bar_left + barWidth) - x, barHeight)
         p.restore()
+        _t1 = perf_counter_ns()
+        try:
+            GaugeDiagnostics.get().record(self.__class__.__name__, _t1 - _t0)
+        except Exception:
+            pass

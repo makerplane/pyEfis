@@ -46,6 +46,14 @@ class HorizontalBar(AbstractGauge):
         self._bar_left = 0
         self._bar_width = 0
         self.barValueRect = QRectF()
+        # Cache for top-row combined text (name/dbkey + units)
+        self._top_text_cache = {
+            'text': None,
+            'w': 0,
+            'h': 0,
+            'font': None,
+            'name_w': 0,
+        }
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
         return 2
@@ -140,12 +148,40 @@ class HorizontalBar(AbstractGauge):
             fm = QFontMetrics(f)
         return f
 
+    def _get_top_layout(self):
+        """Return fitted font and name width for top row (name/dbkey + units), using a small cache."""
+        top_rect = self.nameTextRect
+        name_text = (self.dbkey if self.show_dbkey_text else self.name) if self.show_name else ""
+        units_text = self.units if self.show_units else ""
+        spacer = " " if name_text and units_text else ""
+        combined_text = f"{name_text}{spacer}{units_text}"
+        key_changed = (
+            combined_text != self._top_text_cache['text'] or
+            top_rect.width() != self._top_text_cache['w'] or
+            top_rect.height() != self._top_text_cache['h']
+        )
+        if key_changed:
+            fitted_font = self._font_fit(self.smallFont, combined_text, top_rect)
+            fm = QFontMetrics(fitted_font)
+            name_w = fm.horizontalAdvance(name_text + spacer) if name_text else 0
+            self._top_text_cache.update({
+                'text': combined_text,
+                'w': top_rect.width(),
+                'h': top_rect.height(),
+                'font': fitted_font,
+                'name_w': name_w,
+            })
+        return self._top_text_cache['font'] or self.smallFont, (name_text, units_text, spacer, self._top_text_cache['name_w'])
+
     def get_bar_geometry(self):
         """Return (left, top, width, height) for the drawable bar region, respecting left label space."""
         return (int(self._bar_left), int(self.barTop), int(self._bar_width), int(self.barHeight))
 
     def paintEvent(self, event):
         # Ensure geometry reflects any preference attributes set after construction
+        from time import perf_counter_ns
+        from pyefis.diagnostics.overlay import GaugeDiagnostics
+        _t0 = perf_counter_ns()
         self._recompute_geometry()
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -154,14 +190,9 @@ class HorizontalBar(AbstractGauge):
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         #pen.setColor(self.textColor)
         #p.setPen(pen)
-        # Top row: name/dbkey followed immediately by units
+        # Top row: name/dbkey followed immediately by units (cached layout)
         top_rect = QRectF(self.nameTextRect)
-        name_text = (self.dbkey if self.show_dbkey_text else self.name) if self.show_name else ""
-        units_text = self.units if self.show_units else ""
-        spacer = " " if name_text and units_text else ""
-        combined_text = f"{name_text}{spacer}{units_text}"
-        # Fit font for combined text within the top rect
-        fitted_font = self._font_fit(self.smallFont, combined_text, top_rect)
+        fitted_font, (name_text, units_text, spacer, name_w) = self._get_top_layout()
         p.setFont(fitted_font)
         # Optional ghost masks: draw individually at computed positions
         pen.setColor(self.textColor)
@@ -179,9 +210,6 @@ class HorizontalBar(AbstractGauge):
                 pen.setColor(self.textColor)
                 p.setPen(pen)
             p.drawText(top_rect, name_text, opt_left)
-            # Measure name width to position units immediately after
-            fm = QFontMetrics(fitted_font)
-            name_w = fm.horizontalAdvance(name_text + spacer)
             if units_text:
                 units_rect = QRectF(top_rect.left() + name_w, top_rect.top(), max(0, top_rect.width() - name_w), top_rect.height())
                 if self.units_font_ghost_mask:
@@ -302,4 +330,10 @@ class HorizontalBar(AbstractGauge):
             p.setBrush(QColor(0, 0, 0, self.segment_alpha))
             p.drawRect(QRectF(x, bar_top, (bar_left + bar_width) - x, bar_height))
         p.restore()
+        # record diagnostics
+        _t1 = perf_counter_ns()
+        try:
+            GaugeDiagnostics.get().record(self.__class__.__name__, _t1 - _t0)
+        except Exception:
+            pass
 
