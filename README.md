@@ -100,19 +100,6 @@ Example configuration reference is in the [MakerPlane Documentation](../makerpla
 
 Parameter staleness is tracked: if FIX-Gateway stops updating a key within its tolerance window, pyEfis flags that instrument as failed (red X or similar), giving the pilot explicit awareness of data loss.
 
-## Role in the MAOS Ecosystem
-
-pyEfis is the **cockpit display application** for a MAOS-equipped aircraft. It is the piece the pilot looks at.
-
-Integration path for MAOS:
-1. **MAOS-FCS** publishes attitude, airspeed, altitude, and surface positions via MAVLink
-2. **FIX-Gateway** MAVLink plugin receives FCS data and maps it to FIX parameter keys
-3. **pyEfis** renders the flight instruments from those keys in real time
-4. **pyAvMap + CIFP data** provide moving map and IFR procedure context
-5. **CAN-FIX bus** (via Arduino nodes) feeds engine data and system status
-
-For MAOS specifically, custom screen layouts can be designed to expose FCS mode state, propulsion system parameters, and fault annunciations — all driven through FIX-Gateway custom keys.
-
 ## Platform Support
 
 - Raspberry Pi (primary embedded target, Snap distribution)
