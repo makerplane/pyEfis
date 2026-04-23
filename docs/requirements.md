@@ -59,6 +59,21 @@ Format: `EFIS-<AREA>-<NNN>`
 
 ---
 
+### Selected Altitude (Altitude Alerting)
+
+- **EFIS-ALTSEL-001:** The altimeter tape shall display a selected (target) altitude bug as a white box at the tape position corresponding to the selected altitude value.
+- **EFIS-ALTSEL-002:** Selected altitude shall be sourced from FIX database key `ALT_SEL`; if the key is absent or has no value set, no bug shall be drawn.
+- **EFIS-ALTSEL-003:** The selected altitude value shall be displayed numerically inside or adjacent to the bug box for unambiguous readout.
+- **EFIS-ALTSEL-004:** When the bug is outside the visible tape range, a caret or clipped indicator shall appear at the appropriate tape edge to indicate direction to the selected altitude.
+- **EFIS-ALTSEL-005:** fix-gateway shall compute altitude deviation as `ALT - ALT_SEL` and set the `ALT_SEL` annunciate flag when the absolute deviation exceeds a configurable threshold (default ±200 ft).
+- **EFIS-ALTSEL-006:** When the annunciate flag is active, the altitude bug box shall change from white to amber/red to provide a continuous visual deviation alert; the alert shall clear automatically when the aircraft returns within the threshold band.
+- **EFIS-ALTSEL-007:** `ALT_SEL` shall be a writable FIX database key; the EFIS display is read-only — it shall not provide a knob or entry interface for setting the selected altitude.
+- **EFIS-ALTSEL-008:** `ALT_SEL` shall be settable by any connected FIX client, including an autopilot controller panel or ground-configuration tool; the architecture shall not assume a specific input device.
+- **EFIS-ALTSEL-009:** The alerting threshold shall be configurable in fix-gateway config without code changes (default 200 ft).
+- **EFIS-ALTSEL-010:** The altitude deviation alert shall be computed and annunciated in fix-gateway so the logic is available to all connected displays and clients, not only the EFIS.
+
+---
+
 ## Notes
 
 - Requirements marked as EFIS-SVS are architectural scope definitions; full SVS implementation requires terrain data pipeline design as a prerequisite.
