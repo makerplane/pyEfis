@@ -470,7 +470,9 @@ class Screen(QWidget):
         elif i['type'] == 'altimeter_dial':
             self.instruments[count] = altimeter.Altimeter(self,font_family=font_family)
         elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self,font_percent=font_percent,font_family=font_family)
+            opts = i.get('options', {})
+            show_fpm = opts.get('show_fpm', True)
+            self.instruments[count] = ai.AI(self, font_percent=font_percent, font_family=font_family, show_fpm=show_fpm)
         elif i['type'] == 'altimeter_tape':
             dbkey = "ALT"
             if 'options' in i and 'dbkey' in i['options']:
