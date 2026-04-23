@@ -59,6 +59,26 @@ Format: `EFIS-<AREA>-<NNN>`
 
 ---
 
+### Flight Path Marker (FPM)
+
+The Flight Path Marker (also known as the velocity vector or flight path vector) shows where the aircraft's center of gravity is actually moving through space, as distinct from where the nose is pointed. This provides immediate intuitive feedback on energy state, angle of attack margin, and departure from desired flight path — particularly valuable in IMC, turbulence, and unusual attitudes.
+
+Two computation methods are defined. GPS-based FPM (implemented first) uses GPS ground speed and track versus magnetic heading to derive flight path angle and drift. Aerodynamic FPM (future) uses True Airspeed and inertial vertical speed for an air-mass-referenced indication; the architecture shall accommodate both without redesign.
+
+- **EFIS-FPM-001:** The attitude indicator shall display a Flight Path Marker (FPM) symbol showing the aircraft's actual flight path direction within the AI coordinate frame.
+- **EFIS-FPM-002:** The FPM symbol shall be a circle with two short horizontal stub wings extending left and right, and a short vertical stem extending upward — consistent with conventional EFIS FPM symbology (Garmin, Honeywell style).
+- **EFIS-FPM-003 (GPS FPM):** FPM vertical position shall be computed as flight path angle γ = arctan(VS / GS), where VS is in ft/min and GS is in ft/min (GS_knots × 101.269). Positive γ displaces the marker above the horizon; negative below.
+- **EFIS-FPM-004 (GPS FPM):** FPM horizontal position shall be computed as drift angle = TRACK − HEAD, normalised to ±180°. Positive drift (wind from left, crabbing right) displaces the marker right of center.
+- **EFIS-FPM-005:** FPM position shall use the same pixels-per-degree scale as the AI pitch ladder (`pixelsPerDeg`) so the marker reads directly against the pitch graduation marks.
+- **EFIS-FPM-006:** The FPM marker shall be positioned within the rolled AI coordinate frame (it moves with the horizon line as the aircraft banks) but the symbol itself shall remain upright (wings horizontal in display space at all bank angles).
+- **EFIS-FPM-007:** The FPM shall be clamped to the visible AI area; it shall not be drawn outside the widget boundary.
+- **EFIS-FPM-008:** FIX database keys required for GPS FPM: `VS` (ft/min), `GS` (knots), `TRACK` (degrees magnetic), `HEAD` (degrees magnetic). When any required key carries a fail flag, the FPM shall not be drawn.
+- **EFIS-FPM-009:** The FPM shall be independently enable/disable-able via the AI instrument options in the screen YAML (`show_fpm: true/false`, default true).
+- **EFIS-FPM-010:** The implementation shall define a clear separation between the FPM position computation and the symbol drawing so that a future aerodynamic FPM variant (using `TAS` and inertial `VS`) can be substituted by changing the computation method only, without altering the drawing code.
+- **EFIS-FPM-011:** When GPS FPM data is valid, the FPM symbol shall be rendered in lime green. When data quality is degraded (bad flag set on any input) but not failed, the symbol shall be rendered in amber to indicate reduced confidence.
+
+---
+
 ### Selected Altitude (Altitude Alerting)
 
 - **EFIS-ALTSEL-001:** The altimeter tape shall display a selected (target) altitude bug as a white box at the tape position corresponding to the selected altitude value.
