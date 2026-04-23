@@ -187,6 +187,20 @@ class TestScreenBuilderInit:
         screen.init_screen()
         assert screen.init is True
 
+    def test_wind_display_instrument_loaded(self, fix, qtbot):
+        """A wind_display instrument is created and added to instruments."""
+        config = _config_with_instruments([
+            {"type": "wind_display", "row": 0, "column": 0},
+        ])
+        parent = _TestParent(config)
+        screen = Screen(parent)
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+        screen.init_screen()
+
+        assert 0 in screen.instruments
+        assert screen.instruments[0] is not None
+
     def test_initscreen_idempotent_via_resize(self, fix, qtbot):
         """Calling initScreen() twice (via resize) does not raise an exception."""
         config = _config_with_instruments([
