@@ -455,7 +455,15 @@ class Screen(QWidget):
         if i['type'] == 'airspeed_box':
             self.instruments[count] = airspeed.Airspeed_Box(self,font_family=font_family)
         if i['type'] == 'airspeed_tape':
-            self.instruments[count] = airspeed.Airspeed_Tape(self,font_percent=font_percent)
+            opts = i.get('options', {})
+            self.instruments[count] = airspeed.Airspeed_Tape(
+                self, font_percent=font_percent,
+                show_tas=opts.get('show_tas', True),
+                show_trend=opts.get('show_trend', True),
+                trend_lookahead=float(opts.get('trend_lookahead', 6.0)),
+                trend_window=float(opts.get('trend_window', 3.0)),
+                trend_min_change=float(opts.get('trend_min_change', 0.5)),
+            )
         if i['type'] == 'airspeed_trend_tape':
             self.instruments[count] = vsi.AS_Trend_Tape(self,font_family=font_family)
         elif i['type'] == 'altimeter_dial':
