@@ -32,6 +32,7 @@ from pyefis.instruments import button
 from pyefis.instruments import misc
 from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 from pyefis.instruments import listbox
+from pyefis.instruments import wind
 
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
@@ -506,6 +507,9 @@ class Screen(QWidget):
 
         elif i['type'] == 'listbox':
             self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'], replace=replace,font_family=font_family) #,font_percent=font_percent)
+
+        elif i['type'] == 'wind_display':
+            self.instruments[count] = wind.WindDisplay(self, font_family=font_family)
 
          # Set options
         if 'options' in i:
