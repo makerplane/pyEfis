@@ -36,13 +36,29 @@ Format: `EFIS-<AREA>-<NNN>`
 - **EFIS-SVS-001:** The attitude indicator background shall support an optional Synthetic Vision System (SVS) mode that replaces the solid sky/ground gradient with a 3D terrain representation.
 - **EFIS-SVS-002:** SVS shall use aircraft position (latitude, longitude, altitude) from the FIX database to determine terrain viewpoint.
 - **EFIS-SVS-003:** SVS shall use aircraft attitude (pitch, roll, heading) from the FIX database to orient the terrain view.
-- **EFIS-SVS-004:** Terrain data shall be sourced from a configurable external database (e.g., SRTM 30m or similar open-source elevation dataset); the SVS module shall define the required data format and loading interface.
-- **EFIS-SVS-005:** SVS terrain rendering shall apply color coding to distinguish terrain clearance zones relative to current aircraft altitude (e.g., green = safe, yellow = caution, red = terrain conflict).
+- **EFIS-SVS-004:** The standard terrain data source shall be NASA SRTMGL3 V003 (3 arc-second / 90 m resolution), distributed as 1°×1° HGT tiles (big-endian signed 16-bit integers, 1201×1201 samples). The full global dataset (14,297 land tiles, ~13.6 GB) fits on a 32 GB microSD card. Higher-resolution sources (e.g., USGS 1/3 arc-second for the US) may be substituted via the terrain provider interface without code changes.
+- **EFIS-SVS-005:** SVS terrain rendering shall apply colour coding to distinguish terrain clearance zones relative to current aircraft altitude: green ≥ 1000 ft clearance, yellow 500–999 ft, red < 500 ft, magenta at or above aircraft altitude. Thresholds shall be configurable.
 - **EFIS-SVS-006:** When SVS terrain data is unavailable or outside the loaded tile area, the display shall fall back to the standard sky/ground gradient without error annunciation.
 - **EFIS-SVS-007:** SVS rendering shall not degrade the PFD attitude indicator update rate below 20 Hz on the reference hardware platform.
-- **EFIS-SVS-008:** SVS shall be independently enable/disable-able via the preferences system; the standard AI shall remain fully functional when SVS is disabled.
+- **EFIS-SVS-008:** SVS shall be independently enable/disable-able via screen YAML config (`svs: enabled: false`). Default is **disabled**; users explicitly enable it after verifying their hardware meets performance requirements. The standard AI shall remain fully functional when SVS is disabled.
 - **EFIS-SVS-009:** The SVS implementation shall define a terrain data provider interface so alternative terrain backends can be substituted without changes to the rendering layer.
-- **EFIS-SVS-010:** SVS shall include configurable display of terrain-referenced obstacles (towers, terrain peaks) when obstacle database data is provided.
+- **EFIS-SVS-010:** SVS shall include configurable display of terrain-referenced obstacles (towers, buildings) when an obstacle database is provided via the data management tool.
+- **EFIS-SVS-011:** SVS shall support three rendering tiers selectable via config (`renderer: cpu_sparse | cpu_dense | opengl`): **cpu_sparse** projects a 48×48 terrain grid using NumPy (suitable for Raspberry Pi 4, ~15 Hz); **cpu_dense** projects a 128×128 grid (Raspberry Pi 5 / x86, ~20 Hz); **opengl** renders a full terrain mesh via QOpenGLWidget (any OpenGL ES 3.1 GPU, 20+ Hz). Default tier is `cpu_sparse`.
+- **EFIS-SVS-012:** SVS lookahead range shall be configurable in nautical miles (`range_nm`, default 30). Terrain data shall be loaded for a radius of `range_nm` around the current aircraft position; tiles outside this radius shall be unloaded to bound memory use.
+- **EFIS-SVS-013:** SVS configuration shall follow this schema in the screen YAML:
+  ```yaml
+  svs:
+    enabled: false
+    renderer: cpu_sparse     # cpu_sparse | cpu_dense | opengl
+    range_nm: 30
+    tile_path: /media/terrain/srtm3
+    obstacle_path: /media/terrain/obstacles
+    clearance_green_ft: 1000
+    clearance_yellow_ft: 500
+    clearance_red_ft: 0
+  ```
+- **EFIS-SVS-014:** The SVS position computation shall reuse the same `pixelsPerDeg` coordinate frame established by the FPM feature: terrain grid points are projected into the AI viewport using pitch/roll transforms identical to the FPM symbol, ensuring SVS terrain and FPM are geometrically consistent.
+- **EFIS-SVS-015:** SVS is recommended for display sizes of 7 inches or larger; on displays smaller than 7 inches the terrain detail is resolution-limited and the feature may be disabled by default in the relevant screen YAML layouts.
 
 ---
 
