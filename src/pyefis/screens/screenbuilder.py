@@ -472,7 +472,10 @@ class Screen(QWidget):
         elif i['type'] == 'atitude_indicator':
             opts = i.get('options', {})
             show_fpm = opts.get('show_fpm', True)
-            self.instruments[count] = ai.AI(self, font_percent=font_percent, font_family=font_family, show_fpm=show_fpm)
+            widget = ai.AI(self, font_percent=font_percent, font_family=font_family, show_fpm=show_fpm)
+            if 'svs' in opts:
+                widget.set_svs_config(opts['svs'])
+            self.instruments[count] = widget
         elif i['type'] == 'altimeter_tape':
             dbkey = "ALT"
             if 'options' in i and 'dbkey' in i['options']:

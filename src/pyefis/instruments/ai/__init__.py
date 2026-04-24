@@ -24,6 +24,7 @@ import logging
 
 import pyavtools.fix as fix
 from pyefis import common
+from pyefis.instruments.ai.svs import SVSRenderer
 
 log = logging.getLogger(__name__)
 
@@ -134,6 +135,16 @@ class AI(QGraphicsView):
             self._fpm_fail[key] = _item.fail
             self._fpm_bad[key]  = _item.bad
             setattr(self, f'_fpm_{key.lower()}', _item.value)
+
+        # SVS position inputs: LAT, LONG, ALT (disabled by default; renderer set via set_svs_config)
+        self._svs_lat  = 0.0
+        self._svs_lon  = 0.0
+        self._svs_alt  = 0.0
+        self.svs: SVSRenderer | None = None
+        for key, attr in (("LAT", "_svs_lat"), ("LONG", "_svs_lon"), ("ALT", "_svs_alt")):
+            _item = fix.db.get_item(key)
+            _item.valueChanged[float].connect(lambda v, a=attr: (setattr(self, a, v), self.update()))
+            setattr(self, attr, _item.value)
 
         # We store all the pitch tick marks and text in a list so that
         # we can adjust the opacity of the items.
@@ -291,6 +302,10 @@ class AI(QGraphicsView):
 
         self.redraw()
 
+    def set_svs_config(self, config: dict):
+        """Initialise the SVS renderer from a config dict (called by screenbuilder)."""
+        self.svs = SVSRenderer(config)
+
     def _fpmValueChanged(self, key, value):
         setattr(self, f'_fpm_{key.lower()}', value)
         if self.isVisible():
@@ -434,6 +449,13 @@ class AI(QGraphicsView):
             p.drawPolygon(diamond)
             p.rotate(-2 * a)
             p.drawPolygon(diamond)
+
+        if self.svs is not None:
+            ppd = getattr(self, 'pixelsPerDeg', self.height() / self.pitchDegreesShown)
+            self.svs.draw(p, w, h,
+                          self._svs_lat, self._svs_lon, self._svs_alt,
+                          self._pitchAngle, self._rollAngle, self._fpm_head,
+                          ppd)
 
         self._drawFPM(p, w, h)
 
