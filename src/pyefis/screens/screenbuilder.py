@@ -101,6 +101,13 @@ class Screen(QWidget):
         # vsi_dial
         # vsi_pfd  # Testing to do
 
+    def closeEvent(self, event):
+        try:
+            if hasattr(self, 'encoder_timer') and self.encoder_timer is not None:
+                self.encoder_timer.stop()
+        except Exception:
+            pass
+        super().closeEvent(event)
 
     def calc_includes(self,i,p_rows,p_cols):
         args = i['type'].split(',')
