@@ -215,14 +215,6 @@ def main():
     log.info("Starting pyEFIS")
 
     fix.initialize(config)
-    loaded = False
-    while not loaded:
-        try:
-            fix.db.get_item("ZZLOADER")
-            loaded = True
-        except:
-            log.critical("fix database not fully Initialized yet, ensure you have 'ZZLOADER' created in fixgateway database.yaml")
-            time.sleep(2)
     pyefis_ver = fix.db.get_item('PYEFIS_VERSION')
     pyefis_ver.value = __version__
     pyefis_ver.output_value()
