@@ -42,6 +42,12 @@ COLOR_SAFE      = QColor(0,   100,  0)    # dark green  — ≥ green threshold
 COLOR_CAUTION   = QColor(180, 130,  0)    # amber       — yellow threshold to green
 COLOR_WARNING   = QColor(200,  40,  0)    # dark red    — 0 to yellow threshold
 COLOR_CONFLICT  = QColor(180,   0, 180)   # magenta     — aircraft at or below terrain
+COLOR_WATER     = QColor( 20,  80, 150)   # ocean blue  — SRTM void / open water
+
+# Sentinel written into elevation arrays where the source tile was void (ocean).
+# Must be far enough negative that real below-sea-level terrain (≥ −430 m) is
+# never mistaken for water.
+_WATER_SENTINEL = -9999.0
 
 # Rendering grid sizes per tier
 GRID_SIZES = {
@@ -88,7 +94,8 @@ def load_tile(tile_root: Path, lat: int, lon: int) -> np.ndarray | None:
         return None
     try:
         data = np.fromfile(path, dtype=">i2").reshape(SRTM3_SAMPLES, SRTM3_SAMPLES)
-        data[data == SRTM3_VOID] = 0
+        data = data.astype(np.float32)
+        data[data == SRTM3_VOID] = _WATER_SENTINEL
         return data
     except Exception as e:
         log.warning(f"SVS: failed to load tile {path}: {e}")
@@ -228,8 +235,9 @@ class SVSRenderer:
 
         # Auto-scale range with AGL so near-ground views stay useful.
         # Sample terrain under the aircraft (cheap — tile is cached after frame 1).
-        ac_ground_m = float(self._sample_elevations(
-            np.array([[ac_lat]]), np.array([[ac_lon]]), 1)[0, 0])
+        _agl_elev, _ = self._sample_elevations(
+            np.array([[ac_lat]]), np.array([[ac_lon]]), 1)
+        ac_ground_m = float(_agl_elev[0, 0])
         agl_ft = ac_alt_ft - ac_ground_m * 3.28084
         # Auto-range: largest of AGL-based, MSL-based, and configured minimum.
         # MSL term ensures high-altitude plateau flying still sees distant terrain.
@@ -250,7 +258,7 @@ class SVSRenderer:
         lat_grid, lon_grid = np.meshgrid(lats, lons, indexing='ij')  # (n, n)
 
         # Vectorised terrain elevation lookup (one tile at a time)
-        elev_m = self._sample_elevations(lat_grid, lon_grid, n)
+        elev_m, is_water = self._sample_elevations(lat_grid, lon_grid, n)
         elev_ft = elev_m * 3.28084
 
         # Convert terrain positions to bearing/elevation angles relative to aircraft
@@ -296,8 +304,10 @@ class SVSRenderer:
         x_rot = x_px * cos_r - y_px * sin_r + w / 2
         y_rot = x_px * sin_r + y_px * cos_r + h / 2
 
-        # Clearance colours
+        # Clearance colours — water points use a sentinel so _cidx routes them
+        # to COLOR_WATER regardless of numeric clearance.
         clearance_ft = ac_alt_ft - elev_ft
+        clearance_ft = np.where(is_water, _WATER_SENTINEL, clearance_ft)
 
         # ------------------------------------------------------------------
         # Slope shading — Lambertian lighting from a fixed sun direction.
@@ -332,9 +342,10 @@ class SVSRenderer:
         intensity = sum(_g[_di, _dj] * _ip[_di:_di+n, _dj:_dj+n]
                         for _di in range(3) for _dj in range(3))
 
-        # Build shade table: 4 clearance × N_SHADE intensity levels
+        # Build shade table: 5 clearance categories × N_SHADE intensity levels
+        # Categories: 0=safe, 1=caution, 2=warning, 3=conflict, 4=water
         N_SHADE = 32
-        _BASE_COLS = (COLOR_SAFE, COLOR_CAUTION, COLOR_WARNING, COLOR_CONFLICT)
+        _BASE_COLS = (COLOR_SAFE, COLOR_CAUTION, COLOR_WARNING, COLOR_CONFLICT, COLOR_WATER)
         shade_table = []
         for _bc in _BASE_COLS:
             for _si in range(N_SHADE):
@@ -346,10 +357,11 @@ class SVSRenderer:
                 ))
 
         def _cidx(c: float) -> int:
-            if c < 0:              return 3
-            if c < self.yellow_ft: return 2
-            if c < self.green_ft:  return 1
-            return 0
+            if c <= _WATER_SENTINEL / 2.0: return 4   # water / ocean void
+            if c < 0:              return 3            # conflict
+            if c < self.yellow_ft: return 2            # warning
+            if c < self.green_ft:  return 1            # caution
+            return 0                                   # safe
 
         def _shade_key(c: float, inten: float) -> int:
             ci = _cidx(c)
@@ -367,7 +379,7 @@ class SVSRenderer:
         # ------------------------------------------------------------------
         if self.terrain_fill:
             from PyQt6.QtGui import QPainterPath as _QPP
-            fill_paths: list[_QPP] = [_QPP() for _ in range(4 * N_SHADE)]
+            fill_paths: list[_QPP] = [_QPP() for _ in range(len(_BASE_COLS) * N_SHADE)]
             for i in range(n - 1):
                 for j in range(n - 1):
                     if not (visible[i, j] and visible[i, j + 1] and
@@ -395,7 +407,7 @@ class SVSRenderer:
                     p.drawPath(path)
 
         if self.grid_lines:
-            segs: list[list[QLineF]] = [[] for _ in range(4 * N_SHADE)]
+            segs: list[list[QLineF]] = [[] for _ in range(len(_BASE_COLS) * N_SHADE)]
 
             # Along-longitude connections (lat row i, adjacent lon j / j+1)
             for i in range(n):
@@ -559,23 +571,23 @@ class SVSRenderer:
                 p.setFont(font)
                 p.drawText(QPointF(sx_top + fw + 3, sy_top + fh), apt["label"])
 
-    def _sample_elevations(self, lat_grid: np.ndarray, lon_grid: np.ndarray, n: int) -> np.ndarray:
+    def _sample_elevations(self, lat_grid: np.ndarray, lon_grid: np.ndarray,
+                           n: int) -> tuple:
         """
         Sample elevation for the entire (n, n) grid in one vectorised pass.
+        Returns (elev_m, is_water) where is_water is a bool array marking ocean
+        grid points (SRTM void tiles or missing tiles).
 
-        Instead of calling cache.elevation() once per point (n² Python calls),
-        we group grid points by their 1°×1° tile, load each tile once, then run
-        bilinear interpolation on all points in that tile simultaneously with NumPy.
-        A 20 NM view typically touches 1-4 tiles, so the outer loop runs 1-4 times
-        regardless of grid resolution — O(tiles) not O(n²).
+        Points over ocean are initialised to _WATER_SENTINEL; bilinear
+        interpolation near coastlines may produce large-negative values that are
+        also caught by the water mask.  Elevation is clamped to 0 m after masking
+        so clearance arithmetic is not affected by the sentinel.
         """
-        elev = np.zeros((n, n), dtype=np.float32)
+        elev = np.full((n, n), _WATER_SENTINEL, dtype=np.float32)
 
-        # Floor gives the SW-corner (lat, lon) of the tile each point belongs to
         tile_lat_grid = np.floor(lat_grid).astype(np.int32)
         tile_lon_grid = np.floor(lon_grid).astype(np.int32)
 
-        # Unique tile keys — typically 1-4 for a 20-30 NM view
         keys = np.unique(
             np.stack([tile_lat_grid.ravel(), tile_lon_grid.ravel()], axis=1),
             axis=0
@@ -584,13 +596,12 @@ class SVSRenderer:
         for tile_lat, tile_lon in keys:
             tile = self.cache.get(int(tile_lat), int(tile_lon))
             if tile is None:
-                continue  # ocean / void tile — leave elevation as 0
+                continue  # missing tile file — stays as water sentinel
 
             mask = (tile_lat_grid == tile_lat) & (tile_lon_grid == tile_lon)
             lats = lat_grid[mask]
             lons = lon_grid[mask]
 
-            # Fractional sample position within the 1201×1201 tile
             row_f = (tile_lat + 1.0 - lats) * (SRTM3_SAMPLES - 1)
             col_f = (lons - tile_lon)        * (SRTM3_SAMPLES - 1)
 
@@ -599,13 +610,18 @@ class SVSRenderer:
             dr  = (row_f - row).astype(np.float32)
             dc  = (col_f - col).astype(np.float32)
 
-            # Bilinear interpolation — all points in one tile, pure NumPy
             elev[mask] = (tile[row,     col    ] * (1 - dr) * (1 - dc) +
                           tile[row,     col + 1] * (1 - dr) *      dc  +
                           tile[row + 1, col    ] *      dr  * (1 - dc) +
                           tile[row + 1, col + 1] *      dr  *      dc)
 
-        return elev
+        # Two water cases:
+        #   1. Missing tile (open ocean, no HGT file) — stays at _WATER_SENTINEL
+        #   2. Void-filled SRTM product — ocean pixels are exactly 0.0
+        # Both are detected here; elev is clamped to 0 so clearance maths is clean.
+        is_water = (elev < (_WATER_SENTINEL / 2.0)) | (elev == 0.0)
+        elev = np.where(is_water, 0.0, elev)
+        return elev, is_water
 
 
 # ---------------------------------------------------------------------------
