@@ -216,8 +216,6 @@ def main():
 
     fix.initialize(config)
     pyefis_ver = fix.db.get_item('PYEFIS_VERSION')
-    pyefis_ver.value = __version__
-    pyefis_ver.output_value()
 
     hmi.initialize(config)
 
@@ -227,6 +225,10 @@ def main():
         fms.start(config["FMS"]["aircraft_config"])
 
     gui.initialize(config,config_path,preferences)
+
+    # Do this after the widgets subscribe to the item
+    pyefis_ver.value = __version__
+
     if "keybindings" in config:
         hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
