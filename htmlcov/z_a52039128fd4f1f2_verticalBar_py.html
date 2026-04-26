@@ -3,21 +3,21 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Coverage for src/pyefis/instruments/gauges/verticalBar.py: 100%</title>
-    <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
-    <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
-    <script src="coverage_html_cb_6fb7b396.js" defer></script>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_9ff733b0.css" type="text/css">
+    <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>src/pyefis/instruments/gauges/verticalBar.py</b>:
+            <span class="text">Coverage for </span><b>src&#8201;/&#8201;pyefis&#8201;/&#8201;instruments&#8201;/&#8201;gauges&#8201;/&#8201;verticalBar.py</b>:
             <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
             <label for="help_panel_state">
-                <img id="keyboard_icon" src="keybd_closed_cb_ce680311.png" alt="Show/hide keyboard shortcuts">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
             </label>
             <div id="help_panel">
                 <p class="legend">Shortcuts on this page</p>
@@ -66,8 +66,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_f32a2e4e5d34fc0c___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-05-19 23:53 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
+            created at 2026-04-26 23:20 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -327,12 +327,12 @@
     <p class="run"><span class="n"><a id="t243" href="#t243">243</a></span><span class="t">        <span class="key">if</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">lowWarn</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">lowWarn</span> <span class="op">>=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">lowRange</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t244" href="#t244">244</a></span><span class="t">            <span class="nam">x</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">interpolate</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">lowWarn</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t245" href="#t245">245</a></span><span class="t">            <span class="nam">p</span><span class="op">.</span><span class="nam">drawRect</span><span class="op">(</span><span class="nam">QRectF</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">barLeft</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barBottom</span> <span class="op">-</span> <span class="nam">x</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t247" href="#t247">247</a></span><span class="t">                              <span class="nam">x</span> <span class="op">+</span> <span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t247" href="#t247">247</a></span><span class="t">                              <span class="nam">x</span> <span class="op">+</span> <span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t248" href="#t248">248</a></span><span class="t">        <span class="key">if</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">highWarn</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">highWarn</span> <span class="op">&lt;=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">highRange</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t249" href="#t249">249</a></span><span class="t">            <span class="nam">p</span><span class="op">.</span><span class="nam">drawRect</span><span class="op">(</span><span class="nam">QRectF</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">barLeft</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barTop</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t250" href="#t250">250</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t251" href="#t251">251</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span> <span class="op">-</span> <span class="nam">self</span><span class="op">.</span><span class="nam">interpolate</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">highWarn</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t250" href="#t250">250</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t251" href="#t251">251</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span> <span class="op">-</span> <span class="nam">self</span><span class="op">.</span><span class="nam">interpolate</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">highWarn</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t252" href="#t252">252</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t253" href="#t253">253</a></span><span class="t">        <span class="nam">pen</span><span class="op">.</span><span class="nam">setColor</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">alarmColor</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t254" href="#t254">254</a></span><span class="t">        <span class="nam">brush</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">alarmColor</span>&nbsp;</span><span class="r"></span></p>
@@ -341,12 +341,12 @@
     <p class="run"><span class="n"><a id="t257" href="#t257">257</a></span><span class="t">        <span class="key">if</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">lowAlarm</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">lowAlarm</span> <span class="op">>=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">lowRange</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t258" href="#t258">258</a></span><span class="t">            <span class="nam">x</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">interpolate</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">lowAlarm</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t259" href="#t259">259</a></span><span class="t">            <span class="nam">p</span><span class="op">.</span><span class="nam">drawRect</span><span class="op">(</span><span class="nam">QRectF</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">barLeft</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barBottom</span> <span class="op">-</span> <span class="nam">x</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t260" href="#t260">260</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t261" href="#t261">261</a></span><span class="t">                              <span class="nam">x</span> <span class="op">+</span> <span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t260" href="#t260">260</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t261" href="#t261">261</a></span><span class="t">                              <span class="nam">x</span> <span class="op">+</span> <span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t262" href="#t262">262</a></span><span class="t">        <span class="key">if</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">highAlarm</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">highAlarm</span> <span class="op">&lt;=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">highRange</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t263" href="#t263">263</a></span><span class="t">            <span class="nam">p</span><span class="op">.</span><span class="nam">drawRect</span><span class="op">(</span><span class="nam">QRectF</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">barLeft</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barTop</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t264" href="#t264">264</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t265" href="#t265">265</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span> <span class="op">-</span> <span class="nam">self</span><span class="op">.</span><span class="nam">interpolate</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">highAlarm</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t264" href="#t264">264</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barWidth</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t265" href="#t265">265</a></span><span class="t">                              <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span> <span class="op">-</span> <span class="nam">self</span><span class="op">.</span><span class="nam">interpolate</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">highAlarm</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">barHeight</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t266" href="#t266">266</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t267" href="#t267">267</a></span><span class="t">        <span class="com"># Draw black bars to create segments</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t268" href="#t268">268</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">segments</span> <span class="op">></span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -418,8 +418,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_f32a2e4e5d34fc0c___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.8.0">coverage.py v7.8.0</a>,
-            created at 2025-05-19 23:53 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
+            created at 2026-04-26 23:20 +0000
         </p>
     </div>
 </footer>
