@@ -379,11 +379,51 @@ class SVSRenderer:
         p.restore()
 
     def _sample_elevations(self, lat_grid: np.ndarray, lon_grid: np.ndarray, n: int) -> np.ndarray:
-        """Sample elevation from the tile cache for each grid point."""
+        """
+        Sample elevation for the entire (n, n) grid in one vectorised pass.
+
+        Instead of calling cache.elevation() once per point (n² Python calls),
+        we group grid points by their 1°×1° tile, load each tile once, then run
+        bilinear interpolation on all points in that tile simultaneously with NumPy.
+        A 20 NM view typically touches 1-4 tiles, so the outer loop runs 1-4 times
+        regardless of grid resolution — O(tiles) not O(n²).
+        """
         elev = np.zeros((n, n), dtype=np.float32)
-        for i in range(n):
-            for j in range(n):
-                elev[i, j] = self.cache.elevation(float(lat_grid[i, j]), float(lon_grid[i, j]))
+
+        # Floor gives the SW-corner (lat, lon) of the tile each point belongs to
+        tile_lat_grid = np.floor(lat_grid).astype(np.int32)
+        tile_lon_grid = np.floor(lon_grid).astype(np.int32)
+
+        # Unique tile keys — typically 1-4 for a 20-30 NM view
+        keys = np.unique(
+            np.stack([tile_lat_grid.ravel(), tile_lon_grid.ravel()], axis=1),
+            axis=0
+        )
+
+        for tile_lat, tile_lon in keys:
+            tile = self.cache.get(int(tile_lat), int(tile_lon))
+            if tile is None:
+                continue  # ocean / void tile — leave elevation as 0
+
+            mask = (tile_lat_grid == tile_lat) & (tile_lon_grid == tile_lon)
+            lats = lat_grid[mask]
+            lons = lon_grid[mask]
+
+            # Fractional sample position within the 1201×1201 tile
+            row_f = (tile_lat + 1.0 - lats) * (SRTM3_SAMPLES - 1)
+            col_f = (lons - tile_lon)        * (SRTM3_SAMPLES - 1)
+
+            row = np.clip(np.floor(row_f).astype(np.int32), 0, SRTM3_SAMPLES - 2)
+            col = np.clip(np.floor(col_f).astype(np.int32), 0, SRTM3_SAMPLES - 2)
+            dr  = (row_f - row).astype(np.float32)
+            dc  = (col_f - col).astype(np.float32)
+
+            # Bilinear interpolation — all points in one tile, pure NumPy
+            elev[mask] = (tile[row,     col    ] * (1 - dr) * (1 - dc) +
+                          tile[row,     col + 1] * (1 - dr) *      dc  +
+                          tile[row + 1, col    ] *      dr  * (1 - dc) +
+                          tile[row + 1, col + 1] *      dr  *      dc)
+
         return elev
 
 
