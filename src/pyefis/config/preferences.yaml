@@ -93,6 +93,8 @@ enabled:
   LEADER_INDICATOR: true
   HSI: true
   HEADING: true
+  WIND: false
+
 # EGT/CHT:
   CYLINDER_1: true
   CYLINDER_2: true
