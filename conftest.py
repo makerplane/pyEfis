@@ -369,4 +369,14 @@ def fix():
     fix.db.define_item("INT", "Testing key", "int", 0, 100, "", 50000, "")
     fix.db.set_value("INT", 29)
 
+    fix.db.define_item("HWIND", "Headwind component", "float", -200.0, 200.0, "knots", 50000, "")
+    fix.db.set_value("HWIND", 0.0)
+    fix.db.get_item("HWIND").bad = False
+    fix.db.get_item("HWIND").fail = False
+
+    fix.db.define_item("XWIND", "Crosswind component", "float", -200.0, 200.0, "knots", 50000, "")
+    fix.db.set_value("XWIND", 0.0)
+    fix.db.get_item("XWIND").bad = False
+    fix.db.get_item("XWIND").fail = False
+
     return fix

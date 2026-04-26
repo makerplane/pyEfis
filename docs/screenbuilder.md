@@ -508,7 +508,9 @@ Options:
 
 
 ## airspeed_tape
-Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe
+Vertical airspeed tape with highlighted sections to indicate Vs, Vs0, Vno Vne and Vfe.
+Includes an optional True Airspeed (TAS) box at the bottom and an optional trend arrow
+showing predicted airspeed change over a configurable look-ahead time.
 
 ![Airspeed Tape](/docs/images/airspeed_tape.png)
 
@@ -516,6 +518,11 @@ Options:
   * font_percent - default None
   * font_family - default 'DejaVu Sans Condensed'
   * font_mask - default '000'
+  * show_tas - default True; show TAS box at bottom of tape (reads FIX key `TAS`)
+  * show_trend - default True; show airspeed trend arrow (reads FIX key `IAS`)
+  * trend_lookahead - default 6.0; look-ahead seconds for trend projection
+  * trend_window - default 3.0; averaging window in seconds for rate-of-change smoothing
+  * trend_min_change - default 0.5; minimum rate (kt/s) below which trend is suppressed
 
 ## airspeed_trend_tape
 
@@ -1042,6 +1049,38 @@ Options:
   * text_bad_color - default gray
   * pen_bad_colo - default gray
   * highlight_bad_color - default dark magenta
+
+## wind_display
+
+Compact two-row widget showing headwind and crosswind components with directional
+arrow indicators.  Intended for placement near the airspeed tape on the PFD.
+
+| Row | Label | Arrow | Value |
+|-----|-------|-------|-------|
+| Top | HW | ↑ headwind / ↓ tailwind | magnitude in knots |
+| Bottom | XW | ← from-right / → from-left | magnitude in knots |
+
+When `HWIND` or `XWIND` data is unavailable (fail flag set) the value shows
+`---` and the arrow is dimmed.
+
+FIX database keys used:
+  * **HWIND** — headwind component (positive = headwind, negative = tailwind).
+    Computed by the fix-gateway `wind_components` function.
+  * **XWIND** — crosswind component (positive = from right, negative = from left).
+    Computed by the fix-gateway `wind_components` function.
+
+Example placement on the PFD (right of the airspeed tape):
+```yaml
+  - type: wind_display
+    row: 83
+    column: 15
+    span:
+      rows: 22
+      columns: 22
+```
+
+Options:
+  * font_family — default 'DejaVu Sans Condensed'
 
 ## virtual_vfr
 
