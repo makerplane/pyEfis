@@ -28,7 +28,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
-from PyQt6.QtCore import QPointF, QRectF
+from PyQt6.QtCore import QLineF, QPointF, QRectF
 from PyQt6.QtGui import QColor, QPainter, QPolygonF
 
 log = logging.getLogger(__name__)
@@ -171,6 +171,8 @@ class SVSRenderer:
         self.cache        = TileCache(Path(tile_path)) if tile_path else None
         self.green_ft     = float(config.get("clearance_green_ft",  1000))
         self.yellow_ft    = float(config.get("clearance_yellow_ft",  500))
+        self.terrain_fill = config.get("terrain_fill", True)
+        self.grid_lines   = config.get("grid_lines", True)
         self._grid_n      = GRID_SIZES.get(self.renderer, 48)
 
     @property
@@ -258,21 +260,122 @@ class SVSRenderer:
         # Clearance colours
         clearance_ft = ac_alt_ft - elev_ft
 
-        # Draw each visible terrain cell as a filled square
-        cell_px = max(2, int(pixels_per_deg * range_deg * 2 / n))
+        # ------------------------------------------------------------------
+        # Slope shading — Lambertian lighting from a fixed sun direction.
+        # Surface normal = (-dz/dE, -dz/dN, step_m), normalised.
+        # Sun from upper-NW in geographic frame: (-1, 1, 2) normalised.
+        # ------------------------------------------------------------------
+        step_m = (range_deg * 2 / max(n - 1, 1)) * 111139.0
+        dz_di = np.gradient(elev_m.astype(float), axis=0)  # N-S (lat)
+        dz_dj = np.gradient(elev_m.astype(float), axis=1)  # E-W (lon)
+        mag = np.sqrt(dz_dj ** 2 + dz_di ** 2 + step_m ** 2)
+        mag = np.where(mag < 1e-6, 1e-6, mag)
+        nx = -dz_dj / mag   # east component of normal
+        ny = -dz_di / mag   # north component of normal
+        nz =  step_m / mag  # up component of normal
+        # Sun direction (pointing from surface toward sun), geographic (E, N, Up)
+        _lx, _ly, _lz = -1.0, 1.0, 2.0
+        _lm = math.sqrt(_lx*_lx + _ly*_ly + _lz*_lz)
+        _lx, _ly, _lz = _lx/_lm, _ly/_lm, _lz/_lm
+        AMBIENT = 0.35
+        DIFFUSE = 0.65
+        diffuse   = np.clip(nx * _lx + ny * _ly + nz * _lz, 0.0, 1.0)
+        intensity = AMBIENT + DIFFUSE * diffuse   # (n,n) ∈ [AMBIENT, 1.0]
+
+        # Build shade table: 4 clearance × N_SHADE intensity levels
+        N_SHADE = 8
+        _BASE_COLS = (COLOR_SAFE, COLOR_CAUTION, COLOR_WARNING, COLOR_CONFLICT)
+        shade_table = []
+        for _bc in _BASE_COLS:
+            for _si in range(N_SHADE):
+                _f = AMBIENT + DIFFUSE * (_si / (N_SHADE - 1))
+                shade_table.append(QColor(
+                    min(255, int(_bc.red()   * _f)),
+                    min(255, int(_bc.green() * _f)),
+                    min(255, int(_bc.blue()  * _f)),
+                ))
+
+        def _cidx(c: float) -> int:
+            if c < 0:              return 3
+            if c < self.yellow_ft: return 2
+            if c < self.green_ft:  return 1
+            return 0
+
+        def _shade_key(c: float, inten: float) -> int:
+            ci = _cidx(c)
+            si = min(N_SHADE - 1, int((inten - AMBIENT) / DIFFUSE * (N_SHADE - 1) + 0.5))
+            si = max(0, si)
+            return ci * N_SHADE + si
 
         p.save()
-        p.setPen(Qt_NoPen())
-        for i in range(n):
-            for j in range(n):
-                if not visible[i, j]:
-                    continue
-                cx = float(x_rot[i, j])
-                cy = float(y_rot[i, j])
-                if cx < -cell_px or cx > w + cell_px or cy < -cell_px or cy > h + cell_px:
-                    continue
-                color = self._clearance_color(float(clearance_ft[i, j]))
-                p.fillRect(QRectF(cx - cell_px/2, cy - cell_px/2, cell_px, cell_px), color)
+        p.resetTransform()
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        # ------------------------------------------------------------------
+        # Filled terrain quads — batched by shade key into QPainterPath
+        # so the actual Qt draw calls are just N_SHADE×4 fillPath() calls.
+        # ------------------------------------------------------------------
+        if self.terrain_fill:
+            from PyQt6.QtGui import QBrush, QPainterPath as _QPP
+            fill_paths: list[_QPP] = [_QPP() for _ in range(4 * N_SHADE)]
+            for i in range(n - 1):
+                for j in range(n - 1):
+                    if not (visible[i, j] and visible[i, j + 1] and
+                            visible[i + 1, j] and visible[i + 1, j + 1]):
+                        continue
+                    c = min(float(clearance_ft[i,     j]),
+                            float(clearance_ft[i,     j + 1]),
+                            float(clearance_ft[i + 1, j]),
+                            float(clearance_ft[i + 1, j + 1]))
+                    inten = (float(intensity[i,     j]) +
+                             float(intensity[i,     j + 1]) +
+                             float(intensity[i + 1, j]) +
+                             float(intensity[i + 1, j + 1])) * 0.25
+                    key = _shade_key(c, inten)
+                    fill_paths[key].addPolygon(QPolygonF([
+                        QPointF(float(x_rot[i,     j]),     float(y_rot[i,     j])),
+                        QPointF(float(x_rot[i,     j + 1]), float(y_rot[i,     j + 1])),
+                        QPointF(float(x_rot[i + 1, j + 1]), float(y_rot[i + 1, j + 1])),
+                        QPointF(float(x_rot[i + 1, j]),     float(y_rot[i + 1, j])),
+                    ]))
+            p.setPen(Qt_NoPen())
+            for key, path in enumerate(fill_paths):
+                if not path.isEmpty():
+                    p.setBrush(QBrush(shade_table[key]))
+                    p.drawPath(path)
+
+        if self.grid_lines:
+            segs: list[list[QLineF]] = [[] for _ in range(4 * N_SHADE)]
+
+            # Along-longitude connections (lat row i, adjacent lon j / j+1)
+            for i in range(n):
+                for j in range(n - 1):
+                    if visible[i, j] and visible[i, j + 1]:
+                        c    = min(float(clearance_ft[i, j]), float(clearance_ft[i, j + 1]))
+                        inten = (float(intensity[i, j]) + float(intensity[i, j + 1])) * 0.5
+                        segs[_shade_key(c, inten)].append(QLineF(
+                            float(x_rot[i, j]),     float(y_rot[i, j]),
+                            float(x_rot[i, j + 1]), float(y_rot[i, j + 1])))
+
+            # Along-latitude connections (adjacent lat row i / i+1, lon col j)
+            for i in range(n - 1):
+                for j in range(n):
+                    if visible[i, j] and visible[i + 1, j]:
+                        c    = min(float(clearance_ft[i, j]), float(clearance_ft[i + 1, j]))
+                        inten = (float(intensity[i, j]) + float(intensity[i + 1, j])) * 0.5
+                        segs[_shade_key(c, inten)].append(QLineF(
+                            float(x_rot[i, j]),     float(y_rot[i, j]),
+                            float(x_rot[i + 1, j]), float(y_rot[i + 1, j])))
+
+            from PyQt6.QtGui import QPen as _QPen
+            pen = _QPen()
+            pen.setWidth(1)
+            for key, lines in enumerate(segs):
+                if lines:
+                    pen.setColor(shade_table[key])
+                    p.setPen(pen)
+                    p.drawLines(lines)
+
         p.restore()
 
     def _sample_elevations(self, lat_grid: np.ndarray, lon_grid: np.ndarray, n: int) -> np.ndarray:

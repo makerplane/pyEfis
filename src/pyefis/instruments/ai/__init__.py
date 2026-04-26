@@ -394,6 +394,18 @@ class AI(QGraphicsView):
         m = self.bankMarkSize
         p = QPainter(self.viewport())
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # SVS terrain drawn first — overlay, bank marks, and FPM render on top.
+        # Note: the animated pitch ladder lives in the QGraphicsScene (rendered by
+        # super() above), so it remains behind SVS until SVS is refactored into a
+        # low-Z scene item. All overlay symbology is correctly in front.
+        if self.svs is not None:
+            ppd = getattr(self, 'pixelsPerDeg', self.height() / self.pitchDegreesShown)
+            self.svs.draw(p, w, h,
+                          self._svs_lat, self._svs_lon, self._svs_alt,
+                          self._pitchAngle, self._rollAngle, self._fpm_head,
+                          ppd)
+
         # Put the static overlay image on the view
         p.drawImage(self.rect(), self.overlay)
 
@@ -449,13 +461,6 @@ class AI(QGraphicsView):
             p.drawPolygon(diamond)
             p.rotate(-2 * a)
             p.drawPolygon(diamond)
-
-        if self.svs is not None:
-            ppd = getattr(self, 'pixelsPerDeg', self.height() / self.pitchDegreesShown)
-            self.svs.draw(p, w, h,
-                          self._svs_lat, self._svs_lon, self._svs_alt,
-                          self._pitchAngle, self._rollAngle, self._fpm_head,
-                          ppd)
 
         self._drawFPM(p, w, h)
 
