@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import QLineF, QPointF, QRectF
-from PyQt6.QtGui import QColor, QPainter, QPolygonF
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPolygonF
 
 log = logging.getLogger(__name__)
 
@@ -268,22 +268,33 @@ class SVSRenderer:
         step_m = (range_deg * 2 / max(n - 1, 1)) * 111139.0
         dz_di = np.gradient(elev_m.astype(float), axis=0)  # N-S (lat)
         dz_dj = np.gradient(elev_m.astype(float), axis=1)  # E-W (lon)
-        mag = np.sqrt(dz_dj ** 2 + dz_di ** 2 + step_m ** 2)
+        # Amplify slopes so lighting is dramatic at SVS grid scales.
+        # Without this, step_m (~700m) >> dz (~30m) so all normals point
+        # nearly straight up and shading is nearly uniform.
+        SLOPE_EXAG = 4.0
+        mag = np.sqrt((dz_dj * SLOPE_EXAG) ** 2 + (dz_di * SLOPE_EXAG) ** 2 + step_m ** 2)
         mag = np.where(mag < 1e-6, 1e-6, mag)
-        nx = -dz_dj / mag   # east component of normal
-        ny = -dz_di / mag   # north component of normal
-        nz =  step_m / mag  # up component of normal
+        nx = -dz_dj * SLOPE_EXAG / mag   # east component of normal
+        ny = -dz_di * SLOPE_EXAG / mag   # north component of normal
+        nz =  step_m / mag               # up component of normal
         # Sun direction (pointing from surface toward sun), geographic (E, N, Up)
         _lx, _ly, _lz = -1.0, 1.0, 2.0
         _lm = math.sqrt(_lx*_lx + _ly*_ly + _lz*_lz)
         _lx, _ly, _lz = _lx/_lm, _ly/_lm, _lz/_lm
-        AMBIENT = 0.35
-        DIFFUSE = 0.65
+        AMBIENT = 0.10
+        DIFFUSE = 0.90
         diffuse   = np.clip(nx * _lx + ny * _ly + nz * _lz, 0.0, 1.0)
         intensity = AMBIENT + DIFFUSE * diffuse   # (n,n) ∈ [AMBIENT, 1.0]
 
+        # Smooth intensity with a 3×3 Gaussian to soften hard colour steps at
+        # quad boundaries where a ridge bisects a grid cell.
+        _g = np.array([[1,2,1],[2,4,2],[1,2,1]], dtype=np.float32) / 16.0
+        _ip = np.pad(intensity, 1, mode='edge')
+        intensity = sum(_g[_di, _dj] * _ip[_di:_di+n, _dj:_dj+n]
+                        for _di in range(3) for _dj in range(3))
+
         # Build shade table: 4 clearance × N_SHADE intensity levels
-        N_SHADE = 8
+        N_SHADE = 32
         _BASE_COLS = (COLOR_SAFE, COLOR_CAUTION, COLOR_WARNING, COLOR_CONFLICT)
         shade_table = []
         for _bc in _BASE_COLS:
@@ -316,7 +327,7 @@ class SVSRenderer:
         # so the actual Qt draw calls are just N_SHADE×4 fillPath() calls.
         # ------------------------------------------------------------------
         if self.terrain_fill:
-            from PyQt6.QtGui import QBrush, QPainterPath as _QPP
+            from PyQt6.QtGui import QPainterPath as _QPP
             fill_paths: list[_QPP] = [_QPP() for _ in range(4 * N_SHADE)]
             for i in range(n - 1):
                 for j in range(n - 1):
