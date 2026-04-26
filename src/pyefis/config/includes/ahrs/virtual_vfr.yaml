@@ -85,6 +85,7 @@ instruments:
     options:
       font_percent: 0.25
   - type: wind_display
+    disabled: true
     row: 83
     column: 15
     span:

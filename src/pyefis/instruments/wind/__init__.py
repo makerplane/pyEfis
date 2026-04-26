@@ -37,8 +37,12 @@ class WindDisplay(QWidget):
         self._val_font = QFont(self.font_family)
         self._arrow_size = 4
 
-        self._hwind_item = fix.db.get_item("HWIND")
-        self._xwind_item = fix.db.get_item("XWIND")
+        try:
+            self._hwind_item = fix.db.get_item("HWIND")
+            self._xwind_item = fix.db.get_item("XWIND")
+        except KeyError:
+            # HWIND/XWIND not available — display dashes, no signals
+            return
 
         self._hwind = self._hwind_item.value
         self._xwind = self._xwind_item.value
