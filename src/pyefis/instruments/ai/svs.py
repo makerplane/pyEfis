@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import QLineF, QPointF, QRectF
-from PyQt6.QtGui import QBrush, QColor, QPainter, QPolygonF
+from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen, QPolygonF
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +47,7 @@ COLOR_CONFLICT  = QColor(180,   0, 180)   # magenta     — aircraft at or below
 GRID_SIZES = {
     "cpu_sparse": 48,
     "cpu_dense":  128,
+    "cpu_ultra":  192,  # ~2.3× more quads than dense; SRTM3 data supports it
     "opengl":     48,   # opengl tier not yet implemented; falls back to cpu_sparse
 }
 
@@ -146,6 +147,26 @@ class TileCache:
 
 
 # ---------------------------------------------------------------------------
+# Embedded airport / runway database
+# Populated with hand-checked FAA data; replaced later by NASR CSV download.
+# Each runway entry: thr1 = first threshold, thr2 = opposite threshold.
+# Coordinates from FAA NASR; elevations in ft MSL; width in ft.
+# ---------------------------------------------------------------------------
+_AIRPORT_DB = {
+    "KASE": {
+        "label": "ASE",
+        "ref_lat": 39.2232, "ref_lon": -106.8688, "elev_ft": 7820,
+        "runways": [
+            {   # Runway 15/33 — Aspen/Pitkin County Airport
+                "thr1_lat": 39.2282, "thr1_lon": -106.8723, "thr1_elev_ft": 7828,
+                "thr2_lat": 39.2075, "thr2_lon": -106.8644, "thr2_elev_ft": 7938,
+                "width_ft": 100,
+            },
+        ],
+    },
+}
+
+# ---------------------------------------------------------------------------
 # SVS renderer
 # ---------------------------------------------------------------------------
 
@@ -171,9 +192,11 @@ class SVSRenderer:
         self.cache        = TileCache(Path(tile_path)) if tile_path else None
         self.green_ft     = float(config.get("clearance_green_ft",  1000))
         self.yellow_ft    = float(config.get("clearance_yellow_ft",  500))
-        self.terrain_fill = config.get("terrain_fill", True)
-        self.grid_lines   = config.get("grid_lines", True)
-        self._grid_n      = GRID_SIZES.get(self.renderer, 48)
+        self.terrain_fill  = config.get("terrain_fill", True)
+        self.grid_lines    = config.get("grid_lines", True)
+        self.auto_range    = config.get("auto_range", True)
+        self.min_range_nm  = float(config.get("min_range_nm", 8.0))
+        self._grid_n       = GRID_SIZES.get(self.renderer, 48)
 
     @property
     def ready(self) -> bool:
@@ -202,7 +225,23 @@ class SVSRenderer:
             return
 
         n = self._grid_n
-        range_deg = self.range_nm * NM_TO_DEG
+
+        # Auto-scale range with AGL so near-ground views stay useful.
+        # Sample terrain under the aircraft (cheap — tile is cached after frame 1).
+        ac_ground_m = float(self._sample_elevations(
+            np.array([[ac_lat]]), np.array([[ac_lon]]), 1)[0, 0])
+        agl_ft = ac_alt_ft - ac_ground_m * 3.28084
+        # Auto-range: largest of AGL-based, MSL-based, and configured minimum.
+        # MSL term ensures high-altitude plateau flying still sees distant terrain.
+        # Disabled when auto_range=false — config range_nm is used directly.
+        if self.auto_range:
+            agl_range = 0.1 * math.sqrt(max(0.0, agl_ft))   # e.g. 2500 AGL → 5 NM
+            msl_range = ac_alt_ft * 0.001                    # e.g. 14000 MSL → 14 NM
+            range_nm  = min(self.range_nm,
+                            max(self.min_range_nm, agl_range, msl_range))
+        else:
+            range_nm = self.range_nm
+        range_deg = range_nm * NM_TO_DEG
 
         # Build a grid of (lat, lon) points centred on the aircraft
         # Grid runs from -range_deg to +range_deg in both lat and lon
@@ -387,7 +426,138 @@ class SVSRenderer:
                     p.setPen(pen)
                     p.drawLines(lines)
 
+        self._draw_runways(p, w, h, ac_lat, ac_lon, ac_alt_ft,
+                           pitch_deg, roll_deg, heading_deg, pixels_per_deg)
+
         p.restore()
+
+    def _project_point(self, lat, lon, alt_ft,
+                       ac_lat, ac_lon, ac_alt_ft,
+                       pitch_deg, roll_deg, heading_deg,
+                       ppd, w, h):
+        """Project a geographic point to AI-viewport screen (x, y).
+        Returns (sx, sy, in_front); in_front=False when point is behind aircraft."""
+        lat_cos = math.cos(math.radians(ac_lat))
+        d_lat = lat - ac_lat
+        d_lon = (lon - ac_lon) * lat_cos          # scaled so 1 unit ≈ 111 km
+
+        head_rad = math.radians(heading_deg)
+        cos_h, sin_h = math.cos(head_rad), math.sin(head_rad)
+        x_fwd   =  d_lat * cos_h + d_lon * sin_h
+        x_right = -d_lat * sin_h + d_lon * cos_h
+
+        if x_fwd <= 1e-6:
+            return 0.0, 0.0, False
+
+        range_m = math.sqrt(d_lat ** 2 + d_lon ** 2) * 111139.0
+        range_m = max(range_m, 1.0)
+
+        alt_diff_m    = (alt_ft - ac_alt_ft) * 0.3048
+        elev_angle_deg = math.degrees(math.atan2(alt_diff_m, range_m))
+
+        x_ang = math.degrees(math.atan2(x_right, x_fwd))
+        y_ang = elev_angle_deg - pitch_deg
+
+        x_px = x_ang * ppd
+        y_px = -y_ang * ppd
+
+        roll_rad = math.radians(roll_deg)
+        cos_r, sin_r = math.cos(-roll_rad), math.sin(-roll_rad)
+        sx = x_px * cos_r - y_px * sin_r + w / 2
+        sy = x_px * sin_r + y_px * cos_r + h / 2
+        return sx, sy, True
+
+    def _draw_runways(self, p, w, h, ac_lat, ac_lon, ac_alt_ft,
+                      pitch_deg, roll_deg, heading_deg, ppd):
+        """Draw runways and airport markers from _AIRPORT_DB onto the SVS view."""
+        lat_cos   = math.cos(math.radians(ac_lat))
+        range_m   = self.range_nm * 1852.0
+
+        RWY_FILL    = QColor(210, 210, 210)
+        RWY_OUTLINE = QColor(255, 255, 255)
+        FLAG_FILL   = QColor(255, 220,   0)
+        FLAG_TEXT   = QColor(255, 255,   0)
+
+        rwy_pen  = QPen(RWY_OUTLINE, 1)
+        flag_pen = QPen(QColor(0, 0, 0), 1)
+        font     = QFont("sans-serif", 9, QFont.Weight.Bold)
+
+        for icao, apt in _AIRPORT_DB.items():
+            # Range-check on airport reference point
+            d_lat_ref = (apt["ref_lat"] - ac_lat)
+            d_lon_ref = (apt["ref_lon"] - ac_lon) * lat_cos
+            if math.sqrt(d_lat_ref ** 2 + d_lon_ref ** 2) * 111139.0 > range_m:
+                continue
+
+            # --- Runway rectangles ---
+            for rwy in apt["runways"]:
+                t1_lat, t1_lon = rwy["thr1_lat"], rwy["thr1_lon"]
+                t2_lat, t2_lon = rwy["thr2_lat"], rwy["thr2_lon"]
+                t1_elev = rwy["thr1_elev_ft"]
+                t2_elev = rwy["thr2_elev_ft"]
+
+                # Perpendicular offset for runway width
+                dl = t2_lat - t1_lat
+                dm = (t2_lon - t1_lon) * lat_cos
+                rwy_len = math.sqrt(dl ** 2 + dm ** 2)
+                if rwy_len < 1e-9:
+                    continue
+                # Unit perpendicular in lat / scaled-lon space, then unscale lon
+                perp_lat =  -dm / rwy_len
+                perp_lon =  dl  / rwy_len / lat_cos
+                hw = (rwy["width_ft"] / 2.0) / 364491.0   # half-width in degrees lat
+
+                corners = [
+                    (t1_lat + perp_lat * hw, t1_lon + perp_lon * hw, t1_elev),
+                    (t1_lat - perp_lat * hw, t1_lon - perp_lon * hw, t1_elev),
+                    (t2_lat - perp_lat * hw, t2_lon - perp_lon * hw, t2_elev),
+                    (t2_lat + perp_lat * hw, t2_lon + perp_lon * hw, t2_elev),
+                ]
+
+                pts = []
+                for lat, lon, elev in corners:
+                    sx, sy, vis = self._project_point(lat, lon, elev,
+                                                      ac_lat, ac_lon, ac_alt_ft,
+                                                      pitch_deg, roll_deg, heading_deg,
+                                                      ppd, w, h)
+                    if not vis:
+                        break
+                    pts.append(QPointF(sx, sy))
+
+                if len(pts) == 4:
+                    p.setPen(rwy_pen)
+                    p.setBrush(QBrush(RWY_FILL))
+                    p.drawPolygon(QPolygonF(pts))
+
+            # --- Airport flag marker — pole rising from ground to POLE_HT ---
+            POLE_HT_FT = 2000
+            sx_base, sy_base, vis_base = self._project_point(
+                apt["ref_lat"], apt["ref_lon"], apt["elev_ft"],
+                ac_lat, ac_lon, ac_alt_ft,
+                pitch_deg, roll_deg, heading_deg, ppd, w, h)
+            sx_top, sy_top, vis_top = self._project_point(
+                apt["ref_lat"], apt["ref_lon"], apt["elev_ft"] + POLE_HT_FT,
+                ac_lat, ac_lon, ac_alt_ft,
+                pitch_deg, roll_deg, heading_deg, ppd, w, h)
+            if vis_base and vis_top:
+                pole_pen = QPen(FLAG_FILL, 2)
+                p.setPen(pole_pen)
+                p.drawLine(QPointF(sx_base, sy_base), QPointF(sx_top, sy_top))
+                # Flag rectangle to the right of the pole tip
+                fw, fh = 18, 10
+                flag_rect = QPolygonF([
+                    QPointF(sx_top,      sy_top),
+                    QPointF(sx_top + fw, sy_top),
+                    QPointF(sx_top + fw, sy_top + fh),
+                    QPointF(sx_top,      sy_top + fh),
+                ])
+                p.setBrush(QBrush(FLAG_FILL))
+                p.setPen(flag_pen)
+                p.drawPolygon(flag_rect)
+                # Identifier above/right of flag
+                p.setPen(QPen(FLAG_TEXT))
+                p.setFont(font)
+                p.drawText(QPointF(sx_top + fw + 3, sy_top + fh), apt["label"])
 
     def _sample_elevations(self, lat_grid: np.ndarray, lon_grid: np.ndarray, n: int) -> np.ndarray:
         """

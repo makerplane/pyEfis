@@ -57,8 +57,9 @@ ALT       = float(os.environ.get("SVS_ALT",  "3000"))
 PITCH     = float(os.environ.get("SVS_PITCH", "0"))
 ROLL      = float(os.environ.get("SVS_ROLL",  "0"))
 HEAD      = float(os.environ.get("SVS_HEAD",  "360"))
-RANGE_NM  = float(os.environ.get("SVS_RANGE", "30"))
-RENDERER  = os.environ.get("SVS_RENDERER", "cpu_sparse")
+RANGE_NM   = float(os.environ.get("SVS_RANGE", "30"))
+RENDERER   = os.environ.get("SVS_RENDERER", "cpu_sparse")
+AUTO_RANGE = os.environ.get("SVS_AUTO_RANGE", "true").lower() != "false"
 
 # ---------------------------------------------------------------------------
 # Bootstrap fix DB
@@ -110,10 +111,11 @@ win.resize(800, 600)
 
 widget = AI(win, show_fpm=True)
 widget.set_svs_config({
-    "enabled":           True,
-    "tile_path":         TILE_PATH,
-    "renderer":          RENDERER,
-    "range_nm":          RANGE_NM,
+    "enabled":            True,
+    "tile_path":          TILE_PATH,
+    "renderer":           RENDERER,
+    "range_nm":           RANGE_NM,
+    "auto_range":         AUTO_RANGE,
     "clearance_green_ft": 1000,
     "clearance_yellow_ft": 500,
 })
