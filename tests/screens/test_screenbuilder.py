@@ -1434,7 +1434,6 @@ class TestScreenBuilderPreferencesAndOptions:
         assert screen.get_instrument_defaults("unknown") is None
         assert screen.get_instrument_default_options("heading_display") == {"font_size": 17}
         assert screen.get_instrument_default_options("static_text") is False
-        assert screen.signal_mapping({}) is None
 
 
 class TestScreenBuilderLayout:

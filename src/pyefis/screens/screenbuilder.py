@@ -19,33 +19,18 @@ from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QTimer, qRound
 from PyQt6.QtWidgets import QWidget
 
-from pyefis.instruments import ai
 from pyefis.instruments import weston
-# from pyefis.instruments import gauges
-from pyefis.instruments import hsi
-from pyefis.instruments import airspeed
-from pyefis.instruments import altimeter
-from pyefis.instruments import vsi
-from pyefis.instruments import tc
-from pyefis.instruments import gauges
-from pyefis.instruments import misc
-from pyefis.instruments import button
-from pyefis.instruments import misc
-from pyefis.instruments.ai.VirtualVfr import VirtualVfr
-from pyefis.instruments import listbox
-from pyefis.instruments import wind
 from pyefis.screens import screenbuilder_config
 from pyefis.screens import screenbuilder_display
 from pyefis.screens import screenbuilder_encoder
 from pyefis.screens import screenbuilder_factory
 from pyefis.screens import screenbuilder_layout
 from pyefis.screens import screenbuilder_options
+from pyefis.screens import screenbuilder_preferences
 from pyefis.screens.screenbuilder_overlay import GridOverlay
 
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
-
-import re
 
 import logging
 
@@ -204,53 +189,10 @@ class Screen(QWidget):
     def setup_instruments(self,count,i,ganged=False,replace=None,state=False):
         if not ganged:
             self.instrument_config[count] = i
-        # Get the default items for this instrument
-        #default_items = self.get_instrument_defaults( i['type'])
-        #dbkey=None
-        #if default_items:
-        #    #This instrument has default items
-        #    dbkey = default_items
-        #else:
-        #    #No default for this Instrument, db_item is required
-        #    if not 'options' in i and not 'dbkey' in i['options']:
-        #        raise Exception(f"Instrument {i['type']} does not have a default dbkey, you must specify options:\n  dbkey:")
-        #    if 'options' in i and 'dbkey' in i['options']:
-        #        dbkey = i['options']['dbkey']            
-
-        font_percent = None
-        font_family = "DejaVu Sans Condensed"
-        if 'preferences' in i:
-            specific_pref = dict()
-            if i['preferences'] in self.parent.preferences['gauges']:
-                specific_pref = self.parent.preferences['gauges'][i['preferences']]
-            # Merge the main style(s)
-            for style in self.parent.preferences['style']:
-                if not self.parent.preferences['style'][style]:
-                    #only process if true
-                    continue
-                if re.sub("[^A-Za-z]","",i['preferences']) in self.parent.preferences['styles']:
-                    if style in self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])]:
-                        pref = self.parent.preferences['styles'][re.sub("[^A-Za-z]","",i['preferences'])][style]
-                        if pref is not None:
-                            i['options'] = i.get('options',dict())|pref
-            # Merge gauge specific settings
-            i['options'] = i.get('options',dict())|specific_pref
-
-            if 'styles' in specific_pref:
-                for style in self.parent.preferences['style']:
-                    if not self.parent.preferences['style'][style]:
-                        #only process if true
-                        continue
-                    pref = specific_pref['styles'].get(style,None)
-                    if pref is not None:
-                        i['options'] = i.get('options',dict())|pref
-
-
-        if 'options' in i:
-            if 'font_percent' in i['options']:
-                font_percent = i['options']['font_percent']
-            if 'font_family' in i['options']:
-                font_family = i['options']['font_family']
+        font_percent, font_family = screenbuilder_preferences.apply_preferences(
+            i,
+            self.parent.preferences,
+        )
         self.instruments[count] = screenbuilder_factory.create_instrument(
             self,
             i,
@@ -264,10 +206,6 @@ class Screen(QWidget):
 
     def lookup_mapping(self,item,mapping=dict()):
           return mapping.get(item,item)
-
-    def signal_mapping(self, inst):
-        # returns what signals an instrument needs 
-        pass        
 
     def get_instrument_defaults(self, inst):
         return screenbuilder_factory.get_instrument_defaults(inst)
