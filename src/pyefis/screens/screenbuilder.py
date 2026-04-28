@@ -35,6 +35,8 @@ from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 from pyefis.instruments import listbox
 from pyefis.instruments import wind
 from pyefis.screens import screenbuilder_config
+from pyefis.screens import screenbuilder_display
+from pyefis.screens import screenbuilder_encoder
 from pyefis.screens import screenbuilder_factory
 from pyefis.screens import screenbuilder_layout
 from pyefis.screens import screenbuilder_options
@@ -42,12 +44,9 @@ from pyefis.screens import screenbuilder_options
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
 
-from collections import defaultdict
 import re
 
 import logging
-from operator import itemgetter
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +68,8 @@ class Screen(QWidget):
         self.encoder_timeout = 10000
         self.encoder_timer = QTimer(self)
         self.encoder_control = False
+        self.display_state_controller = screenbuilder_display.DisplayStateController(self)
+        self.encoder_controller = screenbuilder_encoder.EncoderController(self)
         p.setColor(self.backgroundRole(), QColor(*self.screenColor))
         self.setPalette(p)
         self.setAutoFillBackground(True)
@@ -167,22 +168,7 @@ class Screen(QWidget):
         return count
 
     def change_display_states(self):
-        # Verify we have something to do
-        if self.display_states < 2: return
-
-        # Hide all instruments for current state
-        for i in self.display_state_inst[self.display_state_current]:
-            self.instruments[i].setVisible(False)
-
-        if self.display_state_current == self.display_states: 
-            # When at the end loop back to the start
-            self.display_state_current = 1
-        else:
-            # Increment to next state
-            self.display_state_current += 1
-        # Unhide all instruments for the next state
-        for i in self.display_state_inst[self.display_state_current]:
-            self.instruments[i].setVisible(True)
+        self.display_state_controller.change()
 
     def init_screen(self):
 
@@ -194,21 +180,7 @@ class Screen(QWidget):
         self.instruments = dict() # Each instrument
         self.instrument_config = dict () # configuration for the instruments
 
-        # Timed display states
-        self.display_timer = None
-        self.display_states = 0
-        self.display_state_current = 0
-        self.display_state_inst = defaultdict(list)
-        # Init timer if defined
-        if self.layout.get('display_state', False):
-            scheduler.initialize()
-            self.timer = scheduler.scheduler.getTimer(self.layout['display_state']['interval'])
-            if not self.timer:
-                scheduler.scheduler.timers.append(scheduler.IntervalTimer(self.layout['display_state']['interval']))
-                scheduler.scheduler.timers[-1].start()
-                self.timer = scheduler.scheduler.getTimer(self.layout['display_state']['interval'])
-            self.display_states = self.layout['display_state']['states']
-            self.display_state_current = 1
+        self.display_state_controller.configure(self.layout, scheduler)
 
         # Setup instruments:
         count = 0
@@ -224,24 +196,8 @@ class Screen(QWidget):
             self.grid.move(0,0)
             self.grid.resize(self.width(),self.height())
 
-        if self.layout.get('display_state', False):
-            # STart the timer after all instruments defined
-            self.timer.add_callback(self.change_display_states)
-
-        if len(self.encoder_list) > 0:
-            if self.encoder and self.encoder_button:
-                # We do have encoder list items, lets sort them
-                self.encoder_list_sorted = [ inst['inst'] for inst in sorted(self.encoder_list, key=itemgetter('order')) ]
-                self.encoder_current_selection = 0
-                # Setup the encoder db key input
-                self.encoder_input = fix.db.get_item(self.encoder)
-                self.encoder_input.valueWrite[int].connect(self.encoderChanged)
-                #self.encoder_input.oldChanged.connect(self.encoderOld)
-                # Setup the button db key input
-                self.encoder_button_input = fix.db.get_item(self.encoder_button)
-                self.encoder_button_input.valueChanged[bool].connect(self.encoderButtonChanged)
-
-                self.encoder_timer.timeout.connect(self.encoderChanged)
+        self.display_state_controller.register_callback(self.layout)
+        self.encoder_controller.configure_inputs(fix)
 
             
     def setup_instruments(self,count,i,ganged=False,replace=None,state=False):
@@ -453,116 +409,10 @@ class Screen(QWidget):
             super().closeEvent(event)
 
     def encoderChanged(self,value=0):
-        curr_time = time.time_ns() // 1000000
-        if value == 0:
-            # we can get here from the timer or from dbkey change
-            if curr_time - self.encoder_timeout >= self.encoder_timestamp:
-                self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
-                # reset control
-                self.encoder_control = False
-                self.encoder_timer.stop()
-                self.encoder_timestamp = 0
-            return
-
-        # Only highlight if we are visible
-        if not self.isVisible(): 
-            return
-
-        if self.encoder_control:
-            # Encoder data needs sent to the controlled instrument so it can process it
-            self.encoder_control = self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_changed(value)
-            if self.encoder_control:
-                self.encoder_timestamp = curr_time
-                # instrument retains control of encoder
-                self.encoder_timer.start(self.encoder_timeout + 500)
-            else:
-                # Instrument has relenquished control of encoder
-                self.encoder_timer.stop()
-                self.encoder_timestamp = 0
-                self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
-
-            return
-
-        # Set to current item
-        val = self.encoder_current_selection
-        if not (curr_time - self.encoder_timeout >= self.encoder_timestamp):
-            # Activate next item
-            # We only move to next/previous if current active is not timed out
-            val = self.encoder_current_selection + value
-
-        # encoder could have sent enough steps to loop one or more times
-        if val < 0:
-            while val < 0:
-                val = len(self.encoder_list_sorted) + val
-        elif val > len(self.encoder_list_sorted) -1:
-            while val > len(self.encoder_list_sorted) -1:
-                val = val - len(self.encoder_list_sorted)
-
-        # Final instrument is selected
-        loop = 0
-        if not self.instruments[self.encoder_list_sorted[val]].isEnabled():
-            # The selected instrument is not enabled, it cannot be selected
-            # Loop until we find an enabled instrument or we have looked over all of them at least once.
-            while not self.instruments[self.encoder_list_sorted[val]].isEnabled() and loop < 2:
-                # Was encoder moving forwards or backwards
-                adder = -1
-                if value > 0:
-                    adder = 1
-                # Move to the next instrument
-                val = val + adder
-                # Increment loop whenever we reach the end and loop arouns
-                if val < 0:
-                    val = len(self.encoder_list_sorted) -1
-                    loop += 1
-                elif val == len(self.encoder_list_sorted):
-                    val = 0
-                    loop += 1
-        # turn off highlight on current instrument   
-        self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
-        # reset encoder_control
-        self.encoder_control = False
-        # Set currently selected instrument
-        self.encoder_current_selection = val
-        # If loop is greater than 1 then nothing is selectable
-        if loop < 2:
-            # highlight selected instrument
-            self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(True)
-            # Create new timestamp
-            self.encoder_timestamp = curr_time
-            # Start timer
-            self.encoder_timer.start(self.encoder_timeout + 500)
+        self.encoder_controller.changed(value)
 
     def encoderButtonChanged(self,value):
-        if not self.isVisible(): return
-        # If we are not timed out and button was clicked
-        if value and not ((time.time_ns() // 1000000) - self.encoder_timeout >= self.encoder_timestamp):
-            # If instrument has control of encoder, pass the steps onto it
-            if self.encoder_control:
-                # We update encoder_control becasue instrument might want to relenquish control
-                self.encoder_control = self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_clicked()
-                if self.encoder_control:
-                    # Create new timestamp
-                    self.encoder_timestamp = time.time_ns() // 1000000
-                    # start timer
-                    self.encoder_timer.start(self.encoder_timeout + 500)
-                else:
-                    self.encoder_timer.stop()
-                    self.encoder_timestamp = 0
-                    self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False)
-            else:
-                # screen has control of encoder, let instrument know the user selected it
-                self.encoder_control = self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_select()
-                # If the instrument wants to take control of encoder
-                if self.encoder_control:
-                    # Create new timestamp
-                    self.encoder_timestamp = time.time_ns() // 1000000
-                    # start timer
-                    self.encoder_timer.start(self.encoder_timeout + 500)
-                else:
-                    # Instrument performed action and is done, nothing more to do so reset interface
-                    self.encoder_timer.stop()
-                    self.encoder_timestamp = 0
-                    self.instruments[self.encoder_list_sorted[self.encoder_current_selection]].enc_highlight(False) 
+        self.encoder_controller.button_changed(value)
 
 class GridOverlay(QWidget):
     def __init__(self, parent=None,layout=None):
