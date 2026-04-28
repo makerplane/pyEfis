@@ -12,6 +12,7 @@ The pyavtools.fix mock from conftest.py is used so no FIX server is needed.
 import pytest
 import time
 from pathlib import Path
+from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QApplication, QWidget
 
 import pyefis.hmi as hmi
@@ -472,6 +473,51 @@ instruments:
 
         assert screen.instruments[0].text == "Included"
 
+    def test_nested_include_without_span_contributes_to_parent_scaling(self, fix, qtbot, tmp_path):
+        grandchild = tmp_path / "grandchild.yaml"
+        grandchild.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 1
+    column: 1
+    span:
+      rows: 3
+      columns: 2
+    options:
+      text: Nested
+""",
+            encoding="utf-8",
+        )
+        child = tmp_path / "child.yaml"
+        child.write_text(
+            """
+instruments:
+  - type: include,grandchild.yaml
+    row: 2
+    column: 1
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {
+                "type": "include,child.yaml",
+                "row": 0,
+                "column": 0,
+                "span": {"rows": 10, "columns": 8},
+            }
+        ])
+        screen = Screen(_TestParent(config, config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].text == "Nested"
+        assert screen.calc_includes({"type": "include,child.yaml"}, 10, 8) == [6, 4]
+        assert screen.insturment_config[0]["row"] == pytest.approx(4.833333333333334)
+        assert screen.insturment_config[0]["column"] == pytest.approx(3.333333333333333)
+
     def test_missing_include_raises_clear_error(self, fix, qtbot, tmp_path):
         config = _config_with_instruments([
             {"type": "include,missing.yaml", "row": 0, "column": 0}
@@ -680,12 +726,51 @@ class TestScreenBuilderPreferencesAndOptions:
 
         assert screen.encoder_list == [{"inst": 0, "order": 2}]
 
+    def test_encoder_order_is_ignored_for_display_state_widgets(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "numeric_display",
+                "display_state": 1,
+                "row": 0,
+                "column": 0,
+                "options": {"dbkey": "NUMOK", "encoder_order": 2},
+            }
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.encoder_list == []
+
+    def test_unknown_instrument_type_raises_useful_error(self, fix, qtbot):
+        config = _config_with_instruments([
+            {"type": "flux_capacitor", "row": 0, "column": 0}
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+
+        with pytest.raises(ValueError, match="Unknown instrument type 'flux_capacitor'"):
+            screen.init_screen()
+
+    def test_button_without_config_raises_useful_error(self, fix, qtbot):
+        config = _config_with_instruments([
+            {"type": "button", "row": 0, "column": 0, "options": {}}
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+
+        with pytest.raises(ValueError, match="button must specify options: config:"):
+            screen.init_screen()
+
     def test_lookup_and_default_helpers_document_current_defaults(self, fix, qtbot):
         screen = Screen(_TestParent(_config_with_instruments([])))
         qtbot.addWidget(screen)
 
         assert screen.lookup_mapping("IAS", {"IAS": "Airspeed"}) == "Airspeed"
         assert screen.lookup_mapping("ALT", {"IAS": "Airspeed"}) == "ALT"
+        assert screen.get_instrument_defaults("airspeed_box") == ["IAS", "GS", "TAS"]
         assert screen.get_instrument_defaults("heading_tape") == ["HEAD"]
         assert screen.get_instrument_defaults("turn_coordinator") == ["ROT", "ALAT"]
         assert screen.get_instrument_default_options("heading_display") == {"font_size": 17}
@@ -866,6 +951,26 @@ class TestScreenBuilderLayout:
 
         with pytest.raises(Exception, match="must also have 'gang_type:'"):
             screen.init_screen()
+
+    def test_draw_grid_creates_overlay_that_can_render(self, fix, qtbot):
+        config = _config_with_instruments([])
+        config["layout"] = {
+            "rows": 20,
+            "columns": 20,
+            "draw_grid": True,
+            "margin": {"top": 5, "bottom": 5, "left": 5, "right": 5},
+        }
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(400, 240)
+
+        screen.init_screen()
+        pixmap = QPixmap(screen.grid.size())
+        pixmap.fill()
+        screen.grid.render(pixmap)
+
+        assert screen.grid.geometry().getRect() == (0, 0, 400, 240)
+        assert screen.grid.textRect.width() > 0
 
 
 class TestScreenBuilderExternalWidgets:
@@ -1062,6 +1167,21 @@ class TestScreenBuilderClose:
         screen.closeEvent(None)
 
         assert [widget.closed for widget in widgets] == [True, True]
+
+    def test_close_event_logs_instrument_close_failures(self, fix, qtbot, caplog):
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+        widget = _SelectableWidget(screen)
+
+        def close_with_error():
+            raise RuntimeError("close failed")
+
+        widget.close = close_with_error
+        screen.instruments = {7: widget}
+
+        screen.closeEvent(None)
+
+        assert "Error closing instrument 7" in caplog.text
 
     def test_close_event_before_init_is_safe(self, fix, qtbot):
         screen = Screen(_TestParent(_config_with_instruments([])))

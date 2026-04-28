@@ -138,7 +138,7 @@ class Screen(QWidget):
                     if inst_cols == 0:
                         pp_cols = p_cols
                     rows, cols = self.calc_includes(inst,pp_rows,pp_cols)
-                    if rows + inst['row'] > inst_rows: inst_row = rows + inst['row']
+                    if rows + inst['row'] > inst_rows: inst_rows = rows + inst['row']
                     if cols + inst['column'] > inst_cols: inst_cols = cols + inst['column']
                 else:
                     inst_rows = p_rows
@@ -473,7 +473,7 @@ class Screen(QWidget):
             if 'options' in i and 'config' in i['options']:
                 self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.config_path,i['options']['config']), font_family=font_family)
             else:
-                logger.warn("button must specify options: config:") 
+                raise ValueError("button must specify options: config:")
         elif i['type'] == 'heading_display':
             self.instruments[count] = hsi.HeadingDisplay(self,font_family=font_family)
         elif i['type'] == 'heading_tape':
@@ -510,6 +510,9 @@ class Screen(QWidget):
         elif i['type'] == 'wind_display':
             self.instruments[count] = wind.WindDisplay(self, font_family=font_family)
 
+        if count not in self.instruments:
+            raise ValueError(f"Unknown instrument type '{i['type']}'")
+
          # Set options
         if 'options' in i:
             #loop over each option
@@ -517,16 +520,16 @@ class Screen(QWidget):
                 if 'encoder_order' == option and not state:
                     if callable(getattr(self.instruments[count], 'enc_selectable', None)):
                         self.encoder_list.append({'inst': count, 'order': i['options']['encoder_order']})
-                    next
+                    continue
                 if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
                     hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
-                    next
+                    continue
                 if 'dbkey' in option:
                     if callable(getattr(self.instruments[count], 'setDbkey', None)): 
                         self.instruments[count].setDbkey(value)
                     else:
                         setattr(self.instruments[count], option, value)
-                    next
+                    continue
                 if 'temperature' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
                     self.instruments[count].conversionFunction1 = funcTempF
                     self.instruments[count].unitsOverride1 = u'\N{DEGREE SIGN}F'
@@ -534,7 +537,7 @@ class Screen(QWidget):
                     self.instruments[count].unitsOverride2 = u'\N{DEGREE SIGN}C'
                     self.instruments[count].unitGroup = 'Temperature'
                     self.instruments[count].setUnitSwitching()
-                    next
+                    continue
                 elif 'pressure' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
                     self.instruments[count].conversionFunction1 = funcPressInHg
                     self.instruments[count].unitsOverride1 = 'inHg'
@@ -542,7 +545,7 @@ class Screen(QWidget):
                     self.instruments[count].unitsOverride2 = 'hPa'
                     self.instruments[count].unitGroup = 'Pressure'
                     self.instruments[count].setUnitSwitching()
-                    next
+                    continue
                 elif 'altitude' in option and value == True and (i['type'] in ['gauge', 'numeric_display','altimeter_tape','altimeter_dial']):
                     self.instruments[count].conversionFunction1 = funcAltitudeFeet
                     self.instruments[count].unitsOverride1 = 'Ft'
@@ -550,7 +553,7 @@ class Screen(QWidget):
                     self.instruments[count].unitsOverride2 = 'M'
                     self.instruments[count].unitGroup = 'Altitude'
                     self.instruments[count].setUnitSwitching()
-                    next
+                    continue
                 else:
                     setattr(self.instruments[count], option, value)
 
@@ -565,7 +568,7 @@ class Screen(QWidget):
     def get_instrument_defaults(self, inst):
         # Always return an array for simplicity
         # a value of boolean false indicates that no default value exists and db_item must be provided
-        if inst in ['airspeed_dial','airspeed_tape', 'airspeed_box', 'airspeed_trend_tape']:
+        if inst in ['airspeed_dial','airspeed_tape', 'airspeed_trend_tape']:
             return ['IAS']
         elif inst in ['airspeed_box']:
             return ['IAS','GS','TAS']
@@ -814,7 +817,8 @@ class Screen(QWidget):
         for inst in self.instruments:
             try:
                 self.instruments[inst].close()
-            except:
+            except Exception:
+                logger.exception("Error closing instrument %s", inst)
                 pass
         if event is not None:
             super().closeEvent(event)
@@ -935,7 +939,7 @@ class GridOverlay(QWidget):
     def __init__(self, parent=None,layout=None):
         super(GridOverlay, self).__init__(parent)
         self.layout = layout
-        self.setAttribute(Qt.WindowType.WindowType.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.Font = QFont()
 
     def paintEvent(self,event):
