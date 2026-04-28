@@ -557,6 +557,31 @@ instruments:
 
         assert screen.instruments == {}
 
+    def test_non_string_non_bool_disabled_value_is_not_disabled(self, fix, qtbot, tmp_path):
+        include_file = tmp_path / "numeric-disabled.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    disabled: 1
+    row: 0
+    column: 0
+    options:
+      text: Visible
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {"type": "include,numeric-disabled.yaml", "row": 0, "column": 0}
+        ])
+        screen = Screen(_TestParent(config, config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].text == "Visible"
+
     @pytest.mark.parametrize(
         "disabled_value,enabled_preferences",
         [
@@ -676,6 +701,37 @@ instruments:
         qtbot.addWidget(screen)
 
         assert screen.calc_includes({"type": "include,span.yaml"}, 2, 4) == expected
+
+    def test_calc_includes_handles_span_that_expands_columns_after_rows_are_set(
+        self, fix, qtbot, tmp_path
+    ):
+        include_file = tmp_path / "wide-after-tall.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 5
+    column: 0
+    span:
+      rows: 2
+      columns: 1
+    options:
+      text: Tall
+  - type: static_text
+    row: 0
+    column: 3
+    span:
+      rows: 1
+      columns: 3
+    options:
+      text: Wide
+""",
+            encoding="utf-8",
+        )
+        screen = Screen(_TestParent(_config_with_instruments([]), config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+
+        assert screen.calc_includes({"type": "include,wide-after-tall.yaml"}, 1, 4) == [7, 6]
 
     def test_calc_includes_nested_include_after_existing_span_uses_current_size(
         self, fix, qtbot, tmp_path
