@@ -35,31 +35,22 @@ from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 from pyefis.instruments import listbox
 from pyefis.instruments import wind
 from pyefis.screens import screenbuilder_config
+from pyefis.screens import screenbuilder_factory
 from pyefis.screens import screenbuilder_layout
+from pyefis.screens import screenbuilder_options
 
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
 
 from collections import defaultdict
 import re
-import pyefis.hmi as hmi
 
 import logging
-import os
 from operator import itemgetter
 import time
 
 logger = logging.getLogger(__name__)
 
-
-funcTempF = lambda x: x * (9.0/5.0) + 32.0
-funcTempC = lambda x: x
-
-funcPressHpa = lambda x: x * 33.863889532610884
-funcPressInHg = lambda x: x
-
-funcAltitudeMeters = lambda x: x / 3.28084
-funcAltitudeFeet = lambda x: x
 
 class Screen(QWidget):
     def __init__(self, parent=None,config=None):
@@ -303,130 +294,15 @@ class Screen(QWidget):
                 font_percent = i['options']['font_percent']
             if 'font_family' in i['options']:
                 font_family = i['options']['font_family']
-        # Process the type of instrument this is and create them
-        if i['type'] == 'weston':
-            # The only way I could make weston work reliably and render the proper
-            # size, was to either make it the first screen to be shown, the primary,
-            # or provide the width and height options along with fullscreen option
-            # when starting weston.
-            if 'span' in i and {'rows', 'columns'} <= set(i['span']) \
-               and 'row' in i \
-               and 'column' in i:
-                grid_x, grid_y, grid_width, grid_height = self.get_grid_coordinates( i['column'], i['row'])
-                weston_width = qRound(grid_width * i['span']['columns'])
-                weston_height = qRound(grid_height * i['span']['rows'])
-                # span rows/columns are required for weston to work properly and they need to be at least 200px x 200px
-                self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'],wide=weston_width,high=weston_height)
-            else:
-                # if span not provided user can hope that it scales well
-                self.instruments[count] = weston.Weston(self,socket=i['options']['socket'],ini=os.path.join(self.parent.config_path,i['options']['ini']),command=i['options']['command'],args=i['options']['args'])
+        self.instruments[count] = screenbuilder_factory.create_instrument(
+            self,
+            i,
+            font_percent=font_percent,
+            font_family=font_family,
+            replace=replace,
+        )
 
-        if i['type'] == 'airspeed_dial':
-            self.instruments[count] = airspeed.Airspeed(self,font_family=font_family)
-        if i['type'] == 'airspeed_box':
-            self.instruments[count] = airspeed.Airspeed_Box(self,font_family=font_family)
-        if i['type'] == 'airspeed_tape':
-            self.instruments[count] = airspeed.Airspeed_Tape(self,font_percent=font_percent)
-        if i['type'] == 'airspeed_trend_tape':
-            self.instruments[count] = vsi.AS_Trend_Tape(self,font_family=font_family)
-        elif i['type'] == 'altimeter_dial':
-            self.instruments[count] = altimeter.Altimeter(self,font_family=font_family)
-        elif i['type'] == 'atitude_indicator':
-            self.instruments[count] = ai.AI(self,font_percent=font_percent,font_family=font_family)
-        elif i['type'] == 'altimeter_tape':
-            dbkey = "ALT"
-            if 'options' in i and 'dbkey' in i['options']:
-                dbkey = i['options']['dbkey']
-            self.instruments[count] = altimeter.Altimeter_Tape(self,font_family=font_family,dbkey=dbkey)
-        elif i['type'] == 'altimeter_trend_tape':
-            self.instruments[count] = vsi.Alt_Trend_Tape(self,font_family=font_family)
-        elif i['type'] == 'button':
-            if 'options' in i and 'config' in i['options']:
-                self.instruments[count] = button.Button(self,config_file=os.path.join(self.parent.config_path,i['options']['config']), font_family=font_family)
-            else:
-                raise ValueError("button must specify options: config:")
-        elif i['type'] == 'heading_display':
-            self.instruments[count] = hsi.HeadingDisplay(self,font_family=font_family)
-        elif i['type'] == 'heading_tape':
-            self.instruments[count] = hsi.DG_Tape(self,font_family=font_family)
-        elif i['type'] == 'horizontal_situation_indicator':
-            #TODO Fix this so cdi/gsi can be enabled/disabled
-            self.instruments[count] = hsi.HSI(self, font_percent=font_percent, cdi_enabled=True, gsi_enabled=True,font_family=font_family)
-        elif i['type'] == 'numeric_display':
-            self.instruments[count] = gauges.NumericDisplay(self,font_family=font_family)
-        elif i['type'] == 'value_text':
-            self.instruments[count] = misc.ValueDisplay(self, font_family=font_family)
-        elif i['type'] == 'static_text':
-            self.instruments[count] = misc.StaticText(text=i['options']['text'], parent=self, font_family=font_family)
-        elif i['type'] == 'turn_coordinator':
-            self.instruments[count] = tc.TurnCoordinator(self,font_family=font_family)
-        elif i['type'] == 'vsi_dial':
-            self.instruments[count] = vsi.VSI_Dial(self,font_family=font_family)
-        elif i['type'] == 'vsi_pfd':
-            self.instruments[count] = vsi.VSI_PFD(self,font_family=font_family)
-
-        # Gauges
-        elif i['type'] == 'arc_gauge':
-            self.instruments[count] = gauges.ArcGauge(self,min_size=False,font_family=font_family)
-        elif i['type'] == 'horizontal_bar_gauge':
-            self.instruments[count] = gauges.HorizontalBar(self,min_size=False,font_family=font_family)
-        elif i['type'] == 'vertical_bar_gauge':
-            self.instruments[count] = gauges.VerticalBar(self,min_size=False,font_family=font_family)
-        elif i['type'] == 'virtual_vfr':
-            self.instruments[count] = VirtualVfr(self,font_percent=font_percent,font_family=font_family)
-
-        elif i['type'] == 'listbox':
-            self.instruments[count] = listbox.ListBox(self, lists=i['options']['lists'], replace=replace,font_family=font_family) #,font_percent=font_percent)
-
-        elif i['type'] == 'wind_display':
-            self.instruments[count] = wind.WindDisplay(self, font_family=font_family)
-
-        if count not in self.instruments:
-            raise ValueError(f"Unknown instrument type '{i['type']}'")
-
-         # Set options
-        if 'options' in i:
-            #loop over each option
-            for option,value in i['options'].items():
-                if 'encoder_order' == option and not state:
-                    if callable(getattr(self.instruments[count], 'enc_selectable', None)):
-                        self.encoder_list.append({'inst': count, 'order': i['options']['encoder_order']})
-                    continue
-                if 'egt_mode_switching' == option and (value == True) and i['type'] == 'vertical_bar_gauge':
-                    hmi.actions.setEgtMode.connect(self.instruments[count].setMode)
-                    continue
-                if 'dbkey' in option:
-                    if callable(getattr(self.instruments[count], 'setDbkey', None)): 
-                        self.instruments[count].setDbkey(value)
-                    else:
-                        setattr(self.instruments[count], option, value)
-                    continue
-                if 'temperature' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
-                    self.instruments[count].conversionFunction1 = funcTempF
-                    self.instruments[count].unitsOverride1 = u'\N{DEGREE SIGN}F'
-                    self.instruments[count].conversionFunction2 = funcTempC
-                    self.instruments[count].unitsOverride2 = u'\N{DEGREE SIGN}C'
-                    self.instruments[count].unitGroup = 'Temperature'
-                    self.instruments[count].setUnitSwitching()
-                    continue
-                elif 'pressure' in option and value == True and ('gauge' in i['type'] or i['type'] == 'numeric_display'):
-                    self.instruments[count].conversionFunction1 = funcPressInHg
-                    self.instruments[count].unitsOverride1 = 'inHg'
-                    self.instruments[count].conversionFunction2 = funcPressHpa
-                    self.instruments[count].unitsOverride2 = 'hPa'
-                    self.instruments[count].unitGroup = 'Pressure'
-                    self.instruments[count].setUnitSwitching()
-                    continue
-                elif 'altitude' in option and value == True and (i['type'] in ['gauge', 'numeric_display','altimeter_tape','altimeter_dial']):
-                    self.instruments[count].conversionFunction1 = funcAltitudeFeet
-                    self.instruments[count].unitsOverride1 = 'Ft'
-                    self.instruments[count].conversionFunction2 = funcAltitudeMeters
-                    self.instruments[count].unitsOverride2 = 'M'
-                    self.instruments[count].unitGroup = 'Altitude'
-                    self.instruments[count].setUnitSwitching()
-                    continue
-                else:
-                    setattr(self.instruments[count], option, value)
+        screenbuilder_options.apply_options(self, count, i, state=state)
 
 
     def lookup_mapping(self,item,mapping=dict()):
