@@ -76,10 +76,9 @@ class Screen(QWidget):
         self.encoder_timeout = 10000
         self.encoder_timer = QTimer(self)
         self.encoder_control = False
-        if self.screenColor:
-            p.setColor(self.backgroundRole(), QColor(*self.screenColor))
-            self.setPalette(p)
-            self.setAutoFillBackground(True)
+        p.setColor(self.backgroundRole(), QColor(*self.screenColor))
+        self.setPalette(p)
+        self.setAutoFillBackground(True)
 
         self.init= False
         self.previous_width = self.width()
