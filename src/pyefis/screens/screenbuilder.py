@@ -102,14 +102,6 @@ class Screen(QWidget):
         # vsi_dial
         # vsi_pfd  # Testing to do
 
-    def closeEvent(self, event):
-        try:
-            if hasattr(self, 'encoder_timer') and self.encoder_timer is not None:
-                self.encoder_timer.stop()
-        except Exception:
-            pass
-        super().closeEvent(event)
-
     def calc_includes(self,i,p_rows,p_cols):
         args = i['type'].split(',')
         if os.path.exists(os.path.join(self.parent.config_path,args[1])):
@@ -809,13 +801,23 @@ class Screen(QWidget):
 
 
     def closeEvent(self, event):
+        try:
+            if hasattr(self, 'encoder_timer') and self.encoder_timer is not None:
+                self.encoder_timer.stop()
+        except Exception:
+            pass
+
         if 'instruments' not in self.__dict__:
+            if event is not None:
+                super().closeEvent(event)
             return
         for inst in self.instruments:
             try:
                 self.instruments[inst].close()
             except:
                 pass
+        if event is not None:
+            super().closeEvent(event)
 
     def encoderChanged(self,value=0):
         curr_time = time.time_ns() // 1000000
@@ -987,4 +989,3 @@ class GridOverlay(QWidget):
                 painter.setPen(QPen(QColor("#99ff0000"),3))
             painter.drawLine(qRound(grid_x), qRound(grid_y), self.width(),  qRound(grid_y))
             y += 5
-
