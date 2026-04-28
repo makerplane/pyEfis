@@ -23,51 +23,61 @@ from pyefis.screens import screenbuilder_layout
 
 
 class GridOverlay(QWidget):
-    def __init__(self, parent=None,layout=None):
+    def __init__(self, parent=None, layout=None):
         super(GridOverlay, self).__init__(parent)
         self.layout = layout
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.Font = QFont()
 
-    def paintEvent(self,event):
+    def paintEvent(self, event):
         topm, leftm, rightm, bottomm = screenbuilder_layout.get_grid_margins(
             self.layout,
             self.width(),
             self.height(),
         )
 
-        grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
-        grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
-        grid_x = leftm# + grid_width)
-        grid_y = topm# + grid_height)
+        grid_width = (self.width() - leftm - rightm) / int(self.layout["columns"])
+        grid_height = (self.height() - topm - bottomm) / int(self.layout["rows"])
+        grid_x = leftm  # + grid_width)
+        grid_y = topm  # + grid_height)
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QPen(Qt.GlobalColor.red,1))
-        self.Font.setPixelSize(qRound(grid_height*5))
+        painter.setPen(QPen(Qt.GlobalColor.red, 1))
+        self.Font.setPixelSize(qRound(grid_height * 5))
         painter.setFont(self.Font)
         x = 0
         self.textRect = QRectF(int(0), int(0), qRound(grid_width), qRound(grid_height))
-        while x <= int(self.layout['columns']):
+        while x <= int(self.layout["columns"]):
             grid_x = leftm + grid_width * (x)
-            painter.setPen(QPen(QColor("#99ff0000"),1))
+            painter.setPen(QPen(QColor("#99ff0000"), 1))
             if (x) % 10 == 0:
-                painter.setPen(QPen(QColor("#9900ff00"),3))
-                self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
-                painter.drawText(self.textRect, str(x),QTextOption(Qt.AlignmentFlag.AlignCenter))
-                painter.setPen(QPen(QColor("#99ff0000"),3))
-            painter.drawLine(qRound(grid_x), qRound(grid_y), qRound(grid_x), self.height())
+                painter.setPen(QPen(QColor("#9900ff00"), 3))
+                self.textRect = QRectF(grid_x, grid_y, grid_width * 10, grid_height * 5)
+                painter.drawText(
+                    self.textRect, str(x), QTextOption(Qt.AlignmentFlag.AlignCenter)
+                )
+                painter.setPen(QPen(QColor("#99ff0000"), 3))
+            painter.drawLine(
+                qRound(grid_x), qRound(grid_y), qRound(grid_x), self.height()
+            )
             x += 5
         y = 0
         grid_x = leftm
-        while y <= int(self.layout['rows']):
+        while y <= int(self.layout["rows"]):
             grid_y = topm + grid_height * (y)
-            painter.setPen(QPen(QColor("#99ff0000"),1))
+            painter.setPen(QPen(QColor("#99ff0000"), 1))
             if (y) % 10 == 0:
                 if y > 0:
-                    painter.setPen(QPen(QColor("#9900ff00"),3))
-                    self.textRect = QRectF(grid_x, grid_y, grid_width*10, grid_height*5)
-                    painter.drawText(self.textRect, str(y),QTextOption(Qt.AlignmentFlag.AlignCenter))
+                    painter.setPen(QPen(QColor("#9900ff00"), 3))
+                    self.textRect = QRectF(
+                        grid_x, grid_y, grid_width * 10, grid_height * 5
+                    )
+                    painter.drawText(
+                        self.textRect, str(y), QTextOption(Qt.AlignmentFlag.AlignCenter)
+                    )
 
-                painter.setPen(QPen(QColor("#99ff0000"),3))
-            painter.drawLine(qRound(grid_x), qRound(grid_y), self.width(),  qRound(grid_y))
+                painter.setPen(QPen(QColor("#99ff0000"), 3))
+            painter.drawLine(
+                qRound(grid_x), qRound(grid_y), self.width(), qRound(grid_y)
+            )
             y += 5

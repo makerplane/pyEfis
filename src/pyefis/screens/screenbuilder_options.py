@@ -16,8 +16,7 @@
 
 import pyefis.hmi as hmi
 
-
-funcTempF = lambda x: x * (9.0/5.0) + 32.0
+funcTempF = lambda x: x * (9.0 / 5.0) + 32.0
 funcTempC = lambda x: x
 
 funcPressHpa = lambda x: x * 33.863889532610884
@@ -27,7 +26,9 @@ funcAltitudeMeters = lambda x: x / 3.28084
 funcAltitudeFeet = lambda x: x
 
 
-def configure_unit_switching(instrument, unit_group, unit1, unit2, conversion1, conversion2):
+def configure_unit_switching(
+    instrument, unit_group, unit1, unit2, conversion1, conversion2
+):
     instrument.conversionFunction1 = conversion1
     instrument.unitsOverride1 = unit1
     instrument.conversionFunction2 = conversion2
@@ -37,55 +38,76 @@ def configure_unit_switching(instrument, unit_group, unit1, unit2, conversion1, 
 
 
 def apply_options(screen, index, config, state=False):
-    if 'options' not in config:
+    if "options" not in config:
         return
 
     instrument = screen.instruments[index]
-    for option, value in config['options'].items():
-        if 'encoder_order' == option and not state:
-            if callable(getattr(instrument, 'enc_selectable', None)):
-                screen.encoder_list.append({'inst': index, 'order': config['options']['encoder_order']})
+    for option, value in config["options"].items():
+        if "encoder_order" == option and not state:
+            if callable(getattr(instrument, "enc_selectable", None)):
+                screen.encoder_list.append(
+                    {"inst": index, "order": config["options"]["encoder_order"]}
+                )
             continue
 
-        if 'egt_mode_switching' == option and value == True and config['type'] == 'vertical_bar_gauge':
+        if (
+            "egt_mode_switching" == option
+            and value == True
+            and config["type"] == "vertical_bar_gauge"
+        ):
             hmi.actions.setEgtMode.connect(instrument.setMode)
             continue
 
-        if 'dbkey' in option:
-            if callable(getattr(instrument, 'setDbkey', None)):
+        if "dbkey" in option:
+            if callable(getattr(instrument, "setDbkey", None)):
                 instrument.setDbkey(value)
             else:
                 setattr(instrument, option, value)
             continue
 
-        if 'temperature' in option and value == True and ('gauge' in config['type'] or config['type'] == 'numeric_display'):
+        if (
+            "temperature" in option
+            and value == True
+            and ("gauge" in config["type"] or config["type"] == "numeric_display")
+        ):
             configure_unit_switching(
                 instrument,
-                'Temperature',
-                u'\N{DEGREE SIGN}F',
-                u'\N{DEGREE SIGN}C',
+                "Temperature",
+                "\N{DEGREE SIGN}F",
+                "\N{DEGREE SIGN}C",
                 funcTempF,
                 funcTempC,
             )
             continue
 
-        elif 'pressure' in option and value == True and ('gauge' in config['type'] or config['type'] == 'numeric_display'):
+        elif (
+            "pressure" in option
+            and value == True
+            and ("gauge" in config["type"] or config["type"] == "numeric_display")
+        ):
             configure_unit_switching(
                 instrument,
-                'Pressure',
-                'inHg',
-                'hPa',
+                "Pressure",
+                "inHg",
+                "hPa",
                 funcPressInHg,
                 funcPressHpa,
             )
             continue
 
-        elif 'altitude' in option and value == True and (config['type'] in ['gauge', 'numeric_display','altimeter_tape','altimeter_dial']):
+        elif (
+            "altitude" in option
+            and value == True
+            and (
+                config["type"]
+                in ["gauge", "numeric_display", "altimeter_tape", "altimeter_dial"]
+            )
+        ):
             configure_unit_switching(
                 instrument,
-                'Altitude',
-                'Ft',
-                'M',
+                "Altitude",
+                "Ft",
+                "M",
                 funcAltitudeFeet,
                 funcAltitudeMeters,
             )

@@ -27,20 +27,24 @@ class DisplayStateController:
         self.screen.display_state_current = 0
         self.screen.display_state_inst = defaultdict(list)
 
-        if layout.get('display_state', False):
+        if layout.get("display_state", False):
             scheduler_module.initialize()
-            self.screen.timer = scheduler_module.scheduler.getTimer(layout['display_state']['interval'])
+            self.screen.timer = scheduler_module.scheduler.getTimer(
+                layout["display_state"]["interval"]
+            )
             if not self.screen.timer:
                 scheduler_module.scheduler.timers.append(
-                    scheduler_module.IntervalTimer(layout['display_state']['interval'])
+                    scheduler_module.IntervalTimer(layout["display_state"]["interval"])
                 )
                 scheduler_module.scheduler.timers[-1].start()
-                self.screen.timer = scheduler_module.scheduler.getTimer(layout['display_state']['interval'])
-            self.screen.display_states = layout['display_state']['states']
+                self.screen.timer = scheduler_module.scheduler.getTimer(
+                    layout["display_state"]["interval"]
+                )
+            self.screen.display_states = layout["display_state"]["states"]
             self.screen.display_state_current = 1
 
     def register_callback(self, layout):
-        if layout.get('display_state', False):
+        if layout.get("display_state", False):
             self.screen.timer.add_callback(self.screen.change_display_states)
 
     def change(self):

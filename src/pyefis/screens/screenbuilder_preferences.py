@@ -18,37 +18,37 @@ import re
 
 
 def apply_preferences(config, preferences):
-    if 'preferences' in config:
+    if "preferences" in config:
         specific_pref = dict()
-        if config['preferences'] in preferences['gauges']:
-            specific_pref = preferences['gauges'][config['preferences']]
+        if config["preferences"] in preferences["gauges"]:
+            specific_pref = preferences["gauges"][config["preferences"]]
 
-        preference_name = re.sub("[^A-Za-z]","",config['preferences'])
-        for style in preferences['style']:
-            if not preferences['style'][style]:
+        preference_name = re.sub("[^A-Za-z]", "", config["preferences"])
+        for style in preferences["style"]:
+            if not preferences["style"][style]:
                 continue
-            if preference_name in preferences['styles']:
-                if style in preferences['styles'][preference_name]:
-                    pref = preferences['styles'][preference_name][style]
+            if preference_name in preferences["styles"]:
+                if style in preferences["styles"][preference_name]:
+                    pref = preferences["styles"][preference_name][style]
                     if pref is not None:
-                        config['options'] = config.get('options',dict())|pref
+                        config["options"] = config.get("options", dict()) | pref
 
-        config['options'] = config.get('options',dict())|specific_pref
+        config["options"] = config.get("options", dict()) | specific_pref
 
-        if 'styles' in specific_pref:
-            for style in preferences['style']:
-                if not preferences['style'][style]:
+        if "styles" in specific_pref:
+            for style in preferences["style"]:
+                if not preferences["style"][style]:
                     continue
-                pref = specific_pref['styles'].get(style,None)
+                pref = specific_pref["styles"].get(style, None)
                 if pref is not None:
-                    config['options'] = config.get('options',dict())|pref
+                    config["options"] = config.get("options", dict()) | pref
 
     font_percent = None
     font_family = "DejaVu Sans Condensed"
-    if 'options' in config:
-        if 'font_percent' in config['options']:
-            font_percent = config['options']['font_percent']
-        if 'font_family' in config['options']:
-            font_family = config['options']['font_family']
+    if "options" in config:
+        if "font_percent" in config["options"]:
+            font_percent = config["options"]["font_percent"]
+        if "font_family" in config["options"]:
+            font_family = config["options"]["font_family"]
 
     return font_percent, font_family

@@ -28,15 +28,22 @@ class EncoderController:
 
         if self.screen.encoder and self.screen.encoder_button:
             self.screen.encoder_list_sorted = [
-                inst['inst'] for inst in sorted(self.screen.encoder_list, key=itemgetter('order'))
+                inst["inst"]
+                for inst in sorted(self.screen.encoder_list, key=itemgetter("order"))
             ]
             self.screen.encoder_current_selection = 0
 
             self.screen.encoder_input = fix_module.db.get_item(self.screen.encoder)
-            self.screen.encoder_input.valueWrite[int].connect(self.screen.encoderChanged)
+            self.screen.encoder_input.valueWrite[int].connect(
+                self.screen.encoderChanged
+            )
 
-            self.screen.encoder_button_input = fix_module.db.get_item(self.screen.encoder_button)
-            self.screen.encoder_button_input.valueChanged[bool].connect(self.screen.encoderButtonChanged)
+            self.screen.encoder_button_input = fix_module.db.get_item(
+                self.screen.encoder_button
+            )
+            self.screen.encoder_button_input.valueChanged[bool].connect(
+                self.screen.encoderButtonChanged
+            )
 
             self.screen.encoder_timer.timeout.connect(self.screen.encoderChanged)
 
@@ -65,14 +72,23 @@ class EncoderController:
             return
 
         val = self.screen.encoder_current_selection
-        if not (curr_time - self.screen.encoder_timeout >= self.screen.encoder_timestamp):
+        if not (
+            curr_time - self.screen.encoder_timeout >= self.screen.encoder_timestamp
+        ):
             val = self.screen.encoder_current_selection + value
 
         val = self._wrap_selection(val)
 
         loop = 0
-        if not self.screen.instruments[self.screen.encoder_list_sorted[val]].isEnabled():
-            while not self.screen.instruments[self.screen.encoder_list_sorted[val]].isEnabled() and loop < 2:
+        if not self.screen.instruments[
+            self.screen.encoder_list_sorted[val]
+        ].isEnabled():
+            while (
+                not self.screen.instruments[
+                    self.screen.encoder_list_sorted[val]
+                ].isEnabled()
+                and loop < 2
+            ):
                 adder = -1
                 if value > 0:
                     adder = 1
@@ -80,7 +96,7 @@ class EncoderController:
                 val = val + adder
 
                 if val < 0:
-                    val = len(self.screen.encoder_list_sorted) -1
+                    val = len(self.screen.encoder_list_sorted) - 1
                     loop += 1
                 elif val == len(self.screen.encoder_list_sorted):
                     val = 0
@@ -98,7 +114,10 @@ class EncoderController:
         if not self.screen.isVisible():
             return
 
-        if value and not ((time.time_ns() // 1000000) - self.screen.encoder_timeout >= self.screen.encoder_timestamp):
+        if value and not (
+            (time.time_ns() // 1000000) - self.screen.encoder_timeout
+            >= self.screen.encoder_timestamp
+        ):
             if self.screen.encoder_control:
                 self.screen.encoder_control = self._selected_instrument().enc_clicked()
                 if self.screen.encoder_control:
@@ -127,7 +146,7 @@ class EncoderController:
         if val < 0:
             while val < 0:
                 val = len(self.screen.encoder_list_sorted) + val
-        elif val > len(self.screen.encoder_list_sorted) -1:
-            while val > len(self.screen.encoder_list_sorted) -1:
+        elif val > len(self.screen.encoder_list_sorted) - 1:
+            while val > len(self.screen.encoder_list_sorted) - 1:
                 val = val - len(self.screen.encoder_list_sorted)
         return val
