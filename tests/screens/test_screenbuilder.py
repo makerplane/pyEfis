@@ -1645,7 +1645,7 @@ class TestScreenBuilderLayout:
         assert screen.get_bounding_box(100, 150, 0, 0, 0.5) == pytest.approx((75, 150, 12.5, 0))
         assert screen.get_bounding_box(100, 100, 0, 0, 2) == pytest.approx((100, 50, 0, 25))
 
-    def test_resize_event_reflows_only_when_width_and_height_change(self, fix, qtbot):
+    def test_resize_event_reflows_when_either_dimension_changes(self, fix, qtbot):
         config = _config_with_instruments([
             {"type": "static_text", "row": 0, "column": 0, "options": {"text": "Resize"}}
         ])
@@ -1664,11 +1664,11 @@ class TestScreenBuilderLayout:
 
         screen.resize(200, 100)
         screen.resizeEvent(None)
-        assert screen.grid_layout_calls == 0
+        assert screen.grid_layout_calls == 1
 
         screen.resize(300, 200)
         screen.resizeEvent(None)
-        assert screen.grid_layout_calls == 1
+        assert screen.grid_layout_calls == 2
 
     def test_horizontal_ganged_layout_places_grouped_widgets(self, fix, qtbot):
         config = _config_with_instruments([

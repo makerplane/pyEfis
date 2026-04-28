@@ -763,7 +763,7 @@ class Screen(QWidget):
         if not self.init:
             self.init_screen()
 
-        if self.previous_width != self.width() and self.previous_height != self.height():
+        if self.previous_width != self.width() or self.previous_height != self.height():
             self.grid_layout()
 
     def get_config_item(self, key):
