@@ -35,6 +35,7 @@ from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 from pyefis.instruments import listbox
 from pyefis.instruments import wind
 from pyefis.screens import screenbuilder_config
+from pyefis.screens import screenbuilder_layout
 
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
@@ -464,29 +465,16 @@ class Screen(QWidget):
         return False
 
     def get_grid_margins(self):
-        topm = 0
-        leftm = 0
-        rightm = 0
-        bottomm = 0
-        # Margins in %
-        if 'margin' in self.layout:
-            if 'top' in self.layout['margin'] and self.layout['margin']['top'] > 0 and self.layout['margin']['top'] < 100:
-                topm = self.height() * ( self.layout['margin']['top'] / 100 )
-            if 'bottom' in self.layout['margin'] and self.layout['margin']['bottom'] > 0 and self.layout['margin']['bottom'] < 100:
-                bottomm = self.height() * ( self.layout['margin']['bottom'] / 100 )
-            if 'left' in self.layout['margin'] and self.layout['margin']['left'] > 0 and self.layout['margin']['left'] < 100:
-                leftm = self.height() * ( self.layout['margin']['left'] / 100 )
-            if 'right' in self.layout['margin'] and self.layout['margin']['right'] > 0 and self.layout['margin']['right'] < 100:
-                rightm = self.height() * ( self.layout['margin']['right'] / 100 )
-        return topm, leftm, rightm, bottomm
+        return screenbuilder_layout.get_grid_margins(self.layout, self.width(), self.height())
 
     def get_grid_coordinates(self, column, row ):
-        topm, leftm, rightm, bottomm = self.get_grid_margins()
-        grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
-        grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
-        grid_x = leftm + grid_width * (( column ))
-        grid_y = topm + grid_height * (( row ))
-        return grid_x, grid_y, grid_width, grid_height
+        return screenbuilder_layout.get_grid_coordinates(
+            self.layout,
+            self.width(),
+            self.height(),
+            column,
+            row,
+        )
 
     
     def grid_layout(self):
@@ -494,29 +482,6 @@ class Screen(QWidget):
         self.previous_height = self.height()
 
         for i,c in self.instrument_config.items():
-            grid_x, grid_y, grid_width, grid_height = self.get_grid_coordinates( c['column'], c['row'])
-            
-            # Span columns to the right and rows down
-            if 'span' in c:
-                if 'rows' in c['span']:
-                    # spanning rows
-                    if c['span']['rows'] >= 0:
-                        grid_height = grid_height * (c['span']['rows'])
-                if 'columns' in c['span']:
-                    #spanning columns
-                    if c['span']['columns'] >= 0:
-                        grid_width = grid_width * (c['span']['columns'])
-
-
-            width = r_width = grid_width
-            height = r_height = grid_height
-            x = r_x = grid_x
-            y = r_y = grid_y
-
-            # Here we need the size of the object for things that need to have specific dimensions
-            # example the round gauges
-            # need to know if a specific type needs a specific ratio or not
-            # we will get this from the instrument.
             ratio = False
             logger.debug(f"{c['type']} {'ganged' in c['type']}")
             if  'ganged' not in c['type'] and hasattr( self.instruments[i], 'getRatio'):
@@ -524,99 +489,37 @@ class Screen(QWidget):
                 ratio = self.instruments[i].getRatio()
                 ratio = c.get('ratio', ratio)
                 logger.debug(f"Instrument {c['type']} has ratio 1:{ratio}")
-                r_width,r_height,r_x,r_y = self.get_bounding_box(width, height,x,y,ratio)
 
-            if 'move' in c:
-                if 'shrink' in c['move']:
-                    if (c['move'].get('shrink',0) < 99 ) and (c['move'].get('shrink',0) >= 0):
-                        # Valid shrink percentage
-                        r_width = r_width - (r_width * c['move'].get('shrink',0)/ 100)
-                        r_height = r_height - (r_height * c['move'].get('shrink',0)/ 100)
-                    else:
-                        raise Exception("shrink must be a valid number between 1 and 99")
-                    justified_horizontal = False
-                    justified_vertical = False 
-                    if 'justify' in c['move']:
-                        for j in c['move']['justify']:
-                            if j == 'left':
-                                x = grid_x
-                                justified_horizontal = True
-                            elif j == 'right':
-                                x = grid_x + ( grid_width - r_width)
-                                justified_horizontal = True
-                            if j == 'top':
-                                y = grid_y
-                                justified_vertical = True
-                            elif j == 'bottom':
-                                y = grid_y + ( grid_height - r_height)
-                                justified_vertical = True
-                    # Default is to center
-                    if not justified_horizontal:
-                        x = grid_x + (( grid_width - r_width) / 2)
-                    if not justified_vertical:
-                        y = grid_y + (( grid_height - r_height) / 2) 
-            elif ratio:
-                x = grid_x + (( grid_width - r_width) / 2)
-                y = grid_y + (( grid_height - r_height) / 2)
+            geometry = screenbuilder_layout.get_instrument_geometry(
+                self.layout,
+                self.width(),
+                self.height(),
+                c,
+                ratio,
+            )
+            x = geometry['x']
+            y = geometry['y']
+            width = geometry['width']
+            height = geometry['height']
+            r_width = geometry['render_width']
+            r_height = geometry['render_height']
 
             if 'ganged' in c['type']:
-                inst_count = 0
-                gang_count = 0
-                groups = 0
-                for g in c['groups']:
-                    inst_count += len(g['instruments'])
-                    groups += 1
-                if 'horizontal' in c['gang_type']:
-                    total_gaps = (groups - 1) * (width * (2/100))
-                else: 
-                    total_gaps = (groups -1 ) * (height * (6/100))
-                gap_size = 0
-                if groups > 1:
-                    gap_size = total_gaps / ( groups - 1) 
-                group = -1
-                group_x = x
-                group_y = y
-                if 'horizontal' in c['gang_type']:
-                    group_width = (width - total_gaps) / inst_count 
-                    group_height = height
-                else:
-                    group_height = (height - total_gaps) / inst_count 
-                    group_width = width
+                ganged_ratio = False
+                if hasattr( self.instruments[i], 'getRatio'):
+                    ganged_ratio = self.instruments[i].getRatio()
+                    ganged_ratio = c.get('ratio', ganged_ratio)
+                    logger.debug(f"Ganged Instrument {c['type']} has ratio 1:{ganged_ratio}")
 
-                for g in c['groups']:
-                    # Render some tiles?
-                    # Option to add gap between each instrument
-                    if 'horizontal' in c['gang_type']:
-                        hgap = g.get('gap', 0)/100 * group_width
-                        vgap = 0
-                    else:
-                        vgap = g.get('gap', 0)/100 * group_height
-                        hgap = 0
-                    for ci in g['instruments']:
-                        g_width = group_width   - ( hgap * (len(g['instruments']) - 1)) 
-                        g_height = group_height - ( vgap * (len(g['instruments']) - 1))
-                        g_x = group_x
-                        g_y = group_y
-                        if hasattr( self.instruments[i], 'getRatio'):
-                            g_ratio = self.instruments[i].getRatio()
-                            g_ratio = c.get('ratio', g_ratio)
-                            logger.debug(f"Ganged Instrument {c['type']} has ratio 1:{g_ratio}")
-                            g_width,g_height,g_x,g_y = self.get_bounding_box(g_width, g_height,g_x,g_y,g_ratio)
-                        self.move_resize_inst(i + gang_count,qRound(g_x),qRound(g_y),qRound(g_width),qRound(g_height))
-                        try:
-                            self.instruments[i + gang_count].setupGauge()
-                        except:
-                            pass
-                        if 'horizontal' in c['gang_type']:
-                            group_x += group_width + hgap
-                        else:
-                            group_y += group_height + vgap
-                        gang_count += 1
-                    if 'horizontal' in c['gang_type']:
-                        group_x += gap_size
-                    else:
-                        group_y += gap_size
-
+                for gang_count, ganged_geometry in enumerate(
+                    screenbuilder_layout.get_ganged_geometries(c, x, y, width, height, ganged_ratio)
+                ):
+                    g_x, g_y, g_width, g_height = ganged_geometry
+                    self.move_resize_inst(i + gang_count,qRound(g_x),qRound(g_y),qRound(g_width),qRound(g_height))
+                    try:
+                        self.instruments[i + gang_count].setupGauge()
+                    except:
+                        pass
 
             else:
                 self.move_resize_inst(i,qRound(x),qRound(y),qRound(r_width),qRound(r_height))
@@ -648,27 +551,7 @@ class Screen(QWidget):
 
 
     def get_bounding_box(self, width, height,x,y,ratio):
-        if width < height:
-            r_height = width / ratio
-            r_width = width
-            if height < r_height:
-                r_height = height
-                r_width = height * ratio
-        else:
-            r_width = height * ratio
-            r_height = height
-            if width < r_width:
-                r_height = width / ratio
-                r_width = width
-        # r_height and r_width are in correct ratio to fit within the box
-        if r_height == height:
-            # It is the width we need to center
-            r_y = y
-            r_x = x + ((width - r_width)/2)
-        else:
-            # If is the height we need to center
-            r_x = x
-            r_y = y + ((height - r_height)/2)
+        r_width, r_height, r_x, r_y = screenbuilder_layout.get_bounding_box(width, height,x,y,ratio)
         logger.debug(f"x:{x}, r_x:{r_x} y:{y} r_y:{r_y} width:{width} r_width:{r_width} height:{height} r_height:{r_height}")
         return (r_width,r_height,r_x,r_y)
 
@@ -813,20 +696,11 @@ class GridOverlay(QWidget):
         self.Font = QFont()
 
     def paintEvent(self,event):
-        topm = 0
-        leftm = 0
-        rightm = 0
-        bottomm = 0
-        # Margins in %
-        if 'margin' in self.layout:
-            if 'top' in self.layout['margin'] and self.layout['margin']['top'] > 0 and self.layout['margin']['top'] < 100:
-                topm = self.height() * ( self.layout['margin']['top'] / 100 )
-            if 'bottom' in self.layout['margin'] and self.layout['margin']['bottom'] > 0 and self.layout['margin']['bottom'] < 100:
-                bottomm = self.height() * ( self.layout['margin']['bottom'] / 100 )
-            if 'left' in self.layout['margin'] and self.layout['margin']['left'] > 0 and self.layout['margin']['left'] < 100:
-                leftm = self.height() * ( self.layout['margin']['left'] / 100 )
-            if 'right' in self.layout['margin'] and self.layout['margin']['right'] > 0 and self.layout['margin']['right'] < 100:
-                rightm = self.height() * ( self.layout['margin']['right'] / 100 )
+        topm, leftm, rightm, bottomm = screenbuilder_layout.get_grid_margins(
+            self.layout,
+            self.width(),
+            self.height(),
+        )
 
         grid_width = ( self.width() - leftm - rightm ) / int(self.layout['columns'])
         grid_height = ( self.height() - topm - bottomm ) / int(self.layout['rows'])
