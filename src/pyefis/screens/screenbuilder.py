@@ -272,12 +272,6 @@ class Screen(QWidget):
             else:
                 # Check if this is an include, if it is recurse and resolve those instruments
                 if 'include,' in inst['type']:
-                    if 'disabled' in inst:
-                        if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
-                            return count
-                        elif isinstance(inst['disabled'],str) and not self.parent.preferences['enabled'][inst['disabled']]:
-                            return count
-
                     count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
                 else: 
                     self.setup_instruments(count,inst,replace=this_replacements,state=state)
