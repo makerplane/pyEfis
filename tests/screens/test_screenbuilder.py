@@ -439,10 +439,10 @@ instruments:
         screen.init_screen()
 
         assert screen.instruments[0].text == "ALT-1"
-        assert screen.insturment_config[0]["row"] == pytest.approx(3 + (1 * 4 / 3))
-        assert screen.insturment_config[0]["column"] == pytest.approx(4 + (2 * 6 / 5))
-        assert screen.insturment_config[0]["span"]["rows"] == pytest.approx(2 * 4 / 3)
-        assert screen.insturment_config[0]["span"]["columns"] == pytest.approx(3 * 6 / 5)
+        assert screen.instrument_config[0]["row"] == pytest.approx(3 + (1 * 4 / 3))
+        assert screen.instrument_config[0]["column"] == pytest.approx(4 + (2 * 6 / 5))
+        assert screen.instrument_config[0]["span"]["rows"] == pytest.approx(2 * 4 / 3)
+        assert screen.instrument_config[0]["span"]["columns"] == pytest.approx(3 * 6 / 5)
 
     def test_include_can_be_resolved_from_preferences(self, fix, qtbot, tmp_path):
         include_file = tmp_path / "aliased.yaml"
@@ -515,8 +515,8 @@ instruments:
 
         assert screen.instruments[0].text == "Nested"
         assert screen.calc_includes({"type": "include,child.yaml"}, 10, 8) == [6, 4]
-        assert screen.insturment_config[0]["row"] == pytest.approx(4.833333333333334)
-        assert screen.insturment_config[0]["column"] == pytest.approx(3.333333333333333)
+        assert screen.instrument_config[0]["row"] == pytest.approx(4.833333333333334)
+        assert screen.instrument_config[0]["column"] == pytest.approx(3.333333333333333)
 
     def test_missing_include_raises_clear_error(self, fix, qtbot, tmp_path):
         config = _config_with_instruments([
@@ -750,7 +750,7 @@ instruments:
         )
         qtbot.addWidget(screen)
         screen.instruments = {}
-        screen.insturment_config = {}
+        screen.instrument_config = {}
         screen.display_state_inst = {}
 
         count = screen.load_instrument(
@@ -798,7 +798,7 @@ instruments:
         )
         qtbot.addWidget(screen)
         screen.instruments = {}
-        screen.insturment_config = {}
+        screen.instrument_config = {}
         screen.display_state_inst = {}
 
         count = screen.load_instrument(
@@ -923,7 +923,7 @@ instruments:
         screen = Screen(_TestParent(_config_with_instruments([])))
         qtbot.addWidget(screen)
         screen.instruments = {}
-        screen.insturment_config = {}
+        screen.instrument_config = {}
         screen.display_state_inst = {3: []}
 
         count = screen.load_instrument(
@@ -951,7 +951,7 @@ instruments:
         )
         qtbot.addWidget(screen)
         screen.instruments = {}
-        screen.insturment_config = {}
+        screen.instrument_config = {}
         screen.display_state_inst = {}
         screen.calc_includes = lambda *args, **kwargs: [1, 1]
 
@@ -1355,7 +1355,7 @@ class TestScreenBuilderPreferencesAndOptions:
         qtbot.addWidget(screen)
         screen.layout = {"rows": 10, "columns": 10}
         screen.instruments = {}
-        screen.insturment_config = {}
+        screen.instrument_config = {}
 
         screen.setup_instruments(
             0,
@@ -1618,7 +1618,7 @@ class TestScreenBuilderLayout:
         screen.layout = {"rows": 1, "columns": 1}
         widget = _RatioWidget(screen, ratio=1)
         screen.instruments = {0: widget}
-        screen.insturment_config = {0: {"type": "ratio_widget", "row": 0, "column": 0}}
+        screen.instrument_config = {0: {"type": "ratio_widget", "row": 0, "column": 0}}
 
         screen.grid_layout()
 
@@ -1726,7 +1726,7 @@ class TestScreenBuilderLayout:
         screen.resize(400, 200)
         screen.layout = {"rows": 1, "columns": 1}
         screen.instruments = {0: _RatioWidget(screen, ratio=1), 1: _RatioWidget(screen, ratio=1)}
-        screen.insturment_config = {
+        screen.instrument_config = {
             0: {
                 "type": "ganged_ratio_widget",
                 "gang_type": "horizontal",

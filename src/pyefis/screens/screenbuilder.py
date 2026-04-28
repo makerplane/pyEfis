@@ -246,7 +246,7 @@ class Screen(QWidget):
                 #ganged instrument
                 if 'gang_type' not in inst:
                     raise Exception(f"Instrument {inst['type']} must also have 'gang_type:' horizontal|vertical specified")
-                self.insturment_config[count] = inst
+                self.instrument_config[count] = inst
                 for g in inst['groups']:
                     for gi in g['instruments']:
                         gi['type'] = inst['type'].replace('ganged_','')
@@ -315,7 +315,7 @@ class Screen(QWidget):
         self.encoder_timeout = self.get_config_item('encoder_timeout') or self.encoder_timeout
 
         self.instruments = dict() # Each instrument
-        self.insturment_config = dict () # configuration for the instruments
+        self.instrument_config = dict () # configuration for the instruments
 
         # Timed display states
         self.display_timer = None
@@ -377,7 +377,7 @@ class Screen(QWidget):
             
     def setup_instruments(self,count,i,ganged=False,replace=None,state=False):
         if not ganged:
-            self.insturment_config[count] = i
+            self.instrument_config[count] = i
         # Get the default items for this instrument
         #default_items = self.get_instrument_defaults( i['type'])
         #dbkey=None
@@ -616,7 +616,7 @@ class Screen(QWidget):
         self.previous_width = self.width()
         self.previous_height = self.height()
 
-        for i,c in self.insturment_config.items():
+        for i,c in self.instrument_config.items():
             grid_x, grid_y, grid_width, grid_height = self.get_grid_coordinates( c['column'], c['row'])
             
             # Span columns to the right and rows down
