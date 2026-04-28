@@ -557,6 +557,385 @@ instruments:
 
         assert screen.instruments == {}
 
+    @pytest.mark.parametrize(
+        "disabled_value,enabled_preferences",
+        [
+            ("hidden-panel", {"hidden-panel": False}),
+            ("not shown-panel", {"shown-panel": True}),
+        ],
+    )
+    def test_disabled_include_preference_strings_skip_children(
+        self, fix, qtbot, tmp_path, disabled_value, enabled_preferences
+    ):
+        include_file = tmp_path / "preference-disabled.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    options:
+      text: Hidden
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {
+                "type": "include,preference-disabled.yaml",
+                "disabled": disabled_value,
+                "row": 0,
+                "column": 0,
+            }
+        ])
+        screen = Screen(
+            _TestParent(
+                config,
+                config_path=str(tmp_path),
+                preferences={"enabled": enabled_preferences},
+            )
+        )
+        qtbot.addWidget(screen)
+
+        screen.init_screen()
+
+        assert screen.instruments == {}
+
+    @pytest.mark.parametrize(
+        "child_disabled,enabled_preferences",
+        [
+            (True, {}),
+            ("hidden-child", {"hidden-child": False}),
+            ("not shown-child", {"shown-child": True}),
+        ],
+    )
+    def test_disabled_included_children_are_skipped(
+        self, fix, qtbot, tmp_path, child_disabled, enabled_preferences
+    ):
+        include_file = tmp_path / "child-disabled.yaml"
+        include_file.write_text(
+            f"""
+instruments:
+  - type: static_text
+    disabled: {child_disabled if isinstance(child_disabled, bool) else repr(child_disabled)}
+    row: 0
+    column: 0
+    options:
+      text: Hidden
+  - type: static_text
+    row: 1
+    column: 0
+    options:
+      text: Visible
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {"type": "include,child-disabled.yaml", "row": 0, "column": 0}
+        ])
+        screen = Screen(
+            _TestParent(
+                config,
+                config_path=str(tmp_path),
+                preferences={"enabled": enabled_preferences},
+            )
+        )
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert [instrument.text for instrument in screen.instruments.values()] == ["Visible"]
+
+    @pytest.mark.parametrize(
+        "span,expected",
+        [
+            ({"rows": 3}, [5, 5]),
+            ({"columns": 6}, [4, 7]),
+            ({"rows": -1, "columns": -1}, [1, 4]),
+        ],
+    )
+    def test_calc_includes_handles_partial_and_negative_spans(
+        self, fix, qtbot, tmp_path, span, expected
+    ):
+        include_file = tmp_path / "span.yaml"
+        span_yaml = "\n".join(f"      {key}: {value}" for key, value in span.items())
+        include_file.write_text(
+            f"""
+instruments:
+  - type: static_text
+    row: 2
+    column: 1
+    span:
+{span_yaml}
+    options:
+      text: Spanned
+""",
+            encoding="utf-8",
+        )
+        screen = Screen(_TestParent(_config_with_instruments([]), config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+
+        assert screen.calc_includes({"type": "include,span.yaml"}, 2, 4) == expected
+
+    def test_calc_includes_nested_include_after_existing_span_uses_current_size(
+        self, fix, qtbot, tmp_path
+    ):
+        grandchild = tmp_path / "grandchild-size.yaml"
+        grandchild.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    span:
+      rows: 4
+      columns: 5
+    options:
+      text: Nested
+""",
+            encoding="utf-8",
+        )
+        child = tmp_path / "child-size.yaml"
+        child.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    span:
+      rows: 3
+      columns: 2
+    options:
+      text: First
+  - type: include,grandchild-size.yaml
+    row: 1
+    column: 1
+""",
+            encoding="utf-8",
+        )
+        screen = Screen(_TestParent(_config_with_instruments([]), config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+
+        assert screen.calc_includes({"type": "include,child-size.yaml"}, 1, 1) == [5, 6]
+
+    @pytest.mark.parametrize(
+        "disabled_value,enabled_preferences",
+        [
+            (True, {}),
+            ("hidden-direct", {"hidden-direct": False}),
+            ("not shown-direct", {"shown-direct": True}),
+        ],
+    )
+    def test_load_instrument_skips_disabled_include_directly(
+        self, fix, qtbot, tmp_path, disabled_value, enabled_preferences
+    ):
+        include_file = tmp_path / "direct-disabled.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    options:
+      text: Hidden
+""",
+            encoding="utf-8",
+        )
+        screen = Screen(
+            _TestParent(
+                _config_with_instruments([]),
+                config_path=str(tmp_path),
+                preferences={"enabled": enabled_preferences},
+            )
+        )
+        qtbot.addWidget(screen)
+        screen.instruments = {}
+        screen.insturment_config = {}
+        screen.display_state_inst = {}
+
+        count = screen.load_instrument(
+            {
+                "type": "include,direct-disabled.yaml",
+                "disabled": disabled_value,
+                "row": 0,
+                "column": 0,
+            },
+            4,
+        )
+
+        assert count == 4
+        assert screen.instruments == {}
+
+    @pytest.mark.parametrize(
+        "disabled_value,enabled_preferences",
+        [
+            (False, {}),
+            ("shown-direct", {"shown-direct": True}),
+            ("not hidden-direct", {"hidden-direct": False}),
+        ],
+    )
+    def test_load_instrument_keeps_enabled_include_directly(
+        self, fix, qtbot, tmp_path, disabled_value, enabled_preferences
+    ):
+        include_file = tmp_path / "direct-enabled.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    options:
+      text: Visible
+""",
+            encoding="utf-8",
+        )
+        screen = Screen(
+            _TestParent(
+                _config_with_instruments([]),
+                config_path=str(tmp_path),
+                preferences={"enabled": enabled_preferences},
+            )
+        )
+        qtbot.addWidget(screen)
+        screen.instruments = {}
+        screen.insturment_config = {}
+        screen.display_state_inst = {}
+
+        count = screen.load_instrument(
+            {
+                "type": "include,direct-enabled.yaml",
+                "disabled": disabled_value,
+                "row": 0,
+                "column": 0,
+            },
+            0,
+        )
+
+        assert count == 1
+        assert screen.instruments[0].text == "Visible"
+
+    @pytest.mark.parametrize("disabled_value", [True, "hidden-nested"])
+    def test_nested_disabled_include_returns_without_loading_children(
+        self, fix, qtbot, tmp_path, disabled_value
+    ):
+        nested = tmp_path / "nested-disabled.yaml"
+        nested.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    options:
+      text: Hidden
+""",
+            encoding="utf-8",
+        )
+        parent = tmp_path / "parent-disabled.yaml"
+        parent.write_text(
+            f"""
+instruments:
+  - type: include,nested-disabled.yaml
+    disabled: {disabled_value if isinstance(disabled_value, bool) else repr(disabled_value)}
+    row: 0
+    column: 0
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {"type": "include,parent-disabled.yaml", "row": 0, "column": 0}
+        ])
+        screen = Screen(
+            _TestParent(
+                config,
+                config_path=str(tmp_path),
+                preferences={"enabled": {"hidden-nested": False}},
+            )
+        )
+        qtbot.addWidget(screen)
+
+        screen.init_screen()
+
+        assert screen.instruments == {}
+
+    def test_instrument_specific_replacements_override_include_replacements(self, fix, qtbot, tmp_path):
+        include_file = tmp_path / "replace.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    replace:
+      label: CHILD
+    options:
+      text: "{label}-{id}"
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {
+                "type": "include,replace.yaml",
+                "row": 0,
+                "column": 0,
+                "replace": {"label": "PARENT"},
+            }
+        ])
+        screen = Screen(_TestParent(config, config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].text == "CHILD-1"
+
+    def test_parent_display_state_is_inherited_and_child_state_can_override(self, fix, qtbot, tmp_path):
+        include_file = tmp_path / "states.yaml"
+        include_file.write_text(
+            """
+instruments:
+  - type: static_text
+    row: 0
+    column: 0
+    options:
+      text: Parent
+  - type: static_text
+    display_state: 1
+    row: 0
+    column: 1
+    options:
+      text: Child
+""",
+            encoding="utf-8",
+        )
+        config = _config_with_instruments([
+            {"type": "include,states.yaml", "display_state": 2, "row": 0, "column": 0}
+        ])
+        screen = Screen(_TestParent(config, config_path=str(tmp_path)))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.display_state_inst[2] == [0]
+        assert screen.display_state_inst[1] == [1]
+
+    def test_load_instrument_missing_include_after_size_calculation_raises(self, fix, qtbot, tmp_path):
+        screen = Screen(
+            _TestParent(
+                _config_with_instruments([]),
+                config_path=str(tmp_path),
+                preferences={"includes": {"missing-late.yaml": None}},
+            )
+        )
+        qtbot.addWidget(screen)
+        screen.instruments = {}
+        screen.insturment_config = {}
+        screen.display_state_inst = {}
+        screen.calc_includes = lambda *args, **kwargs: [1, 1]
+
+        with pytest.raises(Exception, match="Include file 'missing-late.yaml' not found"):
+            screen.load_instrument({"type": "include,missing-late.yaml", "row": 0, "column": 0}, 0)
+
 
 class TestScreenBuilderPreferencesAndOptions:
 
@@ -602,6 +981,26 @@ class TestScreenBuilderPreferencesAndOptions:
 
         assert [instrument.text for instrument in screen.instruments.values()] == ["Visible"]
 
+    def test_top_level_not_disabled_false_preference_is_included(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "disabled": "not hidden-feature",
+                "row": 0,
+                "column": 0,
+                "options": {"text": "Visible"},
+            }
+        ])
+        screen = Screen(
+            _TestParent(config, preferences={"enabled": {"hidden-feature": False}})
+        )
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].text == "Visible"
+
     def test_gauge_preferences_and_enabled_styles_are_merged_into_options(self, fix, qtbot):
         config = _config_with_instruments([
             {
@@ -639,6 +1038,43 @@ class TestScreenBuilderPreferencesAndOptions:
         assert widget.font_family == "Liberation Sans"
         assert widget.font_percent == 0.5
         assert widget.alignment == "AlignRight"
+
+    def test_disabled_styles_and_none_preferences_are_ignored(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "preferences": "engine-1",
+                "row": 0,
+                "column": 0,
+                "options": {"text": "EGT"},
+            }
+        ])
+        parent = _TestParent(
+            config,
+            preferences={
+                "style": {"basic": False, "night": True},
+                "styles": {
+                    "engine": {
+                        "basic": {"font_family": "Ignored"},
+                        "night": None,
+                    }
+                },
+                "gauges": {
+                    "engine-1": {
+                        "styles": {"basic": {"alignment": "Ignored"}, "night": None},
+                    }
+                },
+            },
+        )
+        screen = Screen(parent)
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        widget = screen.instruments[0]
+        assert widget.font_family == "DejaVu Sans Condensed"
+        assert widget.alignment != "Ignored"
 
     def test_temperature_option_configures_numeric_unit_switching(self, fix, qtbot):
         config = _config_with_instruments([
@@ -709,6 +1145,34 @@ class TestScreenBuilderPreferencesAndOptions:
 
         assert screen.instruments[0].dbkey == "SYNTHETIC"
 
+    @pytest.mark.parametrize(
+        "disabled_value,enabled_preferences",
+        [
+            (True, {}),
+            ("hidden-option", {"hidden-option": False}),
+        ],
+    )
+    def test_option_disabled_widgets_are_hidden(
+        self, fix, qtbot, disabled_value, enabled_preferences
+    ):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "options": {"text": "Hidden", "disabled": disabled_value},
+            }
+        ])
+        screen = Screen(
+            _TestParent(config, preferences={"enabled": enabled_preferences})
+        )
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].isHidden() is True
+
     def test_encoder_order_option_registers_selectable_instrument(self, fix, qtbot):
         config = _config_with_instruments([
             {
@@ -764,6 +1228,128 @@ class TestScreenBuilderPreferencesAndOptions:
         with pytest.raises(ValueError, match="button must specify options: config:"):
             screen.init_screen()
 
+    def test_encoder_order_option_ignores_non_selectable_widget(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "options": {"text": "Plain", "encoder_order": 2},
+            }
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.encoder_list == []
+
+    def test_egt_mode_switching_connects_vertical_bar_to_hmi_action(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "vertical_bar_gauge",
+                "row": 0,
+                "column": 0,
+                "options": {"dbkey": "NUMOK", "egt_mode_switching": True},
+            }
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+        hmi.actions.setEgtMode.emit("normalize")
+
+        assert screen.instruments[0].normalizeMode is True
+
+    def test_altimeter_tape_accepts_custom_dbkey(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "altimeter_tape",
+                "row": 0,
+                "column": 0,
+                "options": {"dbkey": "BARO"},
+            }
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].dbkey == "BARO"
+
+    def test_virtual_vfr_instrument_is_constructed(self, fix, qtbot):
+        config = _config_with_instruments([
+            {"type": "virtual_vfr", "row": 0, "column": 0}
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert 0 in screen.instruments
+
+    def test_weston_without_span_uses_unconstrained_constructor(self, fix, qtbot, monkeypatch):
+        _FakeWeston.calls = []
+        monkeypatch.setattr(screenbuilder.weston, "Weston", _FakeWeston)
+        screen = Screen(_TestParent(_config_with_instruments([]), config_path=str(Path.cwd())))
+        qtbot.addWidget(screen)
+        screen.layout = {"rows": 10, "columns": 10}
+        screen.instruments = {}
+        screen.insturment_config = {}
+
+        screen.setup_instruments(
+            0,
+            {
+                "type": "weston",
+                "row": 0,
+                "column": 0,
+                "options": {
+                    "socket": "wayland-test",
+                    "ini": "weston.ini",
+                    "command": "waydroid",
+                    "args": [],
+                },
+            },
+        )
+
+        assert "wide" not in _FakeWeston.calls[0]
+        assert "high" not in _FakeWeston.calls[0]
+
+    def test_screen_encoder_inputs_are_connected_when_configured(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "numeric_display",
+                "row": 0,
+                "column": 0,
+                "options": {"dbkey": "NUMOK", "encoder_order": 2},
+            },
+            {
+                "type": "listbox",
+                "row": 0,
+                "column": 1,
+                "options": {
+                    "encoder_order": 1,
+                    "lists": [{"name": "Radio", "file": "tests/data/listbox/list1.yaml"}],
+                },
+            },
+        ])
+        config["encoder"] = "INT"
+        config["encoder_button"] = "HIDEBUTTON"
+        screen = Screen(_TestParent(config, config_path="."))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.encoder_list_sorted == [1, 0]
+        assert screen.encoder_current_selection == 0
+        assert screen.encoder_input is not None
+        assert screen.encoder_button_input is not None
+
     def test_lookup_and_default_helpers_document_current_defaults(self, fix, qtbot):
         screen = Screen(_TestParent(_config_with_instruments([])))
         qtbot.addWidget(screen)
@@ -771,8 +1357,25 @@ class TestScreenBuilderPreferencesAndOptions:
         assert screen.lookup_mapping("IAS", {"IAS": "Airspeed"}) == "Airspeed"
         assert screen.lookup_mapping("ALT", {"IAS": "Airspeed"}) == "ALT"
         assert screen.get_instrument_defaults("airspeed_box") == ["IAS", "GS", "TAS"]
+        assert screen.get_instrument_defaults("airspeed_dial") == ["IAS"]
+        assert screen.get_instrument_defaults("altimeter_trend_tape") == ["ALT"]
+        assert screen.get_instrument_defaults("atitude_indicator") == ["PITCH", "ROLL", "ALAT", "TAS"]
+        assert screen.get_instrument_defaults("horizontal_situation_indicator") == ["COURSE", "CDI", "GSI", "HEAD"]
         assert screen.get_instrument_defaults("heading_tape") == ["HEAD"]
         assert screen.get_instrument_defaults("turn_coordinator") == ["ROT", "ALAT"]
+        assert screen.get_instrument_defaults("vsi_pfd") == ["VS"]
+        assert screen.get_instrument_defaults("virtual_vfr") == [
+            "PITCH",
+            "LAT",
+            "LONG",
+            "HEAD",
+            "ALT",
+            "PITCH",
+            "ROLL",
+            "ALAT",
+            "TAS",
+        ]
+        assert screen.get_instrument_defaults("unknown") is None
         assert screen.get_instrument_default_options("heading_display") == {"font_size": 17}
         assert screen.get_instrument_default_options("static_text") is False
         assert screen.signal_mapping({}) is None
@@ -798,6 +1401,18 @@ class TestScreenBuilderLayout:
         assert (top, left, right, bottom) == pytest.approx((50, 25, 75, 100))
         assert (grid_x, grid_y, grid_width, grid_height) == pytest.approx((115, 155, 45, 35))
 
+    def test_grid_margins_ignore_out_of_range_values(self, fix, qtbot):
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+        screen.resize(1000, 500)
+        screen.layout = {
+            "rows": 10,
+            "columns": 10,
+            "margin": {"top": 0, "bottom": 100, "left": -5, "right": 150},
+        }
+
+        assert screen.get_grid_margins() == (0, 0, 0, 0)
+
     def test_grid_layout_applies_span_shrink_and_justification(self, fix, qtbot):
         config = _config_with_instruments([
             {
@@ -816,6 +1431,111 @@ class TestScreenBuilderLayout:
         screen.init_screen()
 
         assert screen.instruments[0].geometry().getRect() == (200, 50, 200, 50)
+
+    def test_grid_layout_centers_shrunken_widgets_without_justify(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "span": {"rows": 1, "columns": 1},
+                "move": {"shrink": 25},
+                "options": {"text": "Centered"},
+            }
+        ])
+        config["layout"] = {"rows": 1, "columns": 1}
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(400, 200)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].geometry().getRect() == (50, 25, 300, 150)
+
+    def test_grid_layout_left_top_justification(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "span": {"rows": 1, "columns": 1},
+                "move": {"shrink": 25, "justify": ["left", "top"]},
+                "options": {"text": "Pinned"},
+            }
+        ])
+        config["layout"] = {"rows": 1, "columns": 1}
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(400, 200)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].geometry().getRect() == (0, 0, 300, 150)
+
+    def test_grid_layout_move_without_shrink_keeps_full_cell(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "span": {"rows": 1, "columns": 1},
+                "move": {"justify": ["right", "bottom"]},
+                "options": {"text": "Full"},
+            }
+        ])
+        config["layout"] = {"rows": 1, "columns": 1}
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(400, 200)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].geometry().getRect() == (0, 0, 400, 200)
+
+    def test_grid_layout_ignores_negative_spans(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "span": {"rows": -1, "columns": -1},
+                "options": {"text": "Negative"},
+            }
+        ])
+        config["layout"] = {"rows": 2, "columns": 2}
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(400, 200)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].geometry().getRect() == (0, 0, 200, 100)
+
+    @pytest.mark.parametrize(
+        "span,expected",
+        [
+            ({"rows": 2}, (0, 0, 200, 200)),
+            ({"columns": 2}, (0, 0, 400, 100)),
+        ],
+    )
+    def test_grid_layout_handles_partial_spans(self, fix, qtbot, span, expected):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "span": span,
+                "options": {"text": "Partial"},
+            }
+        ])
+        config["layout"] = {"rows": 2, "columns": 2}
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(400, 200)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].geometry().getRect() == expected
 
     def test_grid_layout_raises_for_invalid_shrink(self, fix, qtbot):
         config = _config_with_instruments([
@@ -861,6 +1581,13 @@ class TestScreenBuilderLayout:
         qtbot.addWidget(screen)
 
         assert screen.get_bounding_box(width, height, 10, 20, ratio) == pytest.approx(expected)
+
+    def test_get_bounding_box_handles_inner_dimension_limits(self, fix, qtbot):
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+
+        assert screen.get_bounding_box(100, 150, 0, 0, 0.5) == pytest.approx((75, 150, 12.5, 0))
+        assert screen.get_bounding_box(100, 100, 0, 0, 2) == pytest.approx((100, 50, 0, 25))
 
     def test_resize_event_reflows_only_when_width_and_height_change(self, fix, qtbot):
         config = _config_with_instruments([
@@ -937,6 +1664,120 @@ class TestScreenBuilderLayout:
         assert screen.instruments[0].geometry().getRect() == (0, 0, 400, 47)
         assert screen.instruments[1].geometry().getRect() == (0, 53, 400, 47)
 
+    def test_ganged_layout_applies_group_gaps_and_ratio(self, fix, qtbot):
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+        screen.resize(400, 200)
+        screen.layout = {"rows": 1, "columns": 1}
+        screen.instruments = {0: _RatioWidget(screen, ratio=1), 1: _RatioWidget(screen, ratio=1)}
+        screen.insturment_config = {
+            0: {
+                "type": "ganged_ratio_widget",
+                "gang_type": "horizontal",
+                "row": 0,
+                "column": 0,
+                "groups": [{"gap": 10, "instruments": [{}, {}]}],
+            }
+        }
+
+        screen.grid_layout()
+
+        assert screen.instruments[0].geometry().getRect() == (0, 10, 180, 180)
+        assert screen.instruments[1].geometry().getRect() == (220, 10, 180, 180)
+        assert screen.instruments[0].setup_gauge_calls == 2
+
+    def test_ganged_disabled_and_state_visibility(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "ganged_static_text",
+                "gang_type": "horizontal",
+                "display_state": 2,
+                "row": 0,
+                "column": 0,
+                "groups": [
+                    {
+                        "common_options": {"disabled": False},
+                        "instruments": [
+                            {"options": {"text": "State"}},
+                            {"options": {"text": "Bool", "disabled": True}},
+                            {"options": {"text": "Pref", "disabled": "hidden-ganged"}},
+                            {"options": {"text": "Not", "disabled": "not shown-ganged"}},
+                        ],
+                    }
+                ],
+            }
+        ])
+        screen = Screen(
+            _TestParent(
+                config,
+                preferences={"enabled": {"hidden-ganged": False, "shown-ganged": True}},
+            )
+        )
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.display_state_inst[2] == [0]
+        assert [screen.instruments[index].isHidden() for index in range(4)] == [
+            True,
+            True,
+            True,
+            True,
+        ]
+
+    def test_ganged_enabled_preference_disabled_options_remain_visible(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "ganged_static_text",
+                "gang_type": "horizontal",
+                "row": 0,
+                "column": 0,
+                "groups": [
+                    {
+                        "instruments": [
+                            {"options": {"text": "Shown", "disabled": "shown-ganged"}},
+                            {"options": {"text": "Not", "disabled": "not hidden-ganged"}},
+                        ],
+                    }
+                ],
+            }
+        ])
+        screen = Screen(
+            _TestParent(
+                config,
+                preferences={"enabled": {"shown-ganged": True, "hidden-ganged": False}},
+            )
+        )
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert [screen.instruments[index].isHidden() for index in range(2)] == [False, False]
+
+    def test_ganged_display_state_one_remains_visible(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "ganged_static_text",
+                "gang_type": "horizontal",
+                "display_state": 1,
+                "row": 0,
+                "column": 0,
+                "groups": [
+                    {"instruments": [{"options": {"text": "State 1"}}]},
+                ],
+            }
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.display_state_inst[1] == [0]
+        assert screen.instruments[0].isHidden() is False
+
     def test_ganged_instrument_requires_gang_type(self, fix, qtbot):
         config = _config_with_instruments([
             {
@@ -971,6 +1812,52 @@ class TestScreenBuilderLayout:
 
         assert screen.grid.geometry().getRect() == (0, 0, 400, 240)
         assert screen.grid.textRect.width() > 0
+
+    def test_grid_overlay_renders_without_margins(self, fix, qtbot):
+        grid = screenbuilder.GridOverlay(layout={"rows": 10, "columns": 10})
+        qtbot.addWidget(grid)
+        grid.resize(200, 100)
+        pixmap = QPixmap(grid.size())
+        pixmap.fill()
+
+        grid.render(pixmap)
+
+        assert grid.textRect.width() > 0
+
+    def test_grid_overlay_ignores_invalid_margins_when_rendering(self, fix, qtbot):
+        grid = screenbuilder.GridOverlay(
+            layout={
+                "rows": 10,
+                "columns": 10,
+                "margin": {"top": 0, "bottom": 100, "left": -1, "right": 120},
+            }
+        )
+        qtbot.addWidget(grid)
+        grid.resize(200, 100)
+        pixmap = QPixmap(grid.size())
+        pixmap.fill()
+
+        grid.render(pixmap)
+
+        assert grid.textRect.width() > 0
+
+    def test_init_screen_alias_and_resize_event_initialize_uninitialized_screen(self, fix, qtbot):
+        config = _config_with_instruments([
+            {"type": "static_text", "row": 0, "column": 0, "options": {"text": "Init"}}
+        ])
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.resizeEvent(None)
+
+        assert screen.init is True
+
+        guarded = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(guarded)
+        guarded.initScreen()
+
+        assert guarded.init is True
 
 
 class TestScreenBuilderExternalWidgets:
@@ -1071,6 +1958,37 @@ class TestScreenBuilderDisplayStates:
         assert screen.instruments[0].isHidden() is True
         assert screen.instruments[1].isHidden() is False
 
+        screen.change_display_states()
+
+        assert screen.display_state_current == 1
+        assert screen.instruments[0].isHidden() is False
+        assert screen.instruments[1].isHidden() is True
+
+    def test_display_state_reuses_existing_scheduler_timer(self, fix, qtbot, monkeypatch):
+        fake_scheduler = _FakeSchedulerModule()
+        timer = _FakeTimer(250)
+        fake_scheduler.scheduler.timers.append(timer)
+        monkeypatch.setattr(screenbuilder, "scheduler", fake_scheduler)
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "display_state": 1,
+                "row": 0,
+                "column": 0,
+                "options": {"text": "State"},
+            },
+        ])
+        config["layout"] = {"rows": 10, "columns": 10, "display_state": {"interval": 250, "states": 2}}
+        screen = Screen(_TestParent(config))
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert fake_scheduler.scheduler.timers == [timer]
+        assert timer.started is False
+        assert timer.callbacks == [screen.change_display_states]
+
     def test_change_display_states_is_noop_with_less_than_two_states(self, fix, qtbot):
         screen = Screen(_TestParent(_config_with_instruments([])))
         qtbot.addWidget(screen)
@@ -1152,6 +2070,114 @@ class TestScreenBuilderEncoder:
 
         assert widgets[0].select_calls == 0
 
+    def test_encoder_ignores_movement_when_screen_is_hidden(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        screen.isVisible = lambda: False
+
+        screen.encoderChanged(1)
+
+        assert screen.encoder_current_selection == 0
+        assert widgets[0].highlight_calls == []
+
+    def test_encoder_zero_value_before_timeout_is_noop(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+
+        screen.encoderChanged(0)
+
+        assert widgets[0].highlight_calls == []
+        assert screen.encoder_timestamp != 0
+
+    def test_encoder_control_retained_restarts_timeout(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        screen.encoder_control = True
+        widgets[0].changed_return = True
+
+        screen.encoderChanged(-2)
+
+        assert widgets[0].changed_calls == [-2]
+        assert screen.encoder_control is True
+        assert screen.encoder_timer.isActive() is True
+
+    def test_encoder_large_steps_wrap_selection(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+
+        screen.encoderChanged(5)
+
+        assert screen.encoder_current_selection == 1
+        assert widgets[1].highlight_calls == [True]
+
+        screen.encoderChanged(-5)
+
+        assert screen.encoder_current_selection == 0
+        assert widgets[0].highlight_calls[-1] is True
+
+    def test_encoder_does_not_advance_when_timed_out(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        screen.encoder_timestamp = 1
+
+        screen.encoderChanged(1)
+
+        assert screen.encoder_current_selection == 0
+        assert widgets[0].highlight_calls == [False, True]
+
+    def test_encoder_all_disabled_clears_current_highlight(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        for widget in widgets:
+            widget.setEnabled(False)
+
+        screen.encoderChanged(1)
+
+        assert screen.encoder_current_selection == 0
+        assert widgets[0].highlight_calls == [False]
+        assert screen.encoder_timer.isActive() is False
+
+    def test_encoder_button_noop_when_false_or_timed_out(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+
+        screen.encoderButtonChanged(False)
+        screen.encoder_timestamp = 1
+        screen.encoderButtonChanged(True)
+
+        assert widgets[0].select_calls == 0
+
+    def test_encoder_button_control_click_can_retain_and_release_control(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        screen.encoder_control = True
+        widgets[0].clicked_return = True
+
+        screen.encoderButtonChanged(True)
+
+        assert widgets[0].clicked_calls == 1
+        assert screen.encoder_control is True
+        assert screen.encoder_timer.isActive() is True
+
+        widgets[0].clicked_return = False
+        screen.encoderButtonChanged(True)
+
+        assert widgets[0].clicked_calls == 2
+        assert screen.encoder_control is False
+        assert widgets[0].highlight_calls == [False]
+
+    def test_encoder_negative_movement_skips_disabled_widget(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        screen.encoder_current_selection = 1
+        widgets[0].setEnabled(False)
+
+        screen.encoderChanged(-1)
+
+        assert screen.encoder_current_selection == 1
+        assert widgets[1].highlight_calls == [False, True]
+
+    def test_encoder_button_select_without_control_resets_highlight(self, fix, qtbot):
+        screen, widgets = self._screen_with_encoder_widgets(qtbot)
+        widgets[0].select_return = False
+
+        screen.encoderButtonChanged(True)
+
+        assert widgets[0].select_calls == 1
+        assert screen.encoder_control is False
+        assert widgets[0].highlight_calls == [False]
+
 
 class TestScreenBuilderClose:
 
@@ -1182,6 +2208,18 @@ class TestScreenBuilderClose:
         screen.closeEvent(None)
 
         assert "Error closing instrument 7" in caplog.text
+
+    def test_close_event_ignores_encoder_timer_stop_failures(self, fix, qtbot):
+        class BrokenTimer:
+            def stop(self):
+                raise RuntimeError("timer stop failed")
+
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+        screen.encoder_timer = BrokenTimer()
+        screen.instruments = {}
+
+        screen.closeEvent(None)
 
     def test_close_event_before_init_is_safe(self, fix, qtbot):
         screen = Screen(_TestParent(_config_with_instruments([])))
