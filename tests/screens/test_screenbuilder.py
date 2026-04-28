@@ -919,6 +919,28 @@ instruments:
         assert screen.display_state_inst[2] == [0]
         assert screen.display_state_inst[1] == [1]
 
+    def test_load_instrument_with_existing_state_keeps_parent_state(self, fix, qtbot):
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+        screen.instruments = {}
+        screen.insturment_config = {}
+        screen.display_state_inst = {3: []}
+
+        count = screen.load_instrument(
+            {
+                "type": "static_text",
+                "row": 0,
+                "column": 0,
+                "options": {"text": "Inherited"},
+            },
+            0,
+            replacements={"{id}": "1"},
+            state=3,
+        )
+
+        assert count == 1
+        assert screen.display_state_inst[3] == [0]
+
     def test_load_instrument_missing_include_after_size_calculation_raises(self, fix, qtbot, tmp_path):
         screen = Screen(
             _TestParent(
@@ -1075,6 +1097,40 @@ class TestScreenBuilderPreferencesAndOptions:
         widget = screen.instruments[0]
         assert widget.font_family == "DejaVu Sans Condensed"
         assert widget.alignment != "Ignored"
+
+    def test_preferences_without_matching_style_or_gauge_styles_use_defaults(self, fix, qtbot):
+        config = _config_with_instruments([
+            {
+                "type": "static_text",
+                "preferences": "missing-1",
+                "row": 0,
+                "column": 0,
+                "options": {"text": "Missing"},
+            },
+            {
+                "type": "static_text",
+                "preferences": "plain-1",
+                "row": 1,
+                "column": 0,
+                "options": {"text": "Plain"},
+            },
+        ])
+        parent = _TestParent(
+            config,
+            preferences={
+                "style": {"basic": True},
+                "styles": {"other": {"basic": {"font_family": "Ignored"}}},
+                "gauges": {"plain-1": {"font_percent": 0.25}},
+            },
+        )
+        screen = Screen(parent)
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+
+        screen.init_screen()
+
+        assert screen.instruments[0].font_family == "DejaVu Sans Condensed"
+        assert screen.instruments[1].font_percent == 0.25
 
     def test_temperature_option_configures_numeric_unit_switching(self, fix, qtbot):
         config = _config_with_instruments([
@@ -2217,6 +2273,14 @@ class TestScreenBuilderClose:
         screen = Screen(_TestParent(_config_with_instruments([])))
         qtbot.addWidget(screen)
         screen.encoder_timer = BrokenTimer()
+        screen.instruments = {}
+
+        screen.closeEvent(None)
+
+    def test_close_event_is_safe_when_encoder_timer_is_none(self, fix, qtbot):
+        screen = Screen(_TestParent(_config_with_instruments([])))
+        qtbot.addWidget(screen)
+        screen.encoder_timer = None
         screen.instruments = {}
 
         screen.closeEvent(None)
