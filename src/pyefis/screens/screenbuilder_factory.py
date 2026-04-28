@@ -114,8 +114,40 @@ INSTRUMENT_FACTORIES = {
 }
 
 
+INSTRUMENT_DEFAULTS = {
+    'airspeed_dial': ['IAS'],
+    'airspeed_tape': ['IAS'],
+    'airspeed_trend_tape': ['IAS'],
+    'airspeed_box': ['IAS','GS','TAS'],
+    'altimeter_dial': ['ALT'],
+    'altimeter_tape': ['ALT'],
+    'altimeter_trend_tape': ['ALT'],
+    'atitude_indicator': ['PITCH','ROLL','ALAT','TAS'],
+    'heading_display': ['HEAD'],
+    'heading_tape': ['HEAD'],
+    'horizontal_situation_indicator': ['COURSE','CDI','GSI','HEAD'],
+    'turn_coordinator': ['ROT','ALAT'],
+    'vsi_dial': ['VS'],
+    'vsi_pfd': ['VS'],
+    'virtual_vfr': ['PITCH','LAT','LONG','HEAD','ALT','PITCH','ROLL','ALAT','TAS'],
+}
+
+
+INSTRUMENT_DEFAULT_OPTIONS = {
+    'heading_display': {'font_size': 17},
+}
+
+
 def create_instrument(screen, config, font_percent=None, font_family=None, replace=None):
     factory = INSTRUMENT_FACTORIES.get(config['type'])
     if factory is None:
         raise ValueError(f"Unknown instrument type '{config['type']}'")
     return factory(screen, config, font_percent=font_percent, font_family=font_family, replace=replace)
+
+
+def get_instrument_defaults(instrument_type):
+    return INSTRUMENT_DEFAULTS.get(instrument_type)
+
+
+def get_instrument_default_options(instrument_type):
+    return INSTRUMENT_DEFAULT_OPTIONS.get(instrument_type, False)

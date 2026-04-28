@@ -270,32 +270,10 @@ class Screen(QWidget):
         pass        
 
     def get_instrument_defaults(self, inst):
-        # Always return an array for simplicity
-        # a value of boolean false indicates that no default value exists and db_item must be provided
-        if inst in ['airspeed_dial','airspeed_tape', 'airspeed_trend_tape']:
-            return ['IAS']
-        elif inst in ['airspeed_box']:
-            return ['IAS','GS','TAS']
-        elif inst in ['altimeter_dial', 'altimeter_tape', 'altimeter_trend_tape' ]:
-            return ['ALT']
-        elif 'atitude_indicator' == inst:
-            return ['PITCH','ROLL','ALAT','TAS']
-        elif inst in [ 'heading_display', 'heading_tape']:
-            return ['HEAD']
-        elif 'horizontal_situation_indicator' == inst:
-            return ['COURSE','CDI','GSI','HEAD']
-        elif 'turn_coordinator' == inst:
-            return ['ROT','ALAT']
-        elif inst in ['vsi_dial','vsi_pfd']:
-            return ['VS']
-        elif 'virtual_vfr' == inst:
-            return ['PITCH','LAT','LONG','HEAD','ALT','PITCH','ROLL','ALAT','TAS']
+        return screenbuilder_factory.get_instrument_defaults(inst)
 
     def get_instrument_default_options(self, inst):
-        if inst == 'heading_display':
-            return {'font_size': 17}
-        
-        return False
+        return screenbuilder_factory.get_instrument_default_options(inst)
 
     def get_grid_margins(self):
         return screenbuilder_layout.get_grid_margins(self.layout, self.width(), self.height())
