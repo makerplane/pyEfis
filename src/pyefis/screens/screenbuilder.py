@@ -1,4 +1,5 @@
 #  Copyright (c) 2016 Phil Birkelbach
+#  Copyright (c) 2026 Eric Blevins
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,6 +34,7 @@ from pyefis.instruments import misc
 from pyefis.instruments.ai.VirtualVfr import VirtualVfr
 from pyefis.instruments import listbox
 from pyefis.instruments import wind
+from pyefis.screens import screenbuilder_config
 
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
@@ -43,7 +45,6 @@ import pyefis.hmi as hmi
 
 import logging
 import os
-import yaml
 from operator import itemgetter
 import time
 
@@ -101,147 +102,35 @@ class Screen(QWidget):
         # vsi_dial
         # vsi_pfd  # Testing to do
 
-    def calc_includes(self,i,p_rows,p_cols):
-        args = i['type'].split(',')
-        if os.path.exists(os.path.join(self.parent.config_path,args[1])):
-            iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
-        elif self.parent.preferences['includes'][args[1]]:
-            iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
-        else:
-            raise Exception(f"Include file '{args[1]}' not found")
-        insts = iconfig['instruments']
-        inst_rows = 0
-        inst_cols = 0
-        # Calculate max spans
-        for inst in insts:
-            a_rows = p_rows
-            a_cols = p_cols
-            if 'span' in inst:
-                if 'rows' in inst['span']:
-                    a_rows = inst['span']['rows']
-                if 'columns' in inst['span']:
-                    a_cols = inst['span']['columns']
+    def config_expander(self):
+        return screenbuilder_config.InstrumentExpander(
+            self.parent.config_path,
+            self.parent.preferences,
+            self.parent.nodeID,
+            self.calc_includes,
+        )
 
-                # inst_rows shold be the sum of row + row span
-                if a_rows + inst.get('row',0) > inst_rows: inst_rows = a_rows + inst.get('row',0)
-                # inst_cols should be the sum of colum + column span
-                if a_cols + inst.get('column',0) > inst_cols: inst_cols = a_cols + inst.get('column',0)
-            else:
-                # This is not spanned
-                if 'include,' in inst['type']:
-                    # Need to resolve these includes too
-                    pp_rows = inst_rows
-                    pp_cols = inst_cols
-                    if inst_rows == 0:
-                        pp_rows = p_rows
-                    if inst_cols == 0:
-                        pp_cols = p_cols
-                    rows, cols = self.calc_includes(inst,pp_rows,pp_cols)
-                    if rows + inst['row'] > inst_rows: inst_rows = rows + inst['row']
-                    if cols + inst['column'] > inst_cols: inst_cols = cols + inst['column']
-                else:
-                    inst_rows = p_rows
-                    inst_cols = p_cols
-        if inst_rows == 0:
-            inst_rows = p_rows
-        if inst_cols == 0:
-            inst_cols = p_cols
-        return [ inst_rows, inst_cols ]
+    def calc_includes(self,i,p_rows,p_cols):
+        return screenbuilder_config.InstrumentExpander(
+            self.parent.config_path,
+            self.parent.preferences,
+            self.parent.nodeID,
+            None,
+        ).calc_includes(i,p_rows,p_cols)
 
     def load_instrument(self,i,count,replacements=None,row_p=1,col_p=1,relative_x=0,relative_y=0,inst_rows=0,inst_cols=0,state=False):
-        # Timed display states
-        # we want to propigate state to all children unless the child has its own setting
-        parent_state = state
-        if not state:
-            state =  i.get('display_state', False)
-            parent_state = state
-        if not replacements:
-            replacements = { '{id}': self.parent.nodeID }
-        span_rows = 0
-        span_cols = 0
-        if 'include,' in i['type']:
-            if 'disabled' in i:
-                if isinstance(i['disabled'],bool) and i['disabled'] == True:
-                    return count
-                elif isinstance(i['disabled'],str):
-                    check_not = i['disabled'].split(" ")
-                    if check_not[0].lower() == 'not':
-                        if self.parent.preferences['enabled'][check_not[1]]:
-                            return count
-                    elif not self.parent.preferences['enabled'][i['disabled']]:
-                        return count
-            relative_x = i.get('row', 0)
-            relative_y = i.get('column', 0)
-            if 'span' in i:
-                span_rows = i['span'].get('rows',0)
-                span_cols = i['span'].get('columns',0)
-            inst_rows, inst_cols = self.calc_includes(i,span_rows,span_cols)
-            args = i['type'].split(',')
-            if os.path.exists(os.path.join(self.parent.config_path,args[1])):
-                iconfig = yaml.load(open(os.path.join(self.parent.config_path,args[1])), Loader=yaml.SafeLoader)
-            elif self.parent.preferences['includes'][args[1]]:
-                iconfig = yaml.load(open(os.path.join(self.parent.config_path,self.parent.preferences['includes'][args[1]])), Loader=yaml.SafeLoader)
-            else:
-                raise Exception(f"Include file '{args[1]}' not found")
-            insts = iconfig['instruments']
-
-        else:
-            insts = [i]
-        for inst in insts:
-            if 'disabled' in inst:
-                if isinstance(inst['disabled'],bool) and inst['disabled'] == True:
-                    continue
-                elif isinstance(inst['disabled'],str):
-                    check_not = inst['disabled'].split(" ")
-                    if check_not[0].lower() == 'not':
-                        if self.parent.preferences['enabled'][check_not[1]]:
-                            continue
-                    elif not self.parent.preferences['enabled'][inst['disabled']]:
-                        continue
-            if not parent_state:
-                # No parent state, set to False or this instrument specific state
-                state =  inst.get('display_state', False)
-            elif inst.get('display_state', False):
-                # This child has a state that overrides the parent
-                state =  inst.get('display_state', False)
-
-            # Replacements
-            # Convert to YAML string, replace, convert back to dict
-            # Seems more effecient than nested recursion
-            inst_str = yaml.dump(inst)
-            this_replacements = replacements
-            # From include definition if we have one
-            if 'replace' in i:
-                logger.debug("This instrument has replacement(s)")
-                for rep in i['replace']:
-                    this_replacements[f"{{{rep}}}"] = str(i['replace'][rep])
-            # This specific instrument
-            if 'replace' in inst:
-                # Replace items specific to this instrument
-                logger.debug("This instrument has replacement(s)")
-                for rep in inst['replace']:
-                    this_replacements[f"{{{rep}}}"] = str(inst['replace'][rep])
-            # Perform replacements
-            for rep in this_replacements:
-                inst_str = inst_str.replace(rep,str(this_replacements[rep]))
-            inst = yaml.load(inst_str, Loader=yaml.SafeLoader)
-            if span_rows > 0 and inst_rows > 0:
-                row_p = ( span_rows / inst_rows )
-            if span_cols > 0 and inst_cols > 0:
-                col_p = ( span_cols / inst_cols )
-            inst['row'] = (inst.get('row',0) * row_p) + relative_x
-            inst['column'] = (inst.get('column',0) * col_p) + relative_y
-            if 'span' in inst:
-                if 'rows' in inst['span']:
-                    if inst['span']['rows'] >= 0:
-                        inst['span']['rows'] = inst['span']['rows'] * row_p
-                if 'columns' in inst['span']:
-                    if inst['span']['columns'] >= 0:
-                        inst['span']['columns'] = inst['span']['columns'] * col_p
-            else:
-                inst['span'] = {}
-                inst['span']['rows'] = inst_rows
-                inst['span']['columns'] = inst_cols
+        expanded_instruments = self.config_expander().expand(
+            i,
+            replacements,
+            row_p,
+            col_p,
+            relative_x,
+            relative_y,
+            inst_rows,
+            inst_cols,
+            state,
+        )
+        for inst, this_replacements, state in expanded_instruments:
             if 'ganged' in inst['type']:
                 #ganged instrument
                 if 'gang_type' not in inst:
@@ -269,23 +158,19 @@ class Screen(QWidget):
                                     self.instruments[count].setVisible(False)
                         count += 1     
             else:
-                # Check if this is an include, if it is recurse and resolve those instruments
-                if 'include,' in inst['type']:
-                    count = self.load_instrument(inst,count,this_replacements,row_p,col_p,relative_x,relative_y,inst_rows,inst_cols,state)
-                else: 
-                    self.setup_instruments(count,inst,replace=this_replacements,state=state)
-                    inst_disabled = inst.get('options', False)
-                    if isinstance(inst_disabled, dict):
-                        inst_disabled = inst['options'].get('disabled', False)
-                    if isinstance(inst_disabled,bool) and inst_disabled == True:
-                        self.instruments[count].setVisible(False)
-                    elif isinstance(inst_disabled,str) and not self.parent.preferences['enabled'][inst_disabled]:
-                        self.instruments[count].setVisible(False)
-                    else:
-                        if state:
-                            self.display_state_inst[state].append(count)
-                            if state > 1:
-                               self.instruments[count].setVisible(False)
+                self.setup_instruments(count,inst,replace=this_replacements,state=state)
+                inst_disabled = inst.get('options', False)
+                if isinstance(inst_disabled, dict):
+                    inst_disabled = inst['options'].get('disabled', False)
+                if isinstance(inst_disabled,bool) and inst_disabled == True:
+                    self.instruments[count].setVisible(False)
+                elif isinstance(inst_disabled,str) and not self.parent.preferences['enabled'][inst_disabled]:
+                    self.instruments[count].setVisible(False)
+                else:
+                    if state:
+                        self.display_state_inst[state].append(count)
+                        if state > 1:
+                           self.instruments[count].setVisible(False)
             count += 1
         return count
 
@@ -336,16 +221,8 @@ class Screen(QWidget):
         # Setup instruments:
         count = 0
         for i in self.get_config_item('instruments'):
-            if 'disabled' in i: # and i['disabled'] == True:
-                if isinstance(i['disabled'],bool) and i['disabled'] == True:
-                    continue
-                elif isinstance(i['disabled'],str):
-                    check_not = i['disabled'].split(" ")
-                    if check_not[0].lower() == 'not':
-                        if self.parent.preferences['enabled'][check_not[1]]:
-                            continue
-                    elif not self.parent.preferences['enabled'][i['disabled']]:
-                        continue
+            if screenbuilder_config.is_disabled(i, self.parent.preferences):
+                continue
             count = self.load_instrument(i,count)
         #Place instruments:
         self.grid_layout()
