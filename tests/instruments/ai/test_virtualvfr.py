@@ -2,7 +2,10 @@ import importlib
 from unittest import mock
 
 import pytest
-from PyQt6.QtWidgets import QApplication, QWidget
+import yaml
+from PyQt6.QtCore import QRectF
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QApplication, QGraphicsView, QWidget
 
 
 vfr_module = importlib.import_module("pyefis.instruments.ai.VirtualVfr")
@@ -47,6 +50,18 @@ class FakePointOfView:
 
     def initialize(self, *args):
         self.initialize_calls.append(args)
+
+
+class RenderableObject:
+    def __init__(self, obj_type, lat=0, lng=0, rect=None):
+        self.obj_type = obj_type
+        self.lat = lat
+        self.lng = lng
+        self.rect = rect
+        self.render = mock.Mock(return_value=rect)
+
+    def typestr(self):
+        return self.obj_type
 
 
 @pytest.fixture
@@ -104,6 +119,88 @@ def test_virtualvfr_resize_initializes_pov_and_renders_when_data_is_good(
     assert widget.rendering_prohibited() is False
 
 
+def test_virtualvfr_resize_uses_next_metadata_paths_when_current_is_expired(
+    fix, fake_pov, qtbot, tmp_path
+):
+    metadata_path = tmp_path / "metadata.yaml"
+    metadata_path.write_text(
+        yaml.safe_dump(
+            {
+                "current_expires": {"year": 2025, "month": 1, "day": 1},
+                "next_expires": {"year": 2027, "month": 1, "day": 1},
+            }
+        )
+    )
+    _set_vfr_values(fix)
+    parent = ConfigParent()
+    parent.config["metadata"] = str(metadata_path)
+    widget = VirtualVfr(font_percent=0.15)
+    widget.myparent = parent
+
+    _show_widget(qtbot, widget)
+
+    pov = fake_pov.instances[-1]
+    assert pov.dbpath == str(tmp_path / "next.db")
+    assert pov.index_path == str(tmp_path / "next.bin")
+
+
+def test_virtualvfr_resize_keeps_configured_paths_when_metadata_file_is_missing(
+    fix, fake_pov, qtbot, tmp_path
+):
+    _set_vfr_values(fix)
+    parent = ConfigParent()
+    parent.config["metadata"] = str(tmp_path / "missing.yaml")
+    widget = VirtualVfr(font_percent=0.15)
+    widget.myparent = parent
+
+    _show_widget(qtbot, widget)
+
+    pov = fake_pov.instances[-1]
+    assert pov.dbpath == "/tmp/test-cifp.db"
+    assert pov.index_path == "/tmp/test-cifp.bin"
+
+
+@pytest.mark.parametrize(
+    ("expires", "expected_file"),
+    [
+        ({"year": 2027, "month": 1, "day": 1}, "current"),
+        ({"year": 2025, "month": 1, "day": 1}, "current"),
+    ],
+)
+def test_virtualvfr_resize_metadata_without_next_uses_current_paths(
+    fix, fake_pov, qtbot, tmp_path, expires, expected_file
+):
+    metadata_path = tmp_path / "metadata.yaml"
+    metadata_path.write_text(yaml.safe_dump({"current_expires": expires}))
+    _set_vfr_values(fix)
+    parent = ConfigParent()
+    parent.config["metadata"] = str(metadata_path)
+    widget = VirtualVfr(font_percent=0.15)
+    widget.myparent = parent
+
+    _show_widget(qtbot, widget)
+
+    pov = fake_pov.instances[-1]
+    assert pov.dbpath == str(tmp_path / f"{expected_file}.db")
+    assert pov.index_path == str(tmp_path / f"{expected_file}.bin")
+
+
+def test_virtualvfr_resize_skips_initial_render_when_vfr_data_failed(
+    fix, fake_pov, qtbot
+):
+    _set_vfr_values(fix)
+    fix.db.get_item("LONG").fail = True
+    parent = ConfigParent()
+    widget = VirtualVfr(font_percent=0.15)
+    widget.myparent = parent
+
+    _show_widget(qtbot, widget)
+
+    pov = fake_pov.instances[-1]
+    pov.update_heading.assert_called_once_with(281.8)
+    pov.render.assert_not_called()
+
+
 def test_virtualvfr_fix_setters_update_pov_and_skip_rendering_when_blank(
     fix, fake_pov, qtbot
 ):
@@ -135,6 +232,27 @@ def test_virtualvfr_fix_setters_update_pov_and_skip_rendering_when_blank(
     widget.update.assert_not_called()
 
 
+def test_virtualvfr_good_fix_setters_render_for_longitude_altitude_and_heading(
+    fix, fake_pov, qtbot
+):
+    widget, _parent, pov = _make_widget(fix, fake_pov, qtbot)
+    pov.render.reset_mock()
+    widget.update = mock.Mock()
+
+    widget.setLongitude(-83.1)
+    widget.setAltitude(1400)
+    widget.setHeading(270)
+
+    assert widget.lng == -83.1
+    assert widget.missing_lng is False
+    assert widget.altitude == 1400
+    pov.update_position.assert_any_call(widget.lat, -83.1)
+    pov.update_altitude.assert_called_once_with(1400)
+    pov.update_heading.assert_called_with(270)
+    assert pov.render.call_args_list == [mock.call(widget)] * 3
+    assert widget.update.call_count == 3
+
+
 def test_virtualvfr_quality_flags_clear_vfr_objects_and_drive_blank_state(
     fix, fake_pov, qtbot
 ):
@@ -158,6 +276,59 @@ def test_virtualvfr_quality_flags_clear_vfr_objects_and_drive_blank_state(
     widget.setHeadOld(False)
     widget.setAltFail(True)
     assert widget.getVfrFail() is True
+
+
+def test_virtualvfr_quality_wrapper_methods_update_each_vfr_flag(
+    fix, fake_pov, qtbot
+):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
+
+    widget.setLngBad(True)
+    widget.setHeadBad(True)
+    widget.setAltBad(True)
+    assert widget._VFRBad["LONG"] is True
+    assert widget._VFRBad["HEAD"] is True
+    assert widget._VFRBad["ALT"] is True
+
+    widget.setLngOld(True)
+    widget.setLatOld(True)
+    widget.setAltOld(True)
+    assert widget._VFROld["LONG"] is True
+    assert widget._VFROld["LAT"] is True
+    assert widget._VFROld["ALT"] is True
+
+    widget.setLatFail(True)
+    widget.setHeadFail(True)
+    widget.setAltFail(True)
+    assert widget._VFRFail["LAT"] is True
+    assert widget._VFRFail["HEAD"] is True
+    assert widget._VFRFail["ALT"] is True
+
+
+def test_virtualvfr_ai_quality_branches_update_scene_and_redraw(fix, fake_pov, qtbot):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
+    widget.redraw = mock.Mock()
+
+    widget.setVfrBad(True, "PITCH")
+    assert widget.getAIBad() is True
+    widget.redraw.assert_called_once_with()
+
+    widget.setVfrBad(False, "PITCH")
+    assert widget.getAIBad() is False
+    assert widget.redraw.call_count == 2
+
+    widget.setOld(True, "ROLL")
+    assert widget.getAIOld() is True
+    widget.setOld(False, "ROLL")
+    assert widget.getAIOld() is False
+
+    widget.setVfrFail(True, "TAS")
+    assert widget.getAIFail() is True
+    assert QGraphicsView.scene(widget) == widget.fail_scene
+
+    widget.setVfrFail(False, "TAS")
+    assert widget.getAIFail() is False
+    assert QGraphicsView.scene(widget) == widget.scene
 
 
 def test_virtualvfr_runway_render_creates_updates_and_eliminates_scene_items(
@@ -220,6 +391,165 @@ def test_virtualvfr_runway_render_creates_updates_and_eliminates_scene_items(
     assert all(light.scene() is None for light in papi_lights)
 
 
+def test_virtualvfr_runway_render_covers_hidden_water_and_reciprocal_branches(
+    fix, fake_pov, qtbot
+):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot, width=360, height=260)
+    widget.hide()
+
+    widget.render_runway(
+        (-40, 80),
+        (40, 80),
+        (-30, -120),
+        (30, -120),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW18W",
+        airport_id="KWTR",
+        zoom=100,
+    )
+
+    assert "RW18WKWTR" not in widget.display_objects
+
+    widget.show()
+    qtbot.waitExposed(widget)
+    widget.render_runway(
+        (40, -120),
+        (-40, -120),
+        (30, 80),
+        (-30, 80),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW18W",
+        airport_id="KWTR",
+        zoom=100,
+    )
+
+    runway = widget.display_objects["RW18WKWTR"]
+    assert runway.brush().color() == QColor("#000070")
+    assert "RW18WKWTR36W" in widget.display_objects
+
+
+def test_virtualvfr_runway_render_removes_existing_centerline_label_and_papi(
+    fix, fake_pov, qtbot
+):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot, width=360, height=260)
+
+    widget.render_runway(
+        (-40, 80),
+        (40, 80),
+        (-30, -120),
+        (30, -120),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW09L",
+        airport_id="KDEL",
+        zoom=100,
+    )
+    assert "RW09LKDEL_c" in widget.display_objects
+    assert "RW09LKDEL09L" in widget.display_objects
+    assert "RW09LKDEL_e" in widget.display_objects
+    assert "RW09LKDEL_p" in widget.display_objects
+
+    widget.render_runway(
+        (-1, 0),
+        (1, 0),
+        (-1, 0),
+        (1, 0),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW09L",
+        airport_id="KDEL",
+        zoom=100,
+    )
+
+    assert "RW09LKDEL_c" not in widget.display_objects
+    assert "RW09LKDEL09L" not in widget.display_objects
+    assert "RW09LKDEL27R" not in widget.display_objects
+    assert "RW09LKDEL_e" not in widget.display_objects
+    assert "RW09LKDEL_p" not in widget.display_objects
+
+
+def test_virtualvfr_runway_render_removes_label_when_font_no_longer_fits(
+    fix, fake_pov, qtbot
+):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot, width=360, height=260)
+
+    widget.render_runway(
+        (40, 80),
+        (-40, 80),
+        (-30, -120),
+        (30, -120),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW09L",
+        airport_id="KLBL",
+        zoom=100,
+    )
+    assert "RW09LKLBL09L" in widget.display_objects
+
+    widget.min_font_width = 100
+    widget.render_runway(
+        (40, 80),
+        (-40, 80),
+        (-30, -120),
+        (30, -120),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW09L",
+        airport_id="KLBL",
+        zoom=100,
+    )
+
+    assert "RW09LKLBL_c" in widget.display_objects
+    assert "RW09LKLBL09L" not in widget.display_objects
+
+
+@pytest.mark.parametrize(
+    ("altitude", "expected_gsi"),
+    [
+        (0, pytest.approx(-1.0)),
+        (550, pytest.approx(0.15, abs=0.02)),
+    ],
+)
+def test_virtualvfr_runway_gsi_clamps_low_and_passes_midrange(
+    fix, fake_pov, qtbot, altitude, expected_gsi
+):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot, width=360, height=260)
+    widget.gsi = True
+    widget.altitude = altitude
+    widget.gsi_item.output_value = mock.Mock()
+
+    widget.render_runway(
+        (-40, 80),
+        (40, 80),
+        (-30, -120),
+        (30, -120),
+        touchdown_distance=10000,
+        elevation=0,
+        length=5000,
+        bearing=90,
+        name="RW09L",
+        airport_id=f"KGSI{altitude}",
+        zoom=100,
+    )
+
+    assert widget.gsi_item.value == expected_gsi
+    widget.gsi_item.output_value.assert_called_once_with()
+
+
 def test_virtualvfr_airport_labels_respect_occupied_space(fix, fake_pov, qtbot):
     widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
 
@@ -232,10 +562,33 @@ def test_virtualvfr_airport_labels_respect_occupied_space(fix, fake_pov, qtbot):
     assert "KZZZ" not in widget.display_objects
 
 
+def test_virtualvfr_navaid_render_updates_and_eliminates_items(fix, fake_pov, qtbot):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
+
+    widget.render_navaid((12, -8), "APE")
+    icon = widget.display_objects["APE"]
+    label = widget.display_objects["APE_l"]
+    first_x = label.x()
+
+    widget.render_navaid((32, 14), "APE")
+
+    assert widget.display_objects["APE"] is icon
+    assert widget.display_objects["APE_l"] is label
+    assert label.x() != first_x
+
+    widget.eliminate_navaid("APE")
+
+    assert "APE" not in widget.display_objects
+    assert "APE_l" not in widget.display_objects
+    assert icon.scene() is None
+    assert label.scene() is None
+
+
 @pytest.mark.parametrize(
     ("name", "expected"),
     [
         ("RW09L", ["09L", "27R"]),
+        ("RW01", ["01", "19"]),
         ("RW36", ["36", "18"]),
         ("RW18W", ["18W", "36W"]),
     ],
@@ -244,6 +597,12 @@ def test_virtualvfr_runway_label_reciprocals(fix, fake_pov, qtbot, name, expecte
     widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
 
     assert widget.get_runway_labels(name) == expected
+
+
+def test_virtualvfr_largest_font_size_respects_minimum(fix, fake_pov, qtbot):
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
+
+    assert widget.get_largest_font_size(1) == VirtualVfr.MIN_FONT_SIZE
 
 
 def test_virtualvfr_geometry_helpers_cover_vertical_and_diagonal_lines():
@@ -257,3 +616,204 @@ def test_virtualvfr_geometry_helpers_cover_vertical_and_diagonal_lines():
     distance, rel_lng = vfr_module.Distance([(-82, 40), (-81, 41)])
     assert distance > 60
     assert rel_lng == pytest.approx(vfr_module.GetRelLng(40 * vfr_module.M_PI / 180.0))
+
+
+def test_pointofview_show_filters_and_altitude_heading_updates(monkeypatch):
+    monkeypatch.setattr(vfr_module.CIFPObjects, "find_objects", lambda *_args: [])
+    pov = vfr_module.PointOfView("/db", "/idx", None)
+    pov.update_screen = mock.Mock()
+    pov.update_cache = mock.Mock()
+    pov.approximate_elevation = mock.Mock(return_value=42)
+
+    pov.initialize("Airport", 320, -82.9, 39.9, 1200, 90)
+    assert pov.refresh_period == 0.1
+    assert pov.show_object_types == {"Airport"}
+    assert pov.elevation == 42
+
+    pov.initialize({"Fix", "Runway"}, 320, -82.9, 39.9, 1200, 90)
+    assert {"Airport", "Fix", "Runway"}.issubset(pov.show_object_types)
+
+    pov.dont_show("Airport")
+    assert "Airport" not in pov.show_object_types
+
+    pov.dont_show(["Fix", "Runway"])
+    assert pov.show_object_types == set()
+
+    pov.update_altitude(1300)
+    pov.update_heading(180)
+
+    assert pov.altitude == 1300
+    assert pov.true_heading == 180
+    assert pov.update_screen.call_count == 3
+
+
+def test_pointofview_update_cache_matches_runways_and_purges_stale_blocks(monkeypatch):
+    runway_09 = vfr_module.CIFPObjects.Runway()
+    runway_09.airport_id = "KCMH"
+    runway_09.name = "RW09L"
+    runway_09.lat = 40
+    runway_09.lng = -83
+    runway_09.elevation = 800
+    runway_27 = vfr_module.CIFPObjects.Runway()
+    runway_27.airport_id = "KCMH"
+    runway_27.name = "RW27R"
+    runway_27.lat = 40.01
+    runway_27.lng = -83.01
+    runway_27.elevation = 810
+    calls = []
+
+    def find_objects(_dbpath, _index_path, lat, lng):
+        calls.append((lat, lng))
+        if (lat, lng) == (40, -83):
+            return [runway_09, runway_27]
+        return []
+
+    monkeypatch.setattr(vfr_module.CIFPObjects, "find_objects", find_objects)
+    pov = vfr_module.PointOfView("/db", "/idx", 0.25)
+    pov.gps_lat = 40.1
+    pov.gps_lng = -83.2
+    pov.object_cache[(10, 10)] = ["old"]
+
+    pov.update_cache()
+
+    assert len(calls) == 9
+    assert runway_09.matched() is True
+    assert runway_27 not in pov.object_cache[(40, -83)]
+    assert (10, 10) not in pov.object_cache
+
+    calls.clear()
+    pov.update_cache()
+    assert calls == []
+
+
+def test_pointofview_approximate_elevation_uses_nearest_runway():
+    far_runway = vfr_module.CIFPObjects.Runway()
+    far_runway.lat = 41
+    far_runway.lng = -84
+    far_runway.elevation = 900
+    near_runway = vfr_module.CIFPObjects.Runway()
+    near_runway.lat = 40.1
+    near_runway.lng = -83.1
+    near_runway.elevation = 720
+    pov = vfr_module.PointOfView("/db", "/idx", 0.25)
+    pov.gps_lat = 40
+    pov.gps_lng = -83
+    pov.object_cache = {(40, -83): [far_runway, near_runway, object()]}
+
+    assert pov.approximate_elevation() == 720
+
+
+def test_pointofview_render_sorts_labels_and_renders_other_objects_immediately():
+    pov = vfr_module.PointOfView("/db", "/idx", 0.25)
+    pov.gps_lat = 40
+    pov.gps_lng = -83
+    pov.display_width = 320
+    pov.show_object_types = {"Airport", "Custom"}
+    pov.do_render = True
+    display = object()
+    custom = RenderableObject("Custom", lat=40.5, lng=-83.5)
+    near_airport = RenderableObject("Airport", lat=40, lng=-83, rect=QRectF(0, 0, 5, 5))
+    far_airport = RenderableObject("Airport", lat=41, lng=-84, rect=None)
+    hidden_fix = RenderableObject("Fix", lat=40.2, lng=-83.2)
+    airport_space_snapshots = []
+    near_airport.render.side_effect = (
+        lambda *_args: airport_space_snapshots.append(("near", list(_args[-1])))
+        or near_airport.rect
+    )
+    far_airport.render.side_effect = (
+        lambda *_args: airport_space_snapshots.append(("far", list(_args[-1])))
+        or far_airport.rect
+    )
+    pov.object_cache = {
+        (40, -83): [far_airport, custom, hidden_fix, near_airport],
+    }
+
+    pov.render(display)
+
+    custom.render.assert_called_once_with(pov, display, 320, (-83, 40))
+    far_airport.render.assert_called_once()
+    assert airport_space_snapshots == [
+        ("near", []),
+        ("far", [QRectF(0, 0, 5, 5)]),
+    ]
+    hidden_fix.render.assert_not_called()
+    assert pov.do_render is False
+
+    pov.render(display)
+    assert custom.render.call_count == 1
+
+
+def test_pointofview_update_screen_throttles_and_handles_poles(monkeypatch):
+    pov = vfr_module.PointOfView("/db", "/idx", 100)
+    pov.last_time = 1000
+    monkeypatch.setattr(vfr_module.time, "time", lambda: 1000.5)
+
+    pov.update_screen()
+    assert pov.do_render is False
+
+    pole_pov = vfr_module.PointOfView("/db", "/idx", 0.25)
+    pole_pov.gps_lat = 90
+    pole_pov.gps_lng = 0
+    pole_pov.display_width = 320
+    pole_pov.altitude = 1000
+    pole_pov.update_screen()
+    assert pole_pov.view_screen is None
+
+    normal_pov = vfr_module.PointOfView("/db", "/idx", 0.25)
+    normal_pov.gps_lat = 40
+    normal_pov.gps_lng = -83
+    normal_pov.display_width = 320
+    normal_pov.altitude = -100
+    normal_pov.elevation = 500
+    normal_pov.update_screen()
+    assert normal_pov.view_screen is not None
+    assert normal_pov.do_render is True
+
+
+def test_pointofview_point2d_returns_none_when_projection_fails():
+    pov = vfr_module.PointOfView("/db", "/idx", 0.25)
+    pov.gps_lat = 40
+    pov.gps_lng = -83
+    pov.display_width = 320
+    pov.altitude = 1000
+    pov.elevation = 0
+    pov.update_screen()
+    pov.view_screen = mock.Mock()
+    pov.view_screen.point2D.side_effect = RuntimeError("projection failed")
+
+    assert pov.point2D(40, -83, debug=True) is None
+
+
+class ThetaVector:
+    def __init__(self, theta):
+        self.theta = theta
+
+    def __copy__(self):
+        return ThetaVector(self.theta)
+
+    def mult(self, _factor):
+        pass
+
+    def add(self, _other):
+        pass
+
+    def to_polar(self):
+        return mock.Mock(theta=self.theta)
+
+
+@pytest.mark.parametrize(
+    ("vector_theta", "pov_theta", "expected"),
+    [
+        (8, 1, True),
+        (-8, -1, False),
+    ],
+)
+def test_yvec_points_east_wraps_theta_differences(vector_theta, pov_theta, expected):
+    assert (
+        vfr_module.yvec_points_east(
+            ThetaVector(vector_theta),
+            pov_position=object(),
+            pov_polar=mock.Mock(theta=pov_theta),
+        )
+        is expected
+    )
