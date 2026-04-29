@@ -466,7 +466,7 @@ class AbstractGauge(QWidget):
                     self.encoder_num_digit_selected = 0
                 else:
                     self.encoder_num_digit_selected = self.encoder_num_digit_selected + 1
-            elif data < 0:
+            else:
                 if self.encoder_num_digit_selected == 0:
                     self.encoder_num_digit_selected = len(self.encoder_num_digit_options) - 1
                 else:
@@ -513,18 +513,11 @@ class AbstractGauge(QWidget):
                         self.update()
                         self.encoder_revert = False
                     else:
-                        # We do need final confirm
-                        if self.encoder_num_confirmed:
-                            # We have final confirm
-                            # Done
-                            self.update()
-                            self.encoder_revert = False
-                        else:
-                            # The user is selecting the last digit
-                            # Wee need final confirmation
-                            self.set_encoder_value(clicked=True)
-                            self.update()
-                            self.encoder_revert = True
+                        # The user is selecting the last digit, and we need
+                        # one more click for final confirmation.
+                        self.set_encoder_value(clicked=True)
+                        self.update()
+                        self.encoder_revert = True
             if not self.encoder_revert:
                 # Something above decided we have a final selection
                 # Save the current value
@@ -593,7 +586,7 @@ class AbstractGauge(QWidget):
                 else:
                     string = "{num:0{t}.{d}f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask), d=self.decimal_places)
             else:
-                string = "{num:0{t}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask))
+                string = "{num:0{t}.0f}".format(num=(self.lowRange + (count * self.encoder_multiplier)), t=len(self.encoder_num_mask))
             current = build
             # loop over each digit of the mask
             for x in range(0, len((self.encoder_num_mask))):
@@ -601,7 +594,7 @@ class AbstractGauge(QWidget):
                 if x == len(self.encoder_num_mask) - 1:
                     if string[x] not in current:
                         current.append(string[x])
-                        continue
+                    continue
                 # If this digit is not saved, save it to the dict.
                 if string[x] not in current:
                     if x == len(self.encoder_num_mask) - 2:
@@ -663,6 +656,8 @@ class AbstractGauge(QWidget):
                 continue
             digit_found = True
         self.encoder_num_digit_options = allow
+        if len(allow) == 0:
+            return
         if self.encoder_num_digit < len(self.encoder_num_mask) - 1:
             # not the last digit
             # create the string with selected digit
