@@ -96,19 +96,13 @@ class Altimeter(QWidget):
         count = 0
         altimeter_numbers = 0
         while count < 360:
-            if count % 36 == 0:
-                dial.drawLine(0, -(radius), 0, -(radius - 15))
-                x = fontMetrics.horizontalAdvance(str(altimeter_numbers)) / 2
-                y = f.pixelSize()
-                dial.drawText(
-                    qRound(-x), qRound(-(radius - 15 - y)), str(altimeter_numbers)
-                )
-                altimeter_numbers += 1
-            else:
-                # Do not think this code is needed
-                # count starts at 0, increments by 36
-                # The if would never be false to get here
-                dial.drawLine(0, -(radius), 0, -(radius - 10))
+            dial.drawLine(0, -(radius), 0, -(radius - 15))
+            x = fontMetrics.horizontalAdvance(str(altimeter_numbers)) / 2
+            y = f.pixelSize()
+            dial.drawText(
+                qRound(-x), qRound(-(radius - 15 - y)), str(altimeter_numbers)
+            )
+            altimeter_numbers += 1
 
             dial.rotate(36)
             count += 36
