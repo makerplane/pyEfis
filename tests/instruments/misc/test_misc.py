@@ -7,6 +7,7 @@ from PyQt6.QtGui import QColor
 
 from pyefis.instruments.misc import StaticText, ValueDisplay
 import os
+import shutil
 
 
 @pytest.fixture
@@ -28,7 +29,7 @@ def test_save_screenshot(fix, qtbot, request):
     qtbot.waitExposed(widget1)
     path = qtbot.screenshot(widget1, "instruments-misc-test_misc")
     qtbot.wait(500)
-    os.rename(
+    shutil.move(
         path,
         request.config.rootdir
         + "/extras/extras/test_results/instruments-misc-test_misc-StaticText.png",
