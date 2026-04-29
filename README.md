@@ -40,11 +40,6 @@
 | src/pyefis/instruments/wind/\_\_init\_\_.py             |      109 |        8 |       14 |        4 |     90% |43-45, 92-93, 117-118, 148, 154-\>170, 162 |
 | src/pyefis/main.py                                      |      149 |      149 |       62 |        0 |      0% |    18-248 |
 | src/pyefis/screens/\_\_init\_\_.py                      |        0 |        0 |        0 |        0 |    100% |           |
-| src/pyefis/screens/ems\_sm.py                           |       99 |       99 |       24 |        0 |      0% |    17-341 |
-| src/pyefis/screens/epfd.py                              |      104 |      104 |       12 |        0 |      0% |    17-151 |
-| src/pyefis/screens/pfd.py                               |      123 |      123 |        2 |        0 |      0% |    17-224 |
-| src/pyefis/screens/pfd\_sm.py                           |      108 |      108 |        2 |        0 |      0% |    17-169 |
-| src/pyefis/screens/r582\_sm.py                          |       98 |       98 |       24 |        0 |      0% |    17-210 |
 | src/pyefis/screens/screenbuilder.py                     |      199 |        0 |       68 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder\_config.py             |      135 |        0 |       78 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder\_display.py            |       31 |        0 |       14 |        0 |    100% |           |
@@ -54,15 +49,13 @@
 | src/pyefis/screens/screenbuilder\_options.py            |       41 |        0 |       20 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder\_overlay.py            |       46 |        0 |       10 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder\_preferences.py        |       31 |        0 |       28 |        0 |    100% |           |
-| src/pyefis/screens/sixpack.py                           |       53 |       53 |        2 |        0 |      0% |     17-88 |
-| src/pyefis/screens/test.py                              |       21 |       21 |        2 |        0 |      0% |     17-48 |
 | src/pyefis/user/\_\_init\_\_.py                         |        0 |        0 |        0 |        0 |    100% |           |
 | src/pyefis/user/hooks/\_\_init\_\_.py                   |        0 |        0 |        0 |        0 |    100% |           |
 | src/pyefis/user/hooks/composite.py                      |      103 |      103 |       26 |        0 |      0% |    22-165 |
 | src/pyefis/user/hooks/keys.py                           |       19 |       19 |        4 |        0 |      0% |     20-53 |
 | src/pyefis/user/screens/\_\_init\_\_.py                 |        0 |        0 |        0 |        0 |    100% |           |
 | src/pyefis/version.py                                   |        2 |        0 |        0 |        0 |    100% |           |
-| **TOTAL**                                               | **7442** | **1773** | **2048** |   **27** | **76%** |           |
+| **TOTAL**                                               | **6836** | **1167** | **1980** |   **27** | **82%** |           |
 
 
 ## Setup coverage badge
