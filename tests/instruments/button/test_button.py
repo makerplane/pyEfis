@@ -83,6 +83,9 @@ def test_simple_button(fix,mock_parent_widget,qtbot):
     widget.font_mask = "XXXX"
     fix.db.set_value("TSBTN10", True)
     assert widget.font_size != None
+    font_size = widget.font_size
+    widget.setStyle()
+    assert widget.font_size == font_size
     #qtbot.wait(2000)
 
 
@@ -148,6 +151,22 @@ def test_toggle_button2(fix,mock_parent_widget,qtbot):
     assert widget._button.isChecked()
     fix.db.set_value("MAVMODE", "unchecked")
     assert widget._button.isChecked() == False
+    widget._button.blockSignals(True)
+    widget._button.setChecked(True)
+    widget._button.blockSignals(False)
+    widget._conditions = [
+        {
+            "when": False,
+            "actions": [{"set text": "Skipped"}],
+            "continue": True,
+        },
+        {
+            "when": True,
+            "actions": [{"set text": "Continued"}],
+        },
+    ]
+    widget.processConditions()
+    assert widget._title == "Continued"
     widget.hide()
     fix.db.set_value("TSBTN13", True)
     widget.buttonToggled()
@@ -196,4 +215,3 @@ def test_unknown_button_condition2(fix,mock_parent_widget,qtbot):
     hmi.initialize({})
     with pytest.raises(SyntaxError):
         widget = button.Button(mock_parent_widget, config_file="tests/data/buttons/unknown_condition2.yaml")
-
