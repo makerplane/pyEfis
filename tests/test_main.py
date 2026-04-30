@@ -413,6 +413,18 @@ def test_import_path_setup_uses_tools_env_and_neighbor_map(monkeypatch):
     assert os.path.join("..", "pyAvMap") in imported.sys.path
 
 
+def test_import_path_setup_uses_neighbor_tools_and_map_env(monkeypatch):
+    imported = import_main_with_path_state(
+        monkeypatch,
+        ["/app"],
+        env={"MAP_PATH": "/map-env"},
+        isdir=lambda path: path == os.path.join("..", "pyAvTools"),
+    )
+
+    assert os.path.join("..", "pyAvTools") in imported.sys.path
+    assert "/map-env" in imported.sys.path
+
+
 def test_import_path_setup_uses_map_env_and_skips_missing_tools_env(monkeypatch):
     imported = import_main_with_path_state(
         monkeypatch,
