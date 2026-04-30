@@ -1,5 +1,6 @@
 import os
 import importlib
+import importlib.resources
 import types
 from unittest import mock
 
@@ -369,8 +370,7 @@ def test_create_config_dir_copies_new_changed_and_user_modified_files(
             return nested
         pytest.fail(f"unexpected package {package}")
 
-    resources = types.SimpleNamespace(files=files)
-    monkeypatch.setitem(main_module.sys.modules, "importlib.resources", resources)
+    monkeypatch.setattr(importlib.resources, "files", files)
 
     main_module.create_config_dir(str(tmp_path / "out"))
 
