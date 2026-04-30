@@ -21,21 +21,21 @@ def test_initialize_accepts_empty_config():
 
 def test_initialize_imports_configured_hook_modules():
     config = {
-        "first": {"module": "pyefis.user.hooks.first"},
-        "second": {"module": "pyefis.user.hooks.second"},
+        "first": {"module": "custom_hooks.first"},
+        "second": {"module": "custom_hooks.second"},
     }
 
     with mock.patch.object(hooks.importlib, "import_module") as import_module:
         hooks.initialize(config)
 
     assert import_module.call_args_list == [
-        mock.call("pyefis.user.hooks.first"),
-        mock.call("pyefis.user.hooks.second"),
+        mock.call("custom_hooks.first"),
+        mock.call("custom_hooks.second"),
     ]
 
 
 def test_initialize_logs_and_reraises_import_errors():
-    config = {"bad": {"module": "pyefis.user.hooks.missing"}}
+    config = {"bad": {"module": "custom_hooks.missing"}}
     error = RuntimeError("boom")
 
     with mock.patch.object(hooks.importlib, "import_module", side_effect=error):
@@ -44,5 +44,5 @@ def test_initialize_logs_and_reraises_import_errors():
                 hooks.initialize(config)
 
     critical.assert_called_once_with(
-        "Unable to load module - pyefis.user.hooks.missing: boom"
+        "Unable to load module - custom_hooks.missing: boom"
     )
