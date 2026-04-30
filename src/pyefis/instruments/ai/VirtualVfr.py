@@ -647,7 +647,7 @@ class VirtualVfr(AI):
                     # Initially set to grey
                     # we may have old data while recovering
                     if hasattr(self, 'sky_rect'):
-                        if self.getAIFail():
+                        if self.getAIFail():  # pragma: no cover
                             self.sky_rect.setBrush (self.gray_sky)
                             self.land_rect.setBrush (self.gray_land)
                         else:
@@ -1017,7 +1017,7 @@ def Distance(course, rel_lng=0):
     return distance, relative_lng_length
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # Unit testing for POV class
     pov = PointOfView()
     pov.initialize (0, 0, 1000, 0, [], 400)

@@ -48,8 +48,9 @@ class DataBinding(object):
             return None
 
         if 'args' in config:
-            self.args = str(config['args'])
+            self.args = config['args']
         if self.args is None: self.args = ""
+        else: self.args = str(self.args)
         if self.args.lower() == "<value>":
             self.args = None
 
@@ -96,11 +97,11 @@ class DataBinding(object):
             s = condition.replace(" ", "")
             op = ""
             val = ""
-            for x, c in enumerate(s):
-                if c in "=><":
-                    op += c
-                else:
-                    val = s[x-1:]
+            for possible_op in ["<=", ">=", "<", ">", "="]:
+                if s.startswith(possible_op):
+                    op = possible_op
+                    val = s[len(possible_op):]
+                    break
             if op not in ["<", ">", "<=", ">=", "="]:
                 log.error("Unknown Condition Operator {}".format(op))
                 return None
