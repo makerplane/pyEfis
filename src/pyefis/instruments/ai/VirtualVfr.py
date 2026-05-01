@@ -135,7 +135,9 @@ class VirtualVfr(AI):
                 # if metadata exists dbpath and indepath are not used.
                 # This allows default for non-snap to home directory and for snaps
                 # to have the /usr/share path
-                metadata = yaml.safe_load(open(os.path.expanduser(self.myparent.get_config_item('metadata'))))
+                config_path = os.path.expanduser(self.myparent.get_config_item('metadata'))
+                with open(config_path, 'r') as f:
+                  metadata = yaml.safe_load(f)
                 date_now = datetime.datetime.now()
                 file = 'current'
                 expired = False

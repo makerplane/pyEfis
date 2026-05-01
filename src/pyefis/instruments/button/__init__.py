@@ -45,7 +45,8 @@ class Button(QWidget):
         self.font_family = font_family
         self.font_mask = None
         self.font_size = None
-        config = yaml.load(open(config_file), Loader=yaml.SafeLoader)
+        with open(config_file) as f:
+          config = yaml.load(f, Loader=yaml.SafeLoader)
         self._conditions = config.get('conditions', [])
         self.config = config
         self._button = QPushButton(self) #self.config['text'], self)
