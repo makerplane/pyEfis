@@ -83,6 +83,7 @@ enabled:
   YAW_TRIM: true
   ROLL_TRIM: true
   TRIM_CONTROLS: false
+  WIND_DISPLAY: false
   PRESSURE_DISPLAY: false
   BARO_CONTROLS: true
   VSI_BALL: false

@@ -315,6 +315,74 @@ class TestScreenBuilderInit:
         assert 0 in screen.instruments
         assert screen.instruments[0] is not None
 
+    def test_wind_display_skipped_when_pref_false(self, fix, qtbot):
+        """`disabled: WIND_DISPLAY` skips the widget when enabled.WIND_DISPLAY is False.
+
+        Regression: end users must be able to turn wind off in preferences without
+        any error from screenbuilder, and without the widget being instantiated.
+        """
+        config = _config_with_instruments([
+            {"type": "wind_display", "row": 0, "column": 0,
+             "disabled": "WIND_DISPLAY"},
+        ])
+        parent = _TestParent(config)
+        parent.preferences["enabled"]["WIND_DISPLAY"] = False
+        screen = Screen(parent)
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+        screen.init_screen()
+
+        assert screen.init is True
+        assert len(screen.instruments) == 0
+
+    def test_wind_display_included_when_pref_true(self, fix, qtbot):
+        """`disabled: WIND_DISPLAY` keeps the widget when enabled.WIND_DISPLAY is True."""
+        config = _config_with_instruments([
+            {"type": "wind_display", "row": 0, "column": 0,
+             "disabled": "WIND_DISPLAY"},
+        ])
+        parent = _TestParent(config)
+        parent.preferences["enabled"]["WIND_DISPLAY"] = True
+        screen = Screen(parent)
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+        screen.init_screen()
+
+        assert 0 in screen.instruments
+        assert screen.instruments[0] is not None
+
+    def test_wind_display_built_when_fix_keys_missing(self, fix, qtbot, monkeypatch):
+        """End-to-end: wind enabled in prefs, but gateway never published HWIND/XWIND.
+
+        screenbuilder must build the widget without raising; the widget itself
+        catches the KeyError and renders fail-state dashes. Combined regression
+        for the disabled-pref path + the missing-keys widget path.
+        """
+        real_get_item = fix.db.get_item
+
+        def get_item_no_wind(key, *args, **kwargs):
+            if key in ("HWIND", "XWIND"):
+                raise KeyError(key)
+            return real_get_item(key, *args, **kwargs)
+
+        monkeypatch.setattr(fix.db, "get_item", get_item_no_wind)
+
+        config = _config_with_instruments([
+            {"type": "wind_display", "row": 0, "column": 0,
+             "disabled": "WIND_DISPLAY"},
+        ])
+        parent = _TestParent(config)
+        parent.preferences["enabled"]["WIND_DISPLAY"] = True
+        screen = Screen(parent)
+        qtbot.addWidget(screen)
+        screen.resize(800, 480)
+        screen.init_screen()
+
+        widget = screen.instruments[0]
+        assert widget is not None
+        assert widget._hwind_fail is True
+        assert widget._xwind_fail is True
+
     def test_initscreen_idempotent_via_resize(self, fix, qtbot):
         """Calling initScreen() twice (via resize) does not raise an exception."""
         config = _config_with_instruments([

@@ -48,14 +48,21 @@ Format: `EFIS-<AREA>-<NNN>`
 
 ### Wind Components Display
 
-- **EFIS-WIND-001:** The PFD shall display headwind (HW) and crosswind (XW) components in the bottom-left area of the display, adjacent to the airspeed tape.
+- **EFIS-WIND-001:** The PFD shall display headwind/tailwind and crosswind components in the upper-left area of the display, just below the auto-pilot status text and adjacent to the airspeed tape, without overlapping the trim cluster.
 - **EFIS-WIND-002:** Headwind component shall be sourced from FIX database key `HWIND`; positive values indicate headwind, negative values indicate tailwind.
 - **EFIS-WIND-003:** Crosswind component shall be sourced from FIX database key `XWIND`; positive values indicate wind from the right, negative values indicate wind from the left.
 - **EFIS-WIND-004:** `HWIND` and `XWIND` shall be computed by fix-gateway from `WINDSPD` and `WINDDIR` via the `wind_components` compute function.
 - **EFIS-WIND-005:** `WINDSPD` and `WINDDIR` shall be computed by fix-gateway from GPS inputs `GS`, `TRACK`, `TAS`, and `HEAD` via the `wind_triangle` compute function (GPS wind triangle baseline).
 - **EFIS-WIND-006:** External sources (ADS-B wind, dedicated sensors) may override `WINDSPD` and `WINDDIR` directly; the display and component calculation are decoupled from the wind source.
-- **EFIS-WIND-007:** When `HWIND` or `XWIND` data is unavailable or marked failed, the respective display field shall show dashes and a muted arrow indicator.
-- **EFIS-WIND-008:** Each component row shall display a directional arrow indicating headwind/tailwind or left/right crosswind, updated in real time.
+- **EFIS-WIND-007:** Each component row shall encode direction by switching its two-character label rather than rendering an arrow symbol: `HW`/`TW` for headwind/tailwind, `RX`/`LX` for crosswind from right/left. Magnitude is always shown as an unsigned integer in knots.
+- **EFIS-WIND-008:** Sign determination shall apply a ±0.5 kt deadband: values within the deadband round to zero and use the positive-side label (`HW`, `RX`) to suppress label flicker from sensor noise around zero.
+- **EFIS-WIND-009:** State shall be communicated by colour and content:
+  - **Healthy** — white label and value (e.g., `HW 12`).
+  - **Bad** (data flagged unreliable) — amber label and an amber `X` in place of the value, hiding the suspect number while flagging the condition.
+  - **Failed** (data unavailable) — dim grey label and `---` in place of the value; the label reverts to the positive-side default (`HW`, `RX`) since sign cannot be trusted.
+- **EFIS-WIND-010:** The wind display shall be independently enable/disable-able via the `WIND_DISPLAY` preference key (default disabled), paralleling the existing `TRIM_CONTROLS` pattern. Disabling it shall not raise errors when `HWIND`/`XWIND` are absent from the FIX database.
+- **EFIS-WIND-011:** When the wind display is enabled but `HWIND`/`XWIND` are not defined in the FIX database (e.g., gateway has not deployed the `wind_components` compute function), the widget shall display the failed state and shall not raise exceptions.
+- **EFIS-WIND-012:** Wind display is supplemental information; it shall use a font size comparable to the label text rather than a primary-instrument-sized readout.
 
 ---
 
