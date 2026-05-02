@@ -85,11 +85,11 @@ instruments:
     options:
       font_percent: 0.25
   - type: wind_display
-    disabled: true
-    row: 83
+    disabled: WIND_DISPLAY
+    row: 6
     column: 15
     span:
-      rows: 22
+      rows: 14
       columns: 22
   - type: include,includes/bars/vertical/dimmer_control.yaml
     disabled: DIMMER

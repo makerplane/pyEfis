@@ -5,8 +5,8 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 
-from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QBrush, QPolygon
-from PyQt6.QtCore import Qt, QRect, QPoint, qRound
+from PyQt6.QtGui import QColor, QFont, QPainter, QPen
+from PyQt6.QtCore import Qt, QRect, qRound
 from PyQt6.QtWidgets import QWidget
 
 import pyavtools.fix as fix
@@ -35,7 +35,6 @@ class WindDisplay(QWidget):
         self._row_h = 10
         self._lbl_font = QFont(self.font_family)
         self._val_font = QFont(self.font_family)
-        self._arrow_size = 4
 
         try:
             self._hwind_item = fix.db.get_item("HWIND")
@@ -94,87 +93,69 @@ class WindDisplay(QWidget):
 
     def resizeEvent(self, event):
         row_h = self.height() // 2
-        lbl_px = max(6, qRound(row_h * 0.28))
-        val_px = max(8, qRound(row_h * 0.52))
+        # Label and value share one small font — wind is supplemental info.
+        px = max(6, qRound(row_h * 0.40))
         self._row_h = row_h
         self._lbl_font = QFont(self.font_family)
-        self._lbl_font.setPixelSize(lbl_px)
+        self._lbl_font.setPixelSize(px)
         self._val_font = QFont(self.font_family)
-        self._val_font.setPixelSize(val_px)
-        self._arrow_size = max(4, qRound(row_h * 0.28))
+        self._val_font.setPixelSize(px)
 
-    def _draw_row(self, p, y, label, value, fail, bad, arrow_up, arrow_right):
+    # Sign deadband: values within ±DEADBAND_KT round to 0 and display with the
+    # positive-axis label. Avoids label flicker from sensor noise around zero.
+    DEADBAND_KT = 0.5
+
+    def _hw_label(self, value, fail):
+        if fail:
+            return "HW"
+        return "TW" if value < -self.DEADBAND_KT else "HW"
+
+    def _xw_label(self, value, fail):
+        if fail:
+            return "RX"
+        return "LX" if value < -self.DEADBAND_KT else "RX"
+
+    def _draw_row(self, p, y, label, value, fail, bad):
         w = self.width()
         rh = self._row_h
-        sz = self._arrow_size
-
-        p.fillRect(QRect(0, y, w, rh), QColor(20, 20, 20))
 
         if fail:
             text_color = QColor(100, 100, 100)
-            arrow_color = QColor(80, 80, 80)
         elif bad:
             text_color = QColor(255, 165, 0)
-            arrow_color = QColor(200, 130, 0)
         else:
             text_color = QColor(Qt.GlobalColor.white)
-            arrow_color = QColor(0, 200, 200)
 
-        # Label
-        lbl_w = qRound(w * 0.30)
+        # Use the actual label-text width so the value sits snug against the
+        # label — leaves the rest of the row (plenty for 3-digit values) on the
+        # right. All labels are 2 chars; "HW" is widest in the proportional
+        # font we use, so measure that.
         p.setFont(self._lbl_font)
-        p.setPen(QPen(QColor(180, 180, 180)))
+        fm = p.fontMetrics()
+        label_x = 7
+        label_box_w = fm.horizontalAdvance("HW")
+        gap = max(3, fm.horizontalAdvance(" "))
+
+        p.setPen(QPen(text_color))
         p.drawText(
-            QRect(2, y, lbl_w, rh),
+            QRect(label_x, y, label_box_w, rh),
             Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
             label,
         )
 
-        # Arrow
-        arrow_x = lbl_w + qRound(w * 0.12)
-        arrow_cy = y + rh // 2
-        p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(QBrush(arrow_color))
-
-        if not fail:
-            if arrow_up is not None:
-                if arrow_up:
-                    pts = [
-                        QPoint(arrow_x, arrow_cy - sz),
-                        QPoint(arrow_x - sz, arrow_cy + sz // 2),
-                        QPoint(arrow_x + sz, arrow_cy + sz // 2),
-                    ]
-                else:
-                    pts = [
-                        QPoint(arrow_x, arrow_cy + sz),
-                        QPoint(arrow_x - sz, arrow_cy - sz // 2),
-                        QPoint(arrow_x + sz, arrow_cy - sz // 2),
-                    ]
-                p.drawPolygon(QPolygon(pts))
-            elif arrow_right is not None:
-                if arrow_right:
-                    pts = [
-                        QPoint(arrow_x + sz, arrow_cy),
-                        QPoint(arrow_x - sz // 2, arrow_cy - sz),
-                        QPoint(arrow_x - sz // 2, arrow_cy + sz),
-                    ]
-                else:
-                    pts = [
-                        QPoint(arrow_x - sz, arrow_cy),
-                        QPoint(arrow_x + sz // 2, arrow_cy - sz),
-                        QPoint(arrow_x + sz // 2, arrow_cy + sz),
-                    ]
-                p.drawPolygon(QPolygon(pts))
-
-        # Value
-        val_x = lbl_w + qRound(w * 0.27)
+        val_x = label_x + label_box_w + gap
         val_w = w - val_x - 2
         p.setFont(self._val_font)
         p.setPen(QPen(text_color))
-        val_str = "---" if fail else f"{abs(value):.0f}"
+        if fail:
+            val_str = "---"
+        elif bad:
+            val_str = "X"
+        else:
+            val_str = f"{abs(round(value))}"
         p.drawText(
             QRect(val_x, y, val_w, rh),
-            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight,
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
             val_str,
         )
 
@@ -182,21 +163,16 @@ class WindDisplay(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        hw_up = None if self._hwind_fail else (self._hwind >= 0)
         self._draw_row(
-            p, 0, "HW", self._hwind,
-            self._hwind_fail, self._hwind_bad,
-            arrow_up=hw_up, arrow_right=None,
+            p, 0,
+            self._hw_label(self._hwind, self._hwind_fail),
+            self._hwind, self._hwind_fail, self._hwind_bad,
+        )
+        # Tighten vertical spacing — second row stacks at ~0.65 row_h instead
+        # of 1.0, pulling it ~10-15 px closer for typical PFD sizing.
+        self._draw_row(
+            p, qRound(self._row_h * 0.65),
+            self._xw_label(self._xwind, self._xwind_fail),
+            self._xwind, self._xwind_fail, self._xwind_bad,
         )
 
-        # XWIND > 0 = from right → arrow points left (←, arrow_right=False)
-        xw_right = None if self._xwind_fail else (self._xwind < 0)
-        self._draw_row(
-            p, self._row_h, "XW", self._xwind,
-            self._xwind_fail, self._xwind_bad,
-            arrow_up=None, arrow_right=xw_right,
-        )
-
-        sep_pen = QPen(QColor(60, 60, 60), 1)
-        p.setPen(sep_pen)
-        p.drawLine(0, self._row_h, self.width(), self._row_h)

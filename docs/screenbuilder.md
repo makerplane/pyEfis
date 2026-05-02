@@ -1052,16 +1052,26 @@ Options:
 
 ## wind_display
 
-Compact two-row widget showing headwind and crosswind components with directional
-arrow indicators.  Intended for placement near the airspeed tape on the PFD.
+Compact two-row widget showing headwind/tailwind and crosswind components.
+Intended for placement near the airspeed tape on the PFD. Direction is encoded
+by swapping a two-character label (no arrow symbols), and magnitude is always
+shown as an unsigned integer in knots.
 
-| Row | Label | Arrow | Value |
-|-----|-------|-------|-------|
-| Top | HW | ↑ headwind / ↓ tailwind | magnitude in knots |
-| Bottom | XW | ← from-right / → from-left | magnitude in knots |
+| Row | Label (≥ 0) | Label (< 0) | Value |
+|-----|-------------|-------------|-------|
+| Top | `HW` (headwind) | `TW` (tailwind) | magnitude in knots |
+| Bottom | `RX` (cross from right) | `LX` (cross from left) | magnitude in knots |
 
-When `HWIND` or `XWIND` data is unavailable (fail flag set) the value shows
-`---` and the arrow is dimmed.
+A ±0.5 kt deadband around zero suppresses label flicker from sensor noise; values
+inside the deadband display as `HW 0` / `RX 0`.
+
+State is communicated by colour and content:
+  * **Healthy** — white label and value (e.g., `HW 12`).
+  * **Bad** (`bad` flag set) — amber label and an amber `X` in place of the
+    value, suppressing the suspect number while flagging the condition.
+  * **Failed** (`fail` flag set, or `HWIND`/`XWIND` not defined in the FIX
+    database) — dim grey label with `---` in place of the value. Label reverts
+    to the positive-side default (`HW`, `RX`) since the sign cannot be trusted.
 
 FIX database keys used:
   * **HWIND** — headwind component (positive = headwind, negative = tailwind).
@@ -1069,18 +1079,26 @@ FIX database keys used:
   * **XWIND** — crosswind component (positive = from right, negative = from left).
     Computed by the fix-gateway `wind_components` function.
 
-Example placement on the PFD (right of the airspeed tape):
+The widget is opt-in via the `WIND_DISPLAY` preference (default `false`),
+paralleling the `TRIM_CONTROLS` pattern. When `WIND_DISPLAY` is `false` the
+screenbuilder skips instantiation entirely and no errors occur if `HWIND` /
+`XWIND` are absent from the FIX database.
+
+Example placement on the PFD (just below the auto-pilot status, right of the
+airspeed tape, above the trim cluster):
 ```yaml
   - type: wind_display
-    row: 83
+    disabled: WIND_DISPLAY
+    row: 6
     column: 15
     span:
-      rows: 22
+      rows: 14
       columns: 22
 ```
 
 Options:
-  * font_family — default 'DejaVu Sans Condensed'
+  * font_family — default `'DejaVu Sans Condensed'`. Label and value share one
+    small font sized at 0.40 × row height (wind is supplemental info).
 
 ## virtual_vfr
 
