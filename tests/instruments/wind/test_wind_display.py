@@ -8,7 +8,9 @@ import pytest
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QPaintEvent
 
+import pyefis.instruments.wind as wind_module
 from pyefis.instruments.wind import WindDisplay
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -37,6 +39,26 @@ class TestWindDisplay:
         # fail is read from item.fail in __init__
         assert widget._hwind_fail == fix.db.get_item("HWIND").fail
         assert widget._xwind_fail == fix.db.get_item("XWIND").fail
+
+    def test_missing_wind_fix_items_leave_defaults_without_signal_items(
+        self, monkeypatch, qtbot
+    ):
+        """Missing HWIND/XWIND leaves the display in its default failed state."""
+        monkeypatch.setattr(
+            wind_module.fix.db,
+            "get_item",
+            lambda _key: (_ for _ in ()).throw(KeyError(_key)),
+        )
+
+        widget = WindDisplay()
+        qtbot.addWidget(widget)
+
+        assert widget._hwind == 0.0
+        assert widget._xwind == 0.0
+        assert widget._hwind_fail is True
+        assert widget._xwind_fail is True
+        assert not hasattr(widget, "_hwind_item")
+        assert not hasattr(widget, "_xwind_item")
 
     def test_hwind_value_updated_via_signal(self, fix, qtbot):
         """Setting HWIND in the database updates the widget's internal value."""
@@ -81,6 +103,22 @@ class TestWindDisplay:
 
     def test_positive_hwind_uses_HW_label(self, fix, qtbot):
         """Positive HWIND (headwind) → 'HW' label."""
+        widget = WindDisplay()
+        qtbot.addWidget(widget)
+        fix.db.set_value("HWIND", 12.0)
+        assert widget._hw_label(widget._hwind, widget._hwind_fail) == "HW"
+
+    def test_xwind_bad_flag_propagates(self, fix, qtbot):
+        """Setting XWIND bad flag is reflected in the widget."""
+        widget = WindDisplay()
+        qtbot.addWidget(widget)
+        fix.db.get_item("XWIND").bad = True
+        assert widget._xwind_bad is True
+        fix.db.get_item("XWIND").bad = False
+        assert widget._xwind_bad is False
+
+    def test_positive_hwind_is_headwind_arrow_up(self, fix, qtbot):
+        """Positive HWIND (headwind) maps to arrow_up=True in paintEvent logic."""
         widget = WindDisplay()
         qtbot.addWidget(widget)
         fix.db.set_value("HWIND", 12.0)
@@ -259,3 +297,79 @@ class TestWindDisplayDataFeedOffline:
         assert widget._xwind_fail is False
         assert widget._hwind == pytest.approx(6.0)
         assert widget._xwind == pytest.approx(2.0)
+
+    def test_resize_uses_minimum_font_sizes(self, fix, qtbot):
+        """Very small widgets keep text and arrows at their minimum sizes."""
+        widget = WindDisplay()
+        qtbot.addWidget(widget)
+        widget.resize(10, 10)
+        widget.resizeEvent(None)
+
+        assert widget._lbl_font.pixelSize() == 6
+        assert widget._val_font.pixelSize() == 6
+
+
+class FakePainter:
+    def __init__(self):
+        self.polygons = []
+        self.text = []
+        self.pens = []
+        self.brushes = []
+
+        self.font_metrics_mock = MagicMock()
+        self.font_metrics_mock.width.return_value = 10 
+        self.font_metrics_mock.horizontalAdvance.return_value = 10 
+
+    def fontMetrics(self):
+        """Returns the mocked font metrics object."""
+        return self.font_metrics_mock
+
+    def fillRect(self, *args):
+        pass
+
+    def setFont(self, *args):
+        pass
+
+    def setPen(self, pen):
+        self.pens.append(pen)
+
+    def setBrush(self, brush):
+        self.brushes.append(brush)
+
+    def drawText(self, _rect, _alignment, text):
+        self.text.append(text)
+
+    def drawPolygon(self, polygon):
+        self.polygons.append(polygon)
+
+
+def _polygon_points(polygon):
+    return [(polygon.point(i).x(), polygon.point(i).y()) for i in range(polygon.count())]
+
+
+def test_draw_row_covers_failed_bad_and_no_arrow_branches(fix, qtbot):
+    widget = WindDisplay()
+    qtbot.addWidget(widget)
+    widget.resize(100, 40)
+    painter = FakePainter()
+
+    widget._draw_row(
+        painter,
+        0,
+        "HW",
+        -12.4,
+        fail=True,
+        bad=False
+    )
+    widget._draw_row(
+        painter,
+        20,
+        "XW",
+        7.6,
+        fail=False,
+        bad=True
+    )
+
+    assert painter.polygons == []
+    assert painter.text == ["HW", "---", "XW", "X"]
+

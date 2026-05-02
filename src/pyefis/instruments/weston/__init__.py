@@ -65,9 +65,18 @@ class Weston(QWidget):
                     break
 
     def closeEvent(self, event):
-        self.weston.terminate()
-        self.weston.waitForFinished(4000)
-
-        super(QWidget, self).closeEvent(event)
+        # Attempt a graceful shutdown of the Weston process
+        try:
+            if self.weston is not None:
+                self.weston.terminate()
+                # Wait briefly for graceful exit
+                if not self.weston.waitForFinished(500):
+                    # Force kill if it didn't stop in time
+                    self.weston.kill()
+                    self.weston.waitForFinished(500)
+        except Exception:
+            # Ensure we still propagate close even if termination fails
+            pass
+        super().closeEvent(event)
 
 

@@ -67,6 +67,7 @@ def keyRelease(event):
 
 def initialize(window, config):
     for x in config:
+        k = None
         try:
             k = KeyBinding(x)
         except:

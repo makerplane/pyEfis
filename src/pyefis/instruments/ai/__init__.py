@@ -123,6 +123,7 @@ class AI(QGraphicsView):
         self.pitchItems = []
 
     def resizeEvent(self, event):
+        self.pitchItems = []
         if self.font_percent:
             self.fontSize = qRound(self.width() * self.font_percent)
             self.minorDivWidth = qRound(self.fontSize * 0.3)
@@ -433,7 +434,7 @@ class AI(QGraphicsView):
                     # Initially set to grey
                     # we may have old data while recovering
                     if hasattr(self, 'sky_rect'):
-                        if self.getAIFail():
+                        if self.getAIOld() or self.getAIBad():
                             self.sky_rect.setBrush (self.gray_sky)
                             self.land_rect.setBrush (self.gray_land)
                         else:
@@ -539,7 +540,7 @@ class FDTarget(QGraphicsView):
         self.centerOn (self.w, self.w)
 
     def update(self, fdpitch, fdroll):
-        self.move (self.aicenter.x(), (self.aicenter.y() - fdpitch * self.pixelsPerDeg))
+        self.move (qRound(self.aicenter.x()), qRound(self.aicenter.y() - fdpitch * self.pixelsPerDeg))
         roll = fdroll * math.pi / 180
         sinroll = math.sin(roll)
         cosroll = math.cos(roll)

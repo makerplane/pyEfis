@@ -88,6 +88,21 @@ def test_numerical_airspeed_tape(qtbot):
     widget.setAirspeed(41)
     assert widget._airspeed == 41
 
+
+def test_airspeed_tape_without_font_percent_uses_default_font_size(qtbot):
+    widget = airspeed.Airspeed_Tape()
+    qtbot.addWidget(widget)
+
+    widget.font_mask = ""
+    widget.resize(80, 200)
+    widget.resizeEvent(None)
+
+    assert widget.font_percent is None
+    assert widget.fontsize == 15
+    assert widget.scene is not None
+    assert widget.numerical_display.value == widget._airspeed
+
+
 def test_numerical_airspeed_box(fix, qtbot):
     hmi.initialize({})
     widget = airspeed.Airspeed_Box()
@@ -125,3 +140,27 @@ def test_numerical_airspeed_box(fix, qtbot):
     fix.db.set_value("TAS", 102)
     assert widget.valueText == ""
     widget.paintEvent(None)
+
+
+def test_airspeed_box_explicit_ias_mode_and_hidden_updates(fix, qtbot):
+    hmi.initialize({})
+    widget = airspeed.Airspeed_Box()
+    qtbot.addWidget(widget)
+    widget.resize(50, 50)
+
+    widget.update = mock.Mock()
+    widget.setMode(2)
+
+    assert widget._modeIndicator == 2
+    assert widget.modeText == "IAS"
+    assert widget.fix_item.key == "IAS"
+    assert widget.valueText == "110"
+
+    widget.setMode(99)
+    assert widget._modeIndicator == 2
+    assert widget.modeText == "IAS"
+
+    widget.setASData(111.4)
+
+    assert widget.valueText == "111"
+    widget.update.assert_called()

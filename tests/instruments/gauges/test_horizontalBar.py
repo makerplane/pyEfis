@@ -69,3 +69,32 @@ def test_horizontal_bar_gauge(fix, qtbot):
         widget.paintEvent(None)
 
     assert tracker.was_called_with("setColor", QColor(Qt.GlobalColor.black))
+
+
+def test_horizontal_bar_gauge_optional_sections_hidden(fix, qtbot):
+    widget = gauges.HorizontalBar(min_size=False)
+    widget.setDbkey("NUMOK")
+    widget.setupGauge()
+    qtbot.addWidget(widget)
+    widget.resize(300, 200)
+    widget.show()
+    qtbot.waitExposed(widget)
+    widget.resizeEvent(None)
+
+    assert widget.minimumWidth() == 0
+    assert widget.minimumHeight() == 0
+
+    widget.show_name = False
+    widget.show_units = False
+    widget.show_value = False
+    widget.lowWarn = None
+    widget.highWarn = None
+    widget.lowAlarm = None
+    widget.highAlarm = None
+    widget.segments = 0
+    widget.value = 50
+
+    with track_calls(QPen, "setColor") as tracker:
+        widget.paintEvent(None)
+
+    assert tracker.was_not_called_with("setColor", QColor(Qt.GlobalColor.black))

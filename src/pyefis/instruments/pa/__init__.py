@@ -32,6 +32,8 @@ class Panel_Annunciator(QGraphicsView):
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._Mode_Indicator = 0
         self.Warning_State_Label = "null"
+        self.bcolor = QBrush(QColor(Qt.GlobalColor.black))
+        self.pcolor = QPen(QColor(Qt.GlobalColor.gray))
 
     def resizeEvent(self, event):
         self.w = self.width()
@@ -45,7 +47,7 @@ class Panel_Annunciator(QGraphicsView):
 
         self.scene = QGraphicsScene(0, 0, self.w, self.h)
         self.scene.addRect(0, 0, self.w, self.h,
-                           QPen(QColor(Qt.GlobalColor.gray)), QBrush(QColor(Qt.GlobalColor.black)))
+                           self.pcolor, self.bcolor)
         self.scene.addRect(1, 1, self.w -2, self.h -2,
                            QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.transparent)))
         t = self.scene.addText(str(self.Warning_State_Label))
@@ -75,24 +77,20 @@ class Panel_Annunciator(QGraphicsView):
         return self._Mode_Indicator
 
     def setState(self, Mode):
+        mode_colors = {
+            0: Qt.GlobalColor.black,
+            1: Qt.GlobalColor.yellow,
+            2: Qt.GlobalColor.red,
+            3: Qt.GlobalColor.green,
+        }
+        if Mode not in mode_colors:
+            return
         if Mode != self._Mode_Indicator:
-            if Mode == 0:
-                self._Mode_Indicator = 0
-                self.bcolor = QBrush(QColor(Qt.GlobalColor.black))
-                self.pcolor = QPen(QColor(Qt.GlobalColor.gray))
-            elif Mode == 1:
-                self._Mode_Indicator = 1
-                self.bcolor = QBrush(QColor(Qt.GlobalColor.yellow))
-                self.pcolor = QPen(QColor(Qt.GlobalColor.gray))
-            elif Mode == 2:
-                self._Mode_Indicator = 2
-                self.bcolor = QBrush(QColor(Qt.GlobalColor.red))
-                self.pcolor = QPen(QColor(Qt.GlobalColor.gray))
-            elif Mode == 3:
-                self._Mode_Indicator = 3
-                self.bcolor = QBrush(QColor(Qt.GlobalColor.green))
-                self.pcolor = QPen(QColor(Qt.GlobalColor.gray))
-            self.redraw()
+            self._Mode_Indicator = Mode
+            self.bcolor = QBrush(QColor(mode_colors[Mode]))
+            self.pcolor = QPen(QColor(Qt.GlobalColor.gray))
+            if "scene" in self.__dict__:
+                self.redraw()
 
     def getWARNING_Name(self):
         return self._Mode_Indicator
