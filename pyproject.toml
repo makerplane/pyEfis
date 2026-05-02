@@ -87,3 +87,6 @@ source = [
     "src/"
 ]
 
+
+[tool.black]
+target-version = ['py310']
