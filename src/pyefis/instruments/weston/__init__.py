@@ -6,7 +6,11 @@ import time
 import re
 import os
 
-from Xlib import X, display
+try:
+    from Xlib import X, display
+except ImportError:
+    X = None
+    display = None
 
 class Weston(QWidget):
     def __init__(self, parent=None, socket=None, ini=None, command=None, args=None, wide=None, high=None):
