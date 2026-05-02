@@ -17,11 +17,11 @@
 | src/pyefis/hooks.py                                     |       14 |        0 |        4 |        0 |    100% |           |
 | src/pyefis/instruments/NumericalDisplay/\_\_init\_\_.py |      202 |        0 |       42 |        0 |    100% |           |
 | src/pyefis/instruments/\_\_init\_\_.py                  |        0 |        0 |        0 |        0 |    100% |           |
-| src/pyefis/instruments/ai/VirtualVfr.py                 |      768 |        0 |      238 |        0 |    100% |           |
+| src/pyefis/instruments/ai/VirtualVfr.py                 |      770 |        0 |      238 |        0 |    100% |           |
 | src/pyefis/instruments/ai/\_\_init\_\_.py               |      398 |        0 |       72 |        0 |    100% |           |
 | src/pyefis/instruments/airspeed/\_\_init\_\_.py         |      346 |        0 |       72 |        0 |    100% |           |
 | src/pyefis/instruments/altimeter/\_\_init\_\_.py        |      260 |        0 |       38 |        0 |    100% |           |
-| src/pyefis/instruments/button/\_\_init\_\_.py           |      245 |        0 |      104 |        0 |    100% |           |
+| src/pyefis/instruments/button/\_\_init\_\_.py           |      246 |        0 |      104 |        0 |    100% |           |
 | src/pyefis/instruments/gauges/\_\_init\_\_.py           |        4 |        0 |        0 |        0 |    100% |           |
 | src/pyefis/instruments/gauges/abstract.py               |      456 |        0 |      168 |        0 |    100% |           |
 | src/pyefis/instruments/gauges/arc.py                    |      223 |        0 |       66 |        0 |    100% |           |
@@ -30,14 +30,14 @@
 | src/pyefis/instruments/gauges/verticalBar.py            |      245 |        0 |       72 |        0 |    100% |           |
 | src/pyefis/instruments/helpers/\_\_init\_\_.py          |       40 |        0 |       16 |        0 |    100% |           |
 | src/pyefis/instruments/hsi/\_\_init\_\_.py              |      461 |        0 |      102 |        0 |    100% |           |
-| src/pyefis/instruments/listbox/\_\_init\_\_.py          |      213 |        0 |       58 |        0 |    100% |           |
+| src/pyefis/instruments/listbox/\_\_init\_\_.py          |      215 |        0 |       58 |        0 |    100% |           |
 | src/pyefis/instruments/misc/\_\_init\_\_.py             |      167 |        0 |       20 |        0 |    100% |           |
 | src/pyefis/instruments/pa/\_\_init\_\_.py               |       63 |        0 |        6 |        0 |    100% |           |
 | src/pyefis/instruments/tc/\_\_init\_\_.py               |      220 |        0 |       40 |        0 |    100% |           |
 | src/pyefis/instruments/vsi/\_\_init\_\_.py              |      382 |        0 |       68 |        0 |    100% |           |
 | src/pyefis/instruments/weston/\_\_init\_\_.py           |       61 |        3 |       14 |        0 |     96% |     11-13 |
 | src/pyefis/instruments/wind/\_\_init\_\_.py             |       97 |        0 |       12 |        0 |    100% |           |
-| src/pyefis/main.py                                      |      147 |        0 |       60 |        0 |    100% |           |
+| src/pyefis/main.py                                      |      149 |        0 |       60 |        0 |    100% |           |
 | src/pyefis/screens/\_\_init\_\_.py                      |        0 |        0 |        0 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder.py                     |      199 |        0 |       68 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder\_config.py             |      135 |        0 |       78 |        0 |    100% |           |
@@ -49,7 +49,7 @@
 | src/pyefis/screens/screenbuilder\_overlay.py            |       46 |        0 |       10 |        0 |    100% |           |
 | src/pyefis/screens/screenbuilder\_preferences.py        |       31 |        0 |       28 |        0 |    100% |           |
 | src/pyefis/version.py                                   |        2 |        0 |        0 |        0 |    100% |           |
-| **TOTAL**                                               | **6592** |    **3** | **1908** |    **0** | **99%** |           |
+| **TOTAL**                                               | **6599** |    **3** | **1908** |    **0** | **99%** |           |
 
 
 ## Setup coverage badge
