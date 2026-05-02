@@ -23,8 +23,9 @@ class ListBox(QGraphicsView):
         self.font_family = font_family
         self.tlists = dict()
         for l in lists:
-            self.tlists[l["name"]] = yaml.load(open(os.path.join(self.parent.parent.config_path,l['file'])), Loader=yaml.SafeLoader)
-
+            config_path = os.path.join(self.parent.parent.config_path,l['file'])
+            with open(config_path, 'r') as f:
+              self.tlists[l["name"]] = yaml.load(f, Loader=yaml.SafeLoader)
         list_str = yaml.dump(self.tlists)
         if replace:
             for rep in replace:

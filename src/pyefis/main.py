@@ -155,6 +155,7 @@ def main():
     if args.config_file:
         cf = args.config_file
         config_file = cf.name
+        cf.close()
     else:
         # If all else fails or update the configuration from the package
         # to ~/makerplane/fixgw/config
@@ -198,6 +199,7 @@ def main():
     # look in the configuration for the logging object
     if args.log_config:
         logging.config.fileConfig(args.log_config)
+        args.log_config.close()
     elif 'logging' in config:
         # If running in snap write to $SNAP_USER_COMMON directory
         snap_dir = os.environ.get('SNAP_USER_COMMON','')

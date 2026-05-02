@@ -39,7 +39,7 @@ classifiers = [
 dependencies = [
     "geopy==2.4.1",
 # Until this revision is published to PyPy get it from git:
-    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@f9fbc083821370e32811acc3c9051297fca239ee",
+    "pyavtools @ git+https://github.com/makerplane/pyAvTools/@04b7c6303ceaa78af213422a70e59921d634ef54",
     "pycond==20230212",
     # "PyQt6==6.8.0",
     "PyYAML==6.0.1",
@@ -70,11 +70,12 @@ env = [
 ]
 filterwarnings = [
     # I belive this is warning that pyqt needs updated if you update to python 3.12
-    "ignore:sipPyTypeDict.*:DeprecationWarning:.*:"
+    "ignore:sipPyTypeDict.*:DeprecationWarning:.*:",
+    "default"
 ]
 addopts = """
     --cov-report term-missing --cov-branch --cov-report html --cov-report term
-    --cov=pyefis --cov-context=test -vv --strict-markers -rfE
+    --cov=pyefis --cov-context=test -vv --strict-markers -ra
     --ignore=tests/end_to_end/repo
 """
 
@@ -86,3 +87,6 @@ source = [
     "src/"
 ]
 
+
+[tool.black]
+target-version = ['py310']
