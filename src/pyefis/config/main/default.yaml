@@ -33,7 +33,9 @@
   # Screen background color RGB
   screenColor: (0,0,0)
 
-  # If left out the first defined screen will be default
-  defaultScreen: PFD
+  # If left out the first defined screen will be default.
+  # DataStatus is shown at boot; its Continue button proceeds to the PFD.
+  # Set this back to PFD to skip the data-status boot screen.
+  defaultScreen: DataStatus
 
 

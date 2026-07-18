@@ -1,0 +1,24 @@
+main:
+  nodeID: 1
+  screenWidth: 320
+  screenHeight: 200
+  screenColor: (0,0,0)
+
+screenshot: arc_gauge
+
+screens:
+  TEST:
+    layout:
+      rows: 110
+      columns: 200
+    instruments:
+      - type: arc_gauge
+        row: 10
+        column: 35
+        span:
+          rows: 90
+          columns: 130
+        options:
+          name: RPM
+          dbkey: TACH1
+          decimal_places: 0

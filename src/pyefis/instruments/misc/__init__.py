@@ -83,12 +83,18 @@ class StaticText(QWidget):
 
 
 class ValueDisplay(QWidget):
-    def __init__(self, parent=None, font_family="Open Sans"):
+    def __init__(self, parent=None, font_family="Open Sans", font_percent=None):
         super(ValueDisplay, self).__init__(parent)
         self.font_family = font_family
         self.font_ghost_mask = None
         self.font_ghost_alpha = 50
-        self.font_percent = 0.9
+        # Font height as a fraction of the widget height (used when no font_mask
+        # is set). Defaults to 0.9; an explicit font_percent overrides it.
+        self.font_percent = 0.9 if font_percent is None else font_percent
+        # Display format for the value, a digit mask: "" = as-is (str), "000" =
+        # rounded + zero-padded to 3 integer digits (089), "000.0" = 3 integer
+        # digits + 1 decimal (089.0).
+        self.number_format = ""
         self.name = None
         self._dbkey = None
         self._value = 0.0
@@ -98,6 +104,26 @@ class ValueDisplay(QWidget):
         self.annunciate = False
         self.alignment = "AlignLeft"
         self.conversionFunction = lambda x: x
+
+        # Prefix label drawn before the value (e.g. "HDG", "CRS") with its own
+        # font family / size / colour. Empty prefix_text (the default) = no
+        # prefix, so a plain value_text is unchanged.
+        self.prefix_text = ""
+        self.prefix_font_family = "Open Sans"
+        self.prefix_font_percent = 50     # percent of widget height
+        self.prefix_color = "#ffffff"
+        # Colour of the data value in the good/normal state (bad/old still go
+        # grey, annunciate still goes red). Default white matches textGoodColor.
+        self.value_color = "#ffffff"
+        # Optional visual box at the widget bounds: a background fill and a
+        # border, each with its own colour + opacity. border_width 0 and
+        # bg_opacity 0 (the defaults) = no box, so a plain value_text is
+        # unchanged. The box size IS the widget rect (dragged/resized on screen).
+        self.border_color = "#ffffff"
+        self.border_width = 0       # px (0 = no border)
+        self.border_opacity = 100   # percent
+        self.bg_color = "#000000"
+        self.bg_opacity = 0         # percent (0 = transparent, no background)
 
         # These properties can be modified by the parent
         self.outlineColor = QColor(Qt.GlobalColor.darkGray)
@@ -134,19 +160,68 @@ class ValueDisplay(QWidget):
         else:
             self.font.setPixelSize(qRound(self.height() * self.font_percent))
         self.valueRect = QRectF(0, 0, self.width(), self.height())
+        # Prefix font: its own family + size. prefix_font_percent is a percent of
+        # widget height, accepted as a whole number (50) or a fraction (0.5);
+        # falls back to the value's font_percent, then 0.5.
+        if self.prefix_text:
+            self.prefix_font = QFont(self.prefix_font_family or self.font_family)
+            pfp = self.prefix_font_percent
+            if pfp is None:
+                pfp = self.font_percent
+            if pfp and float(pfp) > 1:
+                pfp = float(pfp) / 100.0
+            self.prefix_font.setPixelSize(
+                max(1, qRound(self.height() * (float(pfp) if pfp else 0.5))))
+
+    def _paint_box(self, p):
+        # Optional visual box at the widget bounds: background fill + border,
+        # each with its own colour and opacity. No-op unless a border or a
+        # non-transparent background is configured (default = no box).
+        bw = int(getattr(self, "border_width", 0) or 0)
+        bgo = int(getattr(self, "bg_opacity", 0) or 0)
+        if bw <= 0 and bgo <= 0:
+            return
+        w = float(self.width())
+        h = float(self.height())
+        p.save()
+        if bgo > 0:
+            bg = QColor(self.bg_color)
+            bg.setAlpha(max(0, min(255, round(255 * bgo / 100.0))))
+            p.setBrush(bg)
+        else:
+            p.setBrush(Qt.BrushStyle.NoBrush)
+        if bw > 0:
+            bc = QColor(self.border_color)
+            bo = int(getattr(self, "border_opacity", 100) or 0)
+            bc.setAlpha(max(0, min(255, round(255 * bo / 100.0))))
+            pen = QPen(bc)
+            pen.setWidth(bw)
+            p.setPen(pen)
+            inset = bw / 2.0
+            p.drawRect(QRectF(inset, inset, w - bw, h - bw))
+        else:
+            p.setPen(Qt.PenStyle.NoPen)
+            p.drawRect(QRectF(0.0, 0.0, w, h))
+        p.restore()
 
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        self._paint_box(p)
 
         pen = QPen()
         pen.setWidth(int(self.height() * 0.01))
         pen.setCapStyle(Qt.PenCapStyle.FlatCap)
         p.setPen(pen)
 
+        self.align = getattr(Qt.AlignmentFlag, self.alignment)
+        if self.prefix_text:
+            self._paint_with_prefix(p, pen)
+            return
+
         # Draw Value
         p.setFont(self.font)
-        self.align = getattr(Qt.AlignmentFlag, self.alignment)
         opt = QTextOption(self.align)
         if self.font_ghost_mask:
             alpha = self.textColor.alpha()
@@ -159,6 +234,39 @@ class ValueDisplay(QWidget):
         pen.setColor(self.textColor)
         p.setPen(pen)
         p.drawText(self.valueRect, self.valueText, opt)
+
+    def _paint_with_prefix(self, p, pen):
+        # Inline [prefix][space][value] on a shared baseline, the whole block
+        # positioned by self.alignment. The prefix uses its own font/colour; the
+        # value keeps the quality-driven self.textColor.
+        pf = getattr(self, "prefix_font", None) or self.font
+        vfm = QFontMetricsF(self.font)
+        pfm = QFontMetricsF(pf)
+        pre = self.prefix_text
+        val = self.valueText
+        pre_w = pfm.horizontalAdvance(pre)
+        val_w = vfm.horizontalAdvance(val)
+        gap = pfm.horizontalAdvance(" ")
+        total = pre_w + gap + val_w
+        w = float(self.width())
+        h = float(self.height())
+        if self.alignment == "AlignRight":
+            x = w - total
+        elif self.alignment == "AlignCenter":
+            x = (w - total) / 2.0
+        else:
+            x = 0.0
+        x = max(0.0, x)
+        baseline = (h + vfm.ascent() - vfm.descent()) / 2.0
+        p.setFont(pf)
+        pc = QColor(self.prefix_color) if self.prefix_color else self.textColor
+        pen.setColor(pc)
+        p.setPen(pen)
+        p.drawText(QPointF(x, baseline), pre)
+        p.setFont(self.font)
+        pen.setColor(self.textColor)
+        p.setPen(pen)
+        p.drawText(QPointF(x + pre_w + gap, baseline), val)
 
     def getValue(self):
         return self._value
@@ -178,8 +286,26 @@ class ValueDisplay(QWidget):
     def getValueText(self):
         if self.fail:
             return "xxx"
-        else:
-            return str(self.value)
+        return self._format_value(self.value)
+
+    def _format_value(self, value):
+        # number_format is a digit mask: "" = as-is, "000" = rounded +
+        # zero-padded to 3 integer digits (089), "000.0" = 3 integer digits +
+        # 1 decimal (089.0). The width passed to format() includes the decimal
+        # point so the integer part keeps the requested number of digits.
+        fmt = getattr(self, "number_format", "") or ""
+        if not fmt:
+            return str(value)
+        try:
+            v = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+        if "." in fmt:
+            intpart, decpart = fmt.split(".", 1)
+            decimals = len(decpart)
+            width = len(intpart) + 1 + decimals
+            return f"{v:0{width}.{decimals}f}"
+        return f"{v:0{len(fmt)}.0f}"
 
     valueText = property(getValueText)
 
@@ -223,13 +349,18 @@ class ValueDisplay(QWidget):
         self.item.valueChanged[self.item.dtype].connect(self.setValue)
 
     def setColors(self):
+        # Configurable value colour overrides the good-state default; bad/old
+        # (grey) and annunciate (red) still apply below.
+        good = self.textGoodColor
+        if getattr(self, "value_color", None):
+            good = QColor(self.value_color)
         if self.bad or self.fail or self.old:
             self.bgColor = self.bgBadColor
             self.textColor = self.textBadColor
             self.highlightColor = self.highlightBadColor
         else:
             self.bgColor = self.bgGoodColor
-            self.textColor = self.textGoodColor
+            self.textColor = good
             self.highlightColor = self.highlightGoodColor
         if self.annunciate and not self.fail:
             self.textColor = self.textAnnunciateColor

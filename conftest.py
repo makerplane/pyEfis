@@ -195,6 +195,20 @@ def fix():
     fix.db.get_item("HEAD").fail = False
 
     fix.db.define_item(
+        "TRACK",
+        "GPS Ground Track",
+        "float",
+        0.0,
+        359.9,
+        "deg",
+        50000,
+        ""
+    )
+    fix.db.set_value("TRACK", 0)
+    fix.db.get_item("TRACK").bad = False
+    fix.db.get_item("TRACK").fail = False
+
+    fix.db.define_item(
         "GSI",
         "Glideslope Indicator",
         "float",

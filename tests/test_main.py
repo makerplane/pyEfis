@@ -13,6 +13,11 @@ import pyefis.main as main_module
 class FakeApp:
     instances = []
 
+    # main() sets AA_ShareOpenGLContexts before constructing the app (it must
+    # be set pre-construction for the SVS QOpenGLWidget share group), so the
+    # stand-in needs a no-op class-level setAttribute.
+    setAttribute = staticmethod(lambda *args, **kwargs: None)
+
     def __init__(self, argv):
         self.argv = argv
         self.exec = mock.Mock(return_value=7)
@@ -246,6 +251,12 @@ def test_main_sets_requested_log_level(
 ):
     config_file, _preferences_file = config_files
     logger = mock.Mock()
+    # pytest's logging plugin iterates logging.getLogger().manager.loggerDict
+    # around each test phase; with getLogger globally mocked, that attribute
+    # must be a real iterable or the plugin raises in teardown ("'Mock' object
+    # is not iterable") on newer pytest, leaking the patch and cascading errors
+    # into every later test. A plain empty dict keeps the plugin happy.
+    logger.manager.loggerDict = {}
     monkeypatch.setattr(
         main_module.sys, "argv", argv + ["--config-file", str(config_file)]
     )

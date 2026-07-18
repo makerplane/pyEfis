@@ -46,6 +46,8 @@ class ActionClass(QWidget):
             "show previous screen": self.showPrevScreen,
             "set value": functions.setValue,
             "change value": functions.changeValue,
+            "change value wrap": functions.changeValueWrap,
+            "sync value": functions.syncValue,
             "toggle bit": functions.toggleBool,
             "activate menu item": self.activateMenuItem,
             "activate menu": activateMenu,

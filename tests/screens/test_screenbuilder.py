@@ -1405,7 +1405,7 @@ class TestScreenBuilderPreferencesAndOptions:
         screen = Screen(_TestParent(config))
         qtbot.addWidget(screen)
 
-        with pytest.raises(ValueError, match="button must specify options: config:"):
+        with pytest.raises(ValueError, match="button needs options"):
             screen.init_screen()
 
     def test_encoder_order_option_ignores_non_selectable_widget(self, fix, qtbot):
@@ -1538,7 +1538,7 @@ class TestScreenBuilderPreferencesAndOptions:
         assert screen.lookup_mapping("ALT", {"IAS": "Airspeed"}) == "ALT"
         assert screen.get_instrument_defaults("airspeed_box") == ["IAS", "GS", "TAS"]
         assert screen.get_instrument_defaults("airspeed_dial") == ["IAS"]
-        assert screen.get_instrument_defaults("altimeter_trend_tape") == ["ALT"]
+        assert screen.get_instrument_defaults("altimeter_trend_tape") == ["VS"]
         assert screen.get_instrument_defaults("atitude_indicator") == ["PITCH", "ROLL", "ALAT", "TAS"]
         assert screen.get_instrument_defaults("horizontal_situation_indicator") == ["COURSE", "CDI", "GSI", "HEAD"]
         assert screen.get_instrument_defaults("heading_tape") == ["HEAD"]
@@ -1550,13 +1550,14 @@ class TestScreenBuilderPreferencesAndOptions:
             "LONG",
             "HEAD",
             "ALT",
-            "PITCH",
             "ROLL",
             "ALAT",
             "TAS",
         ]
         assert screen.get_instrument_defaults("unknown") is None
-        assert screen.get_instrument_default_options("heading_display") == {"font_size": 17}
+        # heading_display migrated to the registry; its legacy default-options
+        # entry (a no-op font_size) is gone, so the legacy accessor returns False.
+        assert screen.get_instrument_default_options("heading_display") is False
         assert screen.get_instrument_default_options("static_text") is False
 
 

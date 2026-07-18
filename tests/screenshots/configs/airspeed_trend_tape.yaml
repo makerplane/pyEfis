@@ -1,0 +1,22 @@
+main:
+  nodeID: 1
+  screenWidth: 130
+  screenHeight: 420
+  screenColor: (0,0,0)
+
+screenshot: airspeed_trend_tape
+seed:
+  IAS: 110
+
+screens:
+  TEST:
+    layout:
+      rows: 110
+      columns: 200
+    instruments:
+      - type: airspeed_trend_tape
+        row: 5
+        column: 60
+        span:
+          rows: 100
+          columns: 80

@@ -1,0 +1,31 @@
+# Navigation-data status screen (makerplane-data Phase F).
+#
+# Shows the currency of installed navigation data (airports, obstacles, ...)
+# with a Continue button (always available) and an Update button (over-the-air;
+# USB sticks are imported automatically by the updater's udev hook and show up
+# on the next refresh).
+#
+# To show this at boot, add this screen to your screen set and set
+#   defaultScreen: DataStatus
+# in the main config. Continue returns to the normal flight screen
+# (continue_screen, default PFD).
+DataStatus:
+  module: pyefis.screens.screenbuilder
+  title: Data Status
+  layout:
+    rows: 100
+    columns: 100
+  instruments:
+    - type: data_status
+      row: 0
+      column: 0
+      span:
+        rows: 100
+        columns: 100
+      options:
+        continue_screen: PFD
+        # pyefis-data CLI path. An ABSOLUTE (or ~-prefixed) path is required
+        # because pyEfis runs as a systemd service whose minimal PATH excludes
+        # ~/.local/bin. A venv install is symlinked into ~/.local/bin.
+        update_command: ~/.local/bin/pyefis-data
+        # status_path defaults to ~/.makerplane/pyefis/status.json

@@ -48,6 +48,53 @@ def test_changeValue(fix_mock):
     assert item_mock.output_value.called
 
 
+class _Item:
+    """A minimal numeric FIX item for the wrap/sync math (MagicMock can't do
+    real arithmetic on .min / .max / .value)."""
+    def __init__(self, value=0.0, mn=0.0, mx=359.9):
+        self.value = value
+        self.min = mn
+        self.max = mx
+        self.dtype = float
+        self.output_called = False
+
+    def output_value(self):
+        self.output_called = True
+
+
+# changeValueWrap wraps within [min, max] instead of clamping.
+def test_changeValueWrap_down_across_zero(fix_mock):
+    item = _Item(0.0, 0.0, 359.9)
+    fix_mock.db.get_item.return_value = item
+    pyefis.hmi.functions.changeValueWrap("HEADBUG, -1")
+    assert round(item.value, 1) == 358.9
+    assert item.output_called
+
+
+def test_changeValueWrap_up_across_max(fix_mock):
+    item = _Item(357.0, 0.0, 359.9)
+    fix_mock.db.get_item.return_value = item
+    pyefis.hmi.functions.changeValueWrap("HEADBUG, 5")
+    assert round(item.value, 1) == 2.1
+
+
+def test_changeValueWrap_within_range_is_plain_add(fix_mock):
+    item = _Item(100.0, 0.0, 359.9)
+    fix_mock.db.get_item.return_value = item
+    pyefis.hmi.functions.changeValueWrap("HEADBUG, 20")
+    assert round(item.value, 1) == 120.0
+
+
+# syncValue copies the source key's value into the destination key.
+def test_syncValue(fix_mock):
+    dest = _Item(0.0)
+    src = _Item(287.0)
+    fix_mock.db.get_item.side_effect = lambda k: {"HEADBUG": dest, "HEAD": src}[k.strip()]
+    pyefis.hmi.functions.syncValue("HEADBUG, HEAD")
+    assert dest.value == 287.0
+    assert dest.output_called
+
+
 # Test for toggleBool function
 def test_toggleBool(fix_mock):
     # Mocking the arg for toggleBool

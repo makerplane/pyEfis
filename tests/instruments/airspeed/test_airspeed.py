@@ -1,6 +1,8 @@
 import pytest
 from unittest import mock
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import (
+    QApplication, QGraphicsRectItem, QGraphicsLineItem,
+)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QBrush, QPaintEvent
 from pyefis.instruments import airspeed
@@ -164,3 +166,108 @@ def test_airspeed_box_explicit_ias_mode_and_hidden_updates(fix, qtbot):
 
     assert widget.valueText == "111"
     widget.update.assert_called()
+
+
+# =============================================================================
+# Airspeed-tape requirements test catalog -- keyed to airspeed_widget_spec.md
+# sec 4 (Markings, Awareness Cues & Annunciation) and avionics_reference.md sec 6.
+#
+# Docstrings: AS-TC-NNN | requirement ID | intent.
+# Passing tests verify shipped behaviour. The xfail(strict) tests are the
+# executable gap tracker for the unimplemented low/high-speed red awareness
+# bands (AC 23.1311-1C sec 17.7.1): they fail today and flip the run red when
+# the band is implemented, forcing removal of the marker. Spec sec 5 carries the
+# case<->requirement map. The fix fixture seeds IAS aux V-speeds: Vs=45, Vs0=40,
+# Vno=125, Vne=140, Vfe=70.
+# =============================================================================
+
+
+def _show_tape(qtbot, **kwargs):
+    """Build a tape and drive resizeEvent so the QGraphicsScene (arcs, bands,
+    ticks) is constructed at a real size."""
+    widget = airspeed.Airspeed_Tape(**kwargs)
+    qtbot.addWidget(widget)
+    widget.resize(120, 400)
+    widget.show()
+    qtbot.waitExposed(widget)
+    return widget
+
+
+def _rect_rgb(widget):
+    """(r,g,b) of every filled rect item in the scene."""
+    return [it.brush().color().getRgb()[:3]
+            for it in widget.scene.items() if isinstance(it, QGraphicsRectItem)]
+
+
+def _tape_y(widget, v):
+    """The tape's own speed -> scene-y mapping."""
+    tape_start = widget.max * widget.pph + widget.height() / 2
+    return -v * widget.pph + tape_start
+
+
+def test_as_cat_moving_scale_tape_format(fix, qtbot):
+    """AS-TC-001 | AS-DISP-001 | Moving-scale tape: a scrolling scale under a fixed pointer
+    with a digital read-out; the scale scrolls with IAS. AC 23.1311-1C sec 17.6 (p.40)."""
+    widget = _show_tape(qtbot)
+    assert widget.scene is not None                       # a scale was built
+    assert widget.numerical_display is not None           # digital read-out
+    assert widget.max == int(round(widget.Vne * 1.25))    # tape spans past VNE
+
+    # Present value drives the read-out and scrolls the scale.
+    widget.setAirspeed(90)
+    assert widget.numerical_display.value == 90
+    assert widget.getAirspeed() == 90
+
+
+def test_as_cat_conventional_vspeed_arcs(fix, qtbot):
+    """AS-TC-002 | AS-MARK-001 | Conventional arcs are present: white flap arc, green
+    normal arc, yellow caution arc, and a red VNE radial. sec 23.1545; sec 22.2 Table 4."""
+    widget = _show_tape(qtbot)
+    rgb = _rect_rgb(widget)
+    assert (0, 155, 0) in rgb                              # green normal-operating arc
+    assert (255, 255, 0) in rgb                            # yellow caution arc (VNO->VNE)
+    assert (255, 255, 255) in rgb                          # white flap arc (VS0->VFE)
+    # Red VNE radial line.
+    red_lines = [it for it in widget.scene.items()
+                 if isinstance(it, QGraphicsLineItem)
+                 and it.pen().color().getRgb()[:3] == (255, 0, 0)]
+    assert red_lines
+
+
+def test_as_cat_airspeed_invalid_annunciation(fix, qtbot):
+    """AS-TC-003 | AS-ANN-001 | Invalid airspeed is annunciated on the read-out: fail ->
+    XXX, old/bad -> not a stale number. AC 23.1311-1C sec 18; ref sec 2 governing rule."""
+    widget = _show_tape(qtbot)
+    widget.setAsFail(True)
+    assert widget.numerical_display.fail is True
+    widget.setAsFail(False)
+    widget.setAsOld(True)
+    assert widget.numerical_display.old is True
+    widget.setAsBad(True)
+    assert widget.numerical_display.bad is True
+
+
+def test_as_cat_low_speed_red_band(fix, qtbot):
+    """AS-TC-101 | AS-LSA-001 | A moving-scale tape must show a red band from VSO down to
+    zero for low-speed awareness. AC 23.1311-1C sec 17.7.1.a (Fig 2, p.40-41). Contract:
+    resizeEvent builds w.low_speed_band spanning y(Vs0)..y(0), red-filled."""
+    widget = _show_tape(qtbot)
+    band = getattr(widget, "low_speed_band", None)
+    assert band is not None
+    assert band.brush().color().getRgb()[:3] == (255, 0, 0)          # red
+    r = band.sceneBoundingRect()
+    assert r.top() == pytest.approx(_tape_y(widget, widget.Vs0), abs=3)   # from VSO
+    assert r.bottom() == pytest.approx(_tape_y(widget, 0), abs=3)         # down to 0
+
+
+def test_as_cat_high_speed_red_band(fix, qtbot):
+    """AS-TC-102 | AS-HSA-001 | A moving-scale tape must show a red band (not just a
+    hairline radial) from VNE up to the top of the tape. AC 23.1311-1C sec 17.7.1.b
+    (Fig 2, p.40-41). Contract: resizeEvent builds w.high_speed_band spanning y(Vne)..0."""
+    widget = _show_tape(qtbot)
+    band = getattr(widget, "high_speed_band", None)
+    assert band is not None
+    assert band.brush().color().getRgb()[:3] == (255, 0, 0)          # red
+    r = band.sceneBoundingRect()
+    assert r.bottom() == pytest.approx(_tape_y(widget, widget.Vne), abs=3)  # from VNE
+    assert r.top() == pytest.approx(0, abs=3)                               # up to tape top

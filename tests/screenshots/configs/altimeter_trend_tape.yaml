@@ -1,0 +1,22 @@
+main:
+  nodeID: 1
+  screenWidth: 150
+  screenHeight: 420
+  screenColor: (0,0,0)
+
+screenshot: altimeter_trend_tape
+seed:
+  VS: 500
+
+screens:
+  TEST:
+    layout:
+      rows: 110
+      columns: 200
+    instruments:
+      - type: altimeter_trend_tape
+        row: 5
+        column: 55
+        span:
+          rows: 100
+          columns: 90

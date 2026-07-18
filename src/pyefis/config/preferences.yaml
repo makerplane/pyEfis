@@ -127,9 +127,11 @@ includes:
   SCREEN_SIXPACK: screens/sixpack.yaml       # screens/sixpack-portrait.yaml
   SCREEN_ANDROID: screens/android.yaml       # screens/android-portrait.yaml
   SCREEN_PFD: screens/pfd.yaml               # screens/pfd-portrait.yaml
+  SCREEN_PFD_AI_ONLY: screens/pfd_ai_only.yaml   # AI/SVS-only PFD, no engine/radio columns
   SCREEN_RADIO: screens/radio.yaml           # screens/radio-portrait.yaml
   SCREEN_EMS: screens/ems.yaml               # screens/ems-portrait.yaml
   SCREEN_EMS2: screens/ems2.yaml             # screens/ems2-portrait.yaml
+  SCREEN_DATA_STATUS: screens/datastatus.yaml  # navigation-data currency (boot screen)
   # Include file for logging configuration
   LOGGING_CONFIG: logging/stderr-info.yaml
   # File that defines what lists are included in the radio listbox

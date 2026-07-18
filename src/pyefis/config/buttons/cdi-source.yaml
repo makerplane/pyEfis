@@ -1,0 +1,20 @@
+type: simple
+text: "CDI\nSRC"
+dbkey: TSBTN{id}33
+bg_color: "#101418"
+fg_color: "#00ffff"
+# Cycles the nav-source selector NAVSRC (0=GPS, 1=NAV1; wraps). The fix-gateway
+# "select" compute routes the chosen source into the canonical COURSE/CDI the
+# HSI and autopilot read. Background turns green for GPS, blue for NAV1.
+condition_keys:
+  - NAVSRC
+conditions:
+  - when: "CLICKED eq true"
+    actions:
+      - change value wrap: "NAVSRC, 1"
+  - when: "NAVSRC lt 0.5"
+    actions:
+      - set bg color: "#1f6b1f"
+  - when: "NAVSRC ge 0.5"
+    actions:
+      - set bg color: "#1a4d80"

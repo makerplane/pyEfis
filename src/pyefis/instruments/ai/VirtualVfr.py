@@ -578,12 +578,11 @@ class VirtualVfr(AI):
             if hasattr(self, 'sky_rect'):
                 if self.getAIBad():
                     self.sky_rect.setBrush (self.gray_sky)
-                    self.land_rect.setBrush (self.gray_land)
                     #self.bad_text.show()
                 else:
                     self.sky_rect.setBrush (self.gblue_brush)
-                    self.land_rect.setBrush (self.gbrown_brush)
                     #self.bad_text.hide()
+                self._update_land_brush()   # grey / sky(SVS active) / brown
                 self.redraw()
 
     def setLngBad(self,bad):
@@ -611,12 +610,11 @@ class VirtualVfr(AI):
             if hasattr(self, 'sky_rect'):
                 if self.getAIOld():
                     self.sky_rect.setBrush (self.gray_sky)
-                    self.land_rect.setBrush (self.gray_land)
                     #self.old_text.show()
                 else:
                     self.sky_rect.setBrush (self.gblue_brush)
-                    self.land_rect.setBrush (self.gbrown_brush)
                     #self.old_text.hide()
+                self._update_land_brush()   # grey / sky(SVS active) / brown
                 self.redraw()
     def setLngOld(self,old):
         #print(f"VFR setLngOld {old}")
@@ -651,10 +649,9 @@ class VirtualVfr(AI):
                     if hasattr(self, 'sky_rect'):
                         if self.getAIFail():  # pragma: no cover
                             self.sky_rect.setBrush (self.gray_sky)
-                            self.land_rect.setBrush (self.gray_land)
                         else:
                             self.sky_rect.setBrush (self.gblue_brush)
-                            self.land_rect.setBrush (self.gbrown_brush)
+                        self._update_land_brush()   # grey / sky(SVS) / brown
                 self.redraw()
 
     def setLngFail(self,fail):

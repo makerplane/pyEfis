@@ -21,6 +21,7 @@ import sys, os
 import logging
 import logging.config
 import argparse
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
@@ -124,6 +125,10 @@ def merge_dict(dest,override):
 def main():
     global config_path
     global preferences
+    # Share GL contexts app-wide (P5): the AI's QOpenGLWidget viewport
+    # and any future GL surfaces resolve resources from one share group.
+    QApplication.setAttribute(
+        Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
     app = QApplication(sys.argv)
     parser = argparse.ArgumentParser(description='pyEfis')
     parser.add_argument('-m', '--mode', choices=['test', 'normal'],
@@ -234,6 +239,37 @@ def main():
     if "keybindings" in config:
         hmi.keys.initialize(gui.mainWindow, config["keybindings"])
     hooks.initialize(config['hooks'])
+
+    # SIGUSR1 -> dump screenshot of mainWindow to /tmp/pyefis_screenshot.png.
+    # Signal-handler runs in the main thread but outside the Qt event loop,
+    # so calling QWidget.grab() directly from inside the handler is unsafe.
+    # The signal just flips a flag; a QTimer in Qt's loop does the real work.
+    import signal as _signal_mod
+    from PyQt6.QtCore import QTimer as _QTimer
+    _screenshot_pending = [False]
+    def _on_sigusr1(_signum, _frame):
+        _screenshot_pending[0] = True
+    def _maybe_screenshot():
+        if not _screenshot_pending[0]:
+            return
+        _screenshot_pending[0] = False
+        try:
+            target = gui.mainWindow if gui.mainWindow else app.primaryScreen()
+            pix = target.grab() if hasattr(target, "grab") \
+                else target.grabWindow(0)
+            ok = pix.save("/tmp/pyefis_screenshot.png", "PNG")
+            log.info(f"screenshot save -> /tmp/pyefis_screenshot.png ({ok})")
+        except Exception as e:
+            log.warning(f"screenshot failed: {e}")
+    try:
+        _signal_mod.signal(_signal_mod.SIGUSR1, _on_sigusr1)
+        _screenshot_timer = _QTimer()
+        _screenshot_timer.setInterval(100)
+        _screenshot_timer.timeout.connect(_maybe_screenshot)
+        _screenshot_timer.start()
+        log.info("SIGUSR1 -> /tmp/pyefis_screenshot.png handler armed")
+    except Exception as e:
+        log.warning(f"could not install SIGUSR1 screenshot handler: {e}")
 
     # Main program loop
     result = app.exec()

@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
 import time
 import importlib
@@ -90,6 +90,9 @@ class Main(QMainWindow):
              w.setAutoFillBackground(True)
 
         scr.object = self.scr.module.Screen(self)
+        # The real gui sets this; buttons read parent.screenName for the SCREEN
+        # condition variable. Set it before resize() triggers init_screen.
+        scr.object.screenName = scr.name
         scr.object.resize(self.width(), self.height())
         scr.object.move(0,0)
         scr.show()
@@ -130,7 +133,7 @@ class Main(QMainWindow):
             return None
 
 
-def initialize(config,config_path,preferences):
+def initialize(config,config_path,preferences,fullscreen=True):
     global mainWindow
     global log
     log = logging.getLogger(__name__)
@@ -138,10 +141,14 @@ def initialize(config,config_path,preferences):
     module = "pyefis.screens.screenbuilder"
 
     scr = Screen("TEST", module, config['screens']["TEST"])
-    print(scr)
     mainWindow = Main(config,config_path,preferences,scr)
 
-    mainWindow.showFullScreen()
+    # Offscreen capture (screenshot generation) skips fullscreen, which would
+    # otherwise resize the window to the offscreen virtual screen size.
+    if fullscreen:
+        mainWindow.showFullScreen()
+    else:
+        mainWindow.show()
 
     def button_timeout():
         # set MENUTIMEOUT True

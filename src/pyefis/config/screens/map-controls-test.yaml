@@ -1,0 +1,97 @@
+# Control-bindings test screen (makerplane-data docs/control_bindings.md, Phase 1).
+# A moving map plus three buttons that drive its settings at runtime through FIX
+# keys -- the concrete "cycle the map range with a button" demo.
+#
+# Requires the MAPRANGE / MAPORIENT / MAPTERRAIN keys (fix-gateway
+# database/custom.yaml). The map draws its current range + orientation in the
+# status chip, so cycling is visible even without terrain data; set tile_path to
+# your GLO-30/SRTM tree to see the terrain layer toggle.
+#
+# Activate by pointing defaultScreen at MAP_CTL_TEST (or add it to your screen
+# rotation). The button dbkeys use TSBTN{id}NN (their own click-state keys); the
+# MAP* keys they write are plain (single instance).
+MAP_CTL_TEST:
+  module: pyefis.screens.screenbuilder
+  title: Map Control Bindings Test
+  layout:
+    rows: 110
+    columns: 200
+  instruments:
+    - type: moving_map
+      row: 0
+      column: 0
+      span:
+        rows: 110
+        columns: 168
+      options:
+        # The three bindings under test. Empty = static; set = a control drives it.
+        range_key: MAPRANGE
+        orientation_key: MAPORIENT
+        terrain_key: MAPTERRAIN
+        range_ladder: "2,5,10,20,40,80,160"
+        # tile_path: /data/makerplane-data/terrain/tiles   # set to see terrain
+
+    # Range: cycle up through the ladder, wrapping 160 -> 2.
+    - type: button
+      row: 4
+      column: 172
+      span:
+        rows: 30
+        columns: 26
+      options:
+        type: simple
+        dbkey: TSBTN{id}20
+        text: "RNG\n+"
+        bg_color: "#101418"
+        fg_color: "#00ffff"
+        conditions:
+          - when: "CLICKED eq true"
+            actions:
+              - change value wrap: "MAPRANGE,1"
+
+    # Orientation: toggle track-up / north-up (two-entry enum, wraps).
+    - type: button
+      row: 40
+      column: 172
+      span:
+        rows: 30
+        columns: 26
+      options:
+        type: simple
+        dbkey: TSBTN{id}21
+        text: "ORIENT"
+        bg_color: "#101418"
+        fg_color: "#00ffff"
+        conditions:
+          - when: "CLICKED eq true"
+            actions:
+              - change value wrap: "MAPORIENT,1"
+
+    # Terrain: toggle the layer, and annunciate its state (green = on). Shows the
+    # full loop -- the button both WRITES the key (toggle) and READS it back
+    # (colour), the same pattern as the CDI source button.
+    - type: button
+      row: 76
+      column: 172
+      span:
+        rows: 30
+        columns: 26
+      options:
+        type: simple
+        dbkey: TSBTN{id}22
+        text: "TERR"
+        fg_color: "#ffffff"
+        condition_keys:
+          - MAPTERRAIN
+        conditions:
+          - when: "CLICKED eq true"
+            actions:
+              - toggle bit: "MAPTERRAIN"
+          - when: "MAPTERRAIN"
+            actions:
+              - set bg color: "#1f6b1f"
+            continue: true
+          - when: "not MAPTERRAIN"
+            actions:
+              - set bg color: "#3a3a3a"
+            continue: true

@@ -36,6 +36,31 @@ def changeValue(arg):
     i.output_value()
 
 
+# Change a value but wrap within the key's [min, max] range instead of clamping.
+# For circular values like a heading bug, so stepping down through 0 wraps to
+# just below max (e.g. HEADBUG 0 - 1 -> 359).  arg should be "key,delta".
+def changeValueWrap(arg):
+    args = arg.split(",")
+    i = fix.db.get_item(args[0].strip())
+    span = i.max - i.min
+    if span <= 0:
+        i.value += i.dtype(args[1])
+    else:
+        v = (float(i.value) + float(args[1]) - i.min) % span
+        i.value = i.dtype(i.min + v)
+    i.output_value()
+
+
+# Copy one key's value into another.  arg should be "dest,source"; used for a
+# "sync" control (e.g. set the heading bug to the current heading).
+def syncValue(arg):
+    args = arg.split(",")
+    dest = fix.db.get_item(args[0].strip())
+    src = fix.db.get_item(args[1].strip())
+    dest.value = dest.dtype(src.value)
+    dest.output_value()
+
+
 def toggleBool(arg):
     bit = fix.db.get_item(arg)
     bit.value = not bit.value

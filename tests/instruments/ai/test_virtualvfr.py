@@ -95,6 +95,30 @@ def _make_widget(fix, fake_pov, qtbot, width=320, height=240):
     return widget, parent, fake_pov.instances[-1]
 
 
+def test_svs_sky_ground_survives_data_recovery(fix, fake_pov, qtbot, tmp_path):
+    """Regression: VirtualVfr's old/bad/fail recovery handlers used to repaint
+    the land brown directly, clobbering the SVS sky-ground (and poisoning the
+    _update_land_brush change-cache so the per-frame update never corrected it).
+    They must route through _update_land_brush and keep sky while SVS draws."""
+    widget, _parent, _pov = _make_widget(fix, fake_pov, qtbot)
+    tiles = tmp_path / "t"
+    tiles.mkdir()
+    widget.set_svs_config({"enabled": True, "tile_path": str(tiles)})
+    widget.svs.gl_failed = False
+    widget.svs.drew_terrain = True               # SVS genuinely drawing terrain
+    widget._update_land_brush()
+    assert widget._land_brush_cur is widget.gblue_brush      # -> sky, not brown
+
+    # A bad->good recovery on a tracked item (the path that used to clobber).
+    widget._AIBad["LAT"] = True
+    widget.setVfrBad(False, "LAT")
+    assert widget._land_brush_cur is widget.gblue_brush      # stays sky
+    # And an old->fresh recovery.
+    widget._AIOld["LAT"] = True
+    widget.setOld(False, "LAT")
+    assert widget._land_brush_cur is widget.gblue_brush      # stays sky
+
+
 def test_virtualvfr_resize_initializes_pov_and_renders_when_data_is_good(
     fix, fake_pov, qtbot
 ):

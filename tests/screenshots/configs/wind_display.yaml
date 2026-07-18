@@ -1,0 +1,23 @@
+main:
+  nodeID: 1
+  screenWidth: 240
+  screenHeight: 160
+  screenColor: (0,0,0)
+
+screenshot: wind_display
+seed:
+  HWIND: 12
+  XWIND: -8
+
+screens:
+  TEST:
+    layout:
+      rows: 110
+      columns: 200
+    instruments:
+      - type: wind_display
+        row: 20
+        column: 55
+        span:
+          rows: 70
+          columns: 90

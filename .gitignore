@@ -3,11 +3,15 @@
 *.log
 .DS_Store
 *.pyc
+pyEfisSudo.txt
 *~
 doc/_*
 .ropeproject/*
 .directory
-config/
+# Anchored to the repo root: ignore a runtime ./config/, NOT the tracked
+# package config under src/pyefis/config/ (so new button/screen yaml is tracked
+# normally without git add -f).
+/config/
 
 # IDE artifacts
 .vscode/
@@ -22,6 +26,8 @@ __pycache__/
 # Binary stuff
 *.png
 *.jpg
+# ...except the golden regression images (see docs/svs_structural_plan.md P0)
+!tests/golden/*.png
 
 # C extensions
 *.so
@@ -31,6 +37,7 @@ env/
 venv/
 .venv/
 ENV/
+.env
 
 # Distribution / packaging
 .Python
@@ -80,3 +87,13 @@ docs/_build/
 
 # Makefile markers
 *.marker
+
+# Bulk FAA data drops (CIFP, NASR, DOF). Users download these locally;
+# build tools turn them into sqlite files (also kept out of the repo).
+cifp/
+nasr/
+dof/
+
+# Reproducible screenshot-harness output (regenerate with GENERATE_SCREENSHOTS=1)
+docs/images/generated/
+.gstack/

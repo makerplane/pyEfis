@@ -48,4 +48,15 @@ PFD:
       display_state: 2
       replace:
         radio_id: 1
+    # Subtle navigation-data currency flag: amber when navdata is expired,
+    # white when expiring soon/missing, hidden when current. Tap for details.
+    # Reposition to taste; it overlays the top-left of the AI.
+    - type: data_annunciation
+      row: 2
+      column: 2
+      span:
+        rows: 5
+        columns: 18
+      options:
+        target_screen: DataStatus
 

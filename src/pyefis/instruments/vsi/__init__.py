@@ -268,6 +268,25 @@ class VSI_PFD(QWidget):
         # Insert Background
         p.drawPixmap(0, 0, self.background)
 
+        # VS-invalid annunciation (AC 25-11B Table 4-6: loss / misleading
+        # vertical speed = Major). On fail remove the moving dot and show a red
+        # X so a frozen dot cannot be read as a valid vertical speed; on old/bad
+        # grey the dot instead of magenta. Same fail/old/bad convention the VSI
+        # dial and tape already follow.
+        if self.item.fail:
+            pen = QPen(QColor(Qt.GlobalColor.red))
+            pen.setWidth(max(2, int(w * 0.08)))
+            p.setPen(pen)
+            m = w * 0.30
+            cx, cy = w / 2.0, h / 2.0
+            p.drawLine(QPointF(cx - m, cy - m), QPointF(cx + m, cy + m))
+            p.drawLine(QPointF(cx - m, cy + m), QPointF(cx + m, cy - m))
+            return
+
+        dot_color = (QColor(Qt.GlobalColor.gray)
+                     if (self.item.old or self.item.bad)
+                     else QColor(Qt.GlobalColor.magenta))
+
         #p.drawEllipse(QPointF(w+4, h/2), 4.0, 4.0)
         dot_size = int(self.width() * 0.4)
         try:
@@ -277,12 +296,12 @@ class VSI_PFD(QWidget):
             else:
                 y = h/2 + (abs(self._value)**self.scaleRoot / self.max**self.scaleRoot) * self.dy
                 if y > h: y = h
-            p.setPen(Qt.GlobalColor.magenta)
-            p.setBrush(Qt.GlobalColor.magenta)
+            p.setPen(QPen(dot_color))
+            p.setBrush(QBrush(dot_color))
             p.drawEllipse(QRectF(2,y-int(dot_size/2),dot_size,dot_size))
         except ZeroDivisionError:
-            p.setPen(Qt.GlobalColor.gray)
-            p.setBrush(Qt.GlobalColor.gray)
+            p.setPen(QPen(QColor(Qt.GlobalColor.gray)))
+            p.setBrush(QBrush(QColor(Qt.GlobalColor.gray)))
             p.drawEllipse(QRectF(2,h/2,dot_size,dot_size))
 
     def getValue(self):
@@ -381,7 +400,8 @@ class Alt_Trend_Tape(QGraphicsView):
 
     def __init__(self, parent=None, font_family="DejaVu Sans Condensed"):
         super(Alt_Trend_Tape, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        self.setStyleSheet(
+            "background-color: rgba(0, 0, 0, 0%); border: 0px")
         self.font_family = font_family
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -390,7 +410,16 @@ class Alt_Trend_Tape(QGraphicsView):
 
         self.item = fix.db.get_item("VS")
         self._vs = self.item.value
-        self.maxvs = 2500
+        # Display options (screen YAML / configurator). AC 23.1311-1C 8.11 /
+        # AC 25-11B A.6: the VS scale should suit the airplane's climb and
+        # descent performance -- so the range and graduations are config,
+        # not constants. Labels stay in hundreds of ft/min (the tape's
+        # existing convention: 2400 fpm prints as 24).
+        self.maxvs = 2500           # full scale, +/- ft/min
+        self.minorDiv = 100         # tick every N ft/min
+        self.numberedDiv = 200      # numbered graduation every N ft/min
+        self.bg_color = "#000000"
+        self.bg_opacity = 100       # percent; 0 = transparent
         self.fontsize = 10
         self.indicator_line = None
 
@@ -399,6 +428,7 @@ class Alt_Trend_Tape(QGraphicsView):
         self._fail = self.item.fail
         self.myparent = parent
         self.update_period = None
+        self._signals_connected = False
 
     def resizeEvent(self, event):
         if self.update_period is None:
@@ -418,8 +448,14 @@ class Alt_Trend_Tape(QGraphicsView):
 
         self.scene = QGraphicsScene(0, 0, w, h)
         self.scene.setFont(f)
+        # Face honours bg_color/bg_opacity (percent) like the other boxed
+        # instruments: 0 = transparent, show what's behind the tape.
+        bg = QColor(str(self.bg_color))
+        if not bg.isValid():
+            bg = QColor(Qt.GlobalColor.black)
+        bg.setAlphaF(max(0.0, min(1.0, float(self.bg_opacity) / 100.0)))
         self.scene.addRect(0, 0, self.width(), h,
-                           QPen(QColor(Qt.GlobalColor.black)), QBrush(QColor(Qt.GlobalColor.black)))
+                           QPen(Qt.PenStyle.NoPen), QBrush(bg))
         t = self.scene.addText("VSI")
         t.setFont(f)
         t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
@@ -437,12 +473,18 @@ class Alt_Trend_Tape(QGraphicsView):
         remaining_height = self.height() - self.top_margin
         self.zero_y = remaining_height / 2 + self.top_margin
 
-        self.pph = float(remaining_height) / (self.maxvs * 2)
+        # Sanitised graduation intervals: minor ticks every minorDiv ft/min,
+        # numbered graduations every numberedDiv (aligned to the tick grid).
+        maxvs = max(500, int(self.maxvs))
+        self.maxvs = maxvs
+        minor = max(25, int(self.minorDiv))
+        numbered = max(minor, int(self.numberedDiv))
+        self.pph = float(remaining_height) / (maxvs * 2)
 
         tapePen = QPen(QColor(Qt.GlobalColor.white))
-        for i in range(self.maxvs, -self.maxvs - 1, -100):
+        for i in range(maxvs, -maxvs - 1, -minor):
             y = self.y_offset(i)
-            if i % 200 == 0:
+            if i % numbered == 0:
                 self.scene.addLine(w_2 + 5, y, w, y, tapePen)
                 t = self.scene.addText(str(int(i / 100)))
                 t.setFont(f)
@@ -452,10 +494,13 @@ class Alt_Trend_Tape(QGraphicsView):
             else:
                 self.scene.addLine(w_2 + 10, y, w, y, tapePen)
         self.setScene(self.scene)
-        self.item.valueChanged[float].connect(self.setVs)
-        self.item.oldChanged[bool].connect(self.setOld)
-        self.item.badChanged[bool].connect(self.setBad)
-        self.item.failChanged[bool].connect(self.setFail)
+        if not self._signals_connected:
+            # resizeEvent fires repeatedly; connect the FIX signals once.
+            self.item.valueChanged[float].connect(self.setVs)
+            self.item.oldChanged[bool].connect(self.setOld)
+            self.item.badChanged[bool].connect(self.setBad)
+            self.item.failChanged[bool].connect(self.setFail)
+            self._signals_connected = True
         self.redraw()
 
     def y_offset(self, vs):

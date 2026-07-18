@@ -79,6 +79,26 @@ def test_value_display_default(fix, qtbot):
     widget.show()
     assert widget.isVisible()
 
+def test_value_display_number_format(fix, qtbot):
+    widget = ValueDisplay()
+    qtbot.addWidget(widget)
+    # Blank format -> as-is (str), preserving existing behaviour.
+    widget._value = 89.0
+    assert widget.valueText == "89.0"
+    # Digit mask: rounded + zero-padded to the requested integer width.
+    widget.number_format = "000"
+    assert widget.valueText == "089"
+    widget._value = 7.4
+    assert widget.valueText == "007"
+    # Mask with decimals keeps the integer width and the decimals.
+    widget._value = 89.0
+    widget.number_format = "000.0"
+    assert widget.valueText == "089.0"
+    # A failed value still shows the failure marker regardless of format.
+    widget.fail = True
+    assert widget.valueText == "xxx"
+
+
 def test_value_display_font_mask(fix, qtbot):
     widget = ValueDisplay()
     widget.font_size = 100

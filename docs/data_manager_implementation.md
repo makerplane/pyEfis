@@ -1,0 +1,373 @@
+# MakerPlane Data Manager — implementation specification
+
+Physical implementation detail for the strategy in
+[data_manager_strategy.md](data_manager_strategy.md). Written as a
+handoff document: a fresh engineer or agent session (e.g. Claude Opus)
+should be able to build any phase from this file plus the referenced
+repos, without access to the conversations that produced it.
+
+## Context for a fresh implementer
+
+- **What this is**: a Garmin-style data-currency system for pyEfis
+  Pi 5 deployments. Three components: a cloud pack-builder pipeline, a
+  zero-egress distribution layer, and an on-Pi updater.
+- **Read first**: `data_manager_strategy.md` (the why and the
+  architecture), `svs_structural_plan.md` P8 (the on-device scenery
+  pack design this merges with), and the pyEfis `CLAUDE.md` (working
+  conventions; `ssh pyefis` reaches the test Pi 5).
+- **Existing assets to reuse, not reinvent**:
+  - `pyEfis/tools/build_airport_db.py` — NASR CSV → airports.sqlite
+  - `pyEfis/tools/build_obstacle_db.py` — DOF → obstacles.sqlite
+  - `pyEfis/tools/build_water_db.py` + `fetch_geofabrik_water.py` —
+    OSM/Natural Earth → water sqlite (R-tree, pre-tessellated)
+  - `pyEfis/tools/fetch_glo30.py` + `convert_glo30.py` — Copernicus
+    GLO-30 → 3601×3601 HGT tiles (resumable fetch; high-latitude
+    column resampling)
+  - `makerplane/faa-cifp-data` repo — **working FAA cycle-fetch
+    logic** including current-AND-next AIRAC cycle handling and a
+    `metadata.yaml` with effective dates. Treat its fetch code as the
+    source of truth for FAA URLs and cycle arithmetic rather than the
+    sketches below.
+- **Decisions pending from MakerPlane** (Bill has emailed them; do not
+  hard-block on these — build against placeholders):
+  domain (assume `data.makerplane.org`), repo home (assume new repo
+  `makerplane-data`), Cloudflare account, signing-key custody,
+  snap-vs-venv for the Pi CLI (assume plain venv + systemd, matching
+  the current Pi 5 deployment).
+
+## Repository layout (`makerplane-data`)
+
+```
+makerplane-data/
+├── packtools/                  # pip-installable package
+│   ├── __init__.py
+│   ├── manifest.py             # schema, signing, validation
+│   ├── cycles.py               # FAA 28/56-day cycle arithmetic
+│   ├── fetch_nasr.py           # download current+next NASR
+│   ├── fetch_cifp.py           # (port from faa-cifp-data)
+│   ├── fetch_dof.py
+│   ├── fetch_water.py          # geofabrik extracts
+│   ├── build/                  # thin wrappers around pyEfis tools
+│   │   └── ... (vendored or pip-dep on pyefis-tools — see note)
+│   └── upload.py               # R2 upload + manifest regeneration
+├── pyefis_data/                # the on-Pi updater CLI (also pip pkg)
+│   ├── __init__.py
+│   ├── cli.py                  # status / update / import / verify
+│   ├── config.py               # ~/.makerplane/pyefis/data.yaml
+│   ├── install.py              # staging, verify, symlink flip
+│   └── systemd/                # unit + timer + udev files
+├── site/                       # Cloudflare Pages static site
+│   ├── index.html              # cycle dashboard
+│   ├── regions.html            # region picker → packlist.json
+│   └── app.js                  # fetches manifest.json, renders
+├── .github/workflows/
+│   ├── cyclical.yml            # daily cron: NASR/CIFP/DOF
+│   ├── water.yml               # quarterly cron / manual dispatch
+│   └── terrain.yml             # manual dispatch only (bulk)
+├── keys/minisign.pub           # public key, committed
+└── docs/
+
+NOTE on tool sharing: phase A factors the pyEfis tools/ build scripts
+into a `pyefis-tools` package (or makes pyEfis pip-installable with a
+tools extra). Until that lands, the workflows may `pip install
+git+https://github.com/makerplane/pyEfis@<branch>` and call the tools
+by path. Do not fork the tool code into this repo permanently — one
+implementation.
+```
+
+## Pack format and manifest (Phase A — settle this first)
+
+### Pack file
+
+A pack is a single file. Two physical kinds:
+
+- **sqlite packs** (navdata, water): the sqlite file itself, with a
+  `pack_meta` table: `(key TEXT, value TEXT)` carrying `id`, `kind`,
+  `cycle`, `effective`, `expires`, `schema_version`, `attribution`.
+  The pyEfis DB loaders already tolerate-and-ignore unknown tables.
+- **tile packs** (terrain, later charts): a zip containing the HGT
+  tree fragment (`N60/N60W136.hgt`, ...) plus `pack_meta.json` with
+  the same keys and a per-file sha256 list.
+
+Naming: `<id>-<cycle-or-edition>.pack` (e.g.
+`navdata-conus-2606.pack`, `terrain-na-west-2024ed.pack`).
+
+### Catalog manifest
+
+One JSON document at a stable URL
+(`https://data.makerplane.org/manifest.json`), regenerated by every
+pipeline run, listing every available pack:
+
+```json
+{
+  "manifest_version": 1,
+  "generated": "2026-06-12T03:10:00Z",
+  "packs": [
+    {
+      "id": "navdata-conus",
+      "kind": "navdata",
+      "cycle": "2606",
+      "effective": "2026-06-12",
+      "expires": "2026-07-10",
+      "bytes": 104857600,
+      "sha256": "hex...",
+      "url": "https://data.makerplane.org/packs/navdata-conus-2606.pack",
+      "min_pyefis": "2.1",
+      "regions": ["conus"],
+      "attribution": "FAA NASR/CIFP/DOF (public domain)"
+    },
+    {
+      "id": "terrain-na-west", "kind": "terrain",
+      "cycle": "2024ed", "effective": null, "expires": null,
+      "regions": ["us-west", "canada-west"],
+      "tiles_bbox": [24, -170, 72, -100], "...": "..."
+    }
+  ],
+  "regions": {
+    "conus": {"name": "Continental US"},
+    "us-west": {"name": "US West", "bbox": [24, -125, 49, -100]}
+  }
+}
+```
+
+Rules: `expires: null` means non-cyclical (terrain). Both the current
+and the **next** cycle of each cyclical pack appear once the FAA
+publishes the next edition (devices stage it early; it becomes valid
+on its effective date). Old cycles stay listed for 1 extra cycle.
+
+### Signing
+
+- Algorithm: ed25519 detached signature over the exact manifest bytes,
+  published as `manifest.json.minisig` (minisign format — `minisign
+  -Sm manifest.json`). Key generation: `minisign -G` — secret key into
+  a GitHub Actions secret (`MINISIGN_SECRET_KEY`) AND offline custody
+  per MakerPlane's answer; public key committed to both repos and
+  embedded as a constant in `pyefis_data/cli.py`.
+- Pi-side verification: PyNaCl `VerifyKey` against the embedded public
+  key (minisign's format is documented; a ~40-line parser, or use the
+  `py-minisign` package if its dependency footprint is acceptable).
+- Per-pack integrity is the manifest's `sha256` (the signature covers
+  the manifest, the manifest covers the packs). HTTPS everywhere.
+
+## Pipeline (Phase B)
+
+### Cycle arithmetic (`packtools/cycles.py`)
+
+AIRAC/NASR cycles are 28 days from a published anchor; DOF is 56 days.
+**Do not hand-derive the anchors** — port the working logic from
+`faa-cifp-data` (it already computes current and next cycle IDs and
+their effective dates and builds the FAA URLs). Add unit tests pinning
+several known cycle/date pairs.
+
+FAA source URLs (verify against faa-cifp-data at implementation time;
+FAA occasionally moves paths):
+
+- NASR 28-day subscription (CSV flavour) from the FAA NASR
+  subscription page; the build_airport_db.py header documents the APT
+  CSV set it consumes.
+- CIFP: `CIFP_<effective-date>.zip` from aeronav.faa.gov (exact path in
+  faa-cifp-data).
+- DOF: the 56-day DOF product (build_obstacle_db.py documents its
+  input format).
+
+### `cyclical.yml` workflow sketch
+
+```yaml
+on:
+  schedule: [{cron: "20 9 * * *"}]   # daily, after FAA's typical posting
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -e . && pip install <pyefis-tools source>
+      - run: python -m packtools.run_cyclical
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+```
+
+`run_cyclical` logic: for each source — compute current/next cycle →
+HEAD the R2 key for that pack id+cycle → if present, skip; if absent,
+fetch + build + embed pack_meta + sha256 → upload pack → regenerate +
+sign + upload manifest. Idempotent and safe to run hourly if wanted.
+R2 uses the S3 API: `boto3` with `endpoint_url` =
+`https://<account-id>.r2.cloudflarestorage.com`.
+
+### Terrain (`terrain.yml`, manual dispatch)
+
+Terrain conversion for a continent exceeds CI limits comfortably only
+if chunked; the pragmatic path (already proven on Bill's PC, 2026-06):
+run `fetch_glo30.py` + `convert_glo30.py` on a workstation, run a
+`packtools.make_terrain_packs --src <hgt-root> --regions regions.yaml`
+script that zips region groups + writes pack_meta + uploads. The
+workflow file exists for re-runs but `workflow_dispatch`-only.
+
+Region grouping: define in `regions.yaml` — start with ~8 NA regions
+(us-west/us-central/us-east/us-south/alaska/canada-west/canada-east/
+mexico+central-america), each a bbox; tiles assigned by SW corner.
+8–15 GB per region pack.
+
+## Cloudflare setup (one-time, documented for whoever owns the account)
+
+1. R2 bucket `makerplane-data`; custom domain `data.makerplane.org`
+   attached to the bucket (Cloudflare proxies it; objects are then
+   plain HTTPS GETs, cached at the edge).
+2. R2 API token (Object Read & Write, scoped to the bucket) → the
+   three `R2_*` GitHub secrets.
+3. Pages project for `site/`, on `data.makerplane.org` root or
+   `www`-style subdomain — either serve the manifest from R2 and the
+   site from Pages on the same hostname via routes, or keep
+   `data.` (objects) and `manager.` (site) separate. Recommend
+   separate hostnames; the site fetches the manifest cross-origin
+   (set CORS on the bucket: `GET` from the site origin).
+
+## On-Pi updater `pyefis-data` (Phase C)
+
+### Filesystem layout on the Pi
+
+```
+~/makerplane-data/
+├── installed.json              # local inventory (ids, cycles, sha256s)
+├── staging/                    # downloads in progress (.part files)
+├── navdata/
+│   ├── 2606/airports.sqlite ...
+│   └── current -> 2606/        # atomic flip via os.replace on a
+├── water/                      #   temp symlink (POSIX-atomic)
+│   ├── 2026q2/water.sqlite
+│   └── current -> 2026q2/
+└── terrain/
+    └── tiles/                  # merged HGT tree (regions unioned)
+        ├── N32/...
+        └── .regions.json       # which region packs are installed
+```
+
+pyEfis config points at the `current` symlinks
+(`nasr_db_path: ~/makerplane-data/navdata/current/airports.sqlite`,
+`tile_path: ~/makerplane-data/terrain/tiles`, etc.). Terrain installs
+unpack into the shared tree (tiles are 1°×1° and independent; regions
+may overlap harmlessly — same content).
+
+### CLI behaviour
+
+- `pyefis-data status [--json]`: fetch manifest (cached, offline-OK),
+  verify signature, compare against `installed.json`. Output per pack:
+  `current | update-staged | UPDATE AVAILABLE | EXPIRES <date> |
+  EXPIRED`. `--json` output feeds the in-EFIS status screen.
+- `pyefis-data update [--now]`: for each configured region/kind, pick
+  the manifest entry whose `[effective, expires]` covers today (or
+  stage the next cycle if published): download to `staging/` with
+  resume, sha256-verify, unpack/install to a versioned dir, flip
+  `current` symlink, update `installed.json`, prune the
+  version-before-last. Exit non-zero on any verification failure and
+  leave `current` untouched (the swap is strictly
+  verify-then-rename — a failed download can never corrupt a live
+  deployment).
+- `pyefis-data import <path>`: same install path but sourcing packs +
+  manifest copy from a directory (the USB flow). The manifest copy on
+  the stick is signature-verified exactly like the network one.
+- systemd (user units, like the existing `pyefis.service`):
+  `pyefis-data.timer` → daily `pyefis-data update` when network is up
+  (`Wants=network-online.target`); failures are logged, never fatal to
+  the EFIS.
+
+### USB import hook
+
+udev rule (system-level, `/etc/udev/rules.d/99-makerplane-data.rules`):
+
+```
+ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", \
+  ENV{ID_FS_USAGE}=="filesystem", TAG+="systemd", \
+  ENV{SYSTEMD_WANTS}="makerplane-usb-import@%k.service"
+```
+
+The templated service mounts the partition read-only at a temp point,
+checks for `makerplane-data/manifest.json`, and if present runs
+`pyefis-data import` against it, then unmounts. All outcomes logged;
+an import while pyEfis runs is safe (symlink flip; data applies at
+next restart / cache expiry — see next section).
+
+### Apply semantics (what "installed" means to a running EFIS)
+
+- Water/airport/obstacle sqlite: pyEfis opens these at startup. After
+  a flip, the running instance keeps the old file handle (POSIX:
+  rename doesn't disturb open fds) — correct and crash-free. The
+  status screen shows "restart to apply"; a config option can let
+  `pyefis-data` restart `pyefis.service` when the aircraft is clearly
+  not in flight (e.g. only via the explicit `--now` + confirmation, or
+  on next boot — default: next boot).
+- Terrain tiles: picked up naturally by TileCache misses; no restart
+  needed for new regions; replaced tiles need restart (cache holds 9).
+
+## In-EFIS DATA annunciation (Phase F)
+
+`pyefis-data status --json > ~/makerplane-data/status.json` runs from
+the timer. pyEfis side: a small status reader (hooks/ module or a
+screenbuilder instrument) that loads the JSON at startup + hourly, and
+(a) drives an amber `DATA` annunciation when any installed cyclical
+pack is `EXPIRED`, white when `EXPIRES` within 7 days; (b) exposes a
+detail listing for a status screen. This subsumes the plan-P8
+"out-of-cycle annunciation" item. Do not couple it to the SVS — the
+reader must construct safely when the file is absent (the standard
+construct-never-raises convention from CLAUDE.md).
+
+## Website (Phase E)
+
+Static, no build step required (vanilla JS or a tiny bundler):
+
+- `index.html`: fetch manifest → table of pack kinds with current
+  cycle, next cycle + its effective date, days-remaining countdown
+  colour-coded. This is the "is the data system healthy" page.
+- `regions.html`: map-or-list region picker → emits (a) direct
+  download links, (b) a `packlist.json` (array of pack ids) the CLI
+  accepts via `pyefis-data update --packlist <url-or-file>`, and
+  (c) "USB stick" instructions: download these N files + manifest +
+  signature into `makerplane-data/` on the stick — that directory
+  IS the sneakernet format, no special tool needed on the PC.
+- Hard requirement: the site is presentation only. Every operation
+  must be possible with curl + the CLI alone.
+
+## Testing strategy
+
+- `packtools`: unit tests for cycle arithmetic (pinned known dates),
+  manifest schema round-trip, signature verify (test keypair in
+  tests/), pack_meta embedding.
+- `pyefis_data`: tests with a local HTTP fixture serving a manifest +
+  packs; corrupted-sha256 and bad-signature cases must leave
+  `installed.json` and `current` symlinks untouched; USB import from
+  a tmpdir.
+- End-to-end on the bench Pi (`ssh pyefis`): point the CLI at a
+  staging bucket, run a full update, restart `pyefis.service`,
+  confirm the DATA flag clears. The harness poses in
+  `svs_structural_plan.md` verify rendering against the installed
+  packs.
+- Pipeline dry-run mode (`--no-upload`) for CI PRs.
+
+## Phase checklist (each independently shippable)
+
+- [ ] **A**: `packtools.manifest` + signing + pack_meta embedding;
+      factor pyEfis tools into an importable package; `regions.yaml`.
+      Done when: a navdata pack builds locally, verifies, and a unit
+      suite covers schema + signature.
+- [ ] **B**: `cyclical.yml` live against R2; manifest regenerating
+      daily; current+next NASR/CIFP/DOF packs appearing unattended.
+      Done when: two consecutive FAA cycles publish without human
+      action.
+- [ ] **C**: `pyefis-data` CLI + systemd + USB import deployed on the
+      bench Pi pulling from the real bucket. Done when: a staged
+      next-cycle pack flips to current on its effective date and the
+      bench EFIS renders from it after restart.
+- [ ] **D**: terrain region packs uploaded (one-time per edition) +
+      `make_terrain_packs` committed. Done when: a fresh Pi gets
+      us-south terrain via `pyefis-data update` alone.
+- [ ] **E**: site live on Pages. Done when: a non-developer can
+      prepare a USB stick from scratch using only the site.
+- [ ] **F**: DATA annunciation in pyEfis. Done when: expiring the
+      bench Pi's navdata (clock or stale pack) shows amber DATA, and
+      updating clears it.
+- [ ] **G** (later): chart packs (plan P10), Canadian airports
+      supplement (OurAirports, labeled), delta updates, email expiry
+      reminders.

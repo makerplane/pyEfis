@@ -157,3 +157,97 @@ def test_turn_coordinator_tape_paint_and_lat_acc(qtbot):
     assert widget.latAcc == 0.25
     widget.update.assert_called_once_with()
     widget.paintEvent(event)
+
+
+# =============================================================================
+# Turn-coordinator / slip-skid requirements test catalog -- keyed to
+# tc_widget_spec.md sec 4 (Rate-of-turn, Slip-skid & Annunciation) and
+# avionics_reference.md sec 8.
+#
+# Docstrings: TC-TC-NNN | requirement ID | intent.
+# Passing tests verify shipped behaviour. The xfail(strict) test is the gap
+# tracker for the excessive-slip amber cue (AC 25-11B sec A.2.6) -- the dedicated
+# slip-skid instrument should carry the same salience the AI slip/skid already
+# does (AI-SLIP-002). Spec sec 5 carries the case<->requirement map.
+# =============================================================================
+
+
+def _reset_tc_items(fix):
+    for key in ("ALAT", "ROT"):
+        item = fix.db.get_item(key)
+        item.bad = False
+        item.old = False
+        item.fail = False
+
+
+def test_tc_cat_rate_of_turn_and_standard_rate(fix, qtbot, config_parent):
+    """TC-TC-001 | TC-DISP-001 | Rate-of-turn: the airplane symbol banks with ROT against
+    fixed standard-rate marks, clamped to scale. AC 23.1311-1C sec 8.9 (p.26); 91.205(d)."""
+    _reset_tc_items(fix)
+    widget = tc.TurnCoordinator(parent=config_parent)
+    event = _show_widget(qtbot, widget)
+    assert widget.rot_item.key == "ROT"
+    assert widget.slip_skid_only is False                  # full rate-of-turn face
+    widget.rate = 99
+    widget.paintEvent(event)
+    assert widget.rate == 5                                 # clamped to scale
+    widget.rate = -99
+    widget.paintEvent(event)
+    assert widget.rate == -5
+
+
+def test_tc_cat_slip_skid_ball_tracks_alat(fix, qtbot, config_parent):
+    """TC-TC-002 | TC-SLIP-001 | The integral slip-skid ball deflects with ALAT and centers
+    in coordinated flight. AC 23.1311-1C sec 8.10 (p.26); 91.205(d)(4)."""
+    _reset_tc_items(fix)
+    widget = tc.TurnCoordinator(parent=config_parent, dial=False, ss_only=True)
+    event = _show_widget(qtbot, widget)
+    assert widget.alat_item.key == "ALAT"
+    widget.setLatAcc(0.0)
+    assert widget.getLatAcc() == 0.0                       # coordinated -> centered
+    widget.setLatAcc(0.1)
+    assert widget.getLatAcc() == pytest.approx(0.1)        # deflects with lateral accel
+    widget.paintEvent(event)
+
+
+def test_tc_cat_invalid_annunciation(fix, qtbot, config_parent):
+    """TC-TC-003 | TC-ANN-001 | Invalid ALAT (ball) and ROT (airplane) are annunciated:
+    fail -> red XXX, old/bad -> grey. ref sec 2 governing principle."""
+    _reset_tc_items(fix)
+    widget = tc.TurnCoordinator(parent=config_parent)
+    event = _show_widget(qtbot, widget)
+
+    with track_calls(QPen, "__init__") as tracker:
+        fix.db.get_item("ALAT").bad = True
+        widget.paintEvent(event)
+    assert tracker.was_called_with("__init__", QColor(Qt.GlobalColor.gray))
+
+    with track_calls(QPen, "__init__") as tracker:
+        fix.db.get_item("ALAT").bad = False
+        fix.db.get_item("ALAT").fail = True
+        widget.paintEvent(event)
+    assert tracker.was_called_with("__init__", QColor(Qt.GlobalColor.red))
+
+    _reset_tc_items(fix)
+    with track_calls(QPen, "__init__") as tracker:
+        fix.db.get_item("ROT").fail = True
+        widget.paintEvent(event)
+    assert tracker.was_called_with("__init__", QColor(Qt.GlobalColor.red))
+
+
+def test_tc_cat_excessive_slip_annunciation(fix, qtbot, config_parent):
+    """TC-TC-004 | TC-SLIP-002 | Beyond the excessive-slip threshold the ball gives a
+    salient (amber) alert, consistent with the AI slip/skid. AC 25-11B sec A.2.6 (p.70).
+    Contract: paintEvent sets w._excessive_slip and draws the ball amber."""
+    _reset_tc_items(fix)
+    widget = tc.TurnCoordinator(parent=config_parent)
+    event = _show_widget(qtbot, widget)
+
+    widget.setLatAcc(0.05)                                 # small slip (in scale) -> no caution
+    widget.paintEvent(event)
+    assert widget._excessive_slip is False
+    with track_calls(QPen, "__init__") as tracker:
+        widget.setLatAcc(0.2)                              # ball pegged -> caution
+        widget.paintEvent(event)
+    assert widget._excessive_slip is True
+    assert tracker.was_called_with("__init__", QColor(255, 150, 0))   # amber

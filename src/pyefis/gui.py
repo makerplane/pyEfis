@@ -18,15 +18,22 @@ from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QObject, pyqtSignal, QEvent, QCoreApplication
 from PyQt6.QtWidgets import QMainWindow, QApplication, QWidget
 
+import os
 import time
 import importlib
 import logging
 import sys
+import yaml
 from pyefis import hmi
 import pyavtools.fix as fix
 import pyavtools.scheduler as scheduler
 
 screens = []
+
+# The nav-data management screen must boot for everyone, independent of the
+# configurable main.defaultScreen (a panel/config push can overwrite that). See
+# _ensure_data_status_boot().
+DATA_STATUS_SCREEN = "DataStatus"
 
 # This class is just a structure to hold information about a single
 # screen that will be loaded.
@@ -206,6 +213,48 @@ def setDefaultScreen(s):
     return found
 
 
+def _ensure_data_status_boot(config, configured_default):
+    """Guarantee the nav-data management screen boots for everyone.
+
+    The data-status screen is normally selected via ``main.defaultScreen``, but
+    that is just a config value a panel/config push can overwrite -- which is how
+    boards silently stop showing it on boot. Make it built-in instead: ensure
+    the screen is loaded (inject the bundled definition if a config dropped it),
+    point its Continue button at the configured default flight screen, and return
+    the name of the screen to boot. Any failure falls back to
+    ``configured_default`` so boot never breaks."""
+    try:
+        name = DATA_STATUS_SCREEN
+        scr_config = config.setdefault("screens", {}).get(name)
+        if scr_config is None:
+            # A config push dropped it -- load the bundled definition so the
+            # screen is always present regardless of the on-disk config.
+            path = os.path.join(os.path.dirname(__file__), "config", "screens",
+                                "datastatus.yaml")
+            with open(path) as f:
+                scr_config = (yaml.safe_load(f) or {}).get(name)
+            if not scr_config:
+                return configured_default
+            config["screens"][name] = scr_config
+            screens.append(Screen(name, scr_config["module"], scr_config))
+            log.info("data-status boot: screen absent from config; "
+                     "injected the bundled definition")
+        # Continue proceeds to the configured default flight screen, so the pilot
+        # lands on their normal screen rather than the bundled fallback.
+        if isinstance(configured_default, str) and configured_default != name:
+            for inst in scr_config.get("instruments", []):
+                if inst.get("type") == "data_status":
+                    inst.setdefault("options", {})["continue_screen"] = \
+                        configured_default
+        log.info("data-status boot: forcing %s as the boot screen "
+                 "(continue -> %s)", name, configured_default)
+        return name
+    except Exception as e:
+        log.error("data-status boot: could not enforce the built-in screen "
+                  "(%s); using the configured default", e)
+        return configured_default
+
+
 def initialize(config, config_path, preferences):
     global mainWindow
     global log
@@ -227,7 +276,11 @@ def initialize(config, config_path, preferences):
     except KeyError:
         d = 0
 
-    setDefaultScreen(d)
+    # The nav-data management screen boots universally, regardless of the
+    # configured defaultScreen (which a panel/config push can overwrite). Ensure
+    # it is loaded, send its Continue to the configured default, and boot to it.
+    boot = _ensure_data_status_boot(config, d)
+    setDefaultScreen(boot)
 
     mainWindow = Main(config, config_path, preferences)
     hmi.actions.showNextScreen.connect(mainWindow.showNextScreen)

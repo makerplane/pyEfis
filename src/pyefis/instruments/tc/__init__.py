@@ -54,6 +54,11 @@ class TurnCoordinator(QWidget):
         self.rot_item.failChanged.connect(self.quality_change)
         self.alat_multiplier = 1.0 / (0.217)
         self.max_tc_displacement = 1.0 / self.alat_multiplier
+        # Excessive-slip caution (AC 25-11B App A A.2.6): amber ball once the
+        # deflection reaches this fraction of full-scale, matching the AI
+        # slip/skid (AI-SLIP-002) so the two ALAT indications agree. Configurable.
+        self.excessiveSlipFraction = 0.85
+        self._excessive_slip = False
 
     def getRatio(self):
         # Return X for 1:x specifying the ratio for this instrument
@@ -143,20 +148,30 @@ class TurnCoordinator(QWidget):
         p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         ball_rad = self.boxHeight / 2
-        if self.alat_item.bad or self.alat_item.old:
-            pen = QPen(QColor(Qt.GlobalColor.gray))
-            brush = QBrush(QColor(Qt.GlobalColor.gray))
-        else:
-            pen = QPen(QColor(Qt.GlobalColor.black))
-            brush = QBrush(QColor(Qt.GlobalColor.black))
-        pen.setWidth(2)
-        p.setPen(pen)
-        p.setBrush(brush)
         acc_displacement = self._latAcc
         if acc_displacement > self.max_tc_displacement:
             acc_displacement = self.max_tc_displacement
         if acc_displacement < -self.max_tc_displacement:
             acc_displacement = -self.max_tc_displacement
+        # Excessive-slip caution (AC 25-11B App A A.2.6): amber ball once the
+        # deflection reaches excessiveSlipFraction of full-scale, unless the data
+        # is degraded (grey) or failed (XXX). Matches the AI slip/skid so the two
+        # ALAT indications agree.
+        degraded = self.alat_item.bad or self.alat_item.old
+        excessive_thr = self.excessiveSlipFraction * self.max_tc_displacement
+        self._excessive_slip = (not degraded and not self.alat_item.fail
+                                and abs(acc_displacement) >= excessive_thr)
+        if degraded:
+            ball_color = QColor(Qt.GlobalColor.gray)
+        elif self._excessive_slip:
+            ball_color = QColor(255, 150, 0)          # amber -- excessive sideslip
+        else:
+            ball_color = QColor(Qt.GlobalColor.black)
+        pen = QPen(ball_color)
+        brush = QBrush(ball_color)
+        pen.setWidth(2)
+        p.setPen(pen)
+        p.setBrush(brush)
         centerball = self.center.x() + (self.boxHalfWidth - ball_rad) * (-(
                      acc_displacement * self.alat_multiplier))
 

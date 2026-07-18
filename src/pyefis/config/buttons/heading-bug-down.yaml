@@ -1,0 +1,12 @@
+type: repeat
+text: "HDG\n-"
+dbkey: TSBTN{id}29
+bg_color: "#101418"
+fg_color: "#00ffff"
+# Hold to spin the heading bug down; wraps 0 -> 359.
+repeat_interval: 60
+repeat_delay: 300
+conditions:
+  - when: "CLICKED eq true"
+    actions:
+      - change value wrap: "HEADBUG, -1"

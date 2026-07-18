@@ -17,6 +17,16 @@
 import re
 
 
+def normalize_font_percent(value):
+    """Font height as a fraction of the widget height. Accept a whole-number
+    percent (40 = 40% of height) as well as the legacy decimal fraction (0.40):
+    a value > 1 is read as a percent and scaled; <= 1 is already a fraction."""
+    if value is None:
+        return None
+    value = float(value)
+    return value / 100.0 if value > 1.0 else value
+
+
 def apply_preferences(config, preferences):
     if "preferences" in config:
         specific_pref = dict()
@@ -47,7 +57,8 @@ def apply_preferences(config, preferences):
     font_family = "DejaVu Sans Condensed"
     if "options" in config:
         if "font_percent" in config["options"]:
-            font_percent = config["options"]["font_percent"]
+            font_percent = normalize_font_percent(
+                config["options"]["font_percent"])
         if "font_family" in config["options"]:
             font_family = config["options"]["font_family"]
 

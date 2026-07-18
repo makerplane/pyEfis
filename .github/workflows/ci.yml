@@ -26,10 +26,14 @@ jobs:
         cache: 'pip'
     - name: Install dependencies
       run: |
+        # Refresh the apt index first: the runner's pre-baked package list can
+        # reference a libegl1 dependency (.deb) that Ubuntu has since rotated off
+        # the mirror, so a bare `apt install` 404s. `apt-get update` re-resolves it.
+        sudo apt-get update
         sudo apt install -y libegl1
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-qt pytest-env pytest-cov
-        pip install -e .[qt]
+        pip install -e .[qt,svs]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

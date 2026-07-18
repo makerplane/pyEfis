@@ -108,6 +108,15 @@ parts:
       - python3-minimal
       - python3-pkg-resources
       - python3-pyqt6
+      # SVS (Synthetic Vision) runtime deps, OS-provided -- same pattern as
+      # python3-pyqt6 above. These are the `svs` extra in pyproject.toml
+      # (numpy, PyOpenGL); supplied here at the OS level and visible to pyEfis
+      # via the venv's --system-site-packages. Without them SVS annunciates
+      # "SVS UNAVAIL". Note: depending on the target GPU/driver, additional GL
+      # runtime libs may be needed for SVS to actually render -- validate on
+      # hardware.
+      - python3-numpy
+      - python3-opengl
       - x11-utils
       - weston
       - fonts-dejavu-core

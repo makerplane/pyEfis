@@ -38,15 +38,19 @@ import time
 from pyefis.instruments import helpers
 
 class Button(QWidget):
-    def __init__(self, parent=None, config_file=None, font_family="DejaVu Sans Condensed"):
+    def __init__(self, parent=None, config_file=None, config=None, font_family="DejaVu Sans Condensed"):
         super(Button, self).__init__(parent)
 
         self.parent = parent
         self.font_family = font_family
         self.font_mask = None
         self.font_size = None
-        with open(config_file) as f:
-          config = yaml.load(f, Loader=yaml.SafeLoader)
+        # A button is defined either by an external YAML file (config_file --
+        # hand-authored panels) or by an inline options dict (config -- authored
+        # in the configurator). Inline wins when supplied.
+        if config is None:
+          with open(config_file) as f:
+            config = yaml.load(f, Loader=yaml.SafeLoader)
         self._conditions = config.get('conditions', [])
         self.config = config
         self._button = QPushButton(self) #self.config['text'], self)
@@ -67,7 +71,11 @@ class Button(QWidget):
         #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)
 
         self._repeat = False
-        if self.config['type'] == 'toggle':
+        # Normalise once so a config that omits `type` (the configurator writes
+        # only non-default options) defaults to 'simple' -- matching the schema
+        # default -- instead of KeyError'ing on the elif below.
+        btype = self.config.get('type', 'simple')
+        if btype == 'toggle':
             self._toggle = True
             self._button.setCheckable(True)
             # toggled reacts to setChecked where clicked does not
@@ -76,17 +84,17 @@ class Button(QWidget):
             # things such as encoder navigation
             self._button.toggled.connect(self.buttonToggled)
 
-        elif self.config['type'] == 'simple':
+        elif btype == 'simple':
             self._button.setCheckable(False)
             self._button.clicked.connect(self.buttonToggled)
-        elif self.config['type'] == 'repeat':
+        elif btype == 'repeat':
             self._repeat = True
             self._button.pressed.connect(self.buttonToggled)
             self._button.setAutoRepeat(True)
             self._button.setAutoRepeatInterval(self.config.get('repeat_interval', 300))
             self._button.setAutoRepeatDelay(self.config.get('repeat_delay', 300))
         else:
-            raise SyntaxError(f"Unknown button type '{self.config['type']}'")
+            raise SyntaxError(f"Unknown button type '{btype}'")
         self._button.setEnabled(True)
         #self._dbkey = fix.db.get_item(self.config['dbkey'])
         #self._dbkey.valueChanged[bool].connect(self.dbkeyChanged)

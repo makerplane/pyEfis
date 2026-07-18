@@ -353,10 +353,14 @@ def test_initialize_loads_screens_menu_fms_window_and_button_timeout(
 
     gui.initialize(config, "/config", {"includes": {}})
 
-    assert [screen.name for screen in gui.screens] == ["FIRST", "SECOND"]
+    # gui._ensure_data_status_boot injects the data-status screen and forces it
+    # as the boot screen for everyone, so it is appended and becomes the default;
+    # the configured defaultScreen ("SECOND") becomes the Continue target.
+    assert [screen.name for screen in gui.screens] == ["FIRST", "SECOND", "DataStatus"]
     assert gui.screens[0].default is False
-    assert gui.screens[1].default is True
-    assert gui.mainWindow.running_screen == 1
+    assert gui.screens[1].default is False
+    assert gui.screens[2].default is True
+    assert gui.mainWindow.running_screen == 2
     menu_class.assert_called_once_with(gui.mainWindow, {"items": []})
     menu_instance.start.assert_called_once_with()
     qtui.FMSUI.assert_called_once_with("/tmp/plans", gui.mainWindow)
@@ -373,7 +377,7 @@ def test_initialize_loads_screens_menu_fms_window_and_button_timeout(
     assert timer.started is True
 
 
-def test_initialize_defaults_to_first_screen_and_fullscreen(app, monkeypatch):
+def test_initialize_boots_data_status_screen_and_fullscreen(app, monkeypatch):
     _screen_module("tests.fake_gui_screen_initialize_full")
     config = {
         "main": {
@@ -391,7 +395,11 @@ def test_initialize_defaults_to_first_screen_and_fullscreen(app, monkeypatch):
 
     gui.initialize(config, ".", {})
 
-    assert gui.screens[0].default is True
+    # gui._ensure_data_status_boot injects the data-status screen and forces it
+    # as the boot/default screen, even with no configured defaultScreen.
+    assert [screen.name for screen in gui.screens] == ["FIRST", "DataStatus"]
+    assert gui.screens[0].default is False
+    assert gui.screens[1].default is True
     show_full_screen.assert_called_once_with()
 
 

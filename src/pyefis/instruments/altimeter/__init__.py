@@ -34,11 +34,13 @@ class Altimeter(QWidget):
         self, parent=None, bg_color=Qt.GlobalColor.black, font_family="DejaVu Sans Condensed"
     ):
         super(Altimeter, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        # Transparent widget background so bg_opacity < 1 reveals what's behind.
+        self.setStyleSheet("background: transparent; border: 0px")
         self.font_family = font_family
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._altimeter = 0
         self.bg_color = bg_color
+        self.bg_opacity = 100  # percent (100 = solid, the default)
         self.item = fix.db.get_item("ALT")
         self.item.valueChanged[float].connect(self.setAltimeter)
         self.item.oldChanged[bool].connect(self.repaint)
@@ -65,8 +67,10 @@ class Altimeter(QWidget):
         center_x = w / 2
         center_y = h / 2
 
-        # Draw the Black Background
-        dial.fillRect(0, 0, w, h, QColor(self.bg_color))
+        # Draw the background (bg_opacity percent < 100 lets what's behind show)
+        _bg = QColor(self.bg_color)
+        _bg.setAlphaF(max(0.0, min(1.0, float(getattr(self, "bg_opacity", 100)) / 100.0)))
+        dial.fillRect(0, 0, w, h, _bg)
         dialPen = QPen()
         # Setup Pens
         if self.item.old or self.item.bad:
@@ -220,11 +224,25 @@ class Altimeter_Tape(QGraphicsView):
         fontsize=15,
         font_percent=None,
         font_family="DejaVu Sans Condensed",
+        majorDiv=200,
+        minorDiv=100,
+        total_decimals=5,
+        font_mask="00000",
+        round_to=0,
+        numeric_box=True,
+        font_scale=1.0,
+        show_trend=None,
+        trend_lookahead=6.0,
+        trend_window=3.0,
+        trend_min_change=20.0,
     ):
         super(Altimeter_Tape, self).__init__(parent)
+        # Checkbox option: alpha-fade the scrolling scale into the
+        # background over the top/bottom 15% of the tape.
+        self.edge_fade = False
         self.setStyleSheet("background: transparent")
         self.font_family = font_family
-        self.font_mask = "00000"
+        self.font_mask = font_mask
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -241,13 +259,35 @@ class Altimeter_Tape(QGraphicsView):
         self._altimeter = self.item.value
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
-        self.majorDiv = 200
-        self.minorDiv = 100
+        self.majorDiv = majorDiv
+        self.minorDiv = minorDiv
 
         self.maxalt = maxalt
         self._maxalt = maxalt
-        self.total_decimals = 5
+        self.total_decimals = total_decimals
+        # Round the value shown in the numeric box to this step (0 = off). For a
+        # jittery source like VS, rounding to e.g. 100 makes the box snap in
+        # 100-fpm steps instead of the digits scrolling continuously; the tape
+        # scroll itself stays smooth (it uses the unrounded value).
+        self.round_to = round_to
+        # When False, the embedded numeric readout box is omitted entirely and
+        # only the scrolling tape (with its fixed read pointer) is shown.
+        self.numeric_box = numeric_box
+        # Multiplier on the tape's scale-number (tick label) font size.
+        self.font_scale = font_scale
         self.myparent = parent
+
+        # 6-second altitude-trend indicator (AC 23.1311-1C sec 17.8.b): a cyan
+        # vector predicting where the altitude will be trend_lookahead seconds
+        # ahead, for level-off look-ahead. It is an ALTITUDE cue, so default it
+        # on only for an ALT tape -- a VS tape shares this class and should not
+        # sprout a trend-of-VS. An explicit show_trend (config/caller) always wins.
+        self.show_trend = (dbkey == "ALT") if show_trend is None else show_trend
+        self.trend_lookahead = trend_lookahead
+        self.trend_window = trend_window
+        self.trend_min_change = trend_min_change
+        self._trend_history = []   # (monotonic_time, altitude) samples
+        self._trend_px = 0.0
 
         self.conversionFunction1 = lambda x: x
         self.conversionFunction2 = lambda x: x
@@ -268,9 +308,9 @@ class Altimeter_Tape(QGraphicsView):
                 self.font_mask,
                 self.font_family,
             )
-            f.setPointSizeF(self.font_size)
+            f.setPointSizeF(self.font_size * self.font_scale)
         else:
-            f.setPixelSize(self.fontsize)
+            f.setPixelSize(qRound(self.fontsize * self.font_scale))
         self.height_pixel = (
             self.maxalt * 2 * self.pph + h
         )  # + abs(self.minalt*self.pph)
@@ -290,37 +330,55 @@ class Altimeter_Tape(QGraphicsView):
 
         for i in range(self.maxalt * 2, -1, -self.minorDiv):
             y = self.y_offset(i)
-            if (i - self.maxalt) % self.majorDiv == 0:
-                l = self.scene.addLine(w_2 + 15, y, w, y, dialPen)
-                l.setOpacity(self.foregroundOpacity)
-                t = self.scene.addText(str(i - self.maxalt))
+            alt = i - self.maxalt
+            # Three tick tiers denoting the standard increments (AC 23.1311-1C
+            # sec 17.8.a): 1,000-ft longest, 500-ft intermediate, minorDiv short.
+            # Labels ride every 1,000-ft tick and every majorDiv tick, so a
+            # config's chosen label spacing is preserved while the 500/1,000-ft
+            # sense of altitude is reinforced.
+            if alt % 1000 == 0:
+                tick_x0 = w_2                       # longest
+                labeled = True
+            elif alt % 500 == 0:
+                tick_x0 = w_2 + 15                  # intermediate
+                labeled = (alt % self.majorDiv == 0)
+            elif alt % self.majorDiv == 0:
+                tick_x0 = w_2 + 15                  # labeled major
+                labeled = True
+            else:
+                tick_x0 = w_2 + 30                  # short minor
+                labeled = False
+            l = self.scene.addLine(tick_x0, y, w, y, dialPen)
+            l.setOpacity(self.foregroundOpacity)
+            if labeled:
+                t = self.scene.addText(str(alt))
                 t.setFont(f)
                 self.scene.setFont(f)
                 t.setDefaultTextColor(QColor(Qt.GlobalColor.white))
                 t.setX(0)
                 t.setY(y - t.boundingRect().height() / 2)
                 t.setOpacity(self.foregroundOpacity)
-
-            else:
-                l = self.scene.addLine(w_2 + 30, y, w, y, dialPen)
-                l.setOpacity(self.foregroundOpacity)
         self.setScene(self.scene)
 
-        self.numerical_display = NumericalDisplay(
-            self, total_decimals=self.total_decimals, scroll_decimal=2
-        )
         nbh = w / 1.20
-        self.numerical_display.resize(qRound(w / 1.20), qRound(nbh / 1.45))
+        box_w = qRound(w / 1.20)
         self.numeric_box_pos = QPoint(0, qRound(h / 2 - (nbh / 1.45) / 2))
-        self.numerical_display.move(self.numeric_box_pos)
-        self.numeric_box_pos.setX(
-            self.numeric_box_pos.x() + self.numerical_display.width()
-        )
+        if self.numeric_box:
+            self.numerical_display = NumericalDisplay(
+                self, total_decimals=self.total_decimals, scroll_decimal=2
+            )
+            self.numerical_display.resize(box_w, qRound(nbh / 1.45))
+            self.numerical_display.move(self.numeric_box_pos)
+            self.numerical_display.show()
+            self.numerical_display.value = self._altimeter
+        else:
+            self.numerical_display = None
+        # Read-pointer position (drawn in paintEvent) — same spot whether or not
+        # the numeric box is shown, so the tape stays readable.
+        self.numeric_box_pos.setX(self.numeric_box_pos.x() + box_w)
         self.numeric_box_pos.setY(
             qRound(self.numeric_box_pos.y() + (nbh / 1.45) / 2) + 1
         )
-        self.numerical_display.show()
-        self.numerical_display.value = self._altimeter
         self.centerOn(
             self.scene.width() / 2, self.y_offset(self._altimeter + self.maxalt)
         )
@@ -342,11 +400,23 @@ class Altimeter_Tape(QGraphicsView):
         self.centerOn(
             self.scene.width() / 2, self.y_offset(self._altimeter + self.maxalt)
         )
-        self.numerical_display.value = self._altimeter
+        if self.numerical_display is not None:
+            if self.round_to:
+                self.numerical_display.value = (
+                    round(self._altimeter / self.round_to) * self.round_to
+                )
+            else:
+                self.numerical_display.value = self._altimeter
 
     #  Index Line that doesn't move to make it easy to read the altimeter.
     def paintEvent(self, event):
-        super(Altimeter_Tape, self).paintEvent(event)
+        # edge_fade (percent of height, 0 = off): melt the scrolling
+        # scale in/out at the top and bottom instead of hard-clipping.
+        _fade = bool(getattr(self, "edge_fade", False))
+        if _fade > 0:
+            helpers.render_view_edge_faded(self, 15.0)
+        else:
+            super(Altimeter_Tape, self).paintEvent(event)
         w = self.width()
         h = self.height()
         p = QPainter(self.viewport())
@@ -366,6 +436,31 @@ class Altimeter_Tape(QGraphicsView):
                 ]
             )
         )
+
+        # Altitude-trend vector (AC 23.1311-1C sec 17.8.b) -- a cyan look-ahead
+        # from the read pointer: up when climbing, down when descending. Only
+        # shown once it clears a noise floor so a level-flight jitter stays quiet.
+        if self.show_trend:
+            noise_floor_px = self.trend_min_change * self.pph
+            if abs(self._trend_px) >= noise_floor_px:
+                trend_color = QColor(0, 220, 255)
+                line_w = max(2, qRound(w / 40))
+                p.setPen(QPen(trend_color, line_w))
+                p.setBrush(QBrush(trend_color))
+                max_trend_px = qRound(h * 0.45)
+                trend_y = max(-max_trend_px, min(max_trend_px, qRound(-self._trend_px)))
+                x0 = qRound(triangle_size * 1.3)
+                p.drawLine(x0, 0, x0, trend_y)
+                arrow = max(3, qRound(w / 14))
+                if trend_y < 0:      # climbing
+                    tip = [QPointF(x0, trend_y),
+                           QPointF(x0 - arrow, trend_y + arrow),
+                           QPointF(x0 + arrow, trend_y + arrow)]
+                else:                # descending
+                    tip = [QPointF(x0, trend_y),
+                           QPointF(x0 - arrow, trend_y - arrow),
+                           QPointF(x0 + arrow, trend_y - arrow)]
+                p.drawPolygon(QPolygonF(tip))
 
     def setUnitSwitching(self):
         """When this function is called the unit switching features are used"""
@@ -397,22 +492,49 @@ class Altimeter_Tape(QGraphicsView):
     def getAltimeter(self):
         return self._altimeter
 
+    def _push_trend(self, now, value):
+        """Update the trend history and derive self._trend_px -- the look-ahead
+        offset in scene pixels (positive = climbing -> vector up)."""
+        self._trend_history.append((now, value))
+        cutoff = now - self.trend_window
+        while self._trend_history and self._trend_history[0][0] < cutoff:
+            self._trend_history.pop(0)
+        if len(self._trend_history) >= 2:
+            t0, v0 = self._trend_history[0]
+            t1, v1 = self._trend_history[-1]
+            dt = t1 - t0
+            if dt >= 0.1:
+                rate = (v1 - v0) / dt                       # units per second
+                self._trend_px = rate * self.trend_lookahead * self.pph
+            else:
+                self._trend_px = 0.0
+        else:
+            self._trend_px = 0.0
+
     def setAltimeter(self, altimeter):
         cvalue = self.conversionFunction(altimeter)
+        if self.show_trend:
+            self._push_trend(time.monotonic(), cvalue)
         if cvalue != self._altimeter:
             self._altimeter = cvalue
             self.redraw()
+        elif self.show_trend:
+            # value unchanged but the trend may have decayed -- repaint the cue.
+            self.viewport().update()
 
     altimeter = property(getAltimeter, setAltimeter)
 
     def setAltOld(self, b):
-        self.numerical_display.old = b
+        if self.numerical_display is not None:
+            self.numerical_display.old = b
 
     def setAltBad(self, b):
-        self.numerical_display.bad = b
+        if self.numerical_display is not None:
+            self.numerical_display.bad = b
 
     def setAltFail(self, b):
-        self.numerical_display.fail = b
+        if self.numerical_display is not None:
+            self.numerical_display.fail = b
 
     # We don't want this responding to keystrokes
     def keyPressEvent(self, event):

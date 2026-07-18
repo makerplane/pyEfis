@@ -5,8 +5,33 @@ instruments:
     span:
       rows: 110
       columns: 155
-    options: 
+    options:
       font_percent: 0.025
+      # Synthetic Vision (terrain + water/roads overlays + airport/runway and
+      # obstacle symbology) is OFF by default. To turn it on, uncomment the
+      # block below. The SVS only renders when an `svs:` block is present AND
+      # `enabled: true` -- without it the attitude view shows sky/ground only.
+      # Paths assume the makerplane-data updater's standard Pi data root
+      # (/data/makerplane-data); adjust if your data root differs. Install the
+      # data from the on-EFIS Update screen or `pyefis-data update`.
+      # svs:
+      #   enabled: true
+      #   range_nm: 30
+      #   tile_path: /data/makerplane-data/terrain/tiles
+      #   nasr_db_path: /data/makerplane-data/navdata/current/airports.sqlite
+      #   # Supplemental airport providers (e.g. airports-canada from
+      #   # OurAirports) merge with the US NASR primary above. Auto-discovers
+      #   # every <dir>/*/current/airports.sqlite, so a new provider pack needs
+      #   # no config change.
+      #   airport_provider_dir: /data/makerplane-data/airports
+      #   dof_db_path: /data/makerplane-data/obstacles/current/obstacles.sqlite
+      #   water_db_path: /data/makerplane-data/water/current/water.sqlite
+      #   highway_db_path: /data/makerplane-data/highways/current/highways.sqlite
+      #   # Render vertex cap per water polygon. MUST match the published
+      #   # pack's build cap or stored triangles won't align -- the current
+      #   # water-na pack is built at 1024 (dendritic reservoirs render as
+      #   # branches, not blobs). Lower values re-decimate and lose detail.
+      #   water_max_vertices: 1024
   - type: horizontal_situation_indicator
     disabled: HSI
     row: 0
@@ -34,6 +59,8 @@ instruments:
       font_percent: 0.24
       #number_font_size: 40
       altitude: true
+      majorDiv: 100
+      font_scale: 1.1
   - type: vsi_pfd
     disabled: VSI_BALL
     row: 0
@@ -64,18 +91,11 @@ instruments:
       font_mask: "00000"
       total_decimals: 5
       altitude: true
-      majorDiv: 100
-      minorDiv: 50
-  - type: static_text
-    disabled: VSI_TAPE
-    row: 49.4
-    column: 129.8
-    span:
-      rows: 2.2
-      columns: 3
-    options:
-      text: VSI
-      font_mask: VSI
+      majorDiv: 200
+      minorDiv: 200
+      round_to: 50
+      numeric_box: false
+      font_scale: 1.45
   - type: airspeed_tape
     row: 5
     column: 0

@@ -38,11 +38,13 @@ class Airspeed(QWidget):
         font_family="DejaVu Sans Condensed",
     ):
         super(Airspeed, self).__init__(parent)
-        self.setStyleSheet("border: 0px")
+        # Transparent widget background so bg_opacity < 1 reveals what's behind.
+        self.setStyleSheet("background: transparent; border: 0px")
         self.font_family = font_family
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.font_percent = font_percent
         self.bg_color = bg_color
+        self.bg_opacity = 100  # percent (100 = solid, the default)
         self._airspeed = 0
         self.item = fix.db.get_item("IAS")
         self._airspeed = self.item.value
@@ -81,8 +83,10 @@ class Airspeed(QWidget):
         dial = QPainter(self)
         dial.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Draw the Black Background
-        dial.fillRect(0, 0, w, h, QColor(self.bg_color))
+        # Draw the background (bg_opacity percent < 100 lets what's behind show)
+        _bg = QColor(self.bg_color)
+        _bg.setAlphaF(max(0.0, min(1.0, float(getattr(self, "bg_opacity", 100)) / 100.0)))
+        dial.fillRect(0, 0, w, h, _bg)
 
         # Setup Pens
         f = QFont(self.font_family)
@@ -231,15 +235,24 @@ class Airspeed(QWidget):
 
 class Airspeed_Tape(QGraphicsView):
     def __init__(
-        self, parent=None, font_percent=None, font_family="DejaVu Sans Condensed"
+        self, parent=None, font_percent=None, font_family="DejaVu Sans Condensed",
+        show_tas=True, show_trend=True,
+        trend_lookahead=6.0, trend_window=3.0, trend_min_change=0.5,
     ):
         super(Airspeed_Tape, self).__init__(parent)
+        # Checkbox option: alpha-fade the scrolling scale into the
+        # background over the top/bottom 15% of the tape.
+        self.edge_fade = False
         self.myparent = parent
         self.font_family = font_family
         self.font_mask = "000"
         self.update_period = None
         self.font_percent = font_percent
-        # self.setStyleSheet("background-color: rgba(32, 32, 32, 0%)")
+        self.show_tas = show_tas
+        self.show_trend = show_trend
+        self.trend_lookahead = trend_lookahead
+        self.trend_window = trend_window
+        self.trend_min_change = trend_min_change
         self.setStyleSheet("background: transparent")
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -247,6 +260,16 @@ class Airspeed_Tape(QGraphicsView):
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.item = fix.db.get_item("IAS")
         self._airspeed = self.item.value
+
+        if self.show_tas:
+            self.tas_item = fix.db.get_item("TAS")
+            self._tas = self.tas_item.value
+            self.tas_item.valueChanged[float].connect(self._on_tas_changed)
+
+        if self.show_trend:
+            self._trend_history = []  # list of (monotonic_time, ias) tuples
+            self._trend_px = 0.0
+        self._nbh = 0  # IAS box half-height in pixels, set in resizeEvent
 
         # V Speeds
         self.Vs = self.item.get_aux_value("Vs")
@@ -266,6 +289,11 @@ class Airspeed_Tape(QGraphicsView):
             self.Vfe = 0
 
         self.max = int(round(self.Vne * 1.25))
+
+        # Low/high-speed awareness bands (AC 23.1311-1C sec 17.7.1) -- built in
+        # resizeEvent; None until then / when the V-speeds don't support them.
+        self.low_speed_band = None
+        self.high_speed_band = None
 
         self.backgroundOpacity = 0.3
         self.foregroundOpacity = 0.6
@@ -328,6 +356,34 @@ class Airspeed_Tape(QGraphicsView):
         x = self.scene.addRect(r, QPen(Qt.GlobalColor.yellow), QBrush(Qt.GlobalColor.yellow))
         x.setOpacity(self.foregroundOpacity)
 
+        # Low/high-speed awareness bands (AC 23.1311-1C sec 17.7.1, Fig 2). A
+        # moving scale gives no inherent sense of margin to the stall / VNE, so
+        # a red band runs from VSO down to 0 and another from VNE up to the top
+        # of the tape. Added before the tick lines / labels so those stay
+        # legible on top (colour is not the sole cue -- the band POSITION carries
+        # the awareness). They are cues, not limits -- they change no behaviour.
+        redBandPen = QPen(QColor(Qt.GlobalColor.red))
+        redBandBrush = QBrush(QColor(Qt.GlobalColor.red))
+        self.low_speed_band = None
+        self.high_speed_band = None
+        # Low-speed red band: VSO -> 0. Requires a real VSO (defaults to 0 when
+        # the aux value is unset -> no band rather than a zero-height sliver).
+        if self.Vs0 > 0:
+            r = QRectF(
+                QPointF(0, -self.Vs0 * self.pph + tape_start),
+                QPointF(self.markWidth, tape_start),
+            )
+            self.low_speed_band = self.scene.addRect(r, redBandPen, redBandBrush)
+            self.low_speed_band.setOpacity(self.foregroundOpacity)
+        # High-speed red band: VNE -> top of the tape (scene y = 0).
+        if 0 < self.Vne < self.max:
+            r = QRectF(
+                QPointF(0, 0),
+                QPointF(self.markWidth, -self.Vne * self.pph + tape_start),
+            )
+            self.high_speed_band = self.scene.addRect(r, redBandPen, redBandBrush)
+            self.high_speed_band.setOpacity(self.foregroundOpacity)
+
         # Draw the little white lines and the text
         for i in range(self.max, -1, -1):
             if i % self.majorDiv == 0:
@@ -369,6 +425,7 @@ class Airspeed_Tape(QGraphicsView):
 
         self.numerical_display = NumericalDisplay(self)
         nbh = w / 2
+        self._nbh = nbh
         self.numerical_display.resize(qRound(w / 2), qRound(nbh))
         self.numeric_box_pos = QPoint(qRound(w - w / 2), qRound(h / 2 - nbh / 2))
         self.numerical_display.move(self.numeric_box_pos)
@@ -381,10 +438,10 @@ class Airspeed_Tape(QGraphicsView):
 
         self.setScene(self.scene)
         self.centerOn(self.scene.width() / 2, -self._airspeed * self.pph + tape_start)
-        self.item.valueChanged[float].connect(self.setAirspeed)
-        self.item.oldChanged[bool].connect(self.setAsOld)
-        self.item.badChanged[bool].connect(self.setAsBad)
-        self.item.failChanged[bool].connect(self.setAsFail)
+        self.item.valueChanged[float].connect(self.setAirspeed, Qt.ConnectionType.UniqueConnection)
+        self.item.oldChanged[bool].connect(self.setAsOld, Qt.ConnectionType.UniqueConnection)
+        self.item.badChanged[bool].connect(self.setAsBad, Qt.ConnectionType.UniqueConnection)
+        self.item.failChanged[bool].connect(self.setAsFail, Qt.ConnectionType.UniqueConnection)
 
     def redraw(self):
         if not self.isVisible():
@@ -397,15 +454,49 @@ class Airspeed_Tape(QGraphicsView):
 
     #  Index Line that doesn't move to make it easy to read the airspeed.
     def paintEvent(self, event):
-        super(Airspeed_Tape, self).paintEvent(event)
+        # edge_fade (percent of height, 0 = off): melt the scrolling
+        # scale in/out at the top and bottom instead of hard-clipping.
+        # Overlays below (TAS box, pointer, trend) stay solid on top.
+        _fade = bool(getattr(self, "edge_fade", False))
+        if _fade > 0:
+            helpers.render_view_edge_faded(self, 15.0)
+        else:
+            super(Airspeed_Tape, self).paintEvent(event)
         w = self.width()
         h = self.height()
         p = QPainter(self.viewport())
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        marks = QPen(Qt.GlobalColor.white, 1)
+        # TAS box — solid white at the bottom of the tape, full width
+        if self.show_tas:
+            lbl_px = max(7, qRound(w * 0.13))
+            val_px = max(9, qRound(w * 0.20))
+            lbl_font = QFont(self.font_family)
+            lbl_font.setPixelSize(lbl_px)
+            val_font = QFont(self.font_family)
+            val_font.setPixelSize(val_px)
+            row_h = qRound(lbl_px * 1.3)
+            box_h = lbl_px + val_px + qRound(lbl_px * 0.6)
+            box_y = h - box_h
+            p.fillRect(QRect(0, box_y, w, box_h), QColor(Qt.GlobalColor.white))
+            dark = QColor(30, 30, 30)
+            p.setPen(QPen(dark))
+            p.setFont(lbl_font)
+            p.drawText(QRect(0, box_y + 2, w, lbl_px + 2),
+                       Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, "TAS")
+            p.setFont(val_font)
+            if self.tas_item.fail:
+                tas_str = "---"
+            elif self.tas_item.bad or self.tas_item.old:
+                tas_str = "---"
+            else:
+                tas_str = str(int(round(self._tas)))
+            p.drawText(QRect(0, box_y + lbl_px + 2, w, val_px + 4),
+                       Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, tas_str)
+
+        # Pointer triangle and trend — translated to tape/box boundary midpoint
         p.translate(self.numeric_box_pos.x(), self.numeric_box_pos.y())
-        p.setPen(marks)
+        p.setPen(QPen(Qt.GlobalColor.white, 1))
         p.setBrush(QBrush(Qt.GlobalColor.black))
         triangle_size = w / 8
         p.drawConvexPolygon(
@@ -418,13 +509,57 @@ class Airspeed_Tape(QGraphicsView):
             )
         )
 
+        # Airspeed trend indicator
+        if self.show_trend:
+            noise_floor_px = self.trend_min_change * self.pph
+            if abs(self._trend_px) >= noise_floor_px:
+                trend_color = QColor(0, 220, 255)
+                line_w = max(2, qRound(w / 25))
+                trend_pen = QPen(trend_color, line_w)
+                p.setPen(trend_pen)
+                p.setBrush(QBrush(trend_color))
+                max_trend_px = qRound(h * 0.45)
+                trend_y = max(-max_trend_px, min(max_trend_px, qRound(-self._trend_px)))
+                x0 = -2
+                p.drawLine(x0, 0, x0, trend_y)
+                arrow = max(3, qRound(w / 12))
+                if trend_y < 0:  # accelerating
+                    tip = [QPoint(x0, trend_y),
+                           QPoint(x0 - arrow, trend_y + arrow),
+                           QPoint(x0 + arrow, trend_y + arrow)]
+                else:            # decelerating
+                    tip = [QPoint(x0, trend_y),
+                           QPoint(x0 - arrow, trend_y - arrow),
+                           QPoint(x0 + arrow, trend_y - arrow)]
+                p.drawPolygon(QPolygon(tip))
+
     def getAirspeed(self):
         return self._airspeed
 
     def setAirspeed(self, airspeed):
-        if airspeed != self._airspeed:
-            self._airspeed = airspeed
-            self.redraw()
+        self._airspeed = airspeed
+        if self.show_trend:
+            now = time.monotonic()
+            self._trend_history.append((now, airspeed))
+            cutoff = now - self.trend_window
+            while self._trend_history and self._trend_history[0][0] < cutoff:
+                self._trend_history.pop(0)
+            if len(self._trend_history) >= 2:
+                t0, v0 = self._trend_history[0]
+                t1, v1 = self._trend_history[-1]
+                dt = t1 - t0
+                if dt >= 0.1:
+                    rate = (v1 - v0) / dt
+                    self._trend_px = rate * self.trend_lookahead * self.pph
+                else:
+                    self._trend_px = 0.0
+            else:
+                self._trend_px = 0.0
+        self.redraw()
+
+    def _on_tas_changed(self, tas):
+        self._tas = tas
+        self.viewport().update()
 
     airspeed = property(getAirspeed, setAirspeed)
 

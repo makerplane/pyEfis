@@ -1,0 +1,40 @@
+# AI-only PFD — full attitude indicator stack (virtual_vfr widget with SVS,
+# airspeed/altitude tapes, VSI, HSI, wind display) at the full width of the
+# display, without the engine-monitoring arcs/bars or the radio panel.
+#
+# Use this screen on hardware that's tight on CPU budget for SVS, or for
+# focused SVS development / demos. To make it the default screen, set
+#   defaultScreen: PFD_AI_ONLY
+# in your main.yaml.
+PFD_AI_ONLY:
+  include:
+  - screens/virtualvfr_db.yaml
+  - HMI_ENCODER_BUTTONS
+  module: pyefis.screens.screenbuilder
+  title: Screen Builder
+  layout:
+    rows: 110
+    columns: 200
+  instruments:
+    # The AHRS bundle (SVS variant): virtual_vfr with Synthetic Vision enabled,
+    # tapes, VSI, wind display — stretched to the full display width since the
+    # engine/radio columns are gone. HSI, the autopilot status line, and the
+    # time readouts are dropped for a clean synthetic-vision picture. Uses the
+    # dedicated svs.yaml include so the shared virtual_vfr.yaml stays untouched
+    # for the standard PFD.
+    - type: include,includes/ahrs/svs.yaml
+      row: 0
+      column: 0
+      span:
+        rows: 110
+        columns: 200
+    # Persistent navigation-data currency flag: amber when navdata is expired,
+    # white when expiring soon/missing, hidden when current. Tap for details.
+    - type: data_annunciation
+      row: 2
+      column: 2
+      span:
+        rows: 5
+        columns: 18
+      options:
+        target_screen: DataStatus
