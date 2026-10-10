@@ -37,7 +37,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "geopy==2.4.1",
+    "geopy==2.5.0",
 # Until this revision is published to PyPy get it from git:
     "pyavtools @ git+https://github.com/makerplane/pyAvTools/@04b7c6303ceaa78af213422a70e59921d634ef54",
     "pycond==20230212",
